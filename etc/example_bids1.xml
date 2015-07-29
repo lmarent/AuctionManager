@@ -1,0 +1,19 @@
+<?xml version ="1.0" encoding="UTF-8"?>
+<!DOCTYPE BIDSET SYSTEM "bidfile.dtd"> 
+<BIDSET ID="1">
+
+  <BID ID="1">    
+
+    <ELEMENT NAME="element1">
+		<FIELD NAME="Quantity">1</PREF>
+		<FIELD NAME="UnitPrice">0.15</PREF>		
+    </ELEMENT>
+
+    <ELEMENT NAME="element2">
+		<FIELD NAME="Quantity">2</PREF>
+		<FIELD NAME="UnitPrice">0.16</PREF>		
+    </ELEMENT>
+    
+    
+  </BID>  
+</BIDSET>

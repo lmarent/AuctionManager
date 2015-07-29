@@ -1,0 +1,7 @@
+<?xml version ="1.0" encoding="UTF-8"?>
+<!DOCTYPE FIELDVAL SYSTEM "fieldval.dtd">
+<FIELDVAL>
+
+<DEF NAME="ip" TYPE="UInt8">0</DEF>
+
+</FIELDVAL>
