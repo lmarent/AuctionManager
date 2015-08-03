@@ -89,6 +89,22 @@ class BidManager
     //! list with bids done
     bidDone_t bidDone;
 
+	//! filter definitions
+    fieldDefList_t fieldDefs;
+
+    //! filter values
+    fieldValList_t fieldVals;
+
+    // name of filter def and filter vals files
+    string fieldDefFileName, fieldValFileName;
+
+    //! load filter definitions
+    void loadFieldDefs(string fname);
+
+    //! load filter value definitions
+    void loadFieldVals(string fname);
+
+
     // pool of unique bid ids
     BidIdSource idSource;
 
@@ -111,11 +127,13 @@ class BidManager
     }
 
     /*! \short   construct and initialize a BidManager object
+        \arg \c fdname  field definition file name
+        \arg \c fvname  field value definition name
      */
-    BidManager();
+    BidManager(string fdname, string fvname); //Ok
 
     //! destroy a BidManager object
-    ~BidManager();
+    ~BidManager(); // Ok
 
      /*! \short   lookup the bid info data for a given BidId or name
 
@@ -129,7 +147,7 @@ class BidManager
     Bid *getBid(int uid);
 
     //! get bid rname from bidset sname 
-    Bid *getBid(string sname, string rname);
+    Bid *getBid(string sname, string rname); //Ok
 
     //! get all bids in bidset with name sname 
     bidIndex_t *getBids(string sname);
@@ -138,7 +156,7 @@ class BidManager
     bidDB_t getBids();
 
     //! parse XML rules from file 
-    bidDB_t *parseBids(string fname);
+    bidDB_t *parseBids(string fname); // Ok
 
     //! parse XML or Auction API bids from buffer
     bidDB_t *parseBidsBuffer(char *buf, int len, int mapi);
@@ -153,10 +171,10 @@ class BidManager
         syntactically correct or does not contain the mandatory fields
         or if a bid with the given identification is already present in the bidDatabase
     */
-    void addBids(bidDB_t *bids, EventScheduler *e);
+    void addBids(bidDB_t *bids, EventScheduler *e);  
 
     //! add a single bid
-    void addBid(Bid *r);
+    void addBid(Bid *b); //ok
 
     //! activate/execute bids
     void activateBids(bidDB_t *bids, EventScheduler *e);
@@ -172,11 +190,11 @@ class BidManager
         if a bid with the given identification is currently not present 
         in the bidDatabase
     */
-    void delBid(int uid, EventScheduler *e);
-    void delBid(string rname, string sname, EventScheduler *e);
+    void delBid(int uid, EventScheduler *e); //ok
+    void delBid(string rname, string sname, EventScheduler *e); // ok
     void delBids(string sname, EventScheduler *e);
     void delBid(Bid *r, EventScheduler *e);
-    void delBids(bidDB_t *bids, EventScheduler *e);
+    void delBids(bidDB_t *bids, EventScheduler *e); //Ok
    
     /*! \short   get information from the bid manager
 

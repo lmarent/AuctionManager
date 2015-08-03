@@ -61,11 +61,11 @@ XMLParser::XMLParser(string dtdname, string fname, string root)
         // set error function
         xmlSetGenericErrorFunc(NULL, XMLParser::XMLErrorCB);
 
+
         XMLDoc = xmlParseFile(fileName.c_str()); 	    
         if (XMLDoc == NULL) {
             throw Error("XML document parse error in file %s", fileName.c_str());
         }
-
         validate(root);
 
 

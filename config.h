@@ -5,7 +5,7 @@
 /* #undef ALPHA */
 
 /* "release date" */
-#define BUILD_TIME "29/07/2015 16:04:25"
+#define BUILD_TIME "03/08/2015 13:17:22"
 
 /* "bin dir" */
 #define DEF_BINDIR "/usr/local/bin"
@@ -20,7 +20,7 @@
 #define DEF_SYSCONFDIR "/home/luis/AuctionManager/etc"
 
 /* enable debug build */
-/* #undef ENABLE_DEBUG */
+#define ENABLE_DEBUG 1
 
 /* enable mpatrol linking */
 /* #undef ENABLE_MP */

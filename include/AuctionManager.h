@@ -67,12 +67,12 @@ class AuctionManager
 
     auto_ptr<Logger>          	log;
     auto_ptr<CommandLineArgs> 	args;
-    auto_ptr<PerfTimer>       	perf;
+    auto_ptr<AuctionTimer>      auct;
     auto_ptr<ConfigManager>   	conf;
-    auto_ptr<RuleManager>     	rulm;
+    auto_ptr<BidManager>     	bidm;
     auto_ptr<EventScheduler>  	evnt;
 
-    auto_ptr<AuctionProcessor> 	proc;    
+    auto_ptr<AUMProcessor> 		proc;    
     auto_ptr<CtrlComm>        	comm;
 
     //! logging channel number used by objects of this class

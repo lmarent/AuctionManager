@@ -47,13 +47,14 @@ typedef enum
 typedef struct
 {
     string name;
-    configItemList_t conf;
     fieldList_t fields;
 } element_t;
 
 //! element list (only push_back & sequential access)
 typedef list<element_t>            elementList_t;
 typedef list<element_t>::iterator  elementListIter_t;
+typedef list<element_t>::const_iterator  elementListConstIter_t;
+
 
 
 class Bid
@@ -62,14 +63,24 @@ private:
     Logger *log; //!< link to global logger object
     int ch;      //!< logging channel number used by objects of this class
 
-
 public:
 
-	Bid(int id, elementList_t &e);
+	Bid(int id, string sname, string rname, elementList_t &e);
+
+	Bid(int id, const Bid &rhs);
 
 	~Bid();
-	
-	string getId();
+		
+    void setState(bidState_t s) 
+    { 
+        state = s;
+    }
+
+    bidState_t getState()
+    {
+        return state;
+    }
+
 	
     time_t getStartTime()
     {
@@ -81,6 +92,36 @@ public:
         return endTime;
     }
 
+    int getUId() 
+    { 
+        return uid;
+    }
+
+    void setSetName(string _setName)
+	{
+		setName = _setName;
+	}	
+
+    string getSetName()
+    {
+        return setName;
+    }
+
+	void setBidName(string _bidName)
+	{
+		bidName = _bidName;
+	}
+
+    string getBidName()
+    {
+        return bidName;
+    }
+
+
+	string getInfo();
+	
+	string toString(element_t &elem);
+	
     //! parse Start time string
     time_t parseStartTime(string timestr);
 	
@@ -96,17 +137,14 @@ public:
 	
 protected:
 	
-	//! Unique id to the agent that creates the bid.
-	string agentId;
-
     //! unique bidID of this Rule instance (has to be provided)
     int uid;
-    
-    //! name of the bid set this rule belongs to
-    string setName;
-    
-    //! name of the bid
+
+    //! name of the rule for the external system calling the Auction Manager
     string bidName;
+
+    //! name of the agent set this bid belongs to
+    string setName;
     
     //! start time 
     time_t startTime;

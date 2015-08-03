@@ -33,7 +33,7 @@ AuctionManagerComponent::AuctionManagerComponent(ConfigManager *_cnf, string nam
 {
     log  = Logger::getInstance();
     ch   = log->createChannel( name );
-    perf = PerfTimer::getInstance();
+    perf = AuctionTimer::getInstance();
 
 #ifdef ENABLE_THREADS
     if (threaded) {

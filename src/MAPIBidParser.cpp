@@ -94,13 +94,11 @@ void MAPIBidParser::parseFieldValue(fieldValList_t *fieldVals, string value, fie
 // FIXME to be rewritten
 void MAPIBidParser::parse(fieldDefList_t *fieldDefs, 
 						  fieldValList_t *fieldVals, 
-						  bidDB_t *rules,
+						  bidDB_t *bids,
 						  BidIdSource *idSource )
 {
     string sname, rname;
-    miscList_t miscs;
-    actionList_t actions;
-    filterList_t filters;
+    elementList_t elements;
     istringstream in(buf);
     string args[128];
     int argc = 0;
@@ -108,9 +106,8 @@ void MAPIBidParser::parse(fieldDefList_t *fieldDefs,
     string tmp;
     int n = 0, n2 = 0;
     string line;
-    time_t now = time(NULL);
 
-    // each line contains 1 rule
+    // each line contains 1 bid
     while (getline(in, line)) {    
         // tokenize rule string
 
@@ -150,7 +147,7 @@ void MAPIBidParser::parse(fieldDefList_t *fieldDefs,
             throw Error("parse error");
         }
 
-        // parse the first argument which must be rulename and rulesetname
+        // parse the first argument which must be bidname and bidsetname
         n = args[0].find(".");
         if (n > 0) {
             sname = args[0].substr(0, n);
@@ -168,199 +165,78 @@ void MAPIBidParser::parse(fieldDefList_t *fieldDefs,
                 case 'w':
                     // -wait is not supported
                     break;
-                case 'r':
-                    // filter spec
-                    while ((ind < argc) && (args[ind][0] != '-')) {
-                        filter_t f;
-                        filterDefListIter_t iter;
-                        string fvalue;
-                        
-                        tmp = args[ind];
-
-                        // skip the separating commas
-                        if (tmp != ",") {
-                            // filter: <name >=<value>[/<mask>]
-                            n = tmp.find("=");
-                            if ((n > 0) && (n < (int)tmp.length()-1)) {
-                                f.name = tmp.substr(0,n);
-                                transform(f.name.begin(), f.name.end(), f.name.begin(), 
-                                          ToLower());
-                                fvalue = tmp.substr(n+1, tmp.length()-n);
-                                transform(fvalue.begin(), fvalue.end(), fvalue.begin(), 
-                                          ToLower());
-                                
-                                // lookup in filter definitions list
-                                iter = filterDefs->find(f.name);
-                                if (iter != filterDefs->end()) {
-                                    // set according to definition
-                                    f.offs = iter->second.offs;
-                                    f.refer = iter->second.refer;
-                                    f.len = iter->second.len;
-                                    f.type = iter->second.type;
-                                    f.fdmask = iter->second.mask;
-				    f.fdshift = iter->second.shift;
-
-                                    // parse and set value
-                                    tmp = fvalue;
-                                    n = tmp.find("/");
-                                    if (n > 0) {
-                                        string mask;
-                                        fvalue = tmp.substr(0,n);
-                                        mask = tmp.substr(n+1, tmp.length()-n);
-                                        f.mask = FilterValue(f.type, mask);
-                                    } else {
-                                        // default mask
-                                        string mask;
-                                        if (f.type == "IPAddr") {
-                                            mask = DEF_MASK_IP;
-                                        } else if (f.type == "IP6Addr") {
-                                            mask = DEF_MASK_IP6;
-                                        } else { 
-                                            // make default mask as wide as data
-                                            mask = "0x" + string(2*f.len, 'F');
-                                        }
-                                        f.mask = FilterValue(f.type, mask);
-                                    }
-                                    
-                                    parseFilterValue(filterVals, fvalue, &f);
-                                    
-                                    filters.push_back(f);
-                                } else {
-                                    throw Error("No filter definition for filter %s found", f.name.c_str());
-                                }
-                            } else {
-                                throw Error("filter parameter parse error");
-                            }
-                        }
-                            
-                        ind++;
-                    }
-                    break;
-                case 'a':
+                case 'e':
                   {
                       if (ind < argc) {
                           // only one action per -a parameter
-                          action_t a;
+                          element_t elem;
                           
-                          // action: <name> [<param>=<value> , ...]
-                          a.name = args[ind++];
+                          // element: <name> [<field>=<value> , ...]
+                          elem.name = args[ind++];
                           
-                          // action parameters
+                          // bid field of the element
                           while ((ind<argc) && (args[ind][0] != '-')) {
-                              configItem_t item;
+                              field_t f;
+                              fieldDefListIter_t iter;
                               
                               // parse param
                               tmp = args[ind];
                               n = tmp.find("=");
                               if ((n > 0) && (n < (int)tmp.length()-1)) {
-                                  item.name = tmp.substr(0,n);
-                                  item.value = tmp.substr(n+1, tmp.length()-n);
-                                  item.type = "String";
-                                  // hack: if parameter method = <method> change name to name_<method>
-                                  // and do not add this parameter
-                                  if (item.name == "method") {
-                                      a.name = a.name + "_" + item.value;
-                                  } else {
-                                      a.conf.push_back(item);
-                                  }
-                              } else {
-                                  // else invalid parameter  
-                                  throw Error("action parameter parse error");
-                              }
-
+                                  f.name = tmp.substr(0,n);
+                                  // use lower case internally
+								  transform(f.name.begin(), f.name.end(), 
+												f.name.begin(), ToLower());	
+								  
+								  // lookup in field definitions list
+								  iter = fieldDefs->find(f.name);
+								  if (iter != fieldDefs->end()) {
+									  // set according to definition
+									  f.len = iter->second.len;
+									  f.type = iter->second.type;
+                                  
+									  string fvalue = tmp.substr(n+1, tmp.length()-n);
+									  if (fvalue.empty()) {
+										  throw Error("Bid Parser Error: missing value at line");
+									  }
+									  // parse and set value
+									  try {
+										  parseFieldValue(fieldVals, fvalue, &f);
+									  } catch(Error &e) {
+											throw Error("Bid Parser Error: field value parse error at line %s", 
+													e.getError().c_str());
+									  }
+									  
+									  elem.fields.push_back(f);
+								  } else {
+									// else invalid parameter  
+									throw Error("field parameter parse error %s", f.name.c_str());
+								  }
+							  }
                               ind++;
                           }
                           
-                          actions.push_back(a);
+                          elements.push_back(elem);
                       }
                   }
                   break;
-                case 'm':
-                    while ((ind<argc) && (args[ind][0] != '-')) {
-                        configItem_t item;
-
-                        tmp = args[ind];
-                        // skip the separating commas
-                        if (tmp != ",") {
-                            n = tmp.find("=");
-                            if ((n > 0) && (n < (int)tmp.length()-1)) {
-                                item.name = tmp.substr(0,n);
-                                item.value = tmp.substr(n+1, tmp.length()-n);
-                                item.type = "String";
-                                if (item.name == "start") {
-                                    item.name = "Start";
-                                } else if (item.name == "stop") {
-                                    item.name = "Stop";
-                                } else if (item.name == "duration") {
-                                    item.name = "Duration";
-                                } else if (item.name == "interval") {
-                                    item.name = "Interval";
-                                } else if (item.name == "auto") {
-                                    item.name = "auto"; 
-                                }
-								else {
-                                    throw Error("unknown option %s", item.name.c_str());
-                                }
-                                miscs[item.name] = item;
-                            } else {
-                                throw Error("misc parse error");
-                            }
-                        }                       
-
-                        ind++;
-                    }
-                    break;
                 default:
                     throw Error(403, "add_task: unknown option %s", args[ind].c_str() );
                 }
             }	
         }
-  
-#ifdef DEBUG
-        // debug info
-        log->dlog(ch, "rule %s.%s", sname.c_str(), rname.c_str());
-        for (filterListIter_t i = filters.begin(); i != filters.end(); i++) {
-            switch (i->mtype) {
-            case FT_WILD:
-                log->dlog(ch, " F %s&%s = *", i->name.c_str(), i->mask.getString().c_str());
-                break;
-            case FT_EXACT:
-                log->dlog(ch, " F %s&%s = %s", i->name.c_str(), i->mask.getString().c_str(), 
-                          i->value[0].getString().c_str());
-                break;
-            case FT_RANGE:
-                log->dlog(ch, " F %s&%s = %s-%s", i->name.c_str(), i->mask.getString().c_str(), 
-                          i->value[0].getString().c_str(), i->value[1].getString().c_str() );
-                break;
-            case FT_SET:
-                string vals;
-                for (int j=0; j < i->cnt; j++) {
-                    vals += i->value[j].getString();
-                    if (j < (i->cnt-1)) {
-                        vals += ", ";
-                    }
-                }
-                log->dlog(ch, " F %s&%s = %s", i->name.c_str(), i->mask.getString().c_str(), 
-                          vals.c_str());
-                break;
-            }
-        }
-        for (actionListIter_t i = actions.begin(); i != actions.end(); i++) {
-            log->dlog(ch, " A %s", i->name.c_str());
-            for (configItemListIter_t j = i->conf.begin(); j != i->conf.end(); j++) {
-                log->dlog(ch, "  C %s = %s", j->name.c_str(), j->value.c_str());
-            }
-        }
-        for (miscListIter_t i = miscs.begin(); i != miscs.end(); i++) {
-            log->dlog(ch, " C %s = %s", i->second.name.c_str(), i->second.value.c_str());
-        }
-#endif
-    
-        // add rule
+      
+        // add bid
         try {
             unsigned short uid = idSource->newId();
-            Rule *r = new Rule((int) uid, now, sname, rname, filters, actions, miscs);
-            rules->push_back(r);
+            Bid *b = new Bid((int) uid, sname, rname, elements);
+            bids->push_back(b);
+
+#ifdef DEBUG
+			// debug info
+			log->dlog(ch, "bid %s.%s - %s", sname.c_str(), rname.c_str(), (b->getInfo()).c_str());
+#endif
+            
         } catch (Error &e) {
             log->elog(ch, e);
             throw e;

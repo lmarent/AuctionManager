@@ -37,7 +37,7 @@
 enum infoType_t {
     I_UNKNOWN = -1,
     I_ALL = 0,
-    I_QUALITYMANAGER_VERSION, 
+    I_AUCTIONMANAGER_VERSION, 
     I_UPTIME, 
     I_BIDS_STORED, 
     I_CONFIGFILE,  

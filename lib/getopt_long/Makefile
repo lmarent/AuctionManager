@@ -324,8 +324,8 @@ top_build_prefix = ../../
 top_builddir = ../..
 top_srcdir = ../..
 noinst_LIBRARIES = libgetopt_long.a
-AM_CFLAGS = -O2  
-#AM_CFLAGS = -g -fno-inline -DDEBUG  
+#AM_CFLAGS = -O2  
+AM_CFLAGS = -g -fno-inline -DDEBUG  
 libgetopt_long_a_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/src/include
 libgetopt_long_a_SOURCES = getopt_long.h getopt_long.c
 all: all-am

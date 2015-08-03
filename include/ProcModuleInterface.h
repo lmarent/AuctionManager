@@ -155,12 +155,14 @@ typedef struct
     //! RANGE -> min in value[0], max in value[1]
     //! SET -> value[0-n] where value.len>0
     //! WILD -> no value
-    FieldValue value[MAX_FIELD_SET_SIZE];
+    vector<FieldValue> value;
 } field_t;
 
 //! field list (only push_back & sequential access)
 typedef std::list<field_t>            fieldList_t;
 typedef std::list<field_t>::iterator  fieldListIter_t;
+typedef std::list<field_t>::const_iterator  fieldListconstIter_t;
+
 
 
 typedef int (*proc_timeout_func_t)( int timerID, void *flowdata );
@@ -178,49 +180,37 @@ void initModule( configParam_t *params );
 void destroyModule( configParam_t *params );
 
 
-/*! \short   initialize flow data record for a rule
-
-    The freshly allocated router configuration for a Qos task (for
-    one module) is initialized here and the 
-    module parameter string can be parsed and checked
+/*! \short   execute the the auction for the list of bids given as parameter
 
     \arg \c  params - module parameter text from inside '( )'
-    \arg \c  flowdata  - place for action module specific data from flow table
+    \arg \c  flowdata  - Data to execute the auction process.
     \returns 0 - on success (parameters are valid), <0 - else
 */
-void initFlowSetup( configParam_t *params, fieldList_t *fields, void **flowdata );
+void execute( configParam_t *params, void **flowdata );
 
 
 /*! \short   get list of default timers for this proc module
-    \arg \c  flowdata  - place for action module specific data from flow table
+    \arg \c  flowdata  - place for module specific data from flow table
     \returns   list of timer structs
 */
 timers_t* getTimers( void *flowdata );
 
 
-/*! \short   dismantle router configuration for a Qos Task
+/*! \short   dismantle the module
 
     attention: do NOT free this slice of memory itself
-    \arg \c  flowdata  - place of action module specific data from flow table
+    \arg \c  Configured parameters given to the module.
     \returns 0 - on success, <0 - else
 */
-void destroyFlowSetup( configParam_t *params, fieldList_t *fields, void *flowdata );
+void destroy( configParam_t *params, void *flowdata );
 
 
 /*! \short   reset flow data record for a rule
 
-    \arg \c  flowdata  - place of action module specific data from flow table
+    \arg \c  flowdata  - Reset the module to start a new binding process.
     \returns 0 - on success, <0 - else
 */
-void resetFlowSetup( configParam_t *params );
-
-
-/*! \short  check if bandwidth available for the rule is enought.
-
-    \arg \c params - rule parameters
-    \returns 0 - on success (bandwidth is valid), <0 - else
-*/
-int checkBandWidth( configParam_t *params );
+void reset( configParam_t *params );
 
 
 /*! \short   provide textual information about this action module
@@ -252,7 +242,9 @@ int checkBandWidth( configParam_t *params );
 const char* getModuleInfo( int i );
 
 
-/*! \short   this function is called if the module supports a timeout callback function every x seconds and its invokation is configured to make use of the timeout feature
+/*! \short   this function is called if the module supports a timeout callback 
+ * 			 function every x seconds and its invocation is configured 
+ * 			 to make use of the timeout feature
  */
 void timeout( int timerID, void *flowdata );
 
@@ -281,13 +273,11 @@ typedef struct {
     void (*initModule)( configParam_t *params );
     void (*destroyModule)( configParam_t *params );
 
-    /*    int (*getFlowRecSize)(); -- deprecated -- */
-    void (*initFlowSetup)( configParam_t *params, fieldList_t *fields, void **flowdata );
+    void (*execute)( configParam_t *params,  void **flowdata );
     timers_t* (*getTimers)( void *flowdata );
-    void (*destroyFlowSetup)( configParam_t *params, fieldList_t *fields, void *flowdata );
+    void (*destroy)( configParam_t *params, void *flowdata);
 
-    void (*resetFlowSetup)( configParam_t *params );
-    int (*checkBandWidth)( configParam_t *params );
+    void (*reset)( configParam_t *params );
     void (*timeout)( int timerID, void *flowdata );
 
     const char* (*getModuleInfo)(int i);

@@ -98,6 +98,9 @@ class AUMProcessor : public AuctionManagerComponent
     virtual ~AUMProcessor();
 
     //! add bids
+    virtual void addBids( bidDB_t *bids, EventScheduler *e );
+
+    //! add bids
     virtual void addBids( bidDB_t *bids );
 
     //! delete bids
@@ -105,6 +108,20 @@ class AUMProcessor : public AuctionManagerComponent
 
     //! execute the algorithm
     int execute(EventScheduler *e );
+
+    /*! \short   add a Bid and its associated actions to bid list
+        \arg \c b   pointer to bid
+        \arg \c e   pointer to event scheduler (timer events)
+        \returns 0 - on success, <0 - else
+    */
+    int addBid( Bid *b, EventScheduler *e );
+
+    /*! \short   delete a Bid from the bid list
+        \arg \c b  pointer to bid
+        \returns 0 - on success, <0 - else
+    */
+    int delBid( Bid *b );
+
 
     //! handle file descriptor event
     virtual int handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds);

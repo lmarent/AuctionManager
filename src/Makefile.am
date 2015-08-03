@@ -10,13 +10,24 @@ endif
 
 auctionManager_SOURCES =  Error.cpp \
 						  Event.cpp \
+						  EventScheduler.cpp \
 						  Logger.cpp \
 						  Timeval.cpp \
+						  FieldDefParser.cpp \
+						  FieldValParser.cpp \
+						  FieldValue.cpp \
+						  MAPIBidParser.cpp \
+						  Module.cpp \
+						  ModuleLoader.cpp \
+						  PageRepository.cpp \
+						  ParserFcts.cpp \
+						  ProcModule.cpp \
 						  Constants.cpp \
 						  ConstantsAum.cpp \
 						  ConfigParser.cpp \
 						  ConfigManager.cpp \
 						  CommandLineArgs.cpp \
+						  CtrlComm.cpp \
 						  XMLParser.cpp \
 						  Bid.cpp \
 						  BidIdSource.cpp \
@@ -24,7 +35,7 @@ auctionManager_SOURCES =  Error.cpp \
 						  BidFileParser.cpp \
 						  AUMProcessor.cpp \
 						  AuctionManagerInfo.cpp \
-						  AuctionTime.cpp \
+						  AuctionTimer.cpp \
 						  AuctionManager.cpp AuctionManagerComponent.cpp
 
 auctionManager_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/lib/getopt_long \

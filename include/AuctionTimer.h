@@ -85,7 +85,7 @@ class AuctionTimer
     */
     double readClockSpeed();
 
-    //! construct and initialize a PerfTimer object
+    //! construct and initialize a AuctionTimer object
     AuctionTimer();
 
   public:

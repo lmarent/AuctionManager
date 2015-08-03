@@ -107,10 +107,32 @@ am_test_runner_OBJECTS = ../src/Error.$(OBJEXT) \
 	../src/Bid.$(OBJEXT) \
 	../src/BidIdSource.$(OBJEXT) \
 	../src/BidFileParser.$(OBJEXT) \
+	../src/MAPIBidParser.$(OBJEXT) \
+	../src/ConfigParser.$(OBJEXT) \
+	../src/Event.$(OBJEXT) \
+	../src/Timeval.$(OBJEXT) \
+	../src/AuctionManagerInfo.$(OBJEXT) \
+	../src/AuctionManagerComponent.$(OBJEXT) \
+	../src/EventScheduler.$(OBJEXT) \
+	../src/BidManager.$(OBJEXT) \
+	../src/CommandLineArgs.$(OBJEXT) \
+	../src/PageRepository.$(OBJEXT) \
+	../src/CtrlComm.$(OBJEXT) \
+	../src/ProcModule.$(OBJEXT) \
+	../src/Module.$(OBJEXT) \
+	../src/ModuleLoader.$(OBJEXT) \
+	../src/AuctionTimer.$(OBJEXT) \
+	../src/AUMProcessor.$(OBJEXT) \
+	../src/ConfigManager.$(OBJEXT) \
+	../src/AuctionManager.$(OBJEXT) \
 	../test/FieldValue_test.$(OBJEXT) \
 	../test/FieldDefParser_test.$(OBJEXT) \
 	../test/FieldValParser_test.$(OBJEXT) \
 	../test/BidFileParser_test.$(OBJEXT) \
+	../test/Bid_test.$(OBJEXT) \
+	../test/AuctionTimer_test.$(OBJEXT) \
+	../test/Bid_Manager_test.$(OBJEXT) \
+	../test/AuctionManager_test.$(OBJEXT) \
 	../test/test_runner.$(OBJEXT)
 test_runner_OBJECTS = $(am_test_runner_OBJECTS)
 test_runner_LDADD = $(LDADD)
@@ -553,16 +575,45 @@ test_runner_SOURCES = ../src/Error.cpp \
 						../src/Bid.cpp \
 						../src/BidIdSource.cpp \
 						../src/BidFileParser.cpp \
+						../src/MAPIBidParser.cpp \
+						../src/ConfigParser.cpp \
+						../src/Event.cpp \
+						../src/Timeval.cpp \
+						../src/AuctionManagerInfo.cpp \
+						../src/AuctionManagerComponent.cpp \
+						../src/EventScheduler.cpp \
+						../src/BidManager.cpp \
+						../src/CommandLineArgs.cpp \
+						../src/PageRepository.cpp \
+						../src/CtrlComm.cpp \
+						../src/ProcModule.cpp \
+						../src/Module.cpp \
+						../src/ModuleLoader.cpp \
+						../src/AuctionTimer.cpp \
+						../src/AUMProcessor.cpp \
+						../src/ConfigManager.cpp \
+						../src/AuctionManager.cpp \
 						../test/FieldValue_test.cpp \
 						../test/FieldDefParser_test.cpp \
 						../test/FieldValParser_test.cpp \
 						../test/BidFileParser_test.cpp \
+						../test/Bid_test.cpp \
+						../test/AuctionTimer_test.cpp \
+						../test/Bid_Manager_test.cpp \
+						../test/AuctionManager_test.cpp \
 						../test/test_runner.cpp
 
+#AM_CXXFLAGS = -O2 -I../include $(CPPUNIT_CFLAGS) \
+#			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd 
 
-# what flags you want to pass to the C compiler & linker
-AM_CPPFLAGS = -g -I../include $(CPPUNIT_CFLAGS)
-AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit
+AM_CXXFLAGS = -g -I../include $(CPPUNIT_CFLAGS) \
+			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
+			    -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING -DINTEL
+
+AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
+			 $(top_builddir)/lib/httpd/libhttpd.a \
+			    -lxml2
+
 LDADD = 
 all: all-am
 
@@ -646,6 +697,56 @@ clean-checkPROGRAMS:
 ../src/BidFileParser.$(OBJEXT):  \
 	../src/$(am__dirstamp) \
 	../src/$(DEPDIR)/$(am__dirstamp)
+../src/MAPIBidParser.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/ConfigParser.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/Event.$(OBJEXT): ../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/Timeval.$(OBJEXT): ../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/AuctionManagerInfo.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/AuctionManagerComponent.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/EventScheduler.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/BidManager.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/CommandLineArgs.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/PageRepository.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/CtrlComm.$(OBJEXT): ../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/ProcModule.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/Module.$(OBJEXT): ../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/ModuleLoader.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/AuctionTimer.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/AUMProcessor.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/ConfigManager.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/AuctionManager.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
 ../test/$(am__dirstamp):
 	@$(MKDIR_P) ../test
 	@: > ../test/$(am__dirstamp)
@@ -664,6 +765,18 @@ clean-checkPROGRAMS:
 ../test/BidFileParser_test.$(OBJEXT):  \
 	../test/$(am__dirstamp) \
 	../test/$(DEPDIR)/$(am__dirstamp)
+../test/Bid_test.$(OBJEXT):  \
+	../test/$(am__dirstamp) \
+	../test/$(DEPDIR)/$(am__dirstamp)
+../test/AuctionTimer_test.$(OBJEXT):  \
+	../test/$(am__dirstamp) \
+	../test/$(DEPDIR)/$(am__dirstamp)
+../test/Bid_Manager_test.$(OBJEXT):  \
+	../test/$(am__dirstamp) \
+	../test/$(DEPDIR)/$(am__dirstamp)
+../test/AuctionManager_test.$(OBJEXT):  \
+	../test/$(am__dirstamp) \
+	../test/$(DEPDIR)/$(am__dirstamp)
 ../test/test_runner.$(OBJEXT):  \
 	../test/$(am__dirstamp) \
 	../test/$(DEPDIR)/$(am__dirstamp)
@@ -680,19 +793,41 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+include ../src/$(DEPDIR)/AUMProcessor.Po
+include ../src/$(DEPDIR)/AuctionManager.Po
+include ../src/$(DEPDIR)/AuctionManagerComponent.Po
+include ../src/$(DEPDIR)/AuctionManagerInfo.Po
+include ../src/$(DEPDIR)/AuctionTimer.Po
 include ../src/$(DEPDIR)/Bid.Po
 include ../src/$(DEPDIR)/BidFileParser.Po
 include ../src/$(DEPDIR)/BidIdSource.Po
+include ../src/$(DEPDIR)/BidManager.Po
+include ../src/$(DEPDIR)/CommandLineArgs.Po
+include ../src/$(DEPDIR)/ConfigManager.Po
+include ../src/$(DEPDIR)/ConfigParser.Po
 include ../src/$(DEPDIR)/Constants.Po
 include ../src/$(DEPDIR)/ConstantsAum.Po
+include ../src/$(DEPDIR)/CtrlComm.Po
 include ../src/$(DEPDIR)/Error.Po
+include ../src/$(DEPDIR)/Event.Po
+include ../src/$(DEPDIR)/EventScheduler.Po
 include ../src/$(DEPDIR)/FieldDefParser.Po
 include ../src/$(DEPDIR)/FieldValParser.Po
 include ../src/$(DEPDIR)/FieldValue.Po
 include ../src/$(DEPDIR)/Logger.Po
+include ../src/$(DEPDIR)/MAPIBidParser.Po
+include ../src/$(DEPDIR)/Module.Po
+include ../src/$(DEPDIR)/ModuleLoader.Po
+include ../src/$(DEPDIR)/PageRepository.Po
 include ../src/$(DEPDIR)/ParserFcts.Po
+include ../src/$(DEPDIR)/ProcModule.Po
+include ../src/$(DEPDIR)/Timeval.Po
 include ../src/$(DEPDIR)/XMLParser.Po
+include ../test/$(DEPDIR)/AuctionManager_test.Po
+include ../test/$(DEPDIR)/AuctionTimer_test.Po
 include ../test/$(DEPDIR)/BidFileParser_test.Po
+include ../test/$(DEPDIR)/Bid_Manager_test.Po
+include ../test/$(DEPDIR)/Bid_test.Po
 include ../test/$(DEPDIR)/FieldDefParser_test.Po
 include ../test/$(DEPDIR)/FieldValParser_test.Po
 include ../test/$(DEPDIR)/FieldValue_test.Po

@@ -29,13 +29,13 @@
 
 #include "BidManager.h"
 #include "CtrlComm.h"
-#include "constants.h"
+#include "Constants.h"
 
 /* ------------------------- BidManager ------------------------- */
 
-BidManager::BidManager( ) 
-    : tasks(0), 
-	  idSource(1)
+BidManager::BidManager( string fdname, string fvname) 
+    : bids(0), 
+	  fieldDefFileName(fdname), fieldValFileName(fvname), idSource(1)
 {
     log = Logger::getInstance();
     ch = log->createChannel("BidManager");
@@ -83,22 +83,72 @@ static int isReadableFile( string fileName ) {
     }
 }
 
+/* -------------------- loadFieldDefs -------------------- */
+
+void BidManager::loadFieldDefs(string fname)
+{
+    if (fieldDefFileName.empty()) {
+        if (fname.empty()) {
+            fname = FIELDDEF_FILE;
+		}
+    } else {
+        fname = fieldDefFileName;
+    }
+
+#ifdef DEBUG
+    log->dlog(ch, "filename %s", fname.c_str());
+#endif
+
+    if (isReadableFile(fname)) {
+        if (fieldDefs.empty() && !fname.empty()) {
+            FieldDefParser f = FieldDefParser(fname.c_str());
+            f.parse(&fieldDefs);
+        }
+    
+    }else{
+#ifdef DEBUG
+    log->dlog(ch, "filename %s is not readable", fname.c_str());
+#endif    
+    }
+    
+}
+
+/* -------------------- loadFieldVals -------------------- */
+
+void BidManager::loadFieldVals( string fname )
+{
+    if (fieldValFileName.empty()) {
+        if (fname.empty()) {
+            fname = FIELDVAL_FILE;
+        }
+    } else {
+        fname = fieldValFileName;
+    }
+
+    if (isReadableFile(fname)) {
+        if (fieldVals.empty() && !fname.empty()) {
+            FieldValParser f = FieldValParser(fname.c_str());
+            f.parse(&fieldVals);
+        }
+    }
+}
 
 /* -------------------------- getRule ----------------------------- */
 
-Bid *RuleManager::getRule(int uid)
+Bid *BidManager::getBid(int uid)
 {
-    if ((uid >= 0) && ((unsigned int)uid <= ruleDB.size())) {
-        return ruleDB[uid];
+    if ((uid >= 0) && ((unsigned int)uid <= bidDB.size())) {
+        return bidDB[uid];
     } else {
         return NULL;
     }
 }
 
 
+
 /* -------------------- getBid -------------------- */
 
-Rule *BidManager::getBid(string sname, string rname)
+Bid *BidManager::getBid(string sname, string rname)
 {
     bidSetIndexIter_t iter;
     bidIndexIter_t iter2;
@@ -167,9 +217,15 @@ bidDB_t *BidManager::parseBids(string fname)
     bidDB_t *new_bids = new bidDB_t();
 
     try {	
+
+        // load the field def list
+        loadFieldDefs(fname);
+	
+        // load the field val list
+        loadFieldVals(fname);
 	
         BidFileParser rfp = BidFileParser(fname);
-        rfp.parse(new_bids, &idSource);
+        rfp.parse(&fieldDefs, &fieldVals, new_bids, &idSource);
 
 #ifdef DEBUG
     log->dlog(ch, "bids parsed");
@@ -195,13 +251,18 @@ bidDB_t *BidManager::parseBidsBuffer(char *buf, int len, int mapi)
     bidDB_t *new_bids = new bidDB_t();
 
     try {
+        // load the filter def list
+        loadFieldDefs("");
+	
+        // load the filter val list
+        loadFieldVals("");
 			
         if (mapi) {
-             MAPIRuleParser rfp = MAPIBidParser(buf, len);
-             rfp.parse(new_bids, &idSource);
+             MAPIBidParser rfp = MAPIBidParser(buf, len);
+             rfp.parse(&fieldDefs, &fieldVals, new_bids, &idSource);
         } else {
             BidFileParser rfp = BidFileParser(buf, len);
-            rfp.parse(new_bids, &idSource);
+            rfp.parse(&fieldDefs, &fieldVals, new_bids, &idSource);
         }
 
         return new_bids;
@@ -217,9 +278,9 @@ bidDB_t *BidManager::parseBidsBuffer(char *buf, int len, int mapi)
 }
 
 
-/* ---------------------------------- addRules ----------------------------- */
+/* ---------------------------------- addBids ----------------------------- */
 
-void BidManager::addBids(bidDB_t *rules, EventScheduler *e)
+void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
 {
     bidDBIter_t        iter;
     bidTimeIndex_t     start;
@@ -228,21 +289,23 @@ void BidManager::addBids(bidDB_t *rules, EventScheduler *e)
     time_t              now = time(NULL);
     
     // add bids
-    for (iter = bids->begin(); iter != bids->end(); iter++) {
-        Bid *r = (*iter);
+    for (iter = _bids->begin(); iter != _bids->end(); iter++) {
+        Bid *b = (*iter);
         
         try {
-            addBid(r);
-
-            start[r->getStart()].push_back(r);
-            if (r->getStop()) 
+            addBid(b);
+			// TODO AM: Correct this part of the code.
+			/*
+            start[b->getStart()].push_back(b);
+            if (b->getStop()) 
             {
-                stop[r->getStop()].push_back(r);
+                stop[b->getStop()].push_back(b);
             }
+            */
         } catch (Error &e ) {
-            saveDelete(r);
+            saveDelete(b);
             // if only one rule return error
-            if (bids->size() == 1) {
+            if (_bids->size() == 1) {
                 throw e;
             }
             // FIXME else return number of successively installed bids
@@ -273,55 +336,60 @@ void BidManager::addBids(bidDB_t *rules, EventScheduler *e)
 
 /* -------------------- addBid -------------------- */
 
-void BidManager::addBid(Bid *r)
+void BidManager::addBid(Bid *b)
 {
   
 #ifdef DEBUG    
     log->dlog(ch, "adding new bid with name = '%s'",
-              r->getBidName().c_str());
+              b->getBidName().c_str());
 #endif  
-
+				  
+			  
     // test for presence of bidSource/bidName combination
     // in bidDatabase in particular set
-    if (getBid(r->getSetName(), r->getBidName())) {
+    if (getBid(b->getSetName(), b->getBidName())) {
         log->elog(ch, "bid %s.%s already installed",
-                  r->getSetName().c_str(), r->getBidName().c_str());
+                  b->getSetName().c_str(), b->getBidName().c_str());
         throw Error(408, "Bid with this name is already installed");
     }
 
     try {
         // could do some more checks here
-        r->setState(RS_VALID);
+        b->setState(BS_VALID);
 
 #ifdef DEBUG    
-    log->dlog(ch, "Bid Id = '%d'",
-              r->getUId());
+		log->dlog(ch, "Bid Id = '%d'", b->getUId());
 #endif 
 
         // resize vector if necessary
-        if ((unsigned int)r->getUId() >= bidDB.size()) {
-            bidDB.reserve(r->getUId() * 2 + 1);
-            bidDB.resize(r->getUId() + 1);
+        if ((unsigned int)b->getUId() >= bidDB.size()) {
+            bidDB.reserve(b->getUId() * 2 + 1);
+            bidDB.resize(b->getUId() + 1);
         }
 
+		std::cout << "SetName" << b->getSetName() 
+			  << "bidName:" << b->getBidName() 
+			  << "Uid:" << b->getUId() << std::endl;
+
+
         // insert bid
-        bidDB[r->getUId()] = r; 	
+        bidDB[b->getUId()] = b; 	
 
         // add new entry in index
-        bidSetIndex[r->getSetName()][r->getBidName()] = r->getUId();
+        bidSetIndex[b->getSetName()][b->getBidName()] = b->getUId();
 	
-        tasks++;
+        bids++;
 
 #ifdef DEBUG    
     log->dlog(ch, "finish adding new bid with name = '%s'",
-              r->getBidName().c_str());
+              b->getBidName().c_str());
 #endif  
 
     } catch (Error &e) { 
 
         // adding new bid failed in some component
         // something failed -> remove bid from database
-        delBid(r->getSetName(), r->getBidName(), NULL);
+        delBid(b->getSetName(), b->getBidName(), NULL);
 	
         throw e;
     }
@@ -334,7 +402,7 @@ void BidManager::activateBids(bidDB_t *bids, EventScheduler *e)
     for (iter = bids->begin(); iter != bids->end(); iter++) {
         Bid *r = (*iter);
         log->dlog(ch, "activate bid with name = '%s'", r->getBidName().c_str());
-        r->setState(RS_ACTIVE);
+        r->setState(BS_ACTIVE);
 	 
         /* TODO AM: Evaluate this code to understand if it has to be adjusted or not
         // set flow timeout
@@ -414,12 +482,12 @@ string BidManager::getInfo(string sname, string rname)
 string BidManager::getInfo(string sname)
 {
     ostringstream s;
-    ruleSetIndexIter_t r;
+    bidSetIndexIter_t b;
 
-    r = ruleSetIndex.find(sname);
+    b = bidSetIndex.find(sname);
 
-    if (r != ruleSetIndex.end()) {
-        for (ruleIndexIter_t i = r->second.begin(); i != r->second.end(); i++) {
+    if (b != bidSetIndex.end()) {
+        for (bidIndexIter_t i = b->second.begin(); i != b->second.end(); i++) {
             s << getInfo(sname, i->first);
         }
     } else {
@@ -491,8 +559,14 @@ void BidManager::delBid(int uid, EventScheduler *e)
 
 void BidManager::delBids(string sname, EventScheduler *e)
 {
+
+	std::cout << "Nro bids:" << bidSetIndex.size() << std::endl;
+    
     if (bidSetIndex.find(sname) != bidSetIndex.end()) {
         for (bidSetIndexIter_t i = bidSetIndex.begin(); i != bidSetIndex.end(); i++) {
+			
+			std::cout << "I am here" << i->first << std::endl;
+			
             delBid(getBid(sname, i->first),e);
         }
     }
@@ -521,7 +595,7 @@ void BidManager::delBid(Bid *r, EventScheduler *e)
         e->delBidEvents(r->getUId());
     }
 
-    tasks--;
+    bids--;
 }
 
 
@@ -542,7 +616,7 @@ void BidManager::delBids(bidDB_t *bids, EventScheduler *e)
 void BidManager::storeBidAsDone(Bid *r)
 {
     
-    r->setState(RS_DONE);
+    r->setState(BS_DONE);
     bidDone.push_back(r);
 
     if (bidDone.size() > DONE_LIST_SIZE) {

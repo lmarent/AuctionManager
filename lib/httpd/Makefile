@@ -328,8 +328,8 @@ top_builddir = ../..
 top_srcdir = ../..
 noinst_LIBRARIES = libhttpd.a
 EXTRA_DIST = README
-AM_CFLAGS = -O2  
-#AM_CFLAGS = -g -fno-inline -DDEBUG  
+#AM_CFLAGS = -O2  
+AM_CFLAGS = -g -fno-inline -DDEBUG  
 libhttpd_a_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/src/include
 libhttpd_a_SOURCES = httpd.h mime.c quote.c ssl.c request.c response.c httpd.c 
 all: all-am

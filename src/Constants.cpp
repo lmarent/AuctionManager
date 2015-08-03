@@ -37,6 +37,11 @@ const string DEFAULT_CONFIG_FILE = DEF_SYSCONFDIR "/netaum.conf.xml";
 const string NETAUM_LOCK_FILE   = DEF_STATEDIR "/run/netaum.pid";
 const int    DEF_SNAPSIZE        = 65536;
 
+// BidManager.cpp
+const unsigned int  DONE_LIST_SIZE = 50;
+const string        FIELDVAL_FILE = DEF_SYSCONFDIR "/fieldval.xml";
+const string        FIELDDEF_FILE = DEF_SYSCONFDIR "/fielddef.xml";
+
 // Logger.h
 const string DEFAULT_LOG_FILE = DEF_STATEDIR "/log/netaum.log";
 

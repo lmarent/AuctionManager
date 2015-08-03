@@ -33,6 +33,7 @@ AC_LANG([C++])
 
 AC_CHECK_LIB([dl], [dlopen])
 
+
 dnl # Platform 
 case "$target" in
 *-linux*)

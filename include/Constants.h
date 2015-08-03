@@ -36,8 +36,14 @@
 
 // Auction.h
 extern const string DEFAULT_CONFIG_FILE;
-extern const string NETMATE_LOCK_FILE;
+extern const string NETAUM_LOCK_FILE;
 extern const int    DEF_SNAPSIZE;
+
+// RuleManager.cpp
+extern const unsigned int  DONE_LIST_SIZE;
+extern const string        FIELDVAL_FILE;
+extern const string        FILTERDEF_FILE;
+
 
 // Logger.h
 extern const string DEFAULT_LOG_FILE;

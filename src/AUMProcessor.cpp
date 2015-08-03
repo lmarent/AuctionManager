@@ -39,7 +39,7 @@
 
 AUMProcessor::AUMProcessor(ConfigManager *cnf, int threaded, string moduleDir ) 
     : AuctionManagerComponent(cnf, "AUM_PROCESSOR", threaded),
-      numRules(0)
+      numBids(0)
 {
     string txt;
     
@@ -93,18 +93,6 @@ AUMProcessor::~AUMProcessor()
 
 }
 
-
-// check a bidset (the filter part)
-void AUMProcessor::checkBids(bidDB_t *bids)
-{
-    bidDBIter_t iter;
-    
-    for (iter = bids->begin(); iter != bids->end(); iter++) {
-        checkBid(*iter);
-    }
-}
-
-
 // add bids
 void AUMProcessor::addBids( bidDB_t *bids, EventScheduler *e )
 {
@@ -116,8 +104,15 @@ void AUMProcessor::addBids( bidDB_t *bids, EventScheduler *e )
 }
 
 
+// add bids
+void AUMProcessor::addBids( bidDB_t *bids )
+{
+
+}
+
+
 // delete bids
-void AUMProcessor::delbids(bidDB_t *bids)
+void AUMProcessor::delBids(bidDB_t *bids)
 {
     bidDBIter_t iter;
 
@@ -132,6 +127,9 @@ void AUMProcessor::delbids(bidDB_t *bids)
 int AUMProcessor::execute( EventScheduler *e )
 {
     int bidId;
+    
+    /* TODO AM: to implement.
+
     ruleActions_t entry;
     actionList_t *actions;
     int errNo;
@@ -220,7 +218,32 @@ int AUMProcessor::execute( EventScheduler *e )
 
         throw Error(errNo, errStr);;
 	}
- 
+	*/
+    return 0;
+}
+
+/* ------------------------- addBid ------------------------- */
+
+int AUMProcessor::addBid( Bid *b, EventScheduler *e )
+{
+
+}
+
+
+/* ------------------------- delBid ------------------------- */
+
+int AUMProcessor::delBid( Bid *b )
+{
+    int bidId = b->getUId();
+
+#ifdef DEBUG
+    log->dlog(ch, "deleting Bid #%d", bidId);
+#endif
+
+    AUTOLOCK(threaded, &maccess);
+
+	// TODO AM: implement this procedure.
+
     return 0;
 }
 
@@ -259,18 +282,18 @@ void AUMProcessor::waitUntilDone(void)
 /* ------------------------- BidTimeout ------------------------- */
 
 // return 0 (if timeout), 1 (stays idle), >1 (active and no timeout yet)
-unsigned long AUMProcessor::ruleTimeout(int bidID, unsigned long ival, time_t now)
+unsigned long AUMProcessor::bidTimeout(int bidID, unsigned long ival, time_t now)
 {
     AUTOLOCK(threaded, &maccess);
-
-    time_t last = rules[bidID].lastPkt;
+	/*
+    time_t last = bids[bidID].lastPkt;
 
     if (last > 0) {
-        ruleActions_t *ra = &rules[bidID];
+        //ruleActions_t *ra = &bids[bidID];
 		 log->dlog(ch,"auto flow idle, export: YES");
          return 0;
     }
-
+	*/
     return 1;
 }
 
@@ -292,6 +315,7 @@ string AUMProcessor::getInfo()
 void AUMProcessor::addTimerEvents( int bidID, int actID,
                                       ppaction_t &act, EventScheduler &es )
 {
+    /*
     timers_t *timers = (act.mapi)->getTimers(act.flowData);
 
     if (timers != NULL) {
@@ -299,11 +323,13 @@ void AUMProcessor::addTimerEvents( int bidID, int actID,
             es.addEvent(new ProcTimerEvent(bidID, actID, timers++));
         }
     }
+    */ 
 }
 
 // handle module timeouts
 void AUMProcessor::timeout(int rid, int actid, unsigned int tmID)
 {
+    /*
     ppaction_t *a;
     ruleActions_t *ra;
 
@@ -313,6 +339,7 @@ void AUMProcessor::timeout(int rid, int actid, unsigned int tmID)
 
     a = &ra->actions[actid];
     a->mapi->timeout(tmID, a->flowData);
+    */
 }
 
 /* -------------------- getModuleInfoXML -------------------- */

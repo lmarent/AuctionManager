@@ -1,17 +1,16 @@
 
 /*! \file ProcModule.cpp
 
-    Copyright 2003-2004 Fraunhofer Institute for Open Communication Systems (FOKUS),
-                        Berlin, Germany
+    Copyright 2014-2015 Universidad de los Andes, Bogotá, Colombiay
 
-    This file is part of Network Measurement and Accounting System (NETMATE).
+    This file is part of Network Measurement and Accounting System (NETAUM).
 
-    NETMATE is free software; you can redistribute it and/or modify 
+    NETAUM is free software; you can redistribute it and/or modify 
     it under the terms of the GNU General Public License as published by 
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
 
-    NETMATE is distributed in the hope that it will be useful, 
+    NETAUM is distributed in the hope that it will be useful, 
     but WITHOUT ANY WARRANTY; without even the implied warranty of 
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -23,7 +22,7 @@
     Description:
     implementation of helper functions for Packet Processing Modules
 
-    $Id: ProcModule.cpp 748 2009-09-10 02:54:03Z szander $
+    $Id: ProcModule.cpp 748 2015-08-03 13:48:00 amarentes $
 
 */
 
@@ -34,18 +33,16 @@
     _N_et_M_ate _P_rocessing Module */
 int magic = PROC_MAGIC;
 
-
 /*! \short   declaration of struct containing all function pointers of a module */
 ProcModuleInterface_t func = 
 { 
     3, 
     initModule, 
     destroyModule, 
-    initFlowSetup, 
+    execute, 
     getTimers, 
-    destroyFlowSetup,
-    resetFlowSetup, 
-    checkBandWidth,
+    destroy,
+    reset, 
     timeout, 
     getModuleInfo, 
     getErrorMsg };
@@ -153,108 +150,6 @@ int parseInt( string s )
     
     return n;
 	
-}
-
-inline int isNumericIPv4(string s)
-{
-    return (s.find_first_not_of("0123456789.", 0) >= s.length());  
-}
-
-inline struct in_addr parseIPAddr(string s)
-{
-    int rc;
-    struct in_addr a;
-    struct addrinfo ask, *res = NULL;
-   
-    memset(&ask,0,sizeof(ask));
-    ask.ai_socktype = SOCK_STREAM;
-    ask.ai_flags = 0;
-    if (isNumericIPv4(s)) {
-        ask.ai_flags |= AI_NUMERICHOST;
-    }
-    ask.ai_family = PF_INET;
-
-    // set timeout
-    g_timeout = 0;
-    alarm(2);
-
-    rc = getaddrinfo(s.c_str(), NULL, &ask, &res);
-
-    alarm(0);
-
-    try {
-        if (g_timeout) {
-            throw Error("DNS timeout: %s", s.c_str());
-        }
-
-        if (rc == 0) {
-            // take first address only, in case of multiple addresses fill addresses
-            // FIXME set match
-            a = ((struct sockaddr_in *) res->ai_addr)->sin_addr;
-            freeaddrinfo(res);
-        } else {
-            throw ProcError("Invalid or unresolvable ip address: %s", s.c_str());
-        }
-    } catch (ProcError &e) {
-        freeaddrinfo(res);
-        throw e;
-    }
-
-    return a;
-
-}
-
-uint32_t parseIPAddr( unsigned char *val )
-{
-	return parseUInt32( val );
-}
-
-inline int isNumericIPv6(string s)
-{
-    return (s.find_first_not_of("0123456789abcdefABCDEF:.", 0) >= s.length());	
-}
-
-inline struct in6_addr parseIP6Addr(string s)
-{
-    int rc;
-    struct in6_addr a;
-    struct addrinfo ask, *res = NULL;
-   
-    memset(&ask,0,sizeof(ask));
-    ask.ai_socktype = SOCK_STREAM;
-    ask.ai_flags = 0;
-    if (isNumericIPv6(s)) {
-        ask.ai_flags |= AI_NUMERICHOST;
-    }
-    ask.ai_family = PF_INET6;
-
-    // set timeout
-    g_timeout = 0;
-    alarm(2);
-
-    rc = getaddrinfo(s.c_str(), NULL, &ask, &res);
-
-    alarm(0);
-
-    try {
-        if (g_timeout) {
-            throw ProcError("DNS timeout: %s", s.c_str());
-        }
-
-        if (rc == 0) {  
-            // take first address only, in case of multiple addresses fill addresses
-            // FIXME set match
-            a = ((struct sockaddr_in6 *) res->ai_addr)->sin6_addr;
-            freeaddrinfo(res);
-        } else {
-            throw ProcError("Invalid or unresolvable ip6 address: %s", s.c_str());
-        }
-    } catch (ProcError &e) {
-        freeaddrinfo(res);
-        throw e;
-    }
-    
-    return a;	
 }
 
 int parseBool(string s)

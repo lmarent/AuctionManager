@@ -27,7 +27,7 @@
 
 #include "AuctionManager.h"
 #include "ParserFcts.h"
-#include "constants_qos.h"
+#include "ConstantsAum.h"
 
 
 // globals in AuctionManager class
@@ -106,13 +106,13 @@ AuctionManager::AuctionManager( int argc, char *argv[])
                   "MAIN", "configfile");
         args->add('l', "LogFile", "<file>", "use alternative log file",
                   "MAIN", "logfile");
-        args->add('r', "RuleFile", "<file>", "use specified rule file",
+        args->add('r', "BidFile", "<file>", "use specified bid file",
                   "MAIN", "rulefile");
         args->addFlag('V', "RelVersion", "show version info and exit",
                       "MAIN", "version");
-        args->add('D', "FilterDefFile", "<file>", "use alternative file for filter definitions",
+        args->add('D', "FieldDefFile", "<file>", "use alternative file for field definitions",
                   "MAIN", "fdeffile");
-        args->add('C', "FilterConstFile", "<file>", "use alternative file for filter constants",
+        args->add('C', "FieldConstFile", "<file>", "use alternative file for field constants",
                   "MAIN", "fcontfile");
 #ifdef USE_SSL
         args->addFlag('x', "UseSSL", "use SSL for control communication",
@@ -199,11 +199,11 @@ AuctionManager::AuctionManager( int argc, char *argv[])
 #endif
 
         // startup other core classes
-        auto_ptr<PerfTimer> _perf(PerfTimer::getInstance());
-        perf = _perf;
-        auto_ptr<RuleManager> _rulm(new RuleManager(conf->getValue("FilterDefFile", "MAIN"),
-                                                    conf->getValue("FilterConstFile", "MAIN")));
-        rulm = _rulm;
+        auto_ptr<AuctionTimer> _auct(AuctionTimer::getInstance());
+        auct = _auct;
+        auto_ptr<BidManager> _bidm(new BidManager(conf->getValue("FieldDefFile", "MAIN"),
+                                                    conf->getValue("FieldConstFile", "MAIN")));
+        bidm = _bidm;
         auto_ptr<EventScheduler> _evnt(new EventScheduler());
         evnt = _evnt;
 
@@ -229,10 +229,10 @@ AuctionManager::AuctionManager( int argc, char *argv[])
         proc->mergeFDs(&fdList);
 		
 		// setup initial rules
-		string rfn = conf->getValue("RuleFile", "MAIN");
+		string rfn = conf->getValue("BidFile", "MAIN");
 
         if (!rfn.empty()) {
-			evnt->addEvent(new AddRulesEvent(rfn));
+			evnt->addEvent(new AddBidsEvent(rfn));
         }
 
         // disable logger threading if not needed
@@ -263,6 +263,11 @@ AuctionManager::AuctionManager( int argc, char *argv[])
 AuctionManager::~AuctionManager()
 {
     // objects are destroyed by their auto ptrs
+
+#ifdef DEBUG
+		log->dlog(ch,"------- end shutdown -------" );
+#endif
+    
 }
 
 
@@ -312,8 +317,8 @@ string AuctionManager::getInfo(infoType_t what, string param)
       uptime = ::time(NULL) - startTime;
         s << uptime << " s, since " << noNewline(ctime(&startTime));
         break;
-    case I_TASKS_STORED:
-        s << rulm->getNumTasks();
+    case I_BIDS_STORED:
+        s << bidm->getNumBids();
         break;
     case I_CONFIGFILE:
         s << configFileName;
@@ -324,18 +329,18 @@ string AuctionManager::getInfo(infoType_t what, string param)
     case I_HELLO:
         s << getHelloMsg();
         break;
-    case I_TASKLIST:
-        s << CtrlComm::xmlQuote(rulm->getInfo());
+    case I_BIDLIST:
+        s << CtrlComm::xmlQuote(bidm->getInfo());
         break;
-    case I_TASK:
+    case I_BID:
         if (param.empty()) {
-            throw Error("get_info: missing parameter for rule = <rulename>" );
+            throw Error("get_info: missing parameter for bid = <bidname>" );
         } else {
             int n = param.find(".");
             if (n > 0) {
-                s << CtrlComm::xmlQuote(rulm->getInfo(param.substr(0,n), param.substr(n+1, param.length())));
+                s << CtrlComm::xmlQuote(bidm->getInfo(param.substr(0,n), param.substr(n+1, param.length())));
             } else {
-                s << CtrlComm::xmlQuote(rulm->getInfo(param));
+                s << CtrlComm::xmlQuote(bidm->getInfo(param));
             }
         }
         break;
@@ -393,7 +398,7 @@ void AuctionManager::handleEvent(Event *e, fd_sets_t *fds)
 
               infoList_t *i = ((GetInfoEvent *)e)->getInfos(); 
               // send meter info
-              comm->sendMsg(getQualityManagerInfo(i), ((GetInfoEvent *)e)->getReq(), fds, 0 /* do not html quote */ );
+              comm->sendMsg(getAuctionManagerInfo(i), ((GetInfoEvent *)e)->getReq(), fds, 0 /* do not html quote */ );
           } catch(Error &err) {
               comm->sendErrMsg(err.getError(), ((GetInfoEvent *)e)->getReq(), fds);
           }
@@ -415,42 +420,43 @@ void AuctionManager::handleEvent(Event *e, fd_sets_t *fds)
           }
       }
       break;
-    case ADD_RULES:
+    case ADD_BIDS:
       {
-          ruleDB_t *new_rules = NULL;
+          bidDB_t *new_bids = NULL;
 
           try {
 
 #ifdef DEBUG
-        log->dlog(ch,"processing event adding rules" );
+        log->dlog(ch,"processing event adding bids" );
 #endif
               // support only XML rules from file
-              new_rules = rulm->parseRules(((AddRulesEvent *)e)->getFileName());
+              new_bids = bidm->parseBids(((AddBidsEvent *)e)->getFileName());
 
 #ifdef DEBUG
-        log->dlog(ch,"Rules sucessfully parsed " );
+        log->dlog(ch,"Bids sucessfully parsed " );
 #endif
              
-              // test rule spec 
-              proc->checkRules(new_rules);
+              // TODO AM : test rule spec 
+              //proc->checkRules(new_rules);
 
 #ifdef DEBUG
-        log->dlog(ch,"Rules sucessfully checked " );
+        log->dlog(ch,"Bids sucessfully checked " );
 #endif
 
               // no error so lets add the rules and schedule for activation
               // and removal
-              rulm->addRules(new_rules, evnt.get());
+              bidm->addBids(new_bids, evnt.get());
 
 #ifdef DEBUG
-        log->dlog(ch,"Rules sucessfully added " );
+        log->dlog(ch,"Bids sucessfully added " );
 #endif
 
 
-              saveDelete(new_rules);
+              saveDelete(new_bids);
 
 			  /*
-				above 'addRules' produces an RuleActivation event.
+			   * TODO AM : verify if I have to do this code.
+				above 'addBids' produces an BidActivation event.
 				If rule addition shall be performed _immediately_
 				(fds == NULL) then we need to execute this
 				activation event _now_ and not wait for the
@@ -464,16 +470,16 @@ void AuctionManager::handleEvent(Event *e, fd_sets_t *fds)
 
           } catch (Error &e) {
               // error in rule(s)
-              if (new_rules) {
-                  saveDelete(new_rules);
+              if (new_bids) {
+                  saveDelete(new_bids);
               }
               throw e;
           }
       }
       break;
-    case ADD_RULES_CTRLCOMM:
+    case ADD_BIDS_CTRLCOMM:
       {
-          ruleDB_t *new_rules = NULL;
+          bidDB_t *new_bids = NULL;
 
           try {
 
@@ -481,106 +487,107 @@ void AuctionManager::handleEvent(Event *e, fd_sets_t *fds)
         log->dlog(ch,"processing event add rules by controlcomm" );
 #endif
               
-              new_rules = rulm->parseRulesBuffer(
-                ((AddRulesCtrlEvent *)e)->getBuf(),
-                ((AddRulesCtrlEvent *)e)->getLen(), ((AddRulesCtrlEvent *)e)->isMAPI());
+              new_bids = bidm->parseBidsBuffer(
+                ((AddBidsCtrlEvent *)e)->getBuf(),
+                ((AddBidsCtrlEvent *)e)->getLen(), ((AddBidsCtrlEvent *)e)->isMAPI());
 
-              // test rule spec 
-              proc->checkRules(new_rules);
+              // TODO AM test bid spec 
+              // Vetifies if this method is required.
+              // proc->checkBids(new_bids);
 	  
               // no error so let's add the rules and 
               // schedule for activation and removal
-              rulm->addRules(new_rules, evnt.get());
-              comm->sendMsg("rule(s) added", ((AddRulesCtrlEvent *)e)->getReq(), fds);
-              saveDelete(new_rules);
+              bidm->addBids(new_bids, evnt.get());
+              comm->sendMsg("bid(s) added", ((AddBidsCtrlEvent *)e)->getReq(), fds);
+              saveDelete(new_bids);
 
           } catch (Error &err) {
-              // error in rule(s)
-              if (new_rules) {
-                  saveDelete(new_rules);
+              // error in bid(s)
+              if (new_bids) {
+                  saveDelete(new_bids);
               }
-              comm->sendErrMsg(err.getError(), ((AddRulesCtrlEvent *)e)->getReq(), fds); 
+              comm->sendErrMsg(err.getError(), ((AddBidsCtrlEvent *)e)->getReq(), fds); 
           }
       }
       break; 	
 
-    case ACTIVATE_RULES:
+    case ACTIVATE_BIDS:
       {
 
 #ifdef DEBUG
-        log->dlog(ch,"processing event activate rules" );
+        log->dlog(ch,"processing event activate bids" );
 #endif
 
-          ruleDB_t *rules = ((ActivateRulesEvent *)e)->getRules();
+          bidDB_t *bids = ((ActivateBidsEvent *)e)->getBids();
 
-          proc->addRules(rules, evnt.get());
+          proc->addBids(bids, evnt.get());
           // activate
-          rulm->activateRules(rules, evnt.get());
+          bidm->activateBids(bids, evnt.get());
       }
       break;
-    case REMOVE_RULES:
+    case REMOVE_BIDS:
       {
 
 #ifdef DEBUG
-        log->dlog(ch,"processing event remove rules" );
+        log->dlog(ch,"processing event remove bids" );
 #endif
 
-          ruleDB_t *rules = ((ActivateRulesEvent *)e)->getRules();
+          bidDB_t *bids = ((ActivateBidsEvent *)e)->getBids();
 	  	  
-          // now get rid of the expired rule
-          proc->delRules(rules);
-          rulm->delRules(rules, evnt.get());
+          // now get rid of the expired bid
+          proc->delBids(bids);
+          bidm->delBids(bids, evnt.get());
       }
       break;
 
-    case REMOVE_RULES_CTRLCOMM:
+    case REMOVE_BIDS_CTRLCOMM:
       {
           try {
 
 #ifdef DEBUG
-        log->dlog(ch,"processing event remove rules cntrlcomm" );
+        log->dlog(ch,"processing event remove bids cntrlcomm" );
 #endif
 
-              string r = ((RemoveRulesCtrlEvent *)e)->getRule();
+              string r = ((RemoveBidsCtrlEvent *)e)->getBid();
               int n = r.find(".");
               if (n > 0) {
 				  string sname = r.substr(0,n); 
 				  string rname = r.substr(n+1, r.length()-n);
 #ifdef DEBUG
-        log->dlog(ch,"Deleting rule set=%s ruleId=%s", sname.c_str(), rname.c_str() );
+        log->dlog(ch,"Deleting bid set=%s ruleId=%s", sname.c_str(), rname.c_str() );
 #endif
 
-                  // delete 1 rule
-                  Rule *rptr = rulm->getRule(sname, rname);
+                  // delete 1 bid
+                  Bid *rptr = bidm->getBid(sname, rname);
                   if (rptr == NULL) {
-                      throw Error("no such rule");
+                      throw Error("no such bid");
                   }
 	  
-                  proc->delRule(rptr);
-                  rulm->delRule(rptr, evnt.get());
+                  proc->delBid(rptr);
+                  bidm->delBid(rptr, evnt.get());
 
               } else {
 
 #ifdef DEBUG
-        log->dlog(ch,"Deleting rule set=%s ", r.c_str() );
+        log->dlog(ch,"Deleting bid set=%s ", r.c_str() );
 #endif				  
                   // delete rule set
-                  ruleIndex_t *rules = rulm->getRules(r);
-                  if (rules == NULL) {
-                      throw Error("no such rule set");
+                  bidIndex_t *bids = bidm->getBids(r);
+                  if (bids == NULL) {
+                      throw Error("no such bid set");
                   }
 
-                  for (ruleIndexIter_t i = rules->begin(); i != rules->end(); i++) {
-                      Rule *rptr = rulm->getRule(i->second);
+                  for (bidIndexIter_t i = bids->begin(); i != bids->end(); i++) {
+                      Bid *rptr = bidm->getBid(i->second);
 	
-                      proc->delRule(rptr);
-                      rulm->delRule(rptr, evnt.get());
+                      proc->delBid(rptr);
+                      bidm->delBid(rptr, evnt.get());
                   }
               }
 
-              comm->sendMsg("rule(s) deleted", ((RemoveRulesCtrlEvent *)e)->getReq(), fds);
+              comm->sendMsg("bid(s) deleted", ((RemoveBidsCtrlEvent *)e)->getReq(), fds);
           } catch (Error &err) {
-              comm->sendErrMsg(err.getError(), ((RemoveRulesCtrlEvent *)e)->getReq(), fds);
+              comm->sendErrMsg(err.getError(), ((RemoveBidsCtrlEvent *)e)->getReq(), fds);
           }
       }
       break;
@@ -646,7 +653,6 @@ void AuctionManager::run()
 #endif
 
         do {
-
 			// select
             rset = fds.rset;
             wset = fds.wset;
@@ -663,6 +669,8 @@ void AuctionManager::run()
                  }
             }
 
+			cout << "here I am - cnt:" << cnt << endl;
+
             // check FD events
             if (cnt > 0)  {
                 if (FD_ISSET( s_sigpipe[0], &rset)) {
@@ -678,6 +686,7 @@ void AuctionManager::run()
                             break;
                         case 'A':
                             // next event
+                            cout << "Type A" << endl;
                             
                             // check Event Scheduler events
                             e = evnt->getNextEvent();
@@ -702,6 +711,7 @@ void AuctionManager::run()
                     }
                 } else {
                     if (enableCtrl) {
+                      cout << "enableCtrl" << endl;
                       comm->handleFDEvent(&retEvents, &rset, &wset, &fds);
                     }
                 }
@@ -719,6 +729,8 @@ void AuctionManager::run()
                        cerr << *this;
                        break;
                    case 'A':
+						cout << "A - section b" << endl;
+
                        // check Event Scheduler events
                        e = evnt->getNextEvent();
                        if (e != NULL) {
@@ -739,6 +751,8 @@ void AuctionManager::run()
 				proc->handleFDEvent(&retEvents, NULL,NULL, NULL);
             }
 
+			cout << "Schedule events - cnt:" << retEvents.size() << endl;
+
             // schedule events
             if (retEvents.size() > 0) {
                 for (eventVecIter_t iter = retEvents.begin();
@@ -750,7 +764,6 @@ void AuctionManager::run()
             }
         } while (!stop);
 
-		// wait for packet processor to handle all remaining packets (if threaded)
 		proc->waitUntilDone();
 
 		log->log(ch,"NetAum going down on Ctrl-C" );
@@ -814,7 +827,7 @@ void AuctionManager::sigusr1_handler(int i)
 
 void AuctionManager::exit_fct(void)
 {
-    unlink(NETMATE_LOCK_FILE.c_str());
+    unlink(NETAUM_LOCK_FILE.c_str());
 }
 
 void AuctionManager::sigalarm_handler(int i)
@@ -894,16 +907,12 @@ int main(int argc, char *argv[])
         cout << NETAUM_OPTIONS << endl;
 #endif
         auto_ptr<AuctionManager> auction(new AuctionManager(argc, argv));
-        cout << "Up and running." << endl;
 
         // going into main loop
         auction->run();
 
-        // shut down the meter
-        cout << "Terminating netmate." << endl;
-
     } catch (Error &e) {
-        cerr << "Terminating netmate on error: " << e.getError() << endl;
+        cerr << "Terminating Auction Manager on error: " << e.getError() << endl;
         exit(1);
     }
 }

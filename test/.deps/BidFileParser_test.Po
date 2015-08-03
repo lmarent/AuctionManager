@@ -25,7 +25,11 @@
  /usr/include/c++/4.8/bits/concept_check.h \
  /usr/include/c++/4.8/bits/stl_iterator_base_types.h \
  /usr/include/c++/4.8/bits/stl_iterator_base_funcs.h \
- /usr/include/c++/4.8/debug/debug.h \
+ /usr/include/c++/4.8/debug/debug.h /usr/include/c++/4.8/debug/macros.h \
+ /usr/include/c++/4.8/debug/functions.h \
+ /usr/include/c++/4.8/debug/formatter.h /usr/include/c++/4.8/typeinfo \
+ /usr/include/c++/4.8/exception \
+ /usr/include/c++/4.8/bits/atomic_lockfree_defines.h \
  /usr/include/c++/4.8/bits/stl_iterator.h \
  /usr/include/c++/4.8/bits/postypes.h /usr/include/c++/4.8/cwchar \
  /usr/include/wchar.h /usr/include/stdio.h \
@@ -35,8 +39,6 @@
  /usr/include/xlocale.h /usr/include/c++/4.8/bits/allocator.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++allocator.h \
  /usr/include/c++/4.8/ext/new_allocator.h /usr/include/c++/4.8/new \
- /usr/include/c++/4.8/exception \
- /usr/include/c++/4.8/bits/atomic_lockfree_defines.h \
  /usr/include/c++/4.8/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++locale.h \
  /usr/include/c++/4.8/clocale /usr/include/locale.h \
@@ -71,8 +73,15 @@
  /usr/include/c++/4.8/ext/alloc_traits.h \
  /usr/include/c++/4.8/bits/stl_uninitialized.h \
  /usr/include/c++/4.8/bits/stl_deque.h \
- /usr/include/c++/4.8/bits/deque.tcc /usr/include/cppunit/SourceLine.h \
- /usr/include/cppunit/Asserter.h /usr/include/cppunit/AdditionalMessage.h \
+ /usr/include/c++/4.8/bits/deque.tcc /usr/include/c++/4.8/debug/deque \
+ /usr/include/c++/4.8/debug/safe_sequence.h \
+ /usr/include/c++/4.8/debug/safe_base.h \
+ /usr/include/c++/4.8/ext/concurrence.h \
+ /usr/include/c++/4.8/debug/safe_sequence.tcc \
+ /usr/include/c++/4.8/debug/safe_iterator.h \
+ /usr/include/c++/4.8/debug/safe_iterator.tcc \
+ /usr/include/cppunit/SourceLine.h /usr/include/cppunit/Asserter.h \
+ /usr/include/cppunit/AdditionalMessage.h \
  /usr/include/cppunit/portability/Stream.h /usr/include/c++/4.8/sstream \
  /usr/include/c++/4.8/istream /usr/include/c++/4.8/ios \
  /usr/include/c++/4.8/bits/ios_base.h \
@@ -102,12 +111,12 @@
  /usr/include/cppunit/extensions/HelperMacros.h \
  /usr/include/cppunit/TestCaller.h \
  /usr/include/cppunit/extensions/TypeInfoHelper.h \
- /usr/include/c++/4.8/typeinfo /usr/include/cppunit/TestSuite.h \
- /usr/include/cppunit/TestComposite.h \
+ /usr/include/cppunit/TestSuite.h /usr/include/cppunit/TestComposite.h \
  /usr/include/cppunit/portability/CppUnitVector.h \
  /usr/include/c++/4.8/vector /usr/include/c++/4.8/bits/stl_vector.h \
  /usr/include/c++/4.8/bits/stl_bvector.h \
- /usr/include/c++/4.8/bits/vector.tcc \
+ /usr/include/c++/4.8/bits/vector.tcc /usr/include/c++/4.8/debug/vector \
+ /usr/include/c++/4.8/utility /usr/include/c++/4.8/bits/stl_relops.h \
  /usr/include/cppunit/extensions/AutoRegisterSuite.h \
  /usr/include/cppunit/extensions/TestSuiteFactory.h \
  /usr/include/cppunit/extensions/TestFactory.h \
@@ -115,7 +124,8 @@
  /usr/include/cppunit/portability/CppUnitSet.h \
  /usr/include/c++/4.8/functional /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_tree.h /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/debug/set \
+ /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
  /usr/include/cppunit/extensions/ExceptionTestCaseDecorator.h \
  /usr/include/cppunit/extensions/TestCaseDecorator.h \
  /usr/include/cppunit/extensions/TestFixtureFactory.h \
@@ -123,8 +133,9 @@
  /usr/include/cppunit/extensions/TestSuiteBuilderContext.h \
  /usr/include/cppunit/portability/CppUnitMap.h /usr/include/c++/4.8/map \
  /usr/include/c++/4.8/bits/stl_map.h \
- /usr/include/c++/4.8/bits/stl_multimap.h /usr/include/c++/4.8/memory \
- /usr/include/c++/4.8/bits/stl_tempbuf.h \
+ /usr/include/c++/4.8/bits/stl_multimap.h /usr/include/c++/4.8/debug/map \
+ /usr/include/c++/4.8/debug/map.h /usr/include/c++/4.8/debug/multimap.h \
+ /usr/include/c++/4.8/memory /usr/include/c++/4.8/bits/stl_tempbuf.h \
  /usr/include/c++/4.8/bits/stl_raw_storage_iter.h \
  /usr/include/c++/4.8/backward/auto_ptr.h ../include/ParserFcts.h \
  ../include/stdincpp.h ../include/stdinc.h ../config.h \
@@ -200,21 +211,23 @@
  /usr/include/c++/4.8/backward/backward_warning.h \
  /usr/include/c++/4.8/backward/hashtable.h /usr/include/c++/4.8/iterator \
  /usr/include/c++/4.8/bits/stream_iterator.h \
- /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/utility \
- /usr/include/c++/4.8/bits/stl_relops.h \
- /usr/include/c++/4.8/bits/stl_algo.h /usr/include/c++/4.8/cstdlib \
- /usr/include/c++/4.8/bits/algorithmfwd.h \
+ /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
+ /usr/include/c++/4.8/cstdlib /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h \
  /usr/include/c++/4.8/backward/hash_fun.h /usr/include/c++/4.8/list \
  /usr/include/c++/4.8/bits/stl_list.h /usr/include/c++/4.8/bits/list.tcc \
- /usr/include/c++/4.8/locale \
+ /usr/include/c++/4.8/debug/list /usr/include/c++/4.8/locale \
  /usr/include/c++/4.8/bits/locale_facets_nonio.h \
  /usr/include/c++/4.8/ctime \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/time_members.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/messages_members.h \
  /usr/include/libintl.h /usr/include/c++/4.8/bits/locale_facets_nonio.tcc \
- /usr/include/c++/4.8/bitset /usr/include/c++/4.8/iomanip \
- ../include/BidFileParser.h /usr/include/libxml2/libxml/parser.h \
+ /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
+ /usr/include/c++/4.8/iomanip ../include/BidManager.h ../include/Logger.h \
+ ../include/ProcError.h ../include/Error.h ../include/Threads.h \
+ ../include/Constants.h ../include/ConstantsAum.h \
+ ../include/BidIdSource.h ../include/Bid.h ../include/ConfigParser.h \
+ /usr/include/libxml2/libxml/parser.h \
  /usr/include/libxml2/libxml/xmlversion.h \
  /usr/include/libxml2/libxml/xmlexports.h \
  /usr/include/libxml2/libxml/tree.h \
@@ -231,13 +244,14 @@
  /usr/include/libxml2/libxml/globals.h /usr/include/libxml2/libxml/SAX.h \
  /usr/include/libxml2/libxml/xlink.h /usr/include/libxml2/libxml/SAX2.h \
  /usr/include/libxml2/libxml/xmlmemory.h \
- /usr/include/libxml2/libxml/threads.h ../include/Logger.h \
- ../include/ProcError.h ../include/Error.h ../include/Threads.h \
- ../include/Constants.h ../include/ConstantsAum.h ../include/XMLParser.h \
- ../include/Bid.h ../include/ConfigParser.h \
+ /usr/include/libxml2/libxml/threads.h ../include/XMLParser.h \
  ../include/ProcModuleInterface.h ../include/metadata.h \
  ../include/FieldDefParser.h ../include/FieldValue.h \
- ../include/FieldValParser.h ../include/BidIdSource.h
+ ../include/BidFileParser.h ../include/FieldValParser.h \
+ ../include/MAPIBidParser.h ../include/EventScheduler.h \
+ ../include/Event.h ../include/AuctionManagerInfo.h ../include/Timeval.h \
+ ../include/BidFileParser.h ../include/FieldValParser.h \
+ ../include/FieldDefParser.h ../include/BidIdSource.h
 
 /usr/include/stdc-predef.h:
 
@@ -303,6 +317,18 @@
 
 /usr/include/c++/4.8/debug/debug.h:
 
+/usr/include/c++/4.8/debug/macros.h:
+
+/usr/include/c++/4.8/debug/functions.h:
+
+/usr/include/c++/4.8/debug/formatter.h:
+
+/usr/include/c++/4.8/typeinfo:
+
+/usr/include/c++/4.8/exception:
+
+/usr/include/c++/4.8/bits/atomic_lockfree_defines.h:
+
 /usr/include/c++/4.8/bits/stl_iterator.h:
 
 /usr/include/c++/4.8/bits/postypes.h:
@@ -328,10 +354,6 @@
 /usr/include/c++/4.8/ext/new_allocator.h:
 
 /usr/include/c++/4.8/new:
-
-/usr/include/c++/4.8/exception:
-
-/usr/include/c++/4.8/bits/atomic_lockfree_defines.h:
 
 /usr/include/c++/4.8/bits/localefwd.h:
 
@@ -419,6 +441,20 @@
 
 /usr/include/c++/4.8/bits/deque.tcc:
 
+/usr/include/c++/4.8/debug/deque:
+
+/usr/include/c++/4.8/debug/safe_sequence.h:
+
+/usr/include/c++/4.8/debug/safe_base.h:
+
+/usr/include/c++/4.8/ext/concurrence.h:
+
+/usr/include/c++/4.8/debug/safe_sequence.tcc:
+
+/usr/include/c++/4.8/debug/safe_iterator.h:
+
+/usr/include/c++/4.8/debug/safe_iterator.tcc:
+
 /usr/include/cppunit/SourceLine.h:
 
 /usr/include/cppunit/Asserter.h:
@@ -501,8 +537,6 @@
 
 /usr/include/cppunit/extensions/TypeInfoHelper.h:
 
-/usr/include/c++/4.8/typeinfo:
-
 /usr/include/cppunit/TestSuite.h:
 
 /usr/include/cppunit/TestComposite.h:
@@ -516,6 +550,12 @@
 /usr/include/c++/4.8/bits/stl_bvector.h:
 
 /usr/include/c++/4.8/bits/vector.tcc:
+
+/usr/include/c++/4.8/debug/vector:
+
+/usr/include/c++/4.8/utility:
+
+/usr/include/c++/4.8/bits/stl_relops.h:
 
 /usr/include/cppunit/extensions/AutoRegisterSuite.h:
 
@@ -537,6 +577,12 @@
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+/usr/include/c++/4.8/debug/set:
+
+/usr/include/c++/4.8/debug/set.h:
+
+/usr/include/c++/4.8/debug/multiset.h:
+
 /usr/include/cppunit/extensions/ExceptionTestCaseDecorator.h:
 
 /usr/include/cppunit/extensions/TestCaseDecorator.h:
@@ -554,6 +600,12 @@
 /usr/include/c++/4.8/bits/stl_map.h:
 
 /usr/include/c++/4.8/bits/stl_multimap.h:
+
+/usr/include/c++/4.8/debug/map:
+
+/usr/include/c++/4.8/debug/map.h:
+
+/usr/include/c++/4.8/debug/multimap.h:
 
 /usr/include/c++/4.8/memory:
 
@@ -777,10 +829,6 @@
 
 /usr/include/c++/4.8/algorithm:
 
-/usr/include/c++/4.8/utility:
-
-/usr/include/c++/4.8/bits/stl_relops.h:
-
 /usr/include/c++/4.8/bits/stl_algo.h:
 
 /usr/include/c++/4.8/cstdlib:
@@ -796,6 +844,8 @@
 /usr/include/c++/4.8/bits/stl_list.h:
 
 /usr/include/c++/4.8/bits/list.tcc:
+
+/usr/include/c++/4.8/debug/list:
 
 /usr/include/c++/4.8/locale:
 
@@ -813,9 +863,29 @@
 
 /usr/include/c++/4.8/bitset:
 
+/usr/include/c++/4.8/debug/bitset:
+
 /usr/include/c++/4.8/iomanip:
 
-../include/BidFileParser.h:
+../include/BidManager.h:
+
+../include/Logger.h:
+
+../include/ProcError.h:
+
+../include/Error.h:
+
+../include/Threads.h:
+
+../include/Constants.h:
+
+../include/ConstantsAum.h:
+
+../include/BidIdSource.h:
+
+../include/Bid.h:
+
+../include/ConfigParser.h:
 
 /usr/include/libxml2/libxml/parser.h:
 
@@ -861,23 +931,7 @@
 
 /usr/include/libxml2/libxml/threads.h:
 
-../include/Logger.h:
-
-../include/ProcError.h:
-
-../include/Error.h:
-
-../include/Threads.h:
-
-../include/Constants.h:
-
-../include/ConstantsAum.h:
-
 ../include/XMLParser.h:
-
-../include/Bid.h:
-
-../include/ConfigParser.h:
 
 ../include/ProcModuleInterface.h:
 
@@ -887,6 +941,24 @@
 
 ../include/FieldValue.h:
 
+../include/BidFileParser.h:
+
 ../include/FieldValParser.h:
+
+../include/MAPIBidParser.h:
+
+../include/EventScheduler.h:
+
+../include/Event.h:
+
+../include/AuctionManagerInfo.h:
+
+../include/Timeval.h:
+
+../include/BidFileParser.h:
+
+../include/FieldValParser.h:
+
+../include/FieldDefParser.h:
 
 ../include/BidIdSource.h:

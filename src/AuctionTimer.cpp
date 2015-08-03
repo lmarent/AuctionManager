@@ -181,7 +181,7 @@ void AuctionTimer::stop( int slot )
     unsigned long long tickCount;
    
     tickCount = readTSC();
-
+    
     if (slot<0 || slot>MAXAUCTSLOTS) {
         return;
     }
@@ -199,7 +199,8 @@ unsigned long long AuctionTimer::latest( int slot )
     if (slot<0 || slot>MAXAUCTSLOTS) {
         return 0;
     }
-
+	
+	
     if (ticks[slot].num == 0) {
         return 0; 	
     } else {
@@ -265,7 +266,7 @@ unsigned long long AuctionTimer::ticks2ns( unsigned int runs,
 
 void AuctionTimer::dump( ostream &os )
 {
-    os << "PerfTimer dump :" << endl;
+    os << "AuctionTimer dump :" << endl;
 
     for (int i = 0; i<MAXAUCTSLOTS; i++) {
 

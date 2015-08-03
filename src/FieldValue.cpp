@@ -58,7 +58,14 @@ FieldValue::FieldValue(string type, string _value)
         val = _value;
     } else if (type == "String") {
         val = _value;
-    } else {
+    } else if (type == "Float") {
+		(float) ParserFcts::parseFloat(_value.c_str());
+		val = _value;
+	} else if (type == "Double") {
+		(double) ParserFcts::parseDouble(_value.c_str());
+		val = _value;
+	}
+    else {
         throw Error("Unsupported type for field value: %s", type.c_str());
     }
 }
@@ -114,7 +121,11 @@ int FieldValue::getTypeLength(string type)
         return 2;
     } else if ((type == "UInt32") || (type == "SInt32")) {
         return 4;
-    } else if (type == "Binary") {
+    } else if (type == "Float") {
+		return 8;
+	} else if (type == "Double") {
+		return 8;		
+	} else if (type == "Binary") {
         return 0;
     } else if (type == "String") {
         return 0;

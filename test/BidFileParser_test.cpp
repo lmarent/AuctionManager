@@ -8,7 +8,11 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "ParserFcts.h"
+#include "BidManager.h"
 #include "BidFileParser.h"
+#include "FieldValParser.h"
+#include "FieldDefParser.h"
+#include "BidIdSource.h"
 
 
 class BidFileParser_Test : public CppUnit::TestFixture {
@@ -21,12 +25,23 @@ class BidFileParser_Test : public CppUnit::TestFixture {
   public:
 	void setUp();
 	void tearDown();
+	void loadFieldDefs(fieldDefList_t *fieldList);
+	void loadFieldVals(fieldValList_t *fieldValList);
 
 	void testParser();
 
   private:
     
     BidFileParser *ptrBidFileParser;
+    FieldDefParser *ptrFieldParsers;
+    FieldValParser *ptrFieldValParser;
+    BidIdSource *idSource;
+
+    //! filter definitions
+    fieldDefList_t fieldDefs;
+
+    //! filter values
+    fieldValList_t fieldVals;
     
 };
 
@@ -39,8 +54,15 @@ void BidFileParser_Test::setUp()
 
 	try
 	{
-		
 		ptrBidFileParser = new BidFileParser(filename);
+		idSource = new BidIdSource(1);
+
+		// load the filter def list
+		loadFieldDefs(&fieldDefs);
+	
+		// load the filter val list
+		loadFieldVals(&fieldVals);
+
 		
 	}catch (Error &e)
 	{
@@ -51,11 +73,59 @@ void BidFileParser_Test::setUp()
 void BidFileParser_Test::tearDown() 
 {
 	delete(ptrBidFileParser);
+	delete(idSource);
+    delete(ptrFieldParsers);
+    delete(ptrFieldValParser);
+	
 }
 
 void BidFileParser_Test::testParser() 
 {
+	bidDB_t *new_bids = new bidDB_t();
+		
+	try
+	{
+		
+		ptrBidFileParser->parse(&fieldDefs, 
+							&fieldVals, 
+							new_bids,
+							idSource );
+		
+		CPPUNIT_ASSERT( new_bids->size() == 1 );
+		
+	}
+	catch (Error &e){
+		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+	}
+}
+
+void BidFileParser_Test::loadFieldDefs(fieldDefList_t *fieldList)
+{
+	const string filename = DEF_SYSCONFDIR "/fielddef.xml";
+
+	try
+	{
+		ptrFieldParsers = new FieldDefParser(filename);
+		ptrFieldParsers->parse(fieldList);
+		
+	}catch (Error &e)
+	{
+		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+	}
 
 }
 
+void BidFileParser_Test::loadFieldVals(fieldValList_t *fieldValList)
+{
+	const string filename = DEF_SYSCONFDIR "/fieldval.xml";
+	try
+	{
+		ptrFieldValParser = new FieldValParser(filename);
+		ptrFieldValParser->parse(fieldValList);
+				
+	}catch (Error &e)
+	{
+		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+	}
 
+}

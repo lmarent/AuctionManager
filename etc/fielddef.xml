@@ -3,7 +3,7 @@
 <FIELDDEF>
   <!-- General fields -->
   <DEF LENGTH="6" TYPE="UInt32" >Quantity</DEF>
-  <DEF LENGTH="6" TYPE="UInt32" >UnitPrice</DEF>
+  <DEF LENGTH="6" TYPE="Double" >UnitPrice</DEF>
 
 
 </FIELDDEF>

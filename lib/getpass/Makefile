@@ -325,8 +325,8 @@ top_builddir = ../..
 top_srcdir = ../..
 noinst_LIBRARIES = libgetpass.a
 EXTRA_DIST = COPYING
-AM_CFLAGS = -O2  
-#AM_CFLAGS = -g -fno-inline -DDEBUG  
+#AM_CFLAGS = -O2  
+AM_CFLAGS = -g -fno-inline -DDEBUG  
 libgetpass_a_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/src/include
 libgetpass_a_SOURCES = getpass.h getpass.c 
 all: all-am

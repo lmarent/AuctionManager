@@ -111,7 +111,7 @@ void AuctionManagerInfo::addInfo( string item, string param )
         addInfo(I_USE_SSL);
         addInfo(I_BIDLIST);
         break;
-    case I_TASK:
+    case I_BID:
         addInfo(I_BID, param );
         break;
     default: 

@@ -349,8 +349,8 @@ target_alias =
 top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
-AM_CFLAGS = -O2 
-#AM_CFLAGS = -g -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING
+#AM_CFLAGS = -O2 
+AM_CFLAGS = -g -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING
 narsh_SOURCES = nqrsh.cpp $(top_srcdir)/src/Error.cpp \
                 $(top_srcdir)/src/CommandLineArgs.cpp \
                 $(top_srcdir)/src/constants.cpp \

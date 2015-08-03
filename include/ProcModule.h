@@ -31,7 +31,7 @@
 
 #include "stdincpp.h"
 #include "ProcModuleInterface.h"
-#include "PerfTimer.h"
+#include "AuctionTimer.h"
 #include "Logger.h"
 #include "Module.h"
 #include "ConfigManager.h"

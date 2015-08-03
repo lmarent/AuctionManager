@@ -34,7 +34,6 @@
 
 
 // AuctionManager.h
-extern const string NETAUM_LOCK_FILE;
 extern const string NETAUM_DEFAULT_CONFIG_FILE;
 
 

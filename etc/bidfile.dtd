@@ -1,8 +1,8 @@
 <?xml version ="1.0" encoding="UTF-8"?>
 <!-- The Document Type Definition (DTD) for the file -->
 
-<!ELEMENT BIDSET (BID*)>
-<!ATTLIST BIDSET
+<!ELEMENT AGENT (BID*)>
+<!ATTLIST AGENT
           ID CDATA #REQUIRED>
 
 <!ELEMENT BID (PREF|ELEMENT)*>
@@ -12,7 +12,7 @@
 <!ELEMENT FIELD (#PCDATA)>
 <!ATTLIST FIELD
         NAME CDATA #REQUIRED
-        TYPE (UInt8|SInt8|UInt16|SInt16|UInt32|SInt32|UInt64|SInt64|Bool|Binary|String|IPAddr|IP6Addr|Float32|Float64) "String">
+        TYPE (UInt8|SInt8|UInt16|SInt16|UInt32|SInt32|UInt64|SInt64|Bool|Binary|String|Float32|Float64) "String">
         
 <!ELEMENT ELEMENT (FIELD*)>
 <!ATTLIST ELEMENT

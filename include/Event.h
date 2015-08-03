@@ -31,6 +31,7 @@
 
 
 #include "stdincpp.h"
+#include "BidFileParser.h"
 #include "AuctionManagerInfo.h"
 
 
@@ -165,7 +166,7 @@ class Event {
     virtual void dump( ostream &os );
     
     //! delete rules stored in this event
-    virtual int deleteRule(int uid) 
+    virtual int deleteBid(int uid) 
     {
 	return 0;
     }
@@ -241,38 +242,38 @@ class AddBidsEvent : public Event
 class ActivateBidsEvent : public Event
 {
   private:
-    ruleDB_t rules;
+    bidDB_t bids;
 
   public:
 
-    ActivateBidsEvent(struct timeval time, ruleDB_t &r) 
-      : Event(ACTIVATE_BIDS, time), rules(r) {}
+    ActivateBidsEvent(struct timeval time, bidDB_t &b) 
+      : Event(ACTIVATE_BIDS, time), bids(b) {}
 
-     ActivateBidsEvent(time_t offs_sec, ruleDB_t &r) 
-      : Event(ACTIVATE_BIDS, offs_sec), rules(r) {}
+     ActivateBidsEvent(time_t offs_sec, bidDB_t &b) 
+      : Event(ACTIVATE_BIDS, offs_sec), bids(b) {}
 
-     ActivateRulesEvent(ruleDB_t &r) 
-      : Event(ACTIVATE_BIDS), rules(r) {}
+     ActivateBidsEvent(bidDB_t &b) 
+      : Event(ACTIVATE_BIDS), bids(b) {}
 
-     ruleDB_t *getRules()
+     bidDB_t *getBids()
      {
-         return &rules;
+         return &bids;
      }
 
-     int deleteRule(int uid)
+     int deleteBid(int uid)
      {
          int ret = 0;
-         ruleDBIter_t iter;
+         bidDBIter_t iter;
            
-         for (iter=rules.begin(); iter != rules.end(); iter++) {
+         for (iter=bids.begin(); iter != bids.end(); iter++) {
              if ((*iter)->getUId() == uid) {
-                 rules.erase(iter);
+                 bids.erase(iter);
                  ret++;
                  break;
              }   
          }
          
-         if (rules.empty()) {
+         if (bids.empty()) {
              return ++ret;
          }
          
@@ -284,38 +285,38 @@ class ActivateBidsEvent : public Event
 class RemoveBidsEvent : public Event
 {
   private:
-    ruleDB_t rules;
+    bidDB_t bids;
 
   public:
 
-    RemoveBidsEvent(struct timeval time, ruleDB_t &r) 
-      : Event(REMOVE_BIDS, time), rules(r) {}
+    RemoveBidsEvent(struct timeval time, bidDB_t &b) 
+      : Event(REMOVE_BIDS, time), bids(b) {}
 
-    RemoveRulesEvent(time_t offs_sec, ruleDB_t &r) 
-      : Event(REMOVE_BIDS, offs_sec), rules(r) {}
+    RemoveBidsEvent(time_t offs_sec, bidDB_t &b) 
+      : Event(REMOVE_BIDS, offs_sec), bids(b) {}
     
-    RemoveRulesEvent(ruleDB_t &r) 
-      : Event(REMOVE_BIDS), rules(r) {}
+    RemoveBidsEvent(bidDB_t &b) 
+      : Event(REMOVE_BIDS), bids(b) {}
 
-    ruleDB_t *getRules()
+    bidDB_t *getBids()
     {
-        return &rules;
+        return &bids;
     }
     
-    int deleteRule(int uid)
+    int deleteBid(int uid)
     {
         int ret = 0;
-        ruleDBIter_t iter;
+        bidDBIter_t iter;
         
-        for (iter=rules.begin(); iter != rules.end(); iter++) {
+        for (iter=bids.begin(); iter != bids.end(); iter++) {
             if ((*iter)->getUId() == uid) {
-                rules.erase(iter);
+                bids.erase(iter);
                 ret++;
                 break;
             }   
         }
           
-        if (rules.empty()) {
+        if (bids.empty()) {
             return ++ret;
         }
           
@@ -328,7 +329,7 @@ class ProcTimerEvent : public Event
 private:
 
  public:
-    int rid;
+    int aid; // Auction Number
     int actid;
     unsigned int tmID;
     
@@ -358,11 +359,11 @@ public:
           return tmID;
       }
     
-    int deleteRule(int uid)
+    int deleteAuction(int uid)
     {
         int ret = 0;
         
-        if (uid == rid) {
+        if (uid == aid) {
             ret = 2;
         }
         return ret;
@@ -423,7 +424,7 @@ class GetModInfoEvent : public CtrlCommEvent
 };
 
 
-//! add rules flags
+//! add bids flags
 const int ADD_BIDS_MAPI   = 0x1;
 
 class AddBidsCtrlEvent : public CtrlCommEvent
@@ -442,7 +443,7 @@ class AddBidsCtrlEvent : public CtrlCommEvent
         memcpy(buf, b, len+1);
           
         if (mapi) {
-            type |= ADD_RULES_MAPI;
+            type |= ADD_BIDS_MAPI;
         }
     }
 
@@ -471,16 +472,16 @@ class AddBidsCtrlEvent : public CtrlCommEvent
 class RemoveBidsCtrlEvent : public CtrlCommEvent
 {
   private:
-    string rule;
+    string bid;
 
   public:
     
-    RemoveBidsCtrlEvent(string r) 
-      : CtrlCommEvent(REMOVE_BIDS_CTRLCOMM), rule(r) {}
+    RemoveBidsCtrlEvent(string b) 
+      : CtrlCommEvent(REMOVE_BIDS_CTRLCOMM), bid(b) {}
 
-    string getRule()
+    string getBid()
     {
-        return rule;
+        return bid;
     }
 };
 

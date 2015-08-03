@@ -1,0 +1,53 @@
+<html>
+<head>
+<title>Auction Manager Main</title>
+</head>
+<body>
+<h2>Auction Manager Main</h2>
+<h3>Commands:</h3>
+<br>
+/help: displays this help<br><br>
+
+/get_info?IType=&lt;type&gt;[&IParam=&lt;param&gt;]: displays varies information<br><br>
+<form method=post action=/get_info>
+Type = 
+<select name=IType size=1>
+  <option>all</option>
+  <option>version</option>
+  <option>uptime</option>
+  <option>bids_stored</option>
+  <option>modules_loaded</option>
+  <option>configfile</option>
+  <option>use_ssl</option>
+  <option>hello</option>
+  <option>bidlist</option>
+  <option>modlist</option>
+  <option>bid</option>
+</select>
+<br>
+Param = <input type=text name=IParam><br>
+<input value="get info" type=submit>
+</form><br>
+
+/rm_bid?BidID=&lt;bid_id&gt;: delete bids(s)<br><br>
+<form method=post action=/rm_task>
+BidID = <input type=text name=BidID><br>
+<input value="delete bid(s)" type=submit>
+</form><br>
+
+/add_bid?Bid=&lt;bid&gt;: add bid(s)<br><br>
+<form method=post action=/add_bid>
+Bid = <textarea col=80 rows=5 name=Bid></textarea><br>
+<input value="add bid(s)" type=submit>
+</form><br>
+
+/get_modinfo?IName=&lt;mod_name&gt;: get module specific information<br><br>
+<form method=post action=/get_modinfo>
+Name = <input type=text name=IName><br>
+<input value="get modinfo" type=submit>
+</form>
+
+</ul>
+</form>
+</body>
+</html>

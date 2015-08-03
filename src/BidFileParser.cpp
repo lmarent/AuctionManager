@@ -33,7 +33,7 @@
 
 
 BidFileParser::BidFileParser(string filename)
-    : XMLParser(BIDFILE_DTD, filename, "BIDSET")
+    : XMLParser(BIDFILE_DTD, filename, "AGENT")
 {
     log = Logger::getInstance();
     ch = log->createChannel("BidFileParser" );
@@ -41,7 +41,7 @@ BidFileParser::BidFileParser(string filename)
 
 
 BidFileParser::BidFileParser(char *buf, int len)
-    : XMLParser(BIDFILE_DTD, buf, len, "BIDSET")
+    : XMLParser(BIDFILE_DTD, buf, len, "AGENT")
 {
     log = Logger::getInstance();
     ch = log->createChannel("BidFileParser" );
@@ -95,7 +95,14 @@ void
 BidFileParser::parseFieldValue(fieldValList_t *fieldVals, string value, field_t *f)
 {
     int n;
-
+	
+	// Initialize the values for the field.
+	for (int i=0 ; i < MAX_FIELD_SET_SIZE; i++)
+	{
+		FieldValue fielvalue;
+		f->value.push_back(fielvalue);
+	}
+		
     if (value == "*") {
         f->mtype = FT_WILD;
         f->cnt = 1;
@@ -141,20 +148,19 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
     sname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
 
 #ifdef DEBUG
-    log->dlog(ch, "bidset %s", sname.c_str());
+    log->dlog(ch, "agent %s", sname.c_str());
 #endif
 
     cur = cur->xmlChildrenNode;
 
     while (cur != NULL) {
 	
-	
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"BID")) && (cur->ns == ns)) {
-            string rname;
+            string bname;
             elementList_t elements;
             fieldList_t fields;
 
-            rname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
+            bname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
 
             cur2 = cur->xmlChildrenNode;
 
@@ -165,6 +171,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
                     element_t elem;
 
                     elem.name = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"NAME"));
+
                     if (elem.name.empty()) {
                         throw Error("Rule Parser Error: missing name at line %d", XML_GET_LINE(cur2));
                     }
@@ -184,6 +191,10 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 						
 							f.name = xmlCharToString(xmlGetProp(cur3, (const xmlChar *)"NAME"));
 							
+							// use lower case internally
+							transform(f.name.begin(), f.name.end(), f.name.begin(), 
+										  ToLower());							
+										  
 							// lookup in field definitions list
 							iter = fieldDefs->find(f.name);
 							if (iter != fieldDefs->end()) {
@@ -196,9 +207,6 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 								if (fvalue.empty()) {
 									throw Error("Bid Parser Error: missing value at line %d", XML_GET_LINE(cur3));
 								}
-								// use lower case internally
-								transform(f.name.begin(), f.name.end(), f.name.begin(), 
-										  ToLower());
 							
 								// parse and set value
 								try {
@@ -223,44 +231,15 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
                 cur2 = cur2->next;
             }
 
-#ifdef DEBUG
-            // debug info
-            log->dlog(ch, "bid %s.%s", sname.c_str(), rname.c_str());
-            /*
-             * TODO AM: Manage more than one value by field 
-            for (fieldListIter_t i = fields.begin(); i != fields.end(); i++) {
-                switch (i->mtype) {
-                case FT_WILD:
-                    log->dlog(ch, " F %s&%s = *", i->name.c_str(), i->mask.getString().c_str());
-                    break;
-                case FT_EXACT:
-                    log->dlog(ch, " F %s&%s = %s", i->name.c_str(), i->mask.getString().c_str(), 
-                              i->value[0].getString().c_str());
-                    break;
-                case FT_RANGE:
-                    log->dlog(ch, " F %s&%s = %s-%s", i->name.c_str(), i->mask.getString().c_str(), 
-                              i->value[0].getString().c_str(), i->value[1].getString().c_str() );
-                    break;
-                case FT_SET:
-                    string vals;
-                    for (int j=0; j < i->cnt; j++) {
-                        vals += i->value[j].getString();
-                        if (j < (i->cnt-1)) {
-                            vals += ", ";
-                        }
-                    }
-                    log->dlog(ch, " F %s&%s = %s", i->name.c_str(), i->mask.getString().c_str(), 
-                              vals.c_str());
-                    break;
-                }
-            }
-			*/
-#endif
 
             // add bid
             try {
 				unsigned short uid = idSource->newId();
-                Bid *b = new Bid((int) uid, elements);
+                Bid *b = new Bid((int) uid, sname, bname, elements);
+#ifdef DEBUG
+				// debug info
+				log->dlog(ch, "bid %s.%s %s", sname.c_str(), bname.c_str(), (b->getInfo()).c_str());
+#endif
                 bids->push_back(b);
             } catch (Error &e) {
                 log->elog(ch, e);
