@@ -222,8 +222,10 @@ auctionManager-AuctionManagerComponent.o: AuctionManagerComponent.cpp \
  ../include/metadata.h ../include/FieldDefParser.h \
  ../include/FieldValue.h ../include/Event.h ../include/BidFileParser.h \
  ../include/Bid.h ../include/FieldValParser.h ../include/BidIdSource.h \
- ../include/AuctionManagerInfo.h ../lib/httpd/httpd.h \
- /usr/include/syslog.h /usr/include/x86_64-linux-gnu/sys/syslog.h \
+ ../include/AuctionFileParser.h ../include/Auction.h \
+ ../include/AuctionIdSource.h ../include/AuctionManagerInfo.h \
+ ../lib/httpd/httpd.h /usr/include/syslog.h \
+ /usr/include/x86_64-linux-gnu/sys/syslog.h \
  /usr/include/x86_64-linux-gnu/bits/syslog-path.h /usr/include/grp.h \
  /usr/include/x86_64-linux-gnu/sys/signal.h \
  /usr/include/x86_64-linux-gnu/sys/utsname.h \
@@ -860,6 +862,12 @@ auctionManager-AuctionManagerComponent.o: AuctionManagerComponent.cpp \
 ../include/FieldValParser.h:
 
 ../include/BidIdSource.h:
+
+../include/AuctionFileParser.h:
+
+../include/Auction.h:
+
+../include/AuctionIdSource.h:
 
 ../include/AuctionManagerInfo.h:
 

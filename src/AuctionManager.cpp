@@ -3,14 +3,14 @@
 
     Copyright 2014-2015 Universidad de los Andes, Bogotá, Colombia
 
-    This file is part of Network Auction Manager System (NETAuM).
+    This file is part of Network Auction Manager System (NETAUM).
 
-    NETAuM is free software; you can redistribute it and/or modify 
+    NETAUM is free software; you can redistribute it and/or modify 
     it under the terms of the GNU General Public License as published by 
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
 
-    NETQoS is distributed in the hope that it will be useful, 
+    NETAUM is distributed in the hope that it will be useful, 
     but WITHOUT ANY WARRANTY; without even the implied warranty of 
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -18,243 +18,31 @@
     You should have received a copy of the GNU General Public License
     along with this software; if not, write to the Free Software 
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-    
-    Code based on Netmate
 
-    $Id: AuctionManager.cpp 748 2015-03-05 11:01:01 amarentes $
+	Description:
+	auction database
+    Code based on Netmate Implementation
+
+    $Id: AuctionManager.h 748 2015-08-04 13:50:00Z amarentes $
+
 */
-
 
 #include "AuctionManager.h"
-#include "ParserFcts.h"
-#include "ConstantsAum.h"
-
-
-// globals in AuctionManager class
-int AuctionManager::s_sigpipe[2];
-int AuctionManager::enableCtrl = 0;
-
-// global timeout flag
-int g_timeout = 0;
-
-
-/*
-  version string embedded into executable file
-  can be found via 'strings <path>/netmate | grep version'
-*/
-const char *NETAUM_VERSION = "NETAuM version " VERSION ", (c) 2014-2015 Universidad de los Andes, Colombia";
-
-const char *NETAUM_OPTIONS = "compile options: "
-"multi-threading support = "
-#ifdef ENABLE_THREADS
-"[YES]"
-#else
-"[NO]"
-#endif
-", secure sockets (SSL) support = "
-#ifdef USE_SSL
-"[YES]"
-#else
-"[NO]"
-#endif
-" ";
-
-
-// remove newline from end of C string
-static inline char *noNewline( char* s )
-{
-    char *p = strchr( s, '\n' );
-    if (p != NULL) {
-        *p = '\0';
-    }
-    return s;
-}
-
+#include "CtrlComm.h"
+#include "Constants.h"
 
 /* ------------------------- AuctionManager ------------------------- */
 
-AuctionManager::AuctionManager( int argc, char *argv[])
-    :  pprocThread(0)
+AuctionManager::AuctionManager() 
+    : auctions(0), 
+	  idSource(1)
 {
-
-    // record meter start time for later output
-  startTime = ::time(NULL);
-
-    try {
-
-        if (pipe((int *)&s_sigpipe) < 0) {
-            throw Error("failed to create signal pipe");
-        }
-				
-        fdList[make_fd(s_sigpipe[0], FD_RD)] = NULL;
-
-        // the read fd must not block
-        fcntl(s_sigpipe[0], F_SETFL, O_NONBLOCK);
-	
-        // install signal handlers
-        signal(SIGINT, sigint_handler);
-        signal(SIGTERM, sigint_handler);
-        signal(SIGUSR1, sigusr1_handler);
-        signal(SIGALRM, sigalarm_handler);
-        // FIXME sighup for log file rotation
-				
-        auto_ptr<CommandLineArgs> _args(new CommandLineArgs());
-        args = _args;
-
-        // basic args
-        args->add('c', "ConfigFile", "<file>", "use alternative config file",
-                  "MAIN", "configfile");
-        args->add('l', "LogFile", "<file>", "use alternative log file",
-                  "MAIN", "logfile");
-        args->add('r', "BidFile", "<file>", "use specified bid file",
-                  "MAIN", "rulefile");
-        args->addFlag('V', "RelVersion", "show version info and exit",
-                      "MAIN", "version");
-        args->add('D', "FieldDefFile", "<file>", "use alternative file for field definitions",
-                  "MAIN", "fdeffile");
-        args->add('C', "FieldConstFile", "<file>", "use alternative file for field constants",
-                  "MAIN", "fcontfile");
-#ifdef USE_SSL
-        args->addFlag('x', "UseSSL", "use SSL for control communication",
-                      "CONTROL", "usessl");
-#endif
-        args->add('P', "ControlPort", "<portnumber>", "use alternative control port",
-                  "CONTROL", "cport");
-#ifndef ENABLE_NF
-#ifndef HAVE_LIBIPULOG_LIBIPULOG_H
-        args->add('i', "NetInterface", "<iface>[,<iface2>,...]", "select network interface(s)"
-                  " to capture from", "MAIN", "interface");
-        args->addFlag('p', "NoPromiscInt", "don't put interface in "
-                      "promiscuous mode", "MAIN", "nopromisc");
-#endif
-#endif
-
-
-        // parse command line args
-        if (args->parseArgs(argc, argv)) {
-            // user wanted help
-            exit(0);
-        }
-
-        if (args->getArgValue('V') == "yes") {
-            cout << getHelloMsg();
-            exit(0);
-        }
-
-        // test before registering the exit function
-        if (alreadyRunning()) {
-            throw Error("already running on this machine - terminating" );
-        }
-
-        // register exit function
-        atexit(exit_fct);
-				
-        auto_ptr<Logger> _log(Logger::getInstance()); 	
-        log = _log;
-        ch = log->createChannel("AuctionManager");
-
-        log->log(ch,"Initializing quality manager system");
-        log->log(ch,"Program executable = %s", argv[0]);
-        log->log(ch,"Started at %s", noNewline(ctime(&startTime)));
-				
-        // parse config file
-        configFileName = args->getArgValue('c');
-        if (configFileName.empty()) { 
-            // is no config file is given then use the default
-            // file located in a relative location to the binary
-            configFileName = NETAUM_DEFAULT_CONFIG_FILE;
-        }
-
-        auto_ptr<ConfigManager> _conf(new ConfigManager(configFileName, argv[0]));
-        conf = _conf;
-
-        // merge into config
-        conf->mergeArgs(args->getArgList(), args->getArgVals());
-
-        // dont need this anymore
-        CommandLineArgs *a = args.release();
-        saveDelete(a);
-
-        // use logfilename (in order of precedence):
-        // from command line / from config file / hardcoded default
-
-        // query command line for log file name
-        logFileName = conf->getValue("LogFile", "MAIN");
-
-        if (logFileName.empty()) {
-            logFileName = AUM_DEFAULT_LOG_FILE;
-        }
-
-        log->setDefaultLogfile(logFileName);
-
-        // set logging vebosity level if configured
-        string verbosity = conf->getValue("VerboseLevel", "MAIN");
-        if (!verbosity.empty()) {
-            log->setLogLevel( ParserFcts::parseInt( verbosity, -1, 4 ) );
-        }
-
-        log->log(ch,"configfilename used is: '%s'", configFileName.c_str());
+    log = Logger::getInstance();
+    ch = log->createChannel("AuctionManager");
 #ifdef DEBUG
-        log->dlog(ch,"------- startup -------" );
+    log->dlog(ch,"Starting");
 #endif
 
-        // startup other core classes
-        auto_ptr<AuctionTimer> _auct(AuctionTimer::getInstance());
-        auct = _auct;
-        auto_ptr<BidManager> _bidm(new BidManager(conf->getValue("FieldDefFile", "MAIN"),
-                                                    conf->getValue("FieldConstFile", "MAIN")));
-        bidm = _bidm;
-        auto_ptr<EventScheduler> _evnt(new EventScheduler());
-        evnt = _evnt;
-
-        // startup Quality components
-
-#ifdef ENABLE_THREADS
-
-        auto_ptr<AUMProcessor> _proc(new AUMProcessor(conf.get(),
-							    conf->isTrue("Thread",
-									 "AUM_PROCESSOR")));
-        pprocThread = conf->isTrue("Thread", "AUM_PROCESSOR");
-#else
-        
-        auto_ptr<AUMProcessor> _proc(new AUMProcessor(conf.get(), 0));
-        pprocThread = 0;
-		
-		
-        if (conf->isTrue("Thread", "AUM_PROCESSOR") ) {
-            log->wlog(ch, "Threads enabled in config file but executable is compiled without thread support");
-        }
-#endif
-        proc = _proc;
-        proc->mergeFDs(&fdList);
-		
-		// setup initial rules
-		string rfn = conf->getValue("BidFile", "MAIN");
-
-        if (!rfn.empty()) {
-			evnt->addEvent(new AddBidsEvent(rfn));
-        }
-
-        // disable logger threading if not needed
-        if (!pprocThread ) {
-            log->setThreaded(0);
-        }
-
-		enableCtrl = conf->isTrue("Enable", "CONTROL");
-
-		if (enableCtrl) {
-			// ctrlcomm can never be a separate thread
-			auto_ptr<CtrlComm> _comm(new CtrlComm(conf.get(), 0));
-			comm = _comm;
-			comm->mergeFDs(&fdList);
-		}
-
-    } catch (Error &e) {
-        if (log.get()) {
-            log->elog(ch, e);
-        }  
-        throw e;
-    }
 }
 
 
@@ -262,657 +50,510 @@ AuctionManager::AuctionManager( int argc, char *argv[])
 
 AuctionManager::~AuctionManager()
 {
-    // objects are destroyed by their auto ptrs
+    auctionDBIter_t iter;
 
 #ifdef DEBUG
-		log->dlog(ch,"------- end shutdown -------" );
+    log->dlog(ch,"Shutdown");
 #endif
-    
-}
 
-
-/* -------------------- getHelloMsg -------------------- */
-
-string AuctionManager::getHelloMsg()
-{
-    ostringstream s;
-    
-    static char name[128] = "\0";
-
-    if (name[0] == '\0') { // first time
-        gethostname(name, sizeof(name));
+    for (iter = auctionDB.begin(); iter != auctionDB.end(); iter++) {
+        if (*iter != NULL) {
+            // delete auction
+            saveDelete(*iter);
+        } 
     }
 
-    s << "AuctionManager build " << BUILD_TIME 
-      << ", running at host \"" << name << "\"," << endl
-      << "compile options: "
-#ifndef ENABLE_THREADS
-      << "_no_ "
-#endif
-      << "multi-threading support, "
-#ifndef USE_SSL
-      << "_no_ "
-#endif
-      << "secure sockets (SSL) support"
-      << endl;
-    
-    return s.str();
+    for (auctionDoneIter_t i = auctionDone.begin(); i != auctionDone.end(); i++) {
+        saveDelete(*i);
+    }
 }
 
 
-/* -------------------- getInfo -------------------- */
+/* -------------------- isReadableFile -------------------- */
 
-string AuctionManager::getInfo(infoType_t what, string param)
-{  
-    time_t uptime;
-    ostringstream s;
-    
-    s << "<info name=\"" << AuctionManagerInfo::getInfoString(what) << "\" >";
+static int isReadableFile( string fileName ) {
 
-    switch (what) {
-    case I_AUCTIONMANAGER_VERSION:
-        s << getHelloMsg();
-        break;
-    case I_UPTIME:
-      uptime = ::time(NULL) - startTime;
-        s << uptime << " s, since " << noNewline(ctime(&startTime));
-        break;
-    case I_BIDS_STORED:
-        s << bidm->getNumBids();
-        break;
-    case I_CONFIGFILE:
-        s << configFileName;
-        break;
-    case I_USE_SSL:
-        s << (httpd_uses_ssl() ? "yes" : "no");
-        break;
-    case I_HELLO:
-        s << getHelloMsg();
-        break;
-    case I_BIDLIST:
-        s << CtrlComm::xmlQuote(bidm->getInfo());
-        break;
-    case I_BID:
-        if (param.empty()) {
-            throw Error("get_info: missing parameter for bid = <bidname>" );
-        } else {
-            int n = param.find(".");
-            if (n > 0) {
-                s << CtrlComm::xmlQuote(bidm->getInfo(param.substr(0,n), param.substr(n+1, param.length())));
-            } else {
-                s << CtrlComm::xmlQuote(bidm->getInfo(param));
-            }
+    FILE *fp = fopen(fileName.c_str(), "r");
+
+    if (fp != NULL) {
+        fclose(fp);
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+/* -------------------------- getAuction ----------------------------- */
+
+Auction *AuctionManager::getAuction(int uid)
+{
+    if ((uid >= 0) && ((unsigned int)uid <= auctionDB.size())) {
+        return auctionDB[uid];
+    } else {
+        return NULL;
+    }
+}
+
+
+
+/* -------------------- getAuction -------------------- */
+
+Auction *AuctionManager::getAuction(string sname, string rname)
+{
+    auctionSetIndexIter_t iter;
+    auctionIndexIter_t iter2;
+
+    iter = auctionSetIndex.find(sname);
+    if (iter != auctionSetIndex.end()) {		
+        iter2 = iter->second.find(rname);
+        if (iter2 != iter->second.end()) {
+            return getAuction(iter2->second);
         }
-        break;
-    case I_NUMAUCTIONMANAGERINFOS:
-    default:
-        return string();
+        else
+        {
+#ifdef DEBUG
+    log->dlog(ch,"Auction Id not found");
+#endif		
+			
+		}
     }
+    else
+    {
+#ifdef DEBUG
+    log->dlog(ch,"Auction set not found");
+#endif		
+	}
 
-    s << "</info>" << endl;
-    
-    return s.str();
+    return NULL;
 }
 
 
-string AuctionManager::getAuctionManagerInfo(infoList_t *i)
-{
-    ostringstream s;
-    infoListIter_t iter;
-   
-    s << "<AuctionManagerInfos>\n";
+/* -------------------- getAuctions -------------------- */
 
-    for (iter = i->begin(); iter != i->end(); iter++) {
-        s << getInfo(iter->type, iter->param);
+auctionIndex_t *AuctionManager::getAuctions(string sname)
+{
+    auctionSetIndexIter_t iter;
+
+    iter = auctionSetIndex.find(sname);
+    if (iter != auctionSetIndex.end()) {
+        return &(iter->second);
     }
 
-    s << "</AuctionManagerInfos>\n";
-
-    return s.str();
+    return NULL;
 }
 
-
-/* -------------------- handleEvent -------------------- */
-
-void AuctionManager::handleEvent(Event *e, fd_sets_t *fds)
+auctionDB_t AuctionManager::getAuctions()
 {
-   
-    switch (e->getType()) {
-    case TEST:
-      {
+    auctionDB_t ret;
+
+    for (auctionSetIndexIter_t r = auctionSetIndex.begin(); r != auctionSetIndex.end(); r++) {
+        for (auctionIndexIter_t i = r->second.begin(); i != r->second.end(); i++) {
+            ret.push_back(getAuction(i->second));
+        }
+    }
+
+    return ret;
+}
+
+/* ----------------------------- parseAuctions --------------------------- */
+
+auctionDB_t *AuctionManager::parseAuctions(string fname)
+{
 
 #ifdef DEBUG
-        log->dlog(ch,"processing event test" );
+    log->dlog(ch,"ParseAuctions");
 #endif
 
-      }
-      break;
-    case GET_INFO:
-      {
-          // get info types from event
-          try {
+    auctionDB_t *new_auctions = new auctionDB_t();
 
-#ifdef DEBUG
-        log->dlog(ch,"processing event Get info" );
-#endif
-
-              infoList_t *i = ((GetInfoEvent *)e)->getInfos(); 
-              // send meter info
-              comm->sendMsg(getAuctionManagerInfo(i), ((GetInfoEvent *)e)->getReq(), fds, 0 /* do not html quote */ );
-          } catch(Error &err) {
-              comm->sendErrMsg(err.getError(), ((GetInfoEvent *)e)->getReq(), fds);
-          }
-      }
-      break;
-    case GET_MODINFO:
-      {
-          // get module information from loaded module (proc mods only now)
-          try {
-
-#ifdef DEBUG
-        log->dlog(ch,"processing event Get modinfo" );
-#endif
-              string s = proc->getModuleInfoXML(((GetModInfoEvent *)e)->getModName());
-              // send module info
-              comm->sendMsg(s, ((GetModInfoEvent *)e)->getReq(), fds, 0);
-          } catch(Error &err) {
-              comm->sendErrMsg(err.getError(), ((GetModInfoEvent *)e)->getReq(), fds);
-          }
-      }
-      break;
-    case ADD_BIDS:
-      {
-          bidDB_t *new_bids = NULL;
-
-          try {
-
-#ifdef DEBUG
-        log->dlog(ch,"processing event adding bids" );
-#endif
-              // support only XML rules from file
-              new_bids = bidm->parseBids(((AddBidsEvent *)e)->getFileName());
-
-#ifdef DEBUG
-        log->dlog(ch,"Bids sucessfully parsed " );
-#endif
-             
-              // TODO AM : test rule spec 
-              //proc->checkRules(new_rules);
-
-#ifdef DEBUG
-        log->dlog(ch,"Bids sucessfully checked " );
-#endif
-
-              // no error so lets add the rules and schedule for activation
-              // and removal
-              bidm->addBids(new_bids, evnt.get());
-
-#ifdef DEBUG
-        log->dlog(ch,"Bids sucessfully added " );
-#endif
-
-
-              saveDelete(new_bids);
-
-			  /*
-			   * TODO AM : verify if I have to do this code.
-				above 'addBids' produces an BidActivation event.
-				If rule addition shall be performed _immediately_
-				(fds == NULL) then we need to execute this
-				activation event _now_ and not wait for the
-				EventScheduler to do this some time later.
-			  */
-			  if (fds == NULL ) {
-			  Event *e = evnt->getNextEvent();
-			  handleEvent(e, NULL);
-			  saveDelete(e);
-			  }
-
-          } catch (Error &e) {
-              // error in rule(s)
-              if (new_bids) {
-                  saveDelete(new_bids);
-              }
-              throw e;
-          }
-      }
-      break;
-    case ADD_BIDS_CTRLCOMM:
-      {
-          bidDB_t *new_bids = NULL;
-
-          try {
-
-#ifdef DEBUG
-        log->dlog(ch,"processing event add rules by controlcomm" );
-#endif
-              
-              new_bids = bidm->parseBidsBuffer(
-                ((AddBidsCtrlEvent *)e)->getBuf(),
-                ((AddBidsCtrlEvent *)e)->getLen(), ((AddBidsCtrlEvent *)e)->isMAPI());
-
-              // TODO AM test bid spec 
-              // Vetifies if this method is required.
-              // proc->checkBids(new_bids);
-	  
-              // no error so let's add the rules and 
-              // schedule for activation and removal
-              bidm->addBids(new_bids, evnt.get());
-              comm->sendMsg("bid(s) added", ((AddBidsCtrlEvent *)e)->getReq(), fds);
-              saveDelete(new_bids);
-
-          } catch (Error &err) {
-              // error in bid(s)
-              if (new_bids) {
-                  saveDelete(new_bids);
-              }
-              comm->sendErrMsg(err.getError(), ((AddBidsCtrlEvent *)e)->getReq(), fds); 
-          }
-      }
-      break; 	
-
-    case ACTIVATE_BIDS:
-      {
-
-#ifdef DEBUG
-        log->dlog(ch,"processing event activate bids" );
-#endif
-
-          bidDB_t *bids = ((ActivateBidsEvent *)e)->getBids();
-
-          proc->addBids(bids, evnt.get());
-          // activate
-          bidm->activateBids(bids, evnt.get());
-      }
-      break;
-    case REMOVE_BIDS:
-      {
-
-#ifdef DEBUG
-        log->dlog(ch,"processing event remove bids" );
-#endif
-
-          bidDB_t *bids = ((ActivateBidsEvent *)e)->getBids();
-	  	  
-          // now get rid of the expired bid
-          proc->delBids(bids);
-          bidm->delBids(bids, evnt.get());
-      }
-      break;
-
-    case REMOVE_BIDS_CTRLCOMM:
-      {
-          try {
-
-#ifdef DEBUG
-        log->dlog(ch,"processing event remove bids cntrlcomm" );
-#endif
-
-              string r = ((RemoveBidsCtrlEvent *)e)->getBid();
-              int n = r.find(".");
-              if (n > 0) {
-				  string sname = r.substr(0,n); 
-				  string rname = r.substr(n+1, r.length()-n);
-#ifdef DEBUG
-        log->dlog(ch,"Deleting bid set=%s ruleId=%s", sname.c_str(), rname.c_str() );
-#endif
-
-                  // delete 1 bid
-                  Bid *rptr = bidm->getBid(sname, rname);
-                  if (rptr == NULL) {
-                      throw Error("no such bid");
-                  }
-	  
-                  proc->delBid(rptr);
-                  bidm->delBid(rptr, evnt.get());
-
-              } else {
-
-#ifdef DEBUG
-        log->dlog(ch,"Deleting bid set=%s ", r.c_str() );
-#endif				  
-                  // delete rule set
-                  bidIndex_t *bids = bidm->getBids(r);
-                  if (bids == NULL) {
-                      throw Error("no such bid set");
-                  }
-
-                  for (bidIndexIter_t i = bids->begin(); i != bids->end(); i++) {
-                      Bid *rptr = bidm->getBid(i->second);
+    try {	
 	
-                      proc->delBid(rptr);
-                      bidm->delBid(rptr, evnt.get());
-                  }
-              }
-
-              comm->sendMsg("bid(s) deleted", ((RemoveBidsCtrlEvent *)e)->getReq(), fds);
-          } catch (Error &err) {
-              comm->sendErrMsg(err.getError(), ((RemoveBidsCtrlEvent *)e)->getReq(), fds);
-          }
-      }
-      break;
-
-    case PROC_MODULE_TIMER:
+        AuctionFileParser afp = AuctionFileParser(fname);
+        afp.parse(new_auctions, &idSource);
 
 #ifdef DEBUG
-        log->dlog(ch,"processing event proc module timer" );
+    log->dlog(ch, "Auctions parsed");
 #endif
 
-        proc->timeout(((ProcTimerEvent *)e)->getRID(), ((ProcTimerEvent *)e)->getAID(),
-                      ((ProcTimerEvent *)e)->getTID());
-        break;
-    
-    default:
-        throw Error("unknown event");
+        return new_auctions;
+
+    } catch (Error &e) {
+
+        for(auctionDBIter_t i=new_auctions->begin(); i != new_auctions->end(); i++) {
+           saveDelete(*i);
+        }
+        saveDelete(new_auctions);
+        throw e;
     }
 }
 
 
-/* ----------------------- run ----------------------------- */
+/* -------------------- parseBidsBuffer -------------------- */
 
-void AuctionManager::run()
+auctionDB_t *AuctionManager::parseAuctionsBuffer(char *buf, int len, int mapi)
 {
-    fdListIter_t   iter;
-    fd_set         rset, wset;
-    fd_sets_t      fds;
-    struct timeval tv;
-    int            cnt = 0;
-    int            stop = 0;
-    eventVec_t     retEvents;
-    Event         *e = NULL;
+    auctionDB_t *new_auctions = new auctionDB_t();
 
     try {
-        // fill the fd set
-        FD_ZERO(&fds.rset);
-        FD_ZERO(&fds.wset);
-        for (iter = fdList.begin(); iter != fdList.end(); iter++) {
-            if ((iter->first.mode == FD_RD) || (iter->first.mode == FD_RW)) {
-                FD_SET(iter->first.fd, &fds.rset);
-            }
-            if ((iter->first.mode == FD_WT) || (iter->first.mode == FD_RW)) {
-                FD_SET(iter->first.fd, &fds.wset);
-            }
-        }
-        fds.max = fdList.begin()->first.fd;
-		
-
-        // register a timer for ctrlcomm (only online capturing)
-		if (enableCtrl) {
-		  int t = comm->getTimeout();
-		  if (t > 0) {
-				evnt->addEvent(new CtrlCommTimerEvent(t, t * 1000));
-		  }
-		}
-		
-		
-        // start threads (if threading is configured)
-        proc->run();
-
-#ifdef DEBUG
-        log->dlog(ch,"------- Auction Manager is running -------");
-#endif
-
-        do {
-			// select
-            rset = fds.rset;
-            wset = fds.wset;
-	    
-			tv = evnt->getNextEventTime();
-
-            //cerr << "timeout: " << tv.tv_sec*1e6+tv.tv_usec << endl;
-
-            // note: under most unix the minimal sleep time of select is
-            // 10ms which means an event may be executed 10ms after expiration!
-            if ((cnt = select(fds.max+1, &rset, &wset, NULL, &tv)) < 0) {
-                 if (errno != EINTR) {
-					throw Error("select error: %s", strerror(errno));
-                 }
-            }
-
-			cout << "here I am - cnt:" << cnt << endl;
-
-            // check FD events
-            if (cnt > 0)  {
-                if (FD_ISSET( s_sigpipe[0], &rset)) {
-                    // handle sig action
-                    char c;
-                    if (read(s_sigpipe[0], &c, 1) > 0) {
-                        switch (c) {
-                        case 'S':
-                            stop = 1;
-                            break;
-                        case 'D':
-                            cerr << *this;
-                            break;
-                        case 'A':
-                            // next event
-                            cout << "Type A" << endl;
-                            
-                            // check Event Scheduler events
-                            e = evnt->getNextEvent();
-                            if (e != NULL) {
-                                // FIXME hack
-                                if (e->getType() == CTRLCOMM_TIMER) {
-                                    comm->handleFDEvent(&retEvents, NULL, 
-                                                        NULL, &fds);
-                                } else {
-                                    handleEvent(e, &fds);
-                                }
-                                // reschedule the event
-                                evnt->reschedNextEvent(e);
-                                e = NULL;
-                            }		    
-                            break;
-                        default:
-                            throw Error("unknown signal");
-                        } 
-                        //} else {
-                        //throw Error("sigpipe read error");
-                    }
-                } else {
-                    if (enableCtrl) {
-                      cout << "enableCtrl" << endl;
-                      comm->handleFDEvent(&retEvents, &rset, &wset, &fds);
-                    }
-                }
-	        }	
-
-            // execute all due events
-            evnt->getNextEventTime();
-            char c;
-            while (read(s_sigpipe[0], &c, 1) > 0) {
-                switch (c) {
-                   case 'S':
-                       stop = 1;
-                       break;
-                   case 'D':
-                       cerr << *this;
-                       break;
-                   case 'A':
-						cout << "A - section b" << endl;
-
-                       // check Event Scheduler events
-                       e = evnt->getNextEvent();
-                       if (e != NULL) {
-						   handleEvent(e, &fds);
-						   // reschedule the event
-						   evnt->reschedNextEvent(e);
-						   e = NULL;
-                       }
-                       break;
-
-                   default:
-                       throw Error("unknown signal");
-				}
-                evnt->getNextEventTime();
-            }
-
-            if (!pprocThread) {
-				proc->handleFDEvent(&retEvents, NULL,NULL, NULL);
-            }
-
-			cout << "Schedule events - cnt:" << retEvents.size() << endl;
-
-            // schedule events
-            if (retEvents.size() > 0) {
-                for (eventVecIter_t iter = retEvents.begin();
-                     iter != retEvents.end(); iter++) {
-
-                    evnt->addEvent(*iter);
-                }
-                retEvents.clear(); 
-            }
-        } while (!stop);
-
-		proc->waitUntilDone();
-
-		log->log(ch,"NetAum going down on Ctrl-C" );
-
-#ifdef DEBUG
-		log->dlog(ch,"------- shutdown -------" );
-#endif
-
-
-    } catch (Error &err) {
-        
-        cout << "error in run() method" << err << endl;
-        if (log.get()) { // Logger might not be available yet
-            log->elog(ch, err);
-        }	   
-
-        // in case an exception happens between get and reschedule event
-        if (e != NULL) {
-            saveDelete(e);
+			
+        if (mapi) {
+             MAPIAuctionParser afp = MAPIAuctionParser(buf, len);
+             afp.parse(new_auctions, &idSource);
+        } else {
+            AuctionFileParser afp = AuctionFileParser(buf, len);
+            afp.parse(new_auctions, &idSource);
         }
 
-        throw err;
+        return new_auctions;
+	
+    } catch (Error &e) {
+
+        for(auctionDBIter_t i=new_auctions->begin(); i != new_auctions->end(); i++) {
+            saveDelete(*i);
+        }
+        saveDelete(new_auctions);
+        throw e;
     }
-    catch (...){
-		cout << "error in run() method" << endl;
-	}
 }
+
+
+/* ---------------------------------- addAuctions ----------------------------- */
+
+void AuctionManager::addAuctions(auctionDB_t * _auctions, EventScheduler *e)
+{
+    auctionDBIter_t        iter;
+    auctionTimeIndex_t     start;
+    auctionTimeIndex_t     stop;
+    auctionTimeIndexIter_t iter2;
+    time_t              now = time(NULL);
+    
+    // add auctions
+    for (iter = _auctions->begin(); iter != _auctions->end(); iter++) {
+        Auction *a = (*iter);
+        cout << "read the auction" << endl;
+        try {
+            addAuction(a);
+			cout << "read the auction 1" << endl;
+            start[a->getStart()].push_back(a);
+			cout << "read the auction 2" << endl;
+            if (a->getStop()) 
+            {
+                stop[a->getStop()].push_back(a);
+            }
+			cout << "read the auction 3" << endl;
+        } catch (Error &e ) {
+            saveDelete(a);
+            // if only one rule return error
+            if (_auctions->size() == 1) {
+                throw e;
+            }
+            // FIXME else return number of successively installed bids
+        }
+      
+    }
+    
+#ifdef DEBUG    
+    log->dlog(ch, "Start all auctions - it is going to activate them");
+#endif      
+
+    // group auctions with same start time
+    for (iter2 = start.begin(); iter2 != start.end(); iter2++) {
+        e->addEvent(new ActivateAuctionsEvent(iter2->first-now, iter2->second));
+    }
+    
+    // group auctions with same stop time
+    for (iter2 = stop.begin(); iter2 != stop.end(); iter2++) {
+        e->addEvent(new RemoveAuctionsEvent(iter2->first-now, iter2->second));
+    }
+
+#ifdef DEBUG    
+    log->dlog(ch, "Finished adding auctions");
+#endif      
+
+}
+
+
+/* -------------------- addAuction -------------------- */
+
+void AuctionManager::addAuction(Auction *a)
+{
+  
+#ifdef DEBUG    
+    log->dlog(ch, "adding new auction with name = '%s'",
+              a->getAuctionName().c_str());
+#endif  
+				  
+			  
+    // test for presence of auctionSource/auctionName combination
+    // in auctionDatabase in particular set
+    if (getAuction(a->getSetName(), a->getAuctionName())) {
+        log->elog(ch, "Auction %s.%s already installed",
+                  a->getSetName().c_str(), a->getAuctionName().c_str());
+        throw Error(408, "Auction with this name is already installed");
+    }
+
+    try {
+        // could do some more checks here
+        a->setState(AS_VALID);
+
+#ifdef DEBUG    
+		log->dlog(ch, "Auction Id = '%d'", a->getUId());
+#endif 
+
+        // resize vector if necessary
+        if ((unsigned int)a->getUId() >= auctionDB.size()) {
+            auctionDB.reserve(a->getUId() * 2 + 1);
+            auctionDB.resize(a->getUId() + 1);
+        }
+
+        // insert auction
+        auctionDB[a->getUId()] = a; 	
+
+        // add new entry in index
+        auctionSetIndex[a->getSetName()][a->getAuctionName()] = a->getUId();
+	
+        auctions++;
+
+#ifdef DEBUG    
+    log->dlog(ch, "finish adding new auction with name = '%s'",
+              a->getAuctionName().c_str());
+#endif  
+
+    } catch (Error &e) { 
+
+        // adding new auction failed in some component
+        // something failed -> remove auction from database
+        delAuction(a->getSetName(), a->getAuctionName(), NULL);
+	
+        throw e;
+    }
+}
+
+void AuctionManager::activateAuctions(auctionDB_t *auctions, EventScheduler *e)
+{
+    auctionDBIter_t             iter;
+
+    for (iter = auctions->begin(); iter != auctions->end(); iter++) {
+        Auction *r = (*iter);
+        log->dlog(ch, "activate auction with name = '%s'", r->getAuctionName().c_str());
+        r->setState(AS_ACTIVE);
+	 
+    }
+
+}
+
+
+/* ------------------------- getInfo ------------------------- */
+
+string AuctionManager::getInfo(Auction *a)
+{
+    ostringstream s;
+
+#ifdef DEBUG
+    log->dlog(ch, "looking up Auction with uid = %d", a->getUId());
+#endif
+
+    s << a->getInfo() << endl;
+    
+    return s.str();
+}
+
+
+/* ------------------------- getInfo ------------------------- */
+
+string AuctionManager::getInfo(string sname, string rname)
+{
+    ostringstream s;
+    string info;
+    Auction *a;
+  
+    a = getAuction(sname, rname);
+
+    if (a == NULL) {
+        // check done tasks
+        for (auctionDoneIter_t i = auctionDone.begin(); i != auctionDone.end(); i++) {
+            if (((*i)->getAuctionName() == rname) && ((*i)->getSetName() == sname)) {
+                info = (*i)->getInfo();
+            }
+        }
+        
+        if (info.empty()) {
+            throw Error("no auction with bid name '%s.%s'", sname.c_str(), rname.c_str());
+        }
+    } else {
+        // rule with given identification is in database
+        info = a->getInfo();
+    }
+    
+    s << info;
+
+    return s.str();
+}
+
+
+/* ------------------------- getInfo ------------------------- */
+
+string AuctionManager::getInfo(string sname)
+{
+    ostringstream s;
+    auctionSetIndexIter_t a;
+
+    a = auctionSetIndex.find(sname);
+
+    if (a != auctionSetIndex.end()) {
+        for (auctionIndexIter_t i = a->second.begin(); i != a->second.end(); i++) {
+            s << getInfo(sname, i->first);
+        }
+    } else {
+        s << "No such auction set" << endl;
+    }
+    
+    return s.str();
+}
+
+
+/* ------------------------- getInfo ------------------------- */
+
+string AuctionManager::getInfo()
+{
+    ostringstream s;
+    auctionSetIndexIter_t iter;
+
+    for (iter = auctionSetIndex.begin(); iter != auctionSetIndex.end(); iter++) {
+        s << getInfo(iter->first);
+    }
+    
+    return s.str();
+}
+
+
+/* ------------------------- delAuction ------------------------- */
+
+void AuctionManager::delAuction(string sname, string rname, EventScheduler *e)
+{
+    Auction *a;
+
+#ifdef DEBUG    
+    log->dlog(ch, "Deleting auction set= %s name = '%s'",
+              sname.c_str(), rname.c_str());
+#endif  
+
+
+    if (sname.empty() && rname.empty()) {
+        throw Error("incomplete auction set or name specified");
+    }
+
+    a = getAuction(sname, rname);
+
+    if (a != NULL) {
+        delAuction(a, e);
+    } else {
+        throw Error("Auction %s.%s does not exist", sname.c_str(),rname.c_str());
+    }
+}
+
+
+/* ------------------------- delAuction ------------------------- */
+
+void AuctionManager::delAuction(int uid, EventScheduler *e)
+{
+    Auction *a;
+
+    a = getAuction(uid);
+
+    if (a != NULL) {
+        delAuction(a, e);
+    } else {
+        throw Error("Auction uid %d does not exist", uid);
+    }
+}
+
+
+/* ------------------------- delAuctions ------------------------- */
+
+void AuctionManager::delAuctions(string sname, EventScheduler *e)
+{
+    
+    if (auctionSetIndex.find(sname) != auctionSetIndex.end()) {
+        for (auctionSetIndexIter_t i = auctionSetIndex.begin(); i != auctionSetIndex.end(); i++) {
+						
+            delAuction(getAuction(sname, i->first),e);
+        }
+    }
+}
+
+
+/* ------------------------- delAuction ------------------------- */
+
+void AuctionManager::delAuction(Auction *a, EventScheduler *e)
+{
+#ifdef DEBUG    
+    log->dlog(ch, "removing auction with name = '%s'", a->getAuctionName().c_str());
+#endif
+
+    // remove auction from database and from index
+    storeAuctionAsDone(a);
+    auctionDB[a->getUId()] = NULL;
+    auctionSetIndex[a->getSetName()].erase(a->getAuctionName());
+
+    // delete auction set if empty
+    if (auctionSetIndex[a->getSetName()].empty()) {
+        auctionSetIndex.erase(a->getSetName());
+    }
+    
+    if (e != NULL) {
+        e->delAuctionEvents(a->getUId());
+    }
+
+    auctions--;
+}
+
+
+/* ------------------------- delAuctions ------------------------- */
+
+void AuctionManager::delAuctions(auctionDB_t *_auctions, EventScheduler *e)
+{
+    auctionDBIter_t iter;
+
+    for (iter = _auctions->begin(); iter != _auctions->end(); iter++) {
+        delAuction(*iter, e);
+    }
+}
+
+
+/* -------------------- storeAuctionAsDone -------------------- */
+
+void AuctionManager::storeAuctionAsDone(Auction *a)
+{
+    
+    a->setState(AS_DONE);
+    auctionDone.push_back(a);
+
+    if (auctionDone.size() > DONE_LIST_SIZE) {
+        // release id
+        idSource.freeId(auctionDone.front()->getUId());
+        // remove auction
+        saveDelete(auctionDone.front());
+        auctionDone.pop_front();
+    }
+}
+
 
 /* ------------------------- dump ------------------------- */
 
-void AuctionManager::dump(ostream &os)
+void AuctionManager::dump( ostream &os )
 {
-    /* FIXME to be implemented */
-    os << "dump" << endl;
+    
+    os << "Auction Manager dump :" << endl;
+    os << getInfo() << endl;
+    
 }
 
 
 /* ------------------------- operator<< ------------------------- */
 
-ostream& operator<<(ostream &os, AuctionManager &obj)
+ostream& operator<< ( ostream &os, AuctionManager &am )
 {
-    obj.dump(os);
+    am.dump(os);
     return os;
-}
-
-/* ------------------------ signal handler ---------------------- */
-
-void AuctionManager::sigint_handler(int i)
-{
-    char c = 'S';
-
-    write(s_sigpipe[1], &c,1);
-}
-
-void AuctionManager::sigusr1_handler(int i)
-{
-    char c = 'D';
-    
-    write(s_sigpipe[1], &c,1);
-}
-
-void AuctionManager::exit_fct(void)
-{
-    unlink(NETAUM_LOCK_FILE.c_str());
-}
-
-void AuctionManager::sigalarm_handler(int i)
-{
-    g_timeout = 1;
-}
-
-/* -------------------- alreadyRunning -------------------- */
-
-int AuctionManager::alreadyRunning()
-{
-    FILE *file;
-    char cmd[128];
-    struct stat stats;
-    int status, oldPid;
-
-	cout << NETAUM_LOCK_FILE.c_str() << endl;
-
-    // do we have a lock file ?
-    if (stat(NETAUM_LOCK_FILE.c_str(), &stats ) == 0) { 
-		
-		
-		
-        // read process ID from lock file
-        file = fopen(NETAUM_LOCK_FILE.c_str(), "rt" );
-        if (file == NULL) {
-            throw Error("cannot open old pidfile '%s' for reading: %s\n",
-                        NETAUM_LOCK_FILE.c_str(), strerror(errno));
-        }
-        fscanf(file, "%d\n", &oldPid);
-        fclose(file);
-
-        // check if process still exists
-        sprintf( cmd, "ps %d > /dev/null", oldPid );
-        status = system(cmd);
-
-        // if yes, do not start a new meter
-        if (status == 0) {
-            return 1;
-        }
-
-        // pid file but no meter process ->meter must have crashed
-        // remove (old) pid file and proceed
-        unlink(NETAUM_LOCK_FILE.c_str());
-    }
-	
-	cout << NETAUM_LOCK_FILE.c_str() << endl;
-	
-    // no lock file and no running meter process
-    // write new lock file and continue
-    file = fopen(NETAUM_LOCK_FILE.c_str(), "wt" );
-    if (file == NULL) {
-        throw Error("cannot open pidfile '%s' for writing: %s\n",
-                    NETAUM_LOCK_FILE.c_str(), strerror(errno));
-    }
-    
-    cout << NETAUM_LOCK_FILE.c_str() << endl;
-    
-    fprintf(file, "%d\n", getpid());
-    fclose(file);
-
-    return 0;
-}
-
-/* ------------------------- main() ------------------------- */
-
-
-// Log functions are not used before the logger is initialized
-
-int main(int argc, char *argv[])
-{
-
-    try {
-        // start up the netmate (this blocks until Ctrl-C !)
-        cout << NETAUM_VERSION << endl;
-#ifdef DEBUG
-        cout << NETAUM_OPTIONS << endl;
-#endif
-        auto_ptr<AuctionManager> auction(new AuctionManager(argc, argv));
-
-        // going into main loop
-        auction->run();
-
-    } catch (Error &e) {
-        cerr << "Terminating Auction Manager on error: " << e.getError() << endl;
-        exit(1);
-    }
 }

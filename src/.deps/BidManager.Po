@@ -220,11 +220,12 @@
  ../include/FieldDefParser.h ../include/FieldValue.h \
  ../include/BidFileParser.h ../include/FieldValParser.h \
  ../include/MAPIBidParser.h ../include/EventScheduler.h \
- ../include/Event.h ../include/AuctionManagerInfo.h ../include/Timeval.h \
+ ../include/Event.h ../include/AuctionFileParser.h ../include/Auction.h \
+ ../include/AuctionTimer.h ../include/AuctionIdSource.h \
+ ../include/AuctionManagerInfo.h ../include/Timeval.h \
  ../include/CtrlComm.h ../include/AuctionManagerComponent.h \
- ../include/AuctionTimer.h ../include/CommandLineArgs.h \
- ../lib/getopt_long/getopt_long.h ../include/ConfigManager.h \
- ../lib/httpd/httpd.h /usr/include/syslog.h \
+ ../include/CommandLineArgs.h ../lib/getopt_long/getopt_long.h \
+ ../include/ConfigManager.h ../lib/httpd/httpd.h /usr/include/syslog.h \
  /usr/include/x86_64-linux-gnu/sys/syslog.h \
  /usr/include/x86_64-linux-gnu/bits/syslog-path.h /usr/include/grp.h \
  /usr/include/x86_64-linux-gnu/sys/signal.h \
@@ -860,6 +861,14 @@
 
 ../include/Event.h:
 
+../include/AuctionFileParser.h:
+
+../include/Auction.h:
+
+../include/AuctionTimer.h:
+
+../include/AuctionIdSource.h:
+
 ../include/AuctionManagerInfo.h:
 
 ../include/Timeval.h:
@@ -867,8 +876,6 @@
 ../include/CtrlComm.h:
 
 ../include/AuctionManagerComponent.h:
-
-../include/AuctionTimer.h:
 
 ../include/CommandLineArgs.h:
 

@@ -32,6 +32,7 @@
 
 #include "stdincpp.h"
 #include "BidFileParser.h"
+#include "AuctionFileParser.h"
 #include "AuctionManagerInfo.h"
 
 
@@ -40,12 +41,16 @@ typedef enum
 {
       ADD_BIDS = 0,
       REMOVE_BIDS,
-      ACTIVATE_BIDS,
+      ADD_AUCTIONS,
+      REMOVE_AUCTIONS,
+      ACTIVATE_AUCTIONS,
       GET_INFO,
       GET_MODINFO,
       TEST,
       REMOVE_BIDS_CTRLCOMM,
       ADD_BIDS_CTRLCOMM,
+      REMOVE_AUCTIONS_CTRLCOMM,
+      ADD_AUCTIONS_CNTRLCOMM,
       PROC_MODULE_TIMER,
       CTRLCOMM_TIMER,      
 } event_t;
@@ -55,12 +60,16 @@ const string eventNames[] =
 {
       "Add-bids",
       "Remove-bids",
-      "Activate-bids",
+      "Add-Auctions",
+      "Remove-Auctions",
+      "Activate-Auctions",
       "Get-info",
       "Get-module-info",
       "Test",
       "Remove-bids-ctrlcomm",
       "Add-bids-ctrlcomm",
+      "Remove-Auctions-ctrlcomm",
+      "Add-Auctions-ctrlcomm",
       "Proc-module-timer",
       "Ctrlcomm-timer",      
 };
@@ -165,11 +174,19 @@ class Event {
     
     virtual void dump( ostream &os );
     
-    //! delete rules stored in this event
+    //! delete bids stored in this event
     virtual int deleteBid(int uid) 
     {
 	return 0;
     }
+
+    //! delete auctions stored in this event
+    virtual int deleteAuction(int uid) 
+    {
+	return 0;
+    }
+
+
 };
 
 //! base class for all ctrlcomm events, contains pointer to request
@@ -239,41 +256,41 @@ class AddBidsEvent : public Event
 };
 
 
-class ActivateBidsEvent : public Event
+class ActivateAuctionsEvent : public Event
 {
   private:
-    bidDB_t bids;
+    auctionDB_t auctions;
 
   public:
 
-    ActivateBidsEvent(struct timeval time, bidDB_t &b) 
-      : Event(ACTIVATE_BIDS, time), bids(b) {}
+    ActivateAuctionsEvent(struct timeval time, auctionDB_t &a) 
+      : Event(ACTIVATE_AUCTIONS, time), auctions(a) {}
 
-     ActivateBidsEvent(time_t offs_sec, bidDB_t &b) 
-      : Event(ACTIVATE_BIDS, offs_sec), bids(b) {}
+     ActivateAuctionsEvent(time_t offs_sec, auctionDB_t &a) 
+      : Event(ACTIVATE_AUCTIONS, offs_sec), auctions(a) {}
 
-     ActivateBidsEvent(bidDB_t &b) 
-      : Event(ACTIVATE_BIDS), bids(b) {}
+     ActivateAuctionsEvent(auctionDB_t &a) 
+      : Event(ACTIVATE_AUCTIONS), auctions(a) {}
 
-     bidDB_t *getBids()
+     auctionDB_t *getAuctions()
      {
-         return &bids;
+         return &auctions;
      }
 
-     int deleteBid(int uid)
+     int deleteAuction(int uid)
      {
          int ret = 0;
-         bidDBIter_t iter;
+         auctionDBIter_t iter;
            
-         for (iter=bids.begin(); iter != bids.end(); iter++) {
+         for (iter=auctions.begin(); iter != auctions.end(); iter++) {
              if ((*iter)->getUId() == uid) {
-                 bids.erase(iter);
+                 auctions.erase(iter);
                  ret++;
                  break;
              }   
          }
          
-         if (bids.empty()) {
+         if (auctions.empty()) {
              return ++ret;
          }
          
@@ -324,32 +341,95 @@ class RemoveBidsEvent : public Event
     }
 };
 
+class AddAuctionsEvent : public Event
+{
+  private:
+    string fileName;
+
+  public:
+
+    AddAuctionsEvent(string fname, int mapi=0) 
+      : Event(ADD_AUCTIONS), fileName(fname) 
+    {
+        
+    }
+
+    string getFileName()
+    {
+        return fileName;
+    }
+};
+
+
+class RemoveAuctionsEvent : public Event
+{
+  private:
+    auctionDB_t auctions;
+
+  public:
+
+    RemoveAuctionsEvent(struct timeval time, auctionDB_t &a) 
+      : Event(REMOVE_AUCTIONS, time), auctions(a) {}
+
+    RemoveAuctionsEvent(time_t offs_sec, auctionDB_t &a) 
+      : Event(REMOVE_AUCTIONS, offs_sec), auctions(a) {}
+    
+    RemoveAuctionsEvent(auctionDB_t &a) 
+      : Event(REMOVE_AUCTIONS), auctions(a) {}
+
+    auctionDB_t *getAuctions()
+    {
+        return &auctions;
+    }
+    
+    int deleteAuction(int uid)
+    {
+        int ret = 0;
+        auctionDBIter_t iter;
+        
+        for (iter=auctions.begin(); iter != auctions.end(); iter++) {
+            if ((*iter)->getUId() == uid) {
+                auctions.erase(iter);
+                ret++;
+                break;
+            }   
+        }
+          
+        if (auctions.empty()) {
+            return ++ret;
+        }
+          
+        return ret;
+    }
+};
+
+
 class ProcTimerEvent : public Event
 {
 private:
 
  public:
     int aid; // Auction Number
-    int actid;
-    unsigned int tmID;
+    int actid;			// Auction Event
+    unsigned int tmID; // Timer Event
     
 public:
 
-    ProcTimerEvent( int ruleID, int actID, timers_t *timer ) :
+    ProcTimerEvent( int auctionID, int actID, timers_t *timer ) :
       Event( PROC_MODULE_TIMER, timer->ival_msec/1000, timer->ival_msec%1000,
              ((timer->flags & TM_RECURRING) ? timer->ival_msec : 0),
              timer->flags & TM_ALIGNED),
-      rid(ruleID), 
+      aid(auctionID), 
       actid(actID),
       tmID(timer->id)
       {}
     
-    int getRID() 
+    int getID() 
       { 
-          return rid;
+          return aid;
       }
 
-    int getAID()
+    int getActID()
       {
           return actid;
       }
@@ -482,6 +562,68 @@ class RemoveBidsCtrlEvent : public CtrlCommEvent
     string getBid()
     {
         return bid;
+    }
+};
+
+
+//! add auction flags
+const int ADD_AUCTIONS_MAPI   = 0x2;
+
+class AddAuctionsCtrlEvent : public CtrlCommEvent
+{
+  private:
+    int type;
+    char *buf;
+    int len;
+
+  public:
+
+    AddAuctionsCtrlEvent(char *b, int l, int mapi=0)
+      : CtrlCommEvent(ADD_AUCTIONS_CNTRLCOMM), type(0), len(l) 
+    {
+        buf = new char[len+1];
+        memcpy(buf, b, len+1);
+          
+        if (mapi) {
+            type |= ADD_AUCTIONS_MAPI;
+        }
+    }
+
+    ~AddAuctionsCtrlEvent()
+    {
+        saveDeleteArr(buf);
+    }
+
+    int isMAPI()
+    {
+        return (type & ADD_AUCTIONS_MAPI);
+    }
+
+    char *getBuf()
+    {
+        return buf;
+    }
+
+    int getLen()
+    {
+        return len;
+    }
+};
+
+
+class RemoveAuctionsCtrlEvent : public CtrlCommEvent
+{
+  private:
+    string auction;
+
+  public:
+    
+    RemoveAuctionsCtrlEvent(string a) 
+      : CtrlCommEvent(REMOVE_AUCTIONS_CTRLCOMM), auction(a) {}
+
+    string getAuction()
+    {
+        return auction;
     }
 };
 

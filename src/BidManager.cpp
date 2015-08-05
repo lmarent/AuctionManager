@@ -162,7 +162,7 @@ Bid *BidManager::getBid(string sname, string rname)
         else
         {
 #ifdef DEBUG
-    log->dlog(ch,"BidId not found");
+    log->dlog(ch,"BidId not found %s.%s",sname.c_str(), rname.c_str());
 #endif		
 			
 		}
@@ -317,6 +317,8 @@ void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
     log->dlog(ch, "Start all bids - it is going to activate them");
 #endif      
 
+    // TODO AM: look how to start or stop bids.
+    /*
     // group rules with same start time
     for (iter2 = start.begin(); iter2 != start.end(); iter2++) {
         e->addEvent(new ActivateBidsEvent(iter2->first-now, iter2->second));
@@ -326,7 +328,7 @@ void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
     for (iter2 = stop.begin(); iter2 != stop.end(); iter2++) {
         e->addEvent(new RemoveBidsEvent(iter2->first-now, iter2->second));
     }
-
+	*/
 #ifdef DEBUG    
     log->dlog(ch, "Finished adding bids");
 #endif      
@@ -366,11 +368,6 @@ void BidManager::addBid(Bid *b)
             bidDB.reserve(b->getUId() * 2 + 1);
             bidDB.resize(b->getUId() + 1);
         }
-
-		std::cout << "SetName" << b->getSetName() 
-			  << "bidName:" << b->getBidName() 
-			  << "Uid:" << b->getUId() << std::endl;
-
 
         // insert bid
         bidDB[b->getUId()] = b; 	
@@ -559,14 +556,13 @@ void BidManager::delBid(int uid, EventScheduler *e)
 
 void BidManager::delBids(string sname, EventScheduler *e)
 {
-
-	std::cout << "Nro bids:" << bidSetIndex.size() << std::endl;
     
-    if (bidSetIndex.find(sname) != bidSetIndex.end()) {
-        for (bidSetIndexIter_t i = bidSetIndex.begin(); i != bidSetIndex.end(); i++) {
-			
-			std::cout << "I am here" << i->first << std::endl;
-			
+    if (bidSetIndex.find(sname) != bidSetIndex.end()) 
+    {
+		bidSetIndexIter_t iter = bidSetIndex.find(sname);
+		bidIndex_t bidIndex = iter->second;
+        for (bidIndexIter_t i = bidIndex.begin(); i != bidIndex.end(); i++) 
+        {
             delBid(getBid(sname, i->first),e);
         }
     }

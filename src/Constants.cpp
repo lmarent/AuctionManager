@@ -48,6 +48,10 @@ const string DEFAULT_LOG_FILE = DEF_STATEDIR "/log/netaum.log";
 // BidFileParser.cpp
 const string BIDFILE_DTD     = DEF_SYSCONFDIR "/bidfile.dtd";
 
+// AuctionFileParser.cpp
+const string AUCTIONFILE_DTD     = DEF_SYSCONFDIR "/auctionfile.dtd";
+
+
 // Bid.cpp
 const string TIME_FORMAT      = "%Y-%m-%d %T";
 const string DEFAULT_SETNAME  = "default";

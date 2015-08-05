@@ -80,20 +80,16 @@ void Bid_Test::setUp()
 		Bid *copy = (*new_bids)[0];
 		ptrBid1 = new Bid(2,*copy);
 		ptrBid2 = new Bid(3,*((*new_bids)[0]));
-		std::cout << ptrBid2->getInfo() << std::endl;
 		
 		CPPUNIT_ASSERT( (ptrBid1->getInfo()).compare(((*new_bids)[0])->getInfo()) == 0 );
 		
-		std::cout << "new bud size:" << new_bids->size() << std::endl;
 		for (int i = 0; i < new_bids->size() ; i++)
 		{
 			delete(((*new_bids)[i]));
 		}
 		new_bids->clear();
 		delete new_bids;
-		
-		std::cout << "new bud eliminated:" << std::endl;
-				
+						
 	}
 	catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
@@ -106,17 +102,9 @@ void Bid_Test::tearDown()
 	delete(idSource);
 	delete(ptrBidFileParser);
 	delete(ptrFieldParsers);
-	delete(ptrFieldValParser);
-	
-	std::cout << "estoy aqui 8" << std::endl;
+	delete(ptrFieldValParser);	
 	delete(ptrBid1);
-	std::cout << "estoy aqui 9" << std::endl;
-	std::cout << ptrBid2->getInfo() << std::endl;
-	delete(ptrBid2);
-	std::cout << "estoy aqui 3" << std::endl << std::flush;
-		
-	std::cout << "estoy aqui 4" << std::endl;
-	
+	delete(ptrBid2);	
 	
 }
 

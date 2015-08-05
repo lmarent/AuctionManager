@@ -15,11 +15,15 @@ test_runner_SOURCES = 	@top_srcdir@/src/Error.cpp \
 						@top_srcdir@/src/FieldValParser.cpp \
 						@top_srcdir@/src/Bid.cpp \
 						@top_srcdir@/src/BidIdSource.cpp \
+						@top_srcdir@/src/AuctionIdSource.cpp \
 						@top_srcdir@/src/BidFileParser.cpp \
 						@top_srcdir@/src/MAPIBidParser.cpp \
+						@top_srcdir@/src/MAPIAuctionParser.cpp \
 						@top_srcdir@/src/ConfigParser.cpp \
 						@top_srcdir@/src/Event.cpp \
 						@top_srcdir@/src/Timeval.cpp \
+						@top_srcdir@/src/Auction.cpp \
+						@top_srcdir@/src/AuctionFileParser.cpp \
 						@top_srcdir@/src/AuctionManagerInfo.cpp \
 						@top_srcdir@/src/AuctionManagerComponent.cpp \
 						@top_srcdir@/src/EventScheduler.cpp \
@@ -34,10 +38,13 @@ test_runner_SOURCES = 	@top_srcdir@/src/Error.cpp \
 						@top_srcdir@/src/AUMProcessor.cpp \
 						@top_srcdir@/src/ConfigManager.cpp \
 						@top_srcdir@/src/AuctionManager.cpp \
+						@top_srcdir@/src/Auctioner.cpp \
 						@top_srcdir@/test/FieldValue_test.cpp \
 						@top_srcdir@/test/FieldDefParser_test.cpp \
 						@top_srcdir@/test/FieldValParser_test.cpp \
+						@top_srcdir@/test/AuctionIdSource_test.cpp \
 						@top_srcdir@/test/BidFileParser_test.cpp \
+						@top_srcdir@/test/AuctionFileParser_test.cpp \
 						@top_srcdir@/test/Bid_test.cpp \
 						@top_srcdir@/test/AuctionTimer_test.cpp \
 						@top_srcdir@/test/Bid_Manager_test.cpp \

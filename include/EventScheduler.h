@@ -89,13 +89,21 @@ class EventScheduler
     void addEvent(Event *ev);
 
 
-    /*! \short   delete all events for a given rule 
+    /*! \short   delete all events for a given bid
 
         delete all Events related to the specified bid from the list of events
 
-        \arg \c uid  - the unique identification number of the rule
+        \arg \c uid  - the unique identification number of the bid
     */
     void delBidEvents(int uid);
+
+    /*! \short   delete all events for a given auction
+
+        delete all Events related to the specified auction from the list of events
+
+        \arg \c uid  - the unique identification number of the auction
+    */
+    void delAuctionEvents(int uid);
 
     // get pointer to first/next event
     Event *getNextEvent();

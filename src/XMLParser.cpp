@@ -54,20 +54,21 @@ XMLParser::XMLParser(string dtdname, string fname, string root)
             throw Error("DTD %s file '%s' not accessible: %s",
                         root.c_str(), dtdName.c_str(), strerror(errno) );
         }
+        
         xmlInitParser();
 
         // set line numbering
         xmlLineNumbersDefault(1);
         // set error function
         xmlSetGenericErrorFunc(NULL, XMLParser::XMLErrorCB);
-
-
+		
         XMLDoc = xmlParseFile(fileName.c_str()); 	    
         if (XMLDoc == NULL) {
             throw Error("XML document parse error in file %s", fileName.c_str());
         }
+                
         validate(root);
-
+		
 
     } catch (Error &e) {
         if (XMLDoc != NULL) {

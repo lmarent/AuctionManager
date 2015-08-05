@@ -252,6 +252,8 @@
  ../include/BidIdSource.h ../include/BidManager.h \
  ../include/BidFileParser.h ../include/MAPIBidParser.h \
  ../include/EventScheduler.h ../include/Event.h \
+ ../include/AuctionFileParser.h ../include/Auction.h \
+ ../include/AuctionTimer.h ../include/AuctionIdSource.h \
  ../include/AuctionManagerInfo.h ../include/Timeval.h
 
 /usr/include/stdc-predef.h:
@@ -961,6 +963,14 @@
 ../include/EventScheduler.h:
 
 ../include/Event.h:
+
+../include/AuctionFileParser.h:
+
+../include/Auction.h:
+
+../include/AuctionTimer.h:
+
+../include/AuctionIdSource.h:
 
 ../include/AuctionManagerInfo.h:
 

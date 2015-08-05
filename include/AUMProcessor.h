@@ -38,51 +38,46 @@
 #include "Logger.h"
 #include "EventScheduler.h"
 
-
 typedef struct
 {
     ProcModule *module;
     ProcModuleInterface_t *mapi; // module API
+    void *flowData;
+    // config params for module
     configParam_t *params;
 } ppaction_t;
 
 
-
 typedef struct {
 
-    Bid *bid;
-
-} bidActions_t;
+    Auction *auction;
+    bidDB_t bids;  // Bids competing in the auction.
+    
+} auctionProcess_t;
 
 //! action list for each rule
-typedef vector<bidActions_t>            bidActionList_t;
-typedef vector<bidActions_t>::iterator  bidActionListIter_t;
+typedef vector<auctionProcess_t>            auctionProcessList_t;
+typedef vector<auctionProcess_t>::iterator  auctionProcessListIter_t;
 
 
-/*! \short   manage and apply auctions for a set of bids.
+/*! \short   manage and execute algoirthms for a set of auctions.
 
-    the AuctionProcessor class allows to auction between bids 
+    the AuctionProcessor class allows auctioning between bids 
 */
 
 class AUMProcessor : public AuctionManagerComponent
 {
   private:
 
-    //! number of bids
-    int numBids;
-
-	//! Algorithm to execute the bidding process.
-	ppaction_t algorithm;
-
     //! associated module loader 
     //! this is the algorithm to execute for the bid
     ModuleLoader *loader;
 
-    //! action list for bids
-    bidActionList_t  bids;
+    //! list of auction being processed.
+    auctionProcessList_t  auctions;
 
     //! add timer events to scheduler
-    void addTimerEvents( int bidID, int actID, ppaction_t &act, EventScheduler &es );
+    void addTimerEvents( int auctionID, int actID, ppaction_t &act, EventScheduler &es );
 
   public:
 
@@ -100,11 +95,20 @@ class AUMProcessor : public AuctionManagerComponent
     //! add bids
     virtual void addBids( bidDB_t *bids, EventScheduler *e );
 
+    //! add auctions
+    virtual void addAuctions( auctionDB_t *auctions, EventScheduler *e );
+
     //! add bids
     virtual void addBids( bidDB_t *bids );
 
+    //! add auctions
+    virtual void addAuctions( auctionDB_t *auctions );
+
     //! delete bids
     virtual void delBids( bidDB_t *bids );
+
+    //! delete bids
+    virtual void delAuctions( auctionDB_t *auctions );
 
     //! execute the algorithm
     int execute(EventScheduler *e );
@@ -116,11 +120,27 @@ class AUMProcessor : public AuctionManagerComponent
     */
     int addBid( Bid *b, EventScheduler *e );
 
+
+    /*! \short   add a Auction and its associated auction process list
+        \arg \c a   pointer to auction
+        \arg \c e   pointer to event scheduler (timer events)
+        \returns 0 - on success, <0 - else
+    */
+    int addAuction( Auction *a, EventScheduler *e );
+
+
     /*! \short   delete a Bid from the bid list
         \arg \c b  pointer to bid
         \returns 0 - on success, <0 - else
     */
     int delBid( Bid *b );
+
+
+    /*! \short   delete an Auction from the auction process list
+        \arg \c a  pointer to auction
+        \returns 0 - on success, <0 - else
+    */
+    int delAuction( Auction *a );
 
 
     //! handle file descriptor event
@@ -131,11 +151,11 @@ class AUMProcessor : public AuctionManagerComponent
 
     /*! \short return -1 (no packet seen), 0 (timeout), >0 (no timeout; adjust last time)
 
-        \arg \c bidId  - number indicating matching bid for packet
+        \arg \c auctionId  - number indicating matching bid for packet
     */
-    unsigned long bidTimeout(int bidID, unsigned long ival, time_t now);
+    unsigned long auctionTimeout(int auctionID, unsigned long ival, time_t now);
     
-    //! get information about loaded modules
+    //! get information about load module
     string getInfo();
 
     //! dump a AUMProcessor object

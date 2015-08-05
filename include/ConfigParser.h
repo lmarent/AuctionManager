@@ -76,6 +76,8 @@ class configItemList_t : public list<configItem_t> {
 };
 
 typedef list<configItem_t>::iterator configItemListIter_t;
+typedef list<configItem_t>::const_iterator configItemListConstIter_t;
+
 
 //! list of access items
 typedef list<configADItem_t> configADList_t;

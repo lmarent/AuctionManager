@@ -38,8 +38,7 @@
 /* ------------------------- AUMProcessor ------------------------- */
 
 AUMProcessor::AUMProcessor(ConfigManager *cnf, int threaded, string moduleDir ) 
-    : AuctionManagerComponent(cnf, "AUM_PROCESSOR", threaded),
-      numBids(0)
+    : AuctionManagerComponent(cnf, "AUM_PROCESSOR", threaded)
 {
     string txt;
     
@@ -103,9 +102,26 @@ void AUMProcessor::addBids( bidDB_t *bids, EventScheduler *e )
     }
 }
 
+// add Auctions
+void AUMProcessor::addAuctions( auctionDB_t *auctions, EventScheduler *e )
+{
+    auctionDBIter_t iter;
+   
+    for (iter = auctions->begin(); iter != auctions->end(); iter++) {
+        addAuction(*iter, e);
+    }
+}
+
+
 
 // add bids
 void AUMProcessor::addBids( bidDB_t *bids )
+{
+
+}
+
+// add auctions
+void AUMProcessor::addAuctions( auctionDB_t *auctions )
 {
 
 }
@@ -118,6 +134,16 @@ void AUMProcessor::delBids(bidDB_t *bids)
 
     for (iter = bids->begin(); iter != bids->end(); iter++) {
         delBid(*iter);
+    }
+}
+
+// delete auctions
+void AUMProcessor::delAuctions(auctionDB_t *auctions)
+{
+    auctionDBIter_t iter;
+
+    for (iter = auctions->begin(); iter != auctions->end(); iter++) {
+        delAuction(*iter);
     }
 }
 
@@ -229,6 +255,13 @@ int AUMProcessor::addBid( Bid *b, EventScheduler *e )
 
 }
 
+/* ------------------------- addAuction ------------------------- */
+
+int AUMProcessor::addAuction( Auction *a, EventScheduler *e )
+{
+
+}
+
 
 /* ------------------------- delBid ------------------------- */
 
@@ -238,6 +271,24 @@ int AUMProcessor::delBid( Bid *b )
 
 #ifdef DEBUG
     log->dlog(ch, "deleting Bid #%d", bidId);
+#endif
+
+    AUTOLOCK(threaded, &maccess);
+
+	// TODO AM: implement this procedure.
+
+    return 0;
+}
+
+
+/* ------------------------- delBid ------------------------- */
+
+int AUMProcessor::delAuction( Auction *a )
+{
+    int auctionId = a->getUId();
+
+#ifdef DEBUG
+    log->dlog(ch, "deleting Auction #%d", auctionId);
 #endif
 
     AUTOLOCK(threaded, &maccess);
@@ -279,10 +330,10 @@ void AUMProcessor::waitUntilDone(void)
 }
 
 
-/* ------------------------- BidTimeout ------------------------- */
+/* ------------------------- AuctionTimeout ------------------------- */
 
 // return 0 (if timeout), 1 (stays idle), >1 (active and no timeout yet)
-unsigned long AUMProcessor::bidTimeout(int bidID, unsigned long ival, time_t now)
+unsigned long AUMProcessor::auctionTimeout(int auctionID, unsigned long ival, time_t now)
 {
     AUTOLOCK(threaded, &maccess);
 	/*

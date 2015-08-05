@@ -77,10 +77,8 @@ void Bid_Manager_Test::setUp()
 		
 		ptrBid1 = new Bid(3,*((*new_bids)[0]));
 		ptrBid2 = new Bid(4,*((*new_bids)[0]));
-
 		ptrBid3 = new Bid(4,*((*new_bids)[0]));
-		ptrBid4 = new Bid(6,*((*new_bids)[0]));
-
+		ptrBid4 = new Bid(5,*((*new_bids)[0]));
 		ptrBid5 = new Bid(6,*((*new_bids)[0]));
 
 		auto_ptr<EventScheduler> _evnt(new EventScheduler());
@@ -119,10 +117,7 @@ void Bid_Manager_Test::testBidManager()
 										ptrBid2->getBidName());
 		
 		manager->delBid(bid2->getUId(), evnt.get());
-		
 		CPPUNIT_ASSERT( manager->getNumBids() == 0 );
-		
-		
 		ptrBid3->setSetName("Agent3");
 		ptrBid4->setSetName("Agent4");		
 		manager->addBid(ptrBid3);
@@ -131,15 +126,14 @@ void Bid_Manager_Test::testBidManager()
 		
 		bidDB_t in_bids = manager->getBids();
 		manager->delBids(&in_bids, evnt.get());
-		
 		CPPUNIT_ASSERT( manager->getNumBids() == 0 );
 	
 		ptrBid5->setSetName("Agent5");
 		manager->addBid(ptrBid5);
 		CPPUNIT_ASSERT( manager->getNumBids() == 1 );
 		manager->delBids("Agent5", evnt.get());
-		//CPPUNIT_ASSERT( manager->getNumBids() == 0 );
-	
+		CPPUNIT_ASSERT( manager->getNumBids() == 0 );
+			
 	} catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
 	}

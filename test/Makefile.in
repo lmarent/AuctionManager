@@ -106,11 +106,15 @@ am_test_runner_OBJECTS = @top_srcdir@/src/Error.$(OBJEXT) \
 	@top_srcdir@/src/FieldValParser.$(OBJEXT) \
 	@top_srcdir@/src/Bid.$(OBJEXT) \
 	@top_srcdir@/src/BidIdSource.$(OBJEXT) \
+	@top_srcdir@/src/AuctionIdSource.$(OBJEXT) \
 	@top_srcdir@/src/BidFileParser.$(OBJEXT) \
 	@top_srcdir@/src/MAPIBidParser.$(OBJEXT) \
+	@top_srcdir@/src/MAPIAuctionParser.$(OBJEXT) \
 	@top_srcdir@/src/ConfigParser.$(OBJEXT) \
 	@top_srcdir@/src/Event.$(OBJEXT) \
 	@top_srcdir@/src/Timeval.$(OBJEXT) \
+	@top_srcdir@/src/Auction.$(OBJEXT) \
+	@top_srcdir@/src/AuctionFileParser.$(OBJEXT) \
 	@top_srcdir@/src/AuctionManagerInfo.$(OBJEXT) \
 	@top_srcdir@/src/AuctionManagerComponent.$(OBJEXT) \
 	@top_srcdir@/src/EventScheduler.$(OBJEXT) \
@@ -125,10 +129,13 @@ am_test_runner_OBJECTS = @top_srcdir@/src/Error.$(OBJEXT) \
 	@top_srcdir@/src/AUMProcessor.$(OBJEXT) \
 	@top_srcdir@/src/ConfigManager.$(OBJEXT) \
 	@top_srcdir@/src/AuctionManager.$(OBJEXT) \
+	@top_srcdir@/src/Auctioner.$(OBJEXT) \
 	@top_srcdir@/test/FieldValue_test.$(OBJEXT) \
 	@top_srcdir@/test/FieldDefParser_test.$(OBJEXT) \
 	@top_srcdir@/test/FieldValParser_test.$(OBJEXT) \
+	@top_srcdir@/test/AuctionIdSource_test.$(OBJEXT) \
 	@top_srcdir@/test/BidFileParser_test.$(OBJEXT) \
+	@top_srcdir@/test/AuctionFileParser_test.$(OBJEXT) \
 	@top_srcdir@/test/Bid_test.$(OBJEXT) \
 	@top_srcdir@/test/AuctionTimer_test.$(OBJEXT) \
 	@top_srcdir@/test/Bid_Manager_test.$(OBJEXT) \
@@ -574,11 +581,15 @@ test_runner_SOURCES = @top_srcdir@/src/Error.cpp \
 						@top_srcdir@/src/FieldValParser.cpp \
 						@top_srcdir@/src/Bid.cpp \
 						@top_srcdir@/src/BidIdSource.cpp \
+						@top_srcdir@/src/AuctionIdSource.cpp \
 						@top_srcdir@/src/BidFileParser.cpp \
 						@top_srcdir@/src/MAPIBidParser.cpp \
+						@top_srcdir@/src/MAPIAuctionParser.cpp \
 						@top_srcdir@/src/ConfigParser.cpp \
 						@top_srcdir@/src/Event.cpp \
 						@top_srcdir@/src/Timeval.cpp \
+						@top_srcdir@/src/Auction.cpp \
+						@top_srcdir@/src/AuctionFileParser.cpp \
 						@top_srcdir@/src/AuctionManagerInfo.cpp \
 						@top_srcdir@/src/AuctionManagerComponent.cpp \
 						@top_srcdir@/src/EventScheduler.cpp \
@@ -593,10 +604,13 @@ test_runner_SOURCES = @top_srcdir@/src/Error.cpp \
 						@top_srcdir@/src/AUMProcessor.cpp \
 						@top_srcdir@/src/ConfigManager.cpp \
 						@top_srcdir@/src/AuctionManager.cpp \
+						@top_srcdir@/src/Auctioner.cpp \
 						@top_srcdir@/test/FieldValue_test.cpp \
 						@top_srcdir@/test/FieldDefParser_test.cpp \
 						@top_srcdir@/test/FieldValParser_test.cpp \
+						@top_srcdir@/test/AuctionIdSource_test.cpp \
 						@top_srcdir@/test/BidFileParser_test.cpp \
+						@top_srcdir@/test/AuctionFileParser_test.cpp \
 						@top_srcdir@/test/Bid_test.cpp \
 						@top_srcdir@/test/AuctionTimer_test.cpp \
 						@top_srcdir@/test/Bid_Manager_test.cpp \
@@ -694,10 +708,16 @@ clean-checkPROGRAMS:
 @top_srcdir@/src/BidIdSource.$(OBJEXT):  \
 	@top_srcdir@/src/$(am__dirstamp) \
 	@top_srcdir@/src/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/src/AuctionIdSource.$(OBJEXT):  \
+	@top_srcdir@/src/$(am__dirstamp) \
+	@top_srcdir@/src/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/src/BidFileParser.$(OBJEXT):  \
 	@top_srcdir@/src/$(am__dirstamp) \
 	@top_srcdir@/src/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/src/MAPIBidParser.$(OBJEXT):  \
+	@top_srcdir@/src/$(am__dirstamp) \
+	@top_srcdir@/src/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/src/MAPIAuctionParser.$(OBJEXT):  \
 	@top_srcdir@/src/$(am__dirstamp) \
 	@top_srcdir@/src/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/src/ConfigParser.$(OBJEXT):  \
@@ -706,6 +726,11 @@ clean-checkPROGRAMS:
 @top_srcdir@/src/Event.$(OBJEXT): @top_srcdir@/src/$(am__dirstamp) \
 	@top_srcdir@/src/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/src/Timeval.$(OBJEXT): @top_srcdir@/src/$(am__dirstamp) \
+	@top_srcdir@/src/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/src/Auction.$(OBJEXT): @top_srcdir@/src/$(am__dirstamp) \
+	@top_srcdir@/src/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/src/AuctionFileParser.$(OBJEXT):  \
+	@top_srcdir@/src/$(am__dirstamp) \
 	@top_srcdir@/src/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/src/AuctionManagerInfo.$(OBJEXT):  \
 	@top_srcdir@/src/$(am__dirstamp) \
@@ -747,6 +772,9 @@ clean-checkPROGRAMS:
 @top_srcdir@/src/AuctionManager.$(OBJEXT):  \
 	@top_srcdir@/src/$(am__dirstamp) \
 	@top_srcdir@/src/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/src/Auctioner.$(OBJEXT):  \
+	@top_srcdir@/src/$(am__dirstamp) \
+	@top_srcdir@/src/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/test/$(am__dirstamp):
 	@$(MKDIR_P) @top_srcdir@/test
 	@: > @top_srcdir@/test/$(am__dirstamp)
@@ -762,7 +790,13 @@ clean-checkPROGRAMS:
 @top_srcdir@/test/FieldValParser_test.$(OBJEXT):  \
 	@top_srcdir@/test/$(am__dirstamp) \
 	@top_srcdir@/test/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/test/AuctionIdSource_test.$(OBJEXT):  \
+	@top_srcdir@/test/$(am__dirstamp) \
+	@top_srcdir@/test/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/test/BidFileParser_test.$(OBJEXT):  \
+	@top_srcdir@/test/$(am__dirstamp) \
+	@top_srcdir@/test/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/test/AuctionFileParser_test.$(OBJEXT):  \
 	@top_srcdir@/test/$(am__dirstamp) \
 	@top_srcdir@/test/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/test/Bid_test.$(OBJEXT):  \
@@ -794,10 +828,14 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/AUMProcessor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/Auction.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/AuctionFileParser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/AuctionIdSource.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/AuctionManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/AuctionManagerComponent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/AuctionManagerInfo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/AuctionTimer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/Auctioner.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/Bid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/BidFileParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/BidIdSource.Po@am__quote@
@@ -815,6 +853,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/FieldValParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/FieldValue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/Logger.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/MAPIAuctionParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/MAPIBidParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/Module.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/ModuleLoader.Po@am__quote@
@@ -823,6 +862,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/ProcModule.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/Timeval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/src/$(DEPDIR)/XMLParser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/AuctionFileParser_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/AuctionIdSource_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/AuctionManager_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/AuctionTimer_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/BidFileParser_test.Po@am__quote@

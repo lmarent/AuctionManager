@@ -223,17 +223,17 @@ auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  ../include/metadata.h ../include/FieldDefParser.h \
  ../include/FieldValue.h ../include/Event.h ../include/BidFileParser.h \
  ../include/Bid.h ../include/FieldValParser.h ../include/BidIdSource.h \
- ../include/AuctionManagerInfo.h ../lib/httpd/httpd.h \
- /usr/include/syslog.h /usr/include/x86_64-linux-gnu/sys/syslog.h \
+ ../include/AuctionFileParser.h ../include/Auction.h \
+ ../include/AuctionIdSource.h ../include/AuctionManagerInfo.h \
+ ../lib/httpd/httpd.h /usr/include/syslog.h \
+ /usr/include/x86_64-linux-gnu/sys/syslog.h \
  /usr/include/x86_64-linux-gnu/bits/syslog-path.h /usr/include/grp.h \
  /usr/include/x86_64-linux-gnu/sys/signal.h \
  /usr/include/x86_64-linux-gnu/sys/utsname.h \
  /usr/include/x86_64-linux-gnu/bits/utsname.h /usr/include/netinet/tcp.h \
  ../include/PageRepository.h ../include/AuctionManager.h \
- ../include/BidManager.h ../include/MAPIBidParser.h \
- ../include/EventScheduler.h ../include/Timeval.h ../include/CtrlComm.h \
- ../include/AUMProcessor.h ../include/ProcModule.h ../include/Module.h \
- ../include/ModuleLoader.h ../include/Bid.h ../include/Constants.h
+ ../include/MAPIAuctionParser.h ../include/EventScheduler.h \
+ ../include/Timeval.h ../include/Bid.h ../include/Constants.h
 
 /usr/include/stdc-predef.h:
 
@@ -875,6 +875,12 @@ auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 
 ../include/BidIdSource.h:
 
+../include/AuctionFileParser.h:
+
+../include/Auction.h:
+
+../include/AuctionIdSource.h:
+
 ../include/AuctionManagerInfo.h:
 
 ../lib/httpd/httpd.h:
@@ -899,23 +905,11 @@ auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 
 ../include/AuctionManager.h:
 
-../include/BidManager.h:
-
-../include/MAPIBidParser.h:
+../include/MAPIAuctionParser.h:
 
 ../include/EventScheduler.h:
 
 ../include/Timeval.h:
-
-../include/CtrlComm.h:
-
-../include/AUMProcessor.h:
-
-../include/ProcModule.h:
-
-../include/Module.h:
-
-../include/ModuleLoader.h:
 
 ../include/Bid.h:
 

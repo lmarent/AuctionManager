@@ -1,0 +1,17 @@
+<?xml version ="1.0" encoding="UTF-8"?>
+<!DOCTYPE AUCTIONSET SYSTEM "auctionfile.dtd"> 
+<AUCTIONSET ID="1">
+  <!-- global part is the default for all auctions -->
+  <!-- overwritten by rule specific configuration -->
+  <GLOBAL>
+    <!-- how long the auctions are active -->
+    <PREF NAME="Duration">1000</PREF>
+
+    <!-- How often they should be run -->
+    <PREF NAME="Interval">1</PREF>
+  </GLOBAL>
+  <AUCTION ID="1">
+    <ACTION NAME="bas" DEFAULT="true">
+    </ACTION>
+  </AUCTION>
+</AUCTIONSET>

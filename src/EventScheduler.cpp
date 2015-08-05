@@ -27,7 +27,7 @@
 
 #include "Error.h"
 #include "EventScheduler.h"
-#include "AuctionManager.h"
+#include "Auctioner.h"
 #include "Timeval.h"
 
 
@@ -118,6 +118,38 @@ void EventScheduler::delBidEvents(int uid)
 }
 
 
+void EventScheduler::delAuctionEvents(int uid)
+{
+    int ret = 0;
+    eventListIter_t iter, tmp;
+
+    // search linearly through list for bid with given ID and delete entries
+    iter = events.begin();
+    while (iter != events.end()) {
+        tmp = iter;
+        iter++;
+        
+        ret = tmp->second->deleteAuction(uid);
+        if (ret == 1) {
+            // ret = 1 means rule was present in event but other auctions are still in
+            // the event
+#ifdef DEBUG
+            log->dlog(ch,"remove auction %d from event %s", uid, 
+                      eventNames[tmp->second->getType()].c_str());
+#endif
+        } else if (ret == 2) {
+            // ret=2 means the event is now empty and therefore can be deleted
+#ifdef DEBUG
+            log->dlog(ch,"remove event %s", eventNames[tmp->second->getType()].c_str());
+#endif
+           
+            saveDelete(tmp->second);
+            events.erase(tmp);
+        } 
+    }
+}
+
+
 Event *EventScheduler::getNextEvent()
 {
     Event *ev;
@@ -183,7 +215,7 @@ struct timeval EventScheduler::getNextEventTime()
 #ifdef DEBUG
             log->dlog(ch,"expired event %s", eventNames[ev->getType()].c_str());
 #endif
-            write(AuctionManager::s_sigpipe[1], &c, 1);
+            write(Auctioner::s_sigpipe[1], &c, 1);
         }
     } 
     return rv;

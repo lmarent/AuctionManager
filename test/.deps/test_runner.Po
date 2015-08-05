@@ -36,7 +36,11 @@
  /usr/include/c++/4.8/bits/concept_check.h \
  /usr/include/c++/4.8/bits/stl_iterator_base_types.h \
  /usr/include/c++/4.8/bits/stl_iterator_base_funcs.h \
- /usr/include/c++/4.8/debug/debug.h \
+ /usr/include/c++/4.8/debug/debug.h /usr/include/c++/4.8/debug/macros.h \
+ /usr/include/c++/4.8/debug/functions.h \
+ /usr/include/c++/4.8/debug/formatter.h /usr/include/c++/4.8/typeinfo \
+ /usr/include/c++/4.8/exception \
+ /usr/include/c++/4.8/bits/atomic_lockfree_defines.h \
  /usr/include/c++/4.8/bits/stl_iterator.h \
  /usr/include/c++/4.8/bits/postypes.h /usr/include/c++/4.8/cwchar \
  /usr/include/wchar.h /usr/include/stdio.h \
@@ -45,8 +49,6 @@
  /usr/include/c++/4.8/bits/allocator.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++allocator.h \
  /usr/include/c++/4.8/ext/new_allocator.h /usr/include/c++/4.8/new \
- /usr/include/c++/4.8/exception \
- /usr/include/c++/4.8/bits/atomic_lockfree_defines.h \
  /usr/include/c++/4.8/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++locale.h \
  /usr/include/c++/4.8/clocale /usr/include/locale.h \
@@ -77,7 +79,13 @@
  /usr/include/c++/4.8/ext/alloc_traits.h \
  /usr/include/c++/4.8/bits/stl_uninitialized.h \
  /usr/include/c++/4.8/bits/stl_deque.h \
- /usr/include/c++/4.8/bits/deque.tcc \
+ /usr/include/c++/4.8/bits/deque.tcc /usr/include/c++/4.8/debug/deque \
+ /usr/include/c++/4.8/debug/safe_sequence.h \
+ /usr/include/c++/4.8/debug/safe_base.h \
+ /usr/include/c++/4.8/ext/concurrence.h \
+ /usr/include/c++/4.8/debug/safe_sequence.tcc \
+ /usr/include/c++/4.8/debug/safe_iterator.h \
+ /usr/include/c++/4.8/debug/safe_iterator.tcc \
  /usr/include/cppunit/TestResultCollector.h \
  /usr/include/cppunit/TestSuccessListener.h \
  /usr/include/cppunit/TestListener.h /usr/include/cppunit/TestRunner.h \
@@ -86,12 +94,14 @@
  /usr/include/cppunit/portability/CppUnitVector.h \
  /usr/include/c++/4.8/vector /usr/include/c++/4.8/bits/stl_vector.h \
  /usr/include/c++/4.8/bits/stl_bvector.h \
- /usr/include/c++/4.8/bits/vector.tcc \
+ /usr/include/c++/4.8/bits/vector.tcc /usr/include/c++/4.8/debug/vector \
+ /usr/include/c++/4.8/utility /usr/include/c++/4.8/bits/stl_relops.h \
  /usr/include/cppunit/extensions/TestFactoryRegistry.h \
  /usr/include/cppunit/portability/CppUnitSet.h \
  /usr/include/c++/4.8/functional /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_tree.h /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h \
+ /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/debug/set \
+ /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
  /usr/include/cppunit/extensions/TestFactory.h \
  /usr/include/cppunit/BriefTestProgressListener.h \
  /usr/include/cppunit/CompilerOutputter.h \
@@ -215,6 +225,18 @@
 
 /usr/include/c++/4.8/debug/debug.h:
 
+/usr/include/c++/4.8/debug/macros.h:
+
+/usr/include/c++/4.8/debug/functions.h:
+
+/usr/include/c++/4.8/debug/formatter.h:
+
+/usr/include/c++/4.8/typeinfo:
+
+/usr/include/c++/4.8/exception:
+
+/usr/include/c++/4.8/bits/atomic_lockfree_defines.h:
+
 /usr/include/c++/4.8/bits/stl_iterator.h:
 
 /usr/include/c++/4.8/bits/postypes.h:
@@ -236,10 +258,6 @@
 /usr/include/c++/4.8/ext/new_allocator.h:
 
 /usr/include/c++/4.8/new:
-
-/usr/include/c++/4.8/exception:
-
-/usr/include/c++/4.8/bits/atomic_lockfree_defines.h:
 
 /usr/include/c++/4.8/bits/localefwd.h:
 
@@ -315,6 +333,20 @@
 
 /usr/include/c++/4.8/bits/deque.tcc:
 
+/usr/include/c++/4.8/debug/deque:
+
+/usr/include/c++/4.8/debug/safe_sequence.h:
+
+/usr/include/c++/4.8/debug/safe_base.h:
+
+/usr/include/c++/4.8/ext/concurrence.h:
+
+/usr/include/c++/4.8/debug/safe_sequence.tcc:
+
+/usr/include/c++/4.8/debug/safe_iterator.h:
+
+/usr/include/c++/4.8/debug/safe_iterator.tcc:
+
 /usr/include/cppunit/TestResultCollector.h:
 
 /usr/include/cppunit/TestSuccessListener.h:
@@ -339,6 +371,12 @@
 
 /usr/include/c++/4.8/bits/vector.tcc:
 
+/usr/include/c++/4.8/debug/vector:
+
+/usr/include/c++/4.8/utility:
+
+/usr/include/c++/4.8/bits/stl_relops.h:
+
 /usr/include/cppunit/extensions/TestFactoryRegistry.h:
 
 /usr/include/cppunit/portability/CppUnitSet.h:
@@ -352,6 +390,12 @@
 /usr/include/c++/4.8/bits/stl_set.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
+
+/usr/include/c++/4.8/debug/set:
+
+/usr/include/c++/4.8/debug/set.h:
+
+/usr/include/c++/4.8/debug/multiset.h:
 
 /usr/include/cppunit/extensions/TestFactory.h:
 

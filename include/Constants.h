@@ -51,6 +51,10 @@ extern const string DEFAULT_LOG_FILE;
 // BidFileParser.cpp
 extern const string BIDFILE_DTD;
 
+// AuctionFileParser.cpp
+extern const string AUCTIONFILE_DTD;
+
+
 // Bid.cpp
 extern const string TIME_FORMAT;
 extern const string DEFAULT_SETNAME;
