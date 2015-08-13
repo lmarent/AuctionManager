@@ -112,7 +112,6 @@ configItemList_t ConfigManager::getItems(string group, string module)
     configItemList_t ret_list;
 
     for (iter = list.begin(); iter != list.end(); iter++) {
-		cout << "group:" << iter->group << "module:" << iter->module << endl;
         if ((group.empty() || group == iter->group) &&
             (module.empty() || module == iter->module)) {
             ret_list.push_back(*iter);

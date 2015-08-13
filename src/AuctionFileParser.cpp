@@ -79,7 +79,6 @@ void AuctionFileParser::parse( auctionDB_t *auctions,
 
     xmlNodePtr cur, cur2, cur3;
     string sname;
-    miscList_t globalMiscList;
     actionList_t globalActionList;
     time_t now = time(NULL);
     string defaultActGbl;
@@ -242,7 +241,8 @@ void AuctionFileParser::parse( auctionDB_t *auctions,
 					}
 				}
 				
-                Auction *a = new Auction(idSource->newId(), now, sname, rname, action, miscs);
+                Auction *a = new Auction(now, sname, rname, action, 
+										 miscs );
                 auctions->push_back(a);
             } catch (Error &e) {
                 log->elog(ch, e);

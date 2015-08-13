@@ -140,6 +140,7 @@ am_test_runner_OBJECTS = ../src/Error.$(OBJEXT) \
 	../test/AuctionTimer_test.$(OBJEXT) \
 	../test/Bid_Manager_test.$(OBJEXT) \
 	../test/AuctionManager_test.$(OBJEXT) \
+	../test/Auctioner_test.$(OBJEXT) \
 	../test/test_runner.$(OBJEXT)
 test_runner_OBJECTS = $(am_test_runner_OBJECTS)
 test_runner_LDADD = $(LDADD)
@@ -441,7 +442,7 @@ DEF_SYSCONFDIR = /home/luis/AuctionManager/etc
 DEPDIR = .deps
 DLLIB = 
 DLLTOOL = false
-DOXY = 
+DOXY = doxygen
 DSYMUTIL = 
 DUMPBIN = 
 ECHO_C = 
@@ -615,6 +616,7 @@ test_runner_SOURCES = ../src/Error.cpp \
 						../test/AuctionTimer_test.cpp \
 						../test/Bid_Manager_test.cpp \
 						../test/AuctionManager_test.cpp \
+						../test/Auctioner_test.cpp \
 						../test/test_runner.cpp
 
 #AM_CXXFLAGS = -O2 -I../include $(CPPUNIT_CFLAGS) \
@@ -811,6 +813,9 @@ clean-checkPROGRAMS:
 ../test/AuctionManager_test.$(OBJEXT):  \
 	../test/$(am__dirstamp) \
 	../test/$(DEPDIR)/$(am__dirstamp)
+../test/Auctioner_test.$(OBJEXT):  \
+	../test/$(am__dirstamp) \
+	../test/$(DEPDIR)/$(am__dirstamp)
 ../test/test_runner.$(OBJEXT):  \
 	../test/$(am__dirstamp) \
 	../test/$(DEPDIR)/$(am__dirstamp)
@@ -866,6 +871,7 @@ include ../test/$(DEPDIR)/AuctionFileParser_test.Po
 include ../test/$(DEPDIR)/AuctionIdSource_test.Po
 include ../test/$(DEPDIR)/AuctionManager_test.Po
 include ../test/$(DEPDIR)/AuctionTimer_test.Po
+include ../test/$(DEPDIR)/Auctioner_test.Po
 include ../test/$(DEPDIR)/BidFileParser_test.Po
 include ../test/$(DEPDIR)/Bid_Manager_test.Po
 include ../test/$(DEPDIR)/Bid_test.Po

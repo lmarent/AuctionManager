@@ -76,11 +76,20 @@ struct lttint
     }
 };
 
-//! execution list intervals.
-typedef list<interval_t>            intervalList_t;
-typedef list<interval_t>::iterator  intervalListIter_t;
-typedef list<interval_t>::const_iterator  intervalListConstIter_t;
+//! process module names
+typedef set<string> procnames_t;
+typedef set<string>::iterator procnamesIter_t;
 
+//! execution list intervals.
+typedef map<interval_t, procnames_t, lttint>            intervalList_t;
+typedef map<interval_t, procnames_t, lttint>::iterator  intervalListIter_t;
+typedef map<interval_t, procnames_t, lttint>::const_iterator  intervalListConstIter_t;
+
+typedef struct 
+{
+    interval_t i;
+    procnames_t e;
+} procdef_t;
 
 //! action list (only push_back & sequential access)
 typedef list<action_t>            actionList_t;
@@ -167,7 +176,17 @@ class Auction
     {
         return setName;
     }
-
+	
+	void setSetName(string sname)
+	{
+		setName = sname;
+	}
+	
+	void setAuctionName(string aname)
+	{
+		auctionName = aname;
+	}
+	
     string getAuctionName()
     {
         return auctionName;
@@ -193,10 +212,12 @@ class Auction
         return stop;
     }
     
+    
     intervalList_t *getIntervals()
     {
         return &intervals;
     }
+     
             
     /*! \short   construct and initialize a Auction object
         \arg \c now   current timestamp
@@ -205,8 +226,8 @@ class Auction
         \arg \c a  action
         \arg \c m  list of misc parameters
     */
-    Auction(unsigned short _uid, time_t now, string sname, string rname, action_t &a,
-    	  miscList_t &m);
+    Auction(time_t now, string sname, string rname, action_t &a
+		    , miscList_t &m );
 
 	/*! \short  construct an auction from another auction
 	  	\arg \c rhs auction to copy from

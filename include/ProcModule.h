@@ -35,6 +35,7 @@
 #include "Logger.h"
 #include "Module.h"
 #include "ConfigManager.h"
+#include "EventScheduler.h"
 
 
 
@@ -59,6 +60,9 @@ class ProcModule : public Module
 
     //! struct of functions pointers for library
     ProcModuleInterface_t *funcList;
+
+    //!< number of active timers
+    unsigned int timersActive;
 
     //!< runtime type information list
     typeInfo_t *typeInfo;
@@ -132,6 +136,12 @@ class ProcModule : public Module
             return INFOLABEL[i];
         }
     }
+
+    /*! \short  add timers of this module as new events to the event 
+                scheduler component (but only once per module!)
+        \arg \c evs - the meter's event scheduler component
+    */
+    void addTimerEvents( EventScheduler &evs );
 
     //! get text label for type property i
     static string typeLabel( int i );

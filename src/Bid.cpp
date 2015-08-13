@@ -34,8 +34,10 @@
 
 /* ------------------------- Bid ------------------------- */
 
-Bid::Bid(int _uid, string sname, string rname, elementList_t &elements)
-  : uid(_uid), bidName(rname), setName(sname), state(BS_NEW), elementList(elements)
+Bid::Bid(int _uid, string sname, string rname, elementList_t &elements,
+		 bidAuctionList_t &ba)
+  : uid(_uid), bidName(rname), setName(sname), state(BS_NEW), 
+	elementList(elements), auctionList(ba)
 {
     unsigned long duration;
 
@@ -55,6 +57,8 @@ Bid::Bid(int id, const Bid &rhs)
 	setName = rhs.setName;
 	startTime = rhs.startTime;
 	endTime = rhs.endTime;
+	
+	// Copy elements part of the bid.
 	elementListConstIter_t iter;
 	for (iter = (rhs.elementList).begin(); iter != (rhs.elementList).end(); ++iter ){
 		element_t elem;
@@ -85,6 +89,15 @@ Bid::Bid(int id, const Bid &rhs)
 		elementList.push_back(elem);
 	}
 	
+	// Copy auctions part of the bid
+	bidAuctionListConstIter_t iter;
+	for (iter = (rhs.auctionList).begin(); iter != (rhs.auctionList).end(); ++iter ){
+		bid_auction_t auction;
+		auction.auctionSet = iter->auctionSet;
+		auction.auctionName = iter->auctionName;
+		auctionList.push_back(auction);
+	}
+	
 }
 
 Bid::~Bid()
@@ -102,6 +115,14 @@ elementList_t *Bid::getElements()
     return &elementList;
 }
 
+/* ------------------------- getAuctions ------------------------- */
+
+bidAuctionList_t *Bid::getAuctions()
+{
+    return &auctionList;
+}
+
+
 string Bid::toString(element_t &elem)
 {
 	std::stringstream output;
@@ -118,6 +139,7 @@ string Bid::toString(element_t &elem)
 			   << " Value:" << ((*iter).value[0]).getValue()
 			   << std::endl;
 	}
+	
 	return output.str();
 
 }	
@@ -135,5 +157,14 @@ string Bid::getInfo()
 	for (iter = elementList.begin(); iter != elementList.end(); ++iter ){
 		output << toString(*iter) << std::endl;
 	}
+	
+	output  << "Nbr Auctions:" << auctionList.size();
+	bidAuctionListIter_t ait;
+	for (ait = auctionList.begin(); ait != auctionList.end(); ++ait ){
+		output << "AuctionSet:" << ait->auctionSet 
+			   << " AuctionName:" << ait->auctionName << std::endl;
+	}
+	
+	
 	return output.str();
 }

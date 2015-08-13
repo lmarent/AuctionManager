@@ -151,9 +151,9 @@ Auctioner::Auctioner( int argc, char *argv[])
 				
         auto_ptr<Logger> _log(Logger::getInstance()); 	
         log = _log;
-        ch = log->createChannel("AuctionManager");
+        ch = log->createChannel("Auctioner");
 
-        log->log(ch,"Initializing quality manager system");
+        log->log(ch,"Initializing auctioner system");
         log->log(ch,"Program executable = %s", argv[0]);
         log->log(ch,"Started at %s", noNewline(ctime(&startTime)));
 				
@@ -164,6 +164,8 @@ Auctioner::Auctioner( int argc, char *argv[])
             // file located in a relative location to the binary
             configFileName = NETAUM_DEFAULT_CONFIG_FILE;
         }
+
+        log->log(ch,"ConfigFile = %s", configFileName.c_str());
 
         auto_ptr<ConfigManager> _conf(new ConfigManager(configFileName, argv[0]));
         conf = _conf;
@@ -192,22 +194,28 @@ Auctioner::Auctioner( int argc, char *argv[])
         if (!verbosity.empty()) {
             log->setLogLevel( ParserFcts::parseInt( verbosity, -1, 4 ) );
         }
-
-        log->log(ch,"configfilename used is: '%s'", configFileName.c_str());
+        
 #ifdef DEBUG
+        log->log(ch,"configfilename used is: '%s'", configFileName.c_str());
         log->dlog(ch,"------- startup -------" );
 #endif
 
         // startup other core classes
         auto_ptr<AuctionTimer> _auct(AuctionTimer::getInstance());
         auct = _auct;
+        
         auto_ptr<BidManager> _bidm(new BidManager(conf->getValue("FieldDefFile", "MAIN"),
                                                     conf->getValue("FieldConstFile", "MAIN")));
         bidm = _bidm;
+        
+        auto_ptr<AuctionManager> _aucm(new AuctionManager());
+        aucm = _aucm;
+
+        
         auto_ptr<EventScheduler> _evnt(new EventScheduler());
         evnt = _evnt;
 
-        // startup Quality components
+        // Startup Processing Components
 
 #ifdef ENABLE_THREADS
 
@@ -228,11 +236,11 @@ Auctioner::Auctioner( int argc, char *argv[])
         proc = _proc;
         proc->mergeFDs(&fdList);
 		
-		// setup initial rules
-		string rfn = conf->getValue("BidFile", "MAIN");
+		// setup initial auctions
+		string rfn = conf->getValue("AuctionFile", "MAIN");
 
         if (!rfn.empty()) {
-			evnt->addEvent(new AddBidsEvent(rfn));
+			evnt->addEvent(new AddAuctionsEvent(rfn));
         }
 
         // disable logger threading if not needed
@@ -248,6 +256,11 @@ Auctioner::Auctioner( int argc, char *argv[])
 			comm = _comm;
 			comm->mergeFDs(&fdList);
 		}
+
+#ifdef DEBUG
+        log->dlog(ch,"------- end Auctioner constructor -------" );
+#endif
+
 
     } catch (Error &e) {
         if (log.get()) {
@@ -477,6 +490,58 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
           }
       }
       break;
+
+    case ADD_AUCTIONS:
+      {
+          auctionDB_t *new_auctions = NULL;
+
+          try {
+
+#ifdef DEBUG
+        log->dlog(ch,"processing event adding auctions" );
+#endif
+              // support only XML rules from file
+              new_auctions = aucm->parseAuctions(((AddAuctionsEvent *)e)->getFileName());
+
+#ifdef DEBUG
+        log->dlog(ch,"Auctions sucessfully parsed " );
+#endif
+             
+              // no error so lets add the rules and schedule for activation
+              // and removal
+              aucm->addAuctions(new_auctions, evnt.get());
+
+#ifdef DEBUG
+        log->dlog(ch,"Auctions sucessfully added " );
+#endif
+
+
+              saveDelete(new_auctions);
+
+			  /*
+			   * above 'addAuctions' produces an AuctionActivation event.
+			   * If rule addition shall be performed _immediately_
+				(fds == NULL) then we need to execute this
+				activation event _now_ and not wait for the
+				EventScheduler to do this some time later.
+			  */
+			  if (fds == NULL ) {
+				Event *e = evnt->getNextEvent();
+				handleEvent(e, NULL);
+				saveDelete(e);
+			  }
+
+          } catch (Error &e) {
+              // error in rule(s)
+              if (new_auctions) {
+                  saveDelete(new_auctions);
+              }
+              throw e;
+          }
+      }
+      break;
+
+
     case ADD_BIDS_CTRLCOMM:
       {
           bidDB_t *new_bids = NULL;
@@ -490,10 +555,6 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
               new_bids = bidm->parseBidsBuffer(
                 ((AddBidsCtrlEvent *)e)->getBuf(),
                 ((AddBidsCtrlEvent *)e)->getLen(), ((AddBidsCtrlEvent *)e)->isMAPI());
-
-              // TODO AM test bid spec 
-              // Vetifies if this method is required.
-              // proc->checkBids(new_bids);
 	  
               // no error so let's add the rules and 
               // schedule for activation and removal
@@ -598,11 +659,42 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
         log->dlog(ch,"processing event proc module timer" );
 #endif
 
-        proc->timeout(((ProcTimerEvent *)e)->getID(), ((ProcTimerEvent *)e)->getActID(),
-                      ((ProcTimerEvent *)e)->getTID());
+        // TODO AM : implement.
+        //proc->timeout(((ProcTimerEvent *)e)->getID(), ((ProcTimerEvent *)e)->getActID(),
+        //              ((ProcTimerEvent *)e)->getTID());
+        break;
+
+    case PUSH_EXECUTION:
+
+	   {
+#ifdef DEBUG
+        log->dlog(ch,"Processing push execution " );
+#endif
+
+          auctionDB_t     *auctions = ((PushExecutionEvent *)e)->getAuctions();
+
+          // multiple auctions can process at the same time
+          for (auctionDBIter_t iter = auctions->begin(); iter != auctions->end(); iter++) {
+
+              // Execute the algorithm
+              proc->executeAuction((*iter)->getUId(), (*iter)->getAuctionName());
+              
+              // Send allocations for agents.
+              
+              
+          }
+
+#ifdef DEBUG
+		  log->dlog(ch,"------- Push Execution end -------" );
+#endif
+
+		}
         break;
     
     default:
+#ifdef DEBUG
+        log->dlog(ch,"Unknown event %s", eventNames[e->getType()].c_str() );
+#endif
         throw Error("unknown event");
     }
 }
@@ -635,8 +727,7 @@ void Auctioner::run()
         }
         fds.max = fdList.begin()->first.fd;
 		
-
-        // register a timer for ctrlcomm (only online capturing)
+		// register a timer for ctrlcomm (only online capturing)
 		if (enableCtrl) {
 		  int t = comm->getTimeout();
 		  if (t > 0) {
@@ -659,8 +750,6 @@ void Auctioner::run()
 	    
 			tv = evnt->getNextEventTime();
 
-            //cerr << "timeout: " << tv.tv_sec*1e6+tv.tv_usec << endl;
-
             // note: under most unix the minimal sleep time of select is
             // 10ms which means an event may be executed 10ms after expiration!
             if ((cnt = select(fds.max+1, &rset, &wset, NULL, &tv)) < 0) {
@@ -669,10 +758,13 @@ void Auctioner::run()
                  }
             }
 
-			cout << "here I am - cnt:" << cnt << endl;
-
             // check FD events
             if (cnt > 0)  {
+
+#ifdef DEBUG			
+				log->dlog(ch,"In check FD events");
+#endif
+
                 if (FD_ISSET( s_sigpipe[0], &rset)) {
                     // handle sig action
                     char c;
@@ -686,10 +778,14 @@ void Auctioner::run()
                             break;
                         case 'A':
                             // next event
-                            cout << "Type A" << endl;
-                            
+                       
                             // check Event Scheduler events
                             e = evnt->getNextEvent();
+
+#ifdef DEBUG			
+							log->dlog(ch,"Next Event %s", eventNames[e->getType()].c_str());
+#endif     
+
                             if (e != NULL) {
                                 // FIXME hack
                                 if (e->getType() == CTRLCOMM_TIMER) {
@@ -709,7 +805,8 @@ void Auctioner::run()
                         //} else {
                         //throw Error("sigpipe read error");
                     }
-                } else {
+                } 
+                else {
                     if (enableCtrl) {
                       cout << "enableCtrl" << endl;
                       comm->handleFDEvent(&retEvents, &rset, &wset, &fds);
@@ -717,41 +814,9 @@ void Auctioner::run()
                 }
 	        }	
 
-            // execute all due events
-            evnt->getNextEventTime();
-            char c;
-            while (read(s_sigpipe[0], &c, 1) > 0) {
-                switch (c) {
-                   case 'S':
-                       stop = 1;
-                       break;
-                   case 'D':
-                       cerr << *this;
-                       break;
-                   case 'A':
-						cout << "A - section b" << endl;
-
-                       // check Event Scheduler events
-                       e = evnt->getNextEvent();
-                       if (e != NULL) {
-						   handleEvent(e, &fds);
-						   // reschedule the event
-						   evnt->reschedNextEvent(e);
-						   e = NULL;
-                       }
-                       break;
-
-                   default:
-                       throw Error("unknown signal");
-				}
-                evnt->getNextEventTime();
-            }
-
             if (!pprocThread) {
 				proc->handleFDEvent(&retEvents, NULL,NULL, NULL);
             }
-
-			cout << "Schedule events - cnt:" << retEvents.size() << endl;
 
             // schedule events
             if (retEvents.size() > 0) {
@@ -892,28 +957,4 @@ int Auctioner::alreadyRunning()
     return 0;
 }
 
-/* ------------------------- main() ------------------------- */
 
-
-// Log functions are not used before the logger is initialized
-/*
-int main(int argc, char *argv[])
-{
-
-    try {
-        // start up the netmate (this blocks until Ctrl-C !)
-        cout << NETAUM_VERSION << endl;
-#ifdef DEBUG
-        cout << NETAUM_OPTIONS << endl;
-#endif
-        auto_ptr<Auctioner> auction(new Auctioner(argc, argv));
-
-        // going into main loop
-        auction->run();
-
-    } catch (Error &e) {
-        cerr << "Terminating Auctioner on error: " << e.getError() << endl;
-        exit(1);
-    }
-}
-*/

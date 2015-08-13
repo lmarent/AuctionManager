@@ -158,6 +158,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"BID")) && (cur->ns == ns)) {
             string bname;
             elementList_t elements;
+            bidAuctionList_t auctions;
             fieldList_t fields;
 
             bname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
@@ -227,7 +228,50 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 					
 					elements.push_back(elem);
                 }
-       
+
+
+                // get AUCTION.
+                if ((!xmlStrcmp(cur2->name, (const xmlChar *)"AUCTION")) && (cur2->ns == ns)) {
+                    bid_auction_t auction;
+
+                    auction.auctionSet = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"SET"));
+                    auction.auctionName = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"NAME"));
+
+                    if (auction.auctionSet.empty() ) {
+                        throw Error("Bid Parser Error: missing auction set at line %d", XML_GET_LINE(cur2));
+                    }
+                    if (auction.auctionName.empty() ) {
+                        throw Error("Bid Parser Error: missing auction name at line %d", XML_GET_LINE(cur2));
+                    }
+                    
+                    // use lower case internally
+                    transform(auction.auctionSet.begin(), auction.auctionSet.end(), 
+							  auction.auctionSet.begin(), ToLower());
+							  
+                    // use lower case internally
+                    transform(auction.auctionName.begin(), auction.auctionName.end(), 
+							  auction.auctionName.begin(), ToLower());
+
+                    cur3 = cur2->xmlChildrenNode;
+					
+                    while (cur3 != NULL) {
+
+						// get PREF
+						if ((!xmlStrcmp(cur3->name, (const xmlChar *)"PREF")) && (cur3->ns == ns)) {
+							// parse
+							configItem_t item = parsePref(cur3); 	
+							// add
+							auction.miscList[item.name] = item;
+#ifdef DEBUG
+							log->dlog(ch, "C %s = %s", item.name.c_str(), item.value.c_str());
+#endif
+						}
+						
+                        // get action specific PREFs
+                        cur3 = cur3->next;
+                    }
+					auctions.push_back(auction);
+                }
                 cur2 = cur2->next;
             }
 
@@ -235,7 +279,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
             // add bid
             try {
 				unsigned short uid = idSource->newId();
-                Bid *b = new Bid((int) uid, sname, bname, elements);
+                Bid *b = new Bid((int) uid, sname, bname, elements, auctions);
 #ifdef DEBUG
 				// debug info
 				log->dlog(ch, "bid %s.%s %s", sname.c_str(), bname.c_str(), (b->getInfo()).c_str());

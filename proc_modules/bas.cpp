@@ -48,13 +48,14 @@ void execute( configParam_t *params, void **flowdata )
 #endif
 }
 
-timers_t* getTimers( void *flowdata )
+timers_t* getTimers( )
 {
 
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start getTimers \n");
 #endif
 
+	return NULL;
 
 #ifdef DEBUG
 	fprintf( stdout, "bas module: end getTimers \n");
@@ -84,12 +85,12 @@ void reset( configParam_t *params )
 #endif
 }
 
-void timeout( int timerID, void *flowdata )
+int timeout( int timerID )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start timeout \n");
 #endif
-
+	return 0;
 #ifdef DEBUG
 	fprintf( stdout, "bas module: end timeout \n");
 #endif

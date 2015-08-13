@@ -54,8 +54,11 @@ void AuctionManager_Test::setUp()
 
 void AuctionManager_Test::tearDown() 
 {
-	delete(auctionManagerPtr);
+
+	saveDelete(auctionManagerPtr);
 	
+	evnt.reset();
+
 }
 
 void AuctionManager_Test::test() 
@@ -66,19 +69,111 @@ void AuctionManager_Test::test()
 		const string filename = DEF_SYSCONFDIR "/example_auctions1.xml";
 		
 		auctionDB_t * auctions = auctionManagerPtr->parseAuctions(filename);
-		
-		cout << "Auctions parsed " << endl;
-		
+				
 		auctionManagerPtr->addAuctions(auctions, evnt.get());
-
-		cout << "Auctions Added " << endl;
 				
 		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
 		
-		//string info = auctionPtr->getInfo();
+		auctionDB_t auctions2 = auctionManagerPtr->getAuctions();		
+
+		Auction *auctionPtr = auctions2[0];
 		
-		// cout << "Info: " << info << endl;
+		Auction *auction2 = new Auction(*auctionPtr);
+		
+		auction2->setAuctionName("2");
+						
+		auctionManagerPtr->addAuction(auction2);
+				
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 2 );
+				
+		string info = auctionPtr->getInfo();
+						
+		CPPUNIT_ASSERT( info.compare(auctionManagerPtr->getInfo(auctionPtr->getUId())) == 0 );
+		
+		auctionDB_t auctions3 = auctionManagerPtr->getAuctions();	
+		
+		CPPUNIT_ASSERT( auctions3.size() == 2 );
+		
+		// Delete functions
+				
+		auctionManagerPtr->delAuction(auctionPtr->getUId(),evnt.get());
+		
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
+		
+		auctionManagerPtr->delAuction(auction2->getSetName(), 
+										auction2->getAuctionName(), evnt.get());
 	
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 0 );
+
+		// Reinsert auctions - Delete by set name( Bidder )
+
+		auctions = auctionManagerPtr->parseAuctions(filename);
+				
+		auctionManagerPtr->addAuctions(auctions, evnt.get());
+				
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
+		
+		auctions2 = auctionManagerPtr->getAuctions();		
+
+		auctionPtr = auctions2[0];
+		
+		auction2 = new Auction(*auctionPtr);
+		
+		auction2->setAuctionName("2");
+		
+		auctionManagerPtr->addAuction(auction2);
+		
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 2 );
+				
+		auctionManagerPtr->delAuctions(auction2->getSetName(), evnt.get());
+		
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 0 );
+		
+		// Reinsert auction - Delete by pointer
+		
+		auctions = auctionManagerPtr->parseAuctions(filename);
+				
+		auctionManagerPtr->addAuctions(auctions, evnt.get());
+				
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
+		
+		auctions2 = auctionManagerPtr->getAuctions();		
+
+		auctionPtr = auctions2[0];
+		
+		auctionManagerPtr->delAuction(auctionPtr, evnt.get());
+		
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 0 );
+
+		// Reinsert auctions - Delete by set.
+
+		auctions = auctionManagerPtr->parseAuctions(filename);
+				
+		auctionManagerPtr->addAuctions(auctions, evnt.get());
+				
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
+		
+		auctionPtr = auctionManagerPtr->getAuction("Bidder1","1");
+				
+		auction2 = new Auction(*auctionPtr);
+		
+		auction2->setAuctionName("2");
+		
+		cout << "Info:" << auction2->getInfo();
+		
+		auctionManagerPtr->addAuction(auction2);
+				
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 2 );
+						
+		auctions3 = auctionManagerPtr->getAuctions();	
+		
+		auctionManagerPtr->delAuctions(&auctions3, evnt.get());
+		
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 0 );
+		
+		
+
+		
 	} catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
 	}

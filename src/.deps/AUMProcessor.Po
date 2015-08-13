@@ -221,19 +221,19 @@
  ../include/FieldValue.h ../include/AuctionTimer.h ../include/Module.h \
  ../include/ConfigManager.h ../include/ConfigParser.h \
  ../include/CommandLineArgs.h ../lib/getopt_long/getopt_long.h \
- ../include/ModuleLoader.h ../include/Bid.h \
- ../include/AuctionManagerComponent.h ../include/Event.h \
+ ../include/EventScheduler.h ../include/Bid.h ../include/Event.h \
  ../include/BidFileParser.h ../include/FieldValParser.h \
  ../include/BidIdSource.h ../include/AuctionFileParser.h \
  ../include/Auction.h ../include/AuctionIdSource.h \
- ../include/AuctionManagerInfo.h ../lib/httpd/httpd.h \
- /usr/include/syslog.h /usr/include/x86_64-linux-gnu/sys/syslog.h \
+ ../include/AuctionManagerInfo.h ../include/Timeval.h \
+ ../include/ModuleLoader.h ../include/AuctionManagerComponent.h \
+ ../lib/httpd/httpd.h /usr/include/syslog.h \
+ /usr/include/x86_64-linux-gnu/sys/syslog.h \
  /usr/include/x86_64-linux-gnu/bits/syslog-path.h /usr/include/grp.h \
  /usr/include/x86_64-linux-gnu/sys/signal.h \
  /usr/include/x86_64-linux-gnu/sys/utsname.h \
  /usr/include/x86_64-linux-gnu/bits/utsname.h /usr/include/netinet/tcp.h \
- ../include/EventScheduler.h ../include/Timeval.h ../include/Module.h \
- ../include/ParserFcts.h
+ ../include/Module.h ../include/ParserFcts.h
 
 /usr/include/stdc-predef.h:
 
@@ -863,11 +863,9 @@
 
 ../lib/getopt_long/getopt_long.h:
 
-../include/ModuleLoader.h:
+../include/EventScheduler.h:
 
 ../include/Bid.h:
-
-../include/AuctionManagerComponent.h:
 
 ../include/Event.h:
 
@@ -884,6 +882,12 @@
 ../include/AuctionIdSource.h:
 
 ../include/AuctionManagerInfo.h:
+
+../include/Timeval.h:
+
+../include/ModuleLoader.h:
+
+../include/AuctionManagerComponent.h:
 
 ../lib/httpd/httpd.h:
 
@@ -902,10 +906,6 @@
 /usr/include/x86_64-linux-gnu/bits/utsname.h:
 
 /usr/include/netinet/tcp.h:
-
-../include/EventScheduler.h:
-
-../include/Timeval.h:
 
 ../include/Module.h:
 

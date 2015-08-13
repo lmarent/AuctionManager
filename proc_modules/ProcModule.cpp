@@ -45,7 +45,8 @@ ProcModuleInterface_t func =
     reset, 
     timeout, 
     getModuleInfo, 
-    getErrorMsg };
+    getErrorMsg 
+};
 
 
 /*! \short   global state variable used within data export macros */

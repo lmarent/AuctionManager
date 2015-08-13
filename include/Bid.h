@@ -32,6 +32,7 @@
 #include "Logger.h"
 #include "ConfigParser.h"
 #include "ProcModuleInterface.h"
+#include "Auction.h"
 
 //! Bid's states during lifecycle
 typedef enum
@@ -50,12 +51,23 @@ typedef struct
     fieldList_t fields;
 } element_t;
 
+//! This bid applies to bid in this auction.
+typedef struct
+{
+	string auctionSet;
+	string auctionName;
+	miscList_t miscList;
+	interval_t interval;
+} bid_auction_t;
+
 //! element list (only push_back & sequential access)
 typedef list<element_t>            elementList_t;
 typedef list<element_t>::iterator  elementListIter_t;
 typedef list<element_t>::const_iterator  elementListConstIter_t;
 
-
+typedef list<bid_auction_t>					bidAuctionList_t;
+typedef list<bid_auction_t>::iterator		bidAuctionListIter_t;
+typedef list<bid_auction_t>::iterator		bidAuctionListConstIter_t;
 
 class Bid
 {
@@ -65,7 +77,7 @@ private:
 
 public:
 
-	Bid(int id, string sname, string rname, elementList_t &e);
+	Bid(int id, string sname, string rname, elementList_t &e, bidAuctionList_t &ba);
 
 	Bid(int id, const Bid &rhs);
 
@@ -135,6 +147,11 @@ public:
     elementList_t *getElements();
 
 	
+    /*! \short   get set and name of all auctions to compete.
+        \returns a pointer (link) to a list that contains the auctions for this bid
+    */
+	bidAuctionList_t *getAuctions();
+	
 protected:
 	
     //! unique bidID of this Rule instance (has to be provided)
@@ -157,6 +174,9 @@ protected:
 
     //! list of elements
     elementList_t elementList;
+    
+    //! list of auctions for this bid
+    bidAuctionList_t auctionList;
 
 };
 

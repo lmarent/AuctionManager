@@ -40,6 +40,8 @@ typedef struct {
 } configParam_t;
 
 
+typedef int (*timeout_func_t)( int timerID );
+
 //! short   the magic number that will be embedded into every action module
 #define PROC_MAGIC   ('N'<<24 | 'M'<<16 | '_'<<8 | 'P')
 
@@ -190,10 +192,9 @@ void execute( configParam_t *params, void **flowdata );
 
 
 /*! \short   get list of default timers for this proc module
-    \arg \c  flowdata  - place for module specific data from flow table
     \returns   list of timer structs
 */
-timers_t* getTimers( void *flowdata );
+timers_t* getTimers( );
 
 
 /*! \short   dismantle the module
@@ -246,7 +247,7 @@ const char* getModuleInfo( int i );
  * 			 function every x seconds and its invocation is configured 
  * 			 to make use of the timeout feature
  */
-void timeout( int timerID, void *flowdata );
+int timeout( int timerID );
 
 
 /*! \short   return error message for last failed function
@@ -274,11 +275,11 @@ typedef struct {
     void (*destroyModule)( configParam_t *params );
 
     void (*execute)( configParam_t *params,  void **flowdata );
-    timers_t* (*getTimers)( void *flowdata );
+    timers_t* (*getTimers)( );
     void (*destroy)( configParam_t *params, void *flowdata);
 
     void (*reset)( configParam_t *params );
-    void (*timeout)( int timerID, void *flowdata );
+    int (*timeout)(int);
 
     const char* (*getModuleInfo)(int i);
     char* (*getErrorMsg)( int code );

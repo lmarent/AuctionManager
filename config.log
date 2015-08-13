@@ -1344,8 +1344,8 @@ configure:18248: $PKG_CONFIG --exists --print-errors "libcurl"
 configure:18251: $? = 0
 configure:18309: result: yes
 configure:18340: checking for doxygen
-configure:18370: result: no
-configure:18376: WARNING: doxygen not installed, can not build documentation
+configure:18356: found /usr/local/bin/doxygen
+configure:18367: result: doxygen
 configure:18574: checking that generated files are newer than configure
 configure:18580: result: done
 configure:18639: creating ./config.status
@@ -1495,6 +1495,7 @@ ac_cv_path_mkdir=/bin/mkdir
 ac_cv_prog_AWK=gawk
 ac_cv_prog_CPP='gcc -E'
 ac_cv_prog_CXXCPP='g++ -E'
+ac_cv_prog_DOXY=doxygen
 ac_cv_prog_ac_ct_AR=ar
 ac_cv_prog_ac_ct_CC=gcc
 ac_cv_prog_ac_ct_CXX=g++
@@ -1594,7 +1595,7 @@ DEF_SYSCONFDIR='/home/luis/AuctionManager/etc'
 DEPDIR='.deps'
 DLLIB=''
 DLLTOOL='false'
-DOXY=''
+DOXY='doxygen'
 DSYMUTIL=''
 DUMPBIN=''
 ECHO_C=''
@@ -1803,7 +1804,7 @@ target_alias=''
 #define HAVE_LIBXSLT_TRANSFORM_H 1
 #define HAVE_LIBXSLT_XSLTUTILS_H 1
 #define HAVE_CURL 1
-#define BUILD_TIME "05/08/2015 14:42:32"
+#define BUILD_TIME "12/08/2015 14:32:43"
 #define DEF_SYSCONFDIR "/home/luis/AuctionManager/etc"
 #define DEF_STATEDIR "/usr/local/var"
 #define DEF_LIBDIR "/usr/local/lib/auctionmanager"

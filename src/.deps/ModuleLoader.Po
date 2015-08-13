@@ -221,7 +221,12 @@
  ../include/ConfigManager.h ../include/ConfigParser.h \
  ../include/CommandLineArgs.h ../lib/getopt_long/getopt_long.h \
  ../include/Module.h ../include/Module.h ../include/ProcModule.h \
- ../include/AuctionTimer.h ../include/ProcModuleInterface.h
+ ../include/AuctionTimer.h ../include/EventScheduler.h ../include/Bid.h \
+ ../include/Event.h ../include/BidFileParser.h \
+ ../include/FieldValParser.h ../include/BidIdSource.h \
+ ../include/AuctionFileParser.h ../include/Auction.h \
+ ../include/AuctionIdSource.h ../include/AuctionManagerInfo.h \
+ ../include/Timeval.h ../include/ProcModuleInterface.h
 
 /usr/include/stdc-predef.h:
 
@@ -854,5 +859,27 @@
 ../include/ProcModule.h:
 
 ../include/AuctionTimer.h:
+
+../include/EventScheduler.h:
+
+../include/Bid.h:
+
+../include/Event.h:
+
+../include/BidFileParser.h:
+
+../include/FieldValParser.h:
+
+../include/BidIdSource.h:
+
+../include/AuctionFileParser.h:
+
+../include/Auction.h:
+
+../include/AuctionIdSource.h:
+
+../include/AuctionManagerInfo.h:
+
+../include/Timeval.h:
 
 ../include/ProcModuleInterface.h:

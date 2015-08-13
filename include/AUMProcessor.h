@@ -42,7 +42,6 @@ typedef struct
 {
     ProcModule *module;
     ProcModuleInterface_t *mapi; // module API
-    void *flowData;
     // config params for module
     configParam_t *params;
 } ppaction_t;
@@ -50,12 +49,13 @@ typedef struct
 
 typedef struct {
 
-    Auction *auction;
-    bidDB_t bids;  // Bids competing in the auction.
+    ppaction_t action; // action module data.
+    Auction *auction; // auction to start execution.
+    bidDB_t *bids;  // Bids competing in the auction.
     
 } auctionProcess_t;
 
-//! action list for each rule
+//! action list for each auction
 typedef vector<auctionProcess_t>            auctionProcessList_t;
 typedef vector<auctionProcess_t>::iterator  auctionProcessListIter_t;
 
@@ -73,7 +73,7 @@ class AUMProcessor : public AuctionManagerComponent
     //! this is the algorithm to execute for the bid
     ModuleLoader *loader;
 
-    //! list of auction being processed.
+    //! action of every auction being processed.
     auctionProcessList_t  auctions;
 
     //! add timer events to scheduler
@@ -101,17 +101,14 @@ class AUMProcessor : public AuctionManagerComponent
     //! add bids
     virtual void addBids( bidDB_t *bids );
 
-    //! add auctions
-    virtual void addAuctions( auctionDB_t *auctions );
-
     //! delete bids
     virtual void delBids( bidDB_t *bids );
 
     //! delete bids
-    virtual void delAuctions( auctionDB_t *auctions );
+    virtual void delAuctions( auctionDB_t *aucts );
 
     //! execute the algorithm
-    int execute(EventScheduler *e );
+    int executeAuction(int rid, string rname);
 
     /*! \short   add a Bid and its associated actions to bid list
         \arg \c b   pointer to bid
@@ -148,13 +145,7 @@ class AUMProcessor : public AuctionManagerComponent
 
     //! thread main function
     void main();
-
-    /*! \short return -1 (no packet seen), 0 (timeout), >0 (no timeout; adjust last time)
-
-        \arg \c auctionId  - number indicating matching bid for packet
-    */
-    unsigned long auctionTimeout(int auctionID, unsigned long ival, time_t now);
-    
+   
     //! get information about load module
     string getInfo();
 

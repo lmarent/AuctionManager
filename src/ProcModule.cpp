@@ -231,6 +231,38 @@ string ProcModule::typeLabel( int i )
     }
 }
 
+/* -------------------- addTimerEvents -------------------- */
+
+void ProcModule::addTimerEvents( EventScheduler &evs )
+{
+#ifdef DEBUG
+    s_log->dlog(s_ch, "Add timer Events " );
+#endif
+
+    if (timersActive != 0) {
+        return;
+    }
+
+    ProcModuleInterface_t *mapi = getAPI();
+    timers_t *timers = mapi->getTimers();
+
+
+    
+    if (timers != NULL) {
+        while (timers->flags != TM_END) {
+            evs.addEvent(new ProcTimerEvent(mapi->timeout, timers++));
+        }
+    }
+    timersActive = 1;
+
+#ifdef DEBUG
+    s_log->dlog(s_ch, "Ending add timer events" );
+#endif
+
+
+}
+
+
 
 /* ------------------------- dump ------------------------- */
 

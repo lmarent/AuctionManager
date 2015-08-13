@@ -56,6 +56,25 @@ typedef list<Auction*>::iterator  auctionDoneIter_t;
 typedef map<time_t, auctionDB_t>            auctionTimeIndex_t;
 typedef map<time_t, auctionDB_t>::iterator  auctionTimeIndexIter_t;
 
+//! compare two export definition structs
+struct lttexp
+{
+    bool operator()(const procdef_t e1, const procdef_t e2) const
+    {
+      if  ((e1.i.interval < e2.i.interval) ||
+           (e1.i.align < e2.i.align) ||
+           (e1.e < e2.e)) {
+          return 1;
+      } else {
+          return 0;
+      }
+    }
+};
+
+//! auctions indexed by interval and execution modules struct
+typedef map<procdef_t, auctionDB_t, lttexp>            auctionIntervalsIndex_t;
+typedef map<procdef_t, auctionDB_t, lttexp>::iterator  auctionIntervalsIndexIter_t;
+
 
 /*! \short   manage adding/deleting of complete auction descriptions
   
@@ -96,22 +115,22 @@ class AuctionManager
 
   public:
 
-    int getNumAuctions() 
+    int getNumAuctions() //Ok
     { 
         return auctions; 
     }
 
-    string getInfo(int uid)
+    string getInfo(int uid) // Ok
     {
         return getInfo(getAuction(uid)); 
     }
 
     /*! \short   construct and initialize a AuctionManager object
      */
-    AuctionManager(); 
+    AuctionManager(); // Ok
 
     //! destroy a AuctionManager object
-    ~AuctionManager(); 
+    ~AuctionManager(); //Ok
 
      /*! \short   lookup the auction info data for a given auctionId or name
 
@@ -122,7 +141,7 @@ class AuctionManager
     
         \arg \c uId - unique auction id
     */
-    Auction *getAuction(int uid);
+    Auction *getAuction(int uid); // Ok
 
     //! get auction rname from auctionset sname 
     Auction *getAuction(string sname, string rname); 
@@ -130,11 +149,12 @@ class AuctionManager
     //! get all auctions in auctionset with name sname 
     auctionIndex_t *getAuctions(string sname);
 
-    //! get all bids
-    auctionDB_t getAuctions();
+    //! get all bids, creates a nuew vector with the same pointers to auctions,
+	//! so it does not require to free memory. 
+    auctionDB_t getAuctions(); //Ok
 
     //! parse XML auctions from file 
-    auctionDB_t *parseAuctions(string fname); 
+    auctionDB_t *parseAuctions(string fname);  // Ok
 
     //! parse XML or Auction API bids from buffer
     auctionDB_t *parseAuctionsBuffer(char *buf, int len, int mapi);
@@ -143,16 +163,17 @@ class AuctionManager
 
         adding new auctions to the Auction system will parse and syntax
         check the given auction specifications, lookup the auction database for
-        already installed auctions and store the auction into the database 
+        already installed auctions and store the auction into the database. 
+        This function assigns the UID for all auctions given.
 
         \throws an Error exception if the given auction description is not
         syntactically correct or does not contain the mandatory fields
         or if a auction with the given identification is already present in the AuctionDatabase
     */
-    void addAuctions(auctionDB_t *auctions, EventScheduler *e);  
+    void addAuctions(auctionDB_t *auctions, EventScheduler *e);  //Ok
 
-    //! add a single auction
-    void addAuction(Auction *b);
+    //! add a single auction, the methods assigns the UID for the auction.
+    void addAuction(Auction *b); // Ok
 
     //! activate/execute auctions
     void activateAuctions(auctionDB_t *auctions, EventScheduler *e);
@@ -168,11 +189,11 @@ class AuctionManager
         if a auction with the given identification is currently not present 
         in the auctionDatabase
     */
-    void delAuction(int uid, EventScheduler *e);
-    void delAuction(string rname, string sname, EventScheduler *e);
-    void delAuctions(string sname, EventScheduler *e);
-    void delAuction(Auction *a, EventScheduler *e);
-    void delAuctions(auctionDB_t *auctions, EventScheduler *e); 
+    void delAuction(int uid, EventScheduler *e); // Ok
+    void delAuction(string sname, string rname, EventScheduler *e); // Ok
+    void delAuctions(string sname, EventScheduler *e); // Ok
+    void delAuction(Auction *a, EventScheduler *e); // Ok
+    void delAuctions(auctionDB_t *auctions, EventScheduler *e); //Ok
    
     /*! \short   get information from the auction manager
 

@@ -49,6 +49,7 @@ test_runner_SOURCES = 	@top_srcdir@/src/Error.cpp \
 						@top_srcdir@/test/AuctionTimer_test.cpp \
 						@top_srcdir@/test/Bid_Manager_test.cpp \
 						@top_srcdir@/test/AuctionManager_test.cpp \
+						@top_srcdir@/test/Auctioner_test.cpp \
 						@top_srcdir@/test/test_runner.cpp
 
 if ENABLE_DEBUG

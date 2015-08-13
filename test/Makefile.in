@@ -140,6 +140,7 @@ am_test_runner_OBJECTS = @top_srcdir@/src/Error.$(OBJEXT) \
 	@top_srcdir@/test/AuctionTimer_test.$(OBJEXT) \
 	@top_srcdir@/test/Bid_Manager_test.$(OBJEXT) \
 	@top_srcdir@/test/AuctionManager_test.$(OBJEXT) \
+	@top_srcdir@/test/Auctioner_test.$(OBJEXT) \
 	@top_srcdir@/test/test_runner.$(OBJEXT)
 test_runner_OBJECTS = $(am_test_runner_OBJECTS)
 test_runner_LDADD = $(LDADD)
@@ -615,6 +616,7 @@ test_runner_SOURCES = @top_srcdir@/src/Error.cpp \
 						@top_srcdir@/test/AuctionTimer_test.cpp \
 						@top_srcdir@/test/Bid_Manager_test.cpp \
 						@top_srcdir@/test/AuctionManager_test.cpp \
+						@top_srcdir@/test/Auctioner_test.cpp \
 						@top_srcdir@/test/test_runner.cpp
 
 @ENABLE_DEBUG_FALSE@AM_CXXFLAGS = -O2 -I@top_srcdir@/include $(CPPUNIT_CFLAGS) \
@@ -811,6 +813,9 @@ clean-checkPROGRAMS:
 @top_srcdir@/test/AuctionManager_test.$(OBJEXT):  \
 	@top_srcdir@/test/$(am__dirstamp) \
 	@top_srcdir@/test/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/test/Auctioner_test.$(OBJEXT):  \
+	@top_srcdir@/test/$(am__dirstamp) \
+	@top_srcdir@/test/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/test/test_runner.$(OBJEXT):  \
 	@top_srcdir@/test/$(am__dirstamp) \
 	@top_srcdir@/test/$(DEPDIR)/$(am__dirstamp)
@@ -866,6 +871,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/AuctionIdSource_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/AuctionManager_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/AuctionTimer_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/Auctioner_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/BidFileParser_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/Bid_Manager_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/test/$(DEPDIR)/Bid_test.Po@am__quote@

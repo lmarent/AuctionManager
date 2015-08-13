@@ -108,7 +108,7 @@ class Auctioner
 
     //! execution information and version.
     string getAuctionManagerInfo(infoList_t *i);
-
+    
   public:
 
     /*! \short   construct and initialize a Auction Manager object
@@ -118,8 +118,7 @@ class Auctioner
         \arg \c argc - number of command line arguments
         \arg \c argv - list of command line arguments
     */
-    Auctioner(int argc, char *argv[]);
-
+    Auctioner(int argc, char *argv[]);	
 
     /*! \short   destroy a Auctioner object
         detailed destructor description for auctioner
@@ -130,7 +129,7 @@ class Auctioner
 
     //! dump a Auction Manager object
     void dump( ostream &os );
-
+    
     //! handle the events
     void handleEvent(Event *e, fd_sets_t *fds);
 

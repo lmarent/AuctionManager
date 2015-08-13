@@ -61,13 +61,18 @@ EventScheduler::~EventScheduler()
     eventListIter_t iter;
 
 #ifdef DEBUG
-    log->dlog(ch, "Shutdown");
+    log->dlog(ch, "Shuting down Event Scheduler");
 #endif
 
     // free all stored events
     for (iter = events.begin(); iter != events.end(); iter++) {
         saveDelete(iter->second);
     }
+    
+#ifdef DEBUG
+    log->dlog(ch, "Shutdown Event Scheduler");
+#endif
+    
 }
 
 
@@ -76,10 +81,10 @@ EventScheduler::~EventScheduler()
 void EventScheduler::addEvent(Event *ev)
 {
 	
-	cout << "in event scheduler add event" << endl;
 	
 #ifdef DEBUG
-    log->dlog(ch,"new event %s", eventNames[ev->getType()].c_str());
+	struct timeval tv = ev->getTime();
+    log->dlog(ch,"new event %s - time: %s", eventNames[ev->getType()].c_str(), (toString(tv)).c_str());
 #endif
     
     events.insert(make_pair(ev->getTime(),ev));
@@ -152,10 +157,18 @@ void EventScheduler::delAuctionEvents(int uid)
 
 Event *EventScheduler::getNextEvent()
 {
+
     Event *ev;
     
     if (events.begin() != events.end()) {
+
         ev = events.begin()->second;
+
+#ifdef DEBUG
+        log->dlog(ch,"get Next Event %s", eventNames[ev->getType()].c_str());
+#endif	
+
+
         // dequeue event
         events.erase(events.begin());
         // the receiver is responsible for
@@ -169,6 +182,11 @@ Event *EventScheduler::getNextEvent()
 
 void EventScheduler::reschedNextEvent(Event *ev)
 {
+
+#ifdef DEBUG
+        log->dlog(ch,"starting requeue event %s", eventNames[ev->getType()].c_str());
+#endif
+
     assert(ev != NULL);
    
     if (ev->getIval() > 0) {
@@ -205,11 +223,31 @@ struct timeval EventScheduler::getNextEventTime()
     struct timeval now;
     char c = 'A';
 
+/*
+ *  Activate to see all running events
+#ifdef DEBUG
+	// Show all events created
+	eventListIter_t iter = events.begin();
+	while (iter != events.end())
+	{
+            Event *ev = iter->second;
+            Timeval::gettimeofday(&now, NULL);
+            struct timeval tv = ev->getTime();
+            log->dlog(ch, "-----------------------------------");
+            log->dlog(ch,"Event %s / time: %s / now: %s", eventNames[ev->getType()].c_str(),
+													(toString(tv)).c_str(),
+													(toString(now)).c_str());
+		++iter;
+	}
+#endif		
+*/
     if (events.begin() != events.end()) {
         Event *ev = events.begin()->second;
 		Timeval::gettimeofday(&now, NULL);
-
+		
+		struct timeval tv = ev->getTime();
         rv = Timeval::sub0(ev->getTime(), now);
+        
         // be 100us fuzzy
         if ((rv.tv_sec == 0) && (rv.tv_usec<100)) {
 #ifdef DEBUG
@@ -217,9 +255,38 @@ struct timeval EventScheduler::getNextEventTime()
 #endif
             write(Auctioner::s_sigpipe[1], &c, 1);
         }
+        
     } 
     return rv;
 }
+
+ssize_t EventScheduler::format_timeval(struct timeval *tv, char *buf, size_t sz)
+{
+	ssize_t written = -1;
+	struct tm *gm = localtime(&tv->tv_sec);
+
+	if (gm)
+	{
+		written = (ssize_t)strftime(buf, sz, "%Y-%m-%d %H:%M:%S", gm);
+		if ((written > 0) && ((size_t)written < sz))
+		{
+			int w = snprintf(buf+written, sz-(size_t)written, ".%06dZ", tv->tv_usec);
+			written = (w > 0) ? written + w : -1;
+		}
+	}
+	return written;	
+}
+
+string 
+EventScheduler::toString(struct timeval tv)
+{
+	char buf[28];
+	if (format_timeval(&tv, buf, sizeof(buf)) > 0) {
+		string val_return(buf);
+		return val_return;
+	}
+}
+
 
 
 /* ------------------------- dump ------------------------- */

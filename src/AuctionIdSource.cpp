@@ -31,7 +31,7 @@
 
 
 AuctionIdSource::AuctionIdSource(int _unique)
-  : num(0), unique(_unique)
+  : num(-1), unique(_unique)
 {
 
 }
@@ -48,7 +48,6 @@ unsigned short AuctionIdSource::newId(void)
     unsigned short id;
     
     if (freeIds.empty()) {
-		
         num++;
         while (true)
         {

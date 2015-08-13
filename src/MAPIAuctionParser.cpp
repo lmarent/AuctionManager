@@ -210,7 +210,8 @@ void MAPIAuctionParser::parse(auctionDB_t *auctions,
     
         // add rule
         try {
-            Auction *a = new Auction(idSource->newId(), now, sname, rname, action, miscs);
+            Auction *a = new Auction(now, sname, rname, action, 
+									 miscs);
             auctions->push_back(a);
         } catch (Error &e) {
             log->elog(ch, e);

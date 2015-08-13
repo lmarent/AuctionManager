@@ -55,14 +55,13 @@ AuctionManager::~AuctionManager()
 #ifdef DEBUG
     log->dlog(ch,"Shutdown");
 #endif
-
     for (iter = auctionDB.begin(); iter != auctionDB.end(); iter++) {
         if (*iter != NULL) {
             // delete auction
             saveDelete(*iter);
         } 
     }
-
+	
     for (auctionDoneIter_t i = auctionDone.begin(); i != auctionDone.end(); i++) {
         saveDelete(*i);
     }
@@ -87,7 +86,7 @@ static int isReadableFile( string fileName ) {
 
 Auction *AuctionManager::getAuction(int uid)
 {
-    if ((uid >= 0) && ((unsigned int)uid <= auctionDB.size())) {
+    if ((uid >= 0) && ((unsigned int)uid < auctionDB.size())) {
         return auctionDB[uid];
     } else {
         return NULL;
@@ -142,7 +141,7 @@ auctionIndex_t *AuctionManager::getAuctions(string sname)
     return NULL;
 }
 
-auctionDB_t AuctionManager::getAuctions()
+auctionDB_t  AuctionManager::getAuctions()
 {
     auctionDB_t ret;
 
@@ -230,17 +229,14 @@ void AuctionManager::addAuctions(auctionDB_t * _auctions, EventScheduler *e)
     // add auctions
     for (iter = _auctions->begin(); iter != _auctions->end(); iter++) {
         Auction *a = (*iter);
-        cout << "read the auction" << endl;
         try {
+            
             addAuction(a);
-			cout << "read the auction 1" << endl;
             start[a->getStart()].push_back(a);
-			cout << "read the auction 2" << endl;
             if (a->getStop()) 
             {
                 stop[a->getStop()].push_back(a);
             }
-			cout << "read the auction 3" << endl;
         } catch (Error &e ) {
             saveDelete(a);
             // if only one rule return error
@@ -279,20 +275,24 @@ void AuctionManager::addAuction(Auction *a)
 {
   
 #ifdef DEBUG    
-    log->dlog(ch, "adding new auction with name = '%s'",
-              a->getAuctionName().c_str());
+    log->dlog(ch, "adding new auction with Id = %d, name = '%s'",
+              a->getUId(), a->getAuctionName().c_str());
 #endif  
 				  
 			  
     // test for presence of auctionSource/auctionName combination
     // in auctionDatabase in particular set
-    if (getAuction(a->getSetName(), a->getAuctionName())) {
+    if ( getAuction(a->getSetName(), a->getAuctionName()) != NULL ) {
         log->elog(ch, "Auction %s.%s already installed",
                   a->getSetName().c_str(), a->getAuctionName().c_str());
         throw Error(408, "Auction with this name is already installed");
     }
-
+        		
     try {
+
+		// Assigns the new Id.
+		a->setUId(idSource.newId());
+
         // could do some more checks here
         a->setState(AS_VALID);
 
@@ -302,10 +302,10 @@ void AuctionManager::addAuction(Auction *a)
 
         // resize vector if necessary
         if ((unsigned int)a->getUId() >= auctionDB.size()) {
-            auctionDB.reserve(a->getUId() * 2 + 1);
+            auctionDB.reserve((a->getUId() * 2) + 1);
             auctionDB.resize(a->getUId() + 1);
         }
-
+		
         // insert auction
         auctionDB[a->getUId()] = a; 	
 
@@ -331,14 +331,43 @@ void AuctionManager::addAuction(Auction *a)
 
 void AuctionManager::activateAuctions(auctionDB_t *auctions, EventScheduler *e)
 {
+
+#ifdef DEBUG    
+    log->dlog(ch, "Activate auctions");
+#endif  
+
     auctionDBIter_t             iter;
+    auctionIntervalsIndexIter_t iter2;
+    auctionIntervalsIndex_t     intervals;    
 
     for (iter = auctions->begin(); iter != auctions->end(); iter++) {
-        Auction *r = (*iter);
-        log->dlog(ch, "activate auction with name = '%s'", r->getAuctionName().c_str());
-        r->setState(AS_ACTIVE);
-	 
+        Auction *a = (*iter);
+        log->dlog(ch, "activate auction with name = '%s'", a->getAuctionName().c_str());
+        a->setState(AS_ACTIVE);
+		
+		// Create the execution intervals
+		intervalList_t *ilist = a->getIntervals();
+        for (intervalListIter_t i = ilist->begin(); i != ilist->end(); i++) {
+             procdef_t entry;
+
+             entry.i = i->first;
+             entry.e = i->second;
+              
+             intervals[entry].push_back(a);
+        }
     }
+
+    // group by export interval
+    for (iter2 = intervals.begin(); iter2 != intervals.end(); iter2++) {
+        unsigned long i = iter2->first.i.interval;
+#ifdef DEBUG    
+    log->dlog(ch, "Activate auctions - Execution interval: %lu", i );
+#endif  
+
+        e->addEvent(new PushExecutionEvent(i, iter2->second, iter2->first.e,
+                                        i * 1000, iter2->first.i.align));
+    }
+    
 
 }
 
@@ -353,7 +382,7 @@ string AuctionManager::getInfo(Auction *a)
     log->dlog(ch, "looking up Auction with uid = %d", a->getUId());
 #endif
 
-    s << a->getInfo() << endl;
+    s << a->getInfo();
     
     return s.str();
 }
@@ -473,9 +502,15 @@ void AuctionManager::delAuction(int uid, EventScheduler *e)
 
 void AuctionManager::delAuctions(string sname, EventScheduler *e)
 {
+
+#ifdef DEBUG    
+    log->dlog(ch, "removing auction with set = '%s'", sname.c_str());
+#endif
     
     if (auctionSetIndex.find(sname) != auctionSetIndex.end()) {
-        for (auctionSetIndexIter_t i = auctionSetIndex.begin(); i != auctionSetIndex.end(); i++) {
+        auctionSetIndexIter_t iter = auctionSetIndex.find(sname);
+        auctionIndex_t auctionIndex = iter->second;
+        for (auctionIndexIter_t i = auctionIndex.begin(); i != auctionIndex.end(); i++) {
 						
             delAuction(getAuction(sname, i->first),e);
         }

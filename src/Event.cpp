@@ -56,6 +56,13 @@ Event::Event(event_t typ, time_t offs_sec, time_t offs_usec, unsigned long ival,
     if (align) {
         doAlign();
     }
+
+	cout << "Creating event type:" << eventNames[typ] << endl;
+	char buff[20];
+	strftime(buff, 20, "%Y-%m-%d %H:%M:%S", localtime(&when.tv_sec));
+	string t_string(buff);
+	cout << "event - time:" << t_string << endl; 
+    
 }
 
 

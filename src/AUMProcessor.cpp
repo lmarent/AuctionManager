@@ -105,23 +105,29 @@ void AUMProcessor::addBids( bidDB_t *bids, EventScheduler *e )
 // add Auctions
 void AUMProcessor::addAuctions( auctionDB_t *auctions, EventScheduler *e )
 {
+
+#ifdef DEBUG
+    log->dlog(ch,"Start addAuctions");
+#endif
+
     auctionDBIter_t iter;
    
-    for (iter = auctions->begin(); iter != auctions->end(); iter++) {
+    for (iter = auctions->begin(); iter != auctions->end(); iter++) 
+    {
         addAuction(*iter, e);
     }
+
+#ifdef DEBUG
+    log->dlog(ch,"End addAuctions");
+#endif
+
+
 }
 
 
 
 // add bids
 void AUMProcessor::addBids( bidDB_t *bids )
-{
-
-}
-
-// add auctions
-void AUMProcessor::addAuctions( auctionDB_t *auctions )
 {
 
 }
@@ -138,11 +144,11 @@ void AUMProcessor::delBids(bidDB_t *bids)
 }
 
 // delete auctions
-void AUMProcessor::delAuctions(auctionDB_t *auctions)
+void AUMProcessor::delAuctions(auctionDB_t *aucts)
 {
     auctionDBIter_t iter;
 
-    for (iter = auctions->begin(); iter != auctions->end(); iter++) {
+    for (iter = aucts->begin(); iter != aucts->end(); iter++) {
         delAuction(*iter);
     }
 }
@@ -150,70 +156,86 @@ void AUMProcessor::delAuctions(auctionDB_t *auctions)
 
 /* ------------------------- execute ------------------------- */
 
-int AUMProcessor::execute( EventScheduler *e )
+int AUMProcessor::executeAuction(int rid, string rname)
 {
-    int bidId;
-    
-    /* TODO AM: to implement.
 
-    ruleActions_t entry;
-    actionList_t *actions;
+	auctionProcess_t *auctionprocess; 
+	
+    AUTOLOCK(threaded, &maccess);  
+
+    auctionprocess = &auctions[rid];
+	(auctionprocess->action.mapi)->execute( (auctionprocess->action).params, (void* *) &(auctionprocess->bids) );
+	
+    return 0;
+}
+
+/* ------------------------- addBid ------------------------- */
+
+int AUMProcessor::addBid( Bid *b, EventScheduler *e )
+{
+
+}
+
+/* ------------------------- addAuction ------------------------- */
+
+int AUMProcessor::addAuction( Auction *a, EventScheduler *evs )
+{
+
+#ifdef DEBUG
+    log->dlog(ch,"Start addAuction");
+#endif
+   
+    auctionProcess_t entry;
     int errNo;
     string errStr;
     bool exThrown = false;
 
-    ruleId  = r->getUId();
-    actions = r->getActions();
+    int auctionId = a->getUId();
+    action_t *action = a->getAction();
 
 #ifdef DEBUG
-    log->dlog(ch, "adding Rule #%d", ruleId);
+    log->dlog(ch, "Adding auction #%d", auctionId);
 #endif  
 
     AUTOLOCK(threaded, &maccess);  
 
-    entry.lastPkt = 0;
-    entry.packets = 0;
-    entry.bytes = 0;
-    entry.flist = r->getFilter();
-    entry.bidir = r->isBidir();
-    entry.seppaths = r->sepPaths();
-    entry.rule = r;
-
-    //  Load the module.
-    ppaction_t a;
-
-    a.module = NULL;
-    a.params = NULL;
-    a.flowData = NULL;
+    entry.action.module = NULL;
+    entry.action.params = NULL;
 
     Module *mod;
-    string mname = iter->name;
+    string mname = action->name;
 
 #ifdef DEBUG
-    log->dlog(ch, "it is going to load module %s", mname.c_str());
+    log->dlog(ch, "It is going to load module %s", mname.c_str());
 #endif 
 
     try{        	    
 		// load Action Module used by this rule
 		mod = loader->getModule(mname.c_str());
-		a.module = dynamic_cast<ProcModule*> (mod);
+		entry.action.module = dynamic_cast<ProcModule*> (mod);
 
-		if (a.module != NULL) { // is it a processing kind of module
+		if (entry.action.module != NULL) { // is it a processing kind of module
 
 #ifdef DEBUG
     log->dlog(ch, "module %s loaded", mname.c_str());
 #endif 
-			 a.mapi = a.module->getAPI();
+			 entry.action.mapi = entry.action.module->getAPI();
 
 			 // init module
-			 configItemList_t itmConf = iter->conf;
-					
-			// init timers
-			addTimerEvents(ruleId, cnt, a, *e);
+			 configItemList_t itmConf = action->conf;
+			
+            // add timer events once (only adds events on first module use)
+            entry.action.module->addTimerEvents( *evs );
 		
-			entry.actions.push_back(a);
+		}
+		// make sure the vector of rules is large enough
+		if ((unsigned int)auctionId + 1 > auctions.size()) {
+			auctions.reserve( auctionId*2 + 1);
+			auctions.resize(auctionId + 1 );
+		}
+		// success ->enter struct into internal table
+		auctions[auctionId] = entry;
 
-		}	
     } 
     catch (Error &e) 
     { 
@@ -235,30 +257,18 @@ int AUMProcessor::execute( EventScheduler *e )
 	{
     
         //release packet processing modules already loaded for this rule
-        if (i->module) {
-            loader->releaseModule(i->module);
+        if (entry.action.module) {
+            loader->releaseModule(entry.action.module);
         }
-
-        // empty the list itself
-        entry.actions.clear();
 
         throw Error(errNo, errStr);;
 	}
-	*/
+
+#ifdef DEBUG
+    log->dlog(ch,"End addAuction");
+#endif
+    
     return 0;
-}
-
-/* ------------------------- addBid ------------------------- */
-
-int AUMProcessor::addBid( Bid *b, EventScheduler *e )
-{
-
-}
-
-/* ------------------------- addAuction ------------------------- */
-
-int AUMProcessor::addAuction( Auction *a, EventScheduler *e )
-{
 
 }
 
@@ -285,7 +295,8 @@ int AUMProcessor::delBid( Bid *b )
 
 int AUMProcessor::delAuction( Auction *a )
 {
-    int auctionId = a->getUId();
+    auctionProcess_t *entry;
+    int auctionId; 
 
 #ifdef DEBUG
     log->dlog(ch, "deleting Auction #%d", auctionId);
@@ -293,8 +304,16 @@ int AUMProcessor::delAuction( Auction *a )
 
     AUTOLOCK(threaded, &maccess);
 
-	// TODO AM: implement this procedure.
-
+    auctionId = a->getUId();
+        
+    entry = &auctions[auctionId];
+    
+    // TODO AM: dismantle auction data structure with module function
+    //(entry->mapi)->destroyExportRec(i->expData);
+        
+    // release modules loaded for this rule
+    loader->releaseModule((entry->action).module);
+       
     return 0;
 }
 
@@ -329,24 +348,6 @@ void AUMProcessor::waitUntilDone(void)
 #endif
 }
 
-
-/* ------------------------- AuctionTimeout ------------------------- */
-
-// return 0 (if timeout), 1 (stays idle), >1 (active and no timeout yet)
-unsigned long AUMProcessor::auctionTimeout(int auctionID, unsigned long ival, time_t now)
-{
-    AUTOLOCK(threaded, &maccess);
-	/*
-    time_t last = bids[bidID].lastPkt;
-
-    if (last > 0) {
-        //ruleActions_t *ra = &bids[bidID];
-		 log->dlog(ch,"auto flow idle, export: YES");
-         return 0;
-    }
-	*/
-    return 1;
-}
 
 string AUMProcessor::getInfo()
 {

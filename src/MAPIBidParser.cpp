@@ -91,7 +91,7 @@ void MAPIBidParser::parseFieldValue(fieldValList_t *fieldVals, string value, fie
     }
 }
 
-// FIXME to be rewritten
+
 void MAPIBidParser::parse(fieldDefList_t *fieldDefs, 
 						  fieldValList_t *fieldVals, 
 						  bidDB_t *bids,
@@ -99,6 +99,7 @@ void MAPIBidParser::parse(fieldDefList_t *fieldDefs,
 {
     string sname, rname;
     elementList_t elements;
+    bidAuctionList_t auctions;
     istringstream in(buf);
     string args[128];
     int argc = 0;
@@ -218,10 +219,58 @@ void MAPIBidParser::parse(fieldDefList_t *fieldDefs,
                           
                           elements.push_back(elem);
                       }
+                      
+                  }
+                  break;
+                case 'a':
+                  {
+                      if (ind < argc) 
+                      {
+                          // only one auction per -a parameter
+                          bid_auction_t auction;
+                          
+                          // auction: <set.name> [<param>=<value> , ...]
+                          auction.name = args[ind++];
+                          
+                          // bid field of the element
+                          while ((ind<argc) && (args[ind][0] != '-')) {
+                              configItem_t item;
+                              
+                              // parse param
+							  tmp = args[ind];
+							  if (tmp != ",") {
+								  n = tmp.find("=");
+								  if ((n > 0) && (n < (int)tmp.length()-1)) {
+									  item.name = tmp.substr(0,n);
+									  item.value = tmp.substr(n+1, tmp.length()-n);
+									  item.type = "String";
+									  if (item.name == "start") {
+										 item.name = "Start";
+									  } else if (item.name == "stop") {
+										 item.name = "Stop";
+									  } else if (item.name == "duration") {
+										 item.name = "Duration";
+									  } else if (item.name == "interval") {
+										 item.name = "Interval";
+									  } else {
+										 throw Error("unknown option %s", item.name.c_str());
+									  }
+									  auction.miscList[item.name] = item;
+
+								  } else {
+									  // else invalid parameter  
+									  throw Error("bid-auction parameter parse error");
+								  }
+							  }  
+                              ind++;
+                          }        
+                          auctions.push_back(auction);
+                      }
+                      
                   }
                   break;
                 default:
-                    throw Error(403, "add_task: unknown option %s", args[ind].c_str() );
+                    throw Error(403, "add_bid: unknown option %s", args[ind].c_str() );
                 }
             }	
         }
@@ -229,7 +278,7 @@ void MAPIBidParser::parse(fieldDefList_t *fieldDefs,
         // add bid
         try {
             unsigned short uid = idSource->newId();
-            Bid *b = new Bid((int) uid, sname, rname, elements);
+            Bid *b = new Bid((int) uid, sname, rname, elements, auctions);
             bids->push_back(b);
 
 #ifdef DEBUG

@@ -34,6 +34,7 @@
 #include "BidFileParser.h"
 #include "AuctionFileParser.h"
 #include "AuctionManagerInfo.h"
+#include "Auction.h"
 
 
 //! event numbers
@@ -44,6 +45,7 @@ typedef enum
       ADD_AUCTIONS,
       REMOVE_AUCTIONS,
       ACTIVATE_AUCTIONS,
+      PUSH_EXECUTION,
       GET_INFO,
       GET_MODINFO,
       TEST,
@@ -63,6 +65,7 @@ const string eventNames[] =
       "Add-Auctions",
       "Remove-Auctions",
       "Activate-Auctions",
+      "Push-Execution",
       "Get-info",
       "Get-module-info",
       "Test",
@@ -404,50 +407,87 @@ class RemoveAuctionsEvent : public Event
 };
 
 
-class ProcTimerEvent : public Event
+class PushExecutionEvent : public Event
 {
-private:
+  private:
+    auctionDB_t auctions;
+    procnames_t procs;
+    int final;
 
- public:
-    int aid; // Auction Number
-    int actid;			// Auction Event
-    unsigned int tmID; // Timer Event
+  public:
+
+    PushExecutionEvent(struct timeval time, auctionDB_t &a, procnames_t e, unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, time, ival, align), auctions(a), procs(e), final(0) {  }
+
+    PushExecutionEvent(time_t offs_sec, auctionDB_t &a, procnames_t e, unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, offs_sec, 0, ival, align), auctions(a), procs(e), final(0) { }
+
+    PushExecutionEvent(auctionDB_t &a, procnames_t e, unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, ival, align), auctions(a), procs(e), final(0) { }
+
+    auctionDB_t *getAuctions()
+    {
+        return &auctions;
+    }
     
-public:
+    procnames_t getProcMods()
+    {
+        return procs;
+    }
 
-    ProcTimerEvent( int auctionID, int actID, timers_t *timer ) :
-      Event( PROC_MODULE_TIMER, timer->ival_msec/1000, timer->ival_msec%1000,
-             ((timer->flags & TM_RECURRING) ? timer->ival_msec : 0),
-             timer->flags & TM_ALIGNED),
-      aid(auctionID), 
-      actid(actID),
-      tmID(timer->id)
-      {}
-    
-    int getID() 
-      { 
-          return aid;
-      }
-
-    int getActID()
-      {
-          return actid;
-      }
-
-    unsigned int getTID()
-      {
-          return tmID;
-      }
-    
     int deleteAuction(int uid)
     {
         int ret = 0;
-        
-        if (uid == aid) {
-            ret = 2;
+        auctionDBIter_t iter;
+           
+        for (iter=auctions.begin(); iter != auctions.end(); iter++) {
+            if ((*iter)->getUId() == uid) {
+                auctions.erase(iter);
+                ret++;
+                break;
+            }   
         }
+           
+        if (auctions.empty()) {
+            return ++ret;
+        }
+        
         return ret;
     }
+
+    void setFinal(int f)
+    {
+      final = f;
+    }
+
+    int isFinal() 
+    {
+      return final;
+    }
+};
+
+
+
+
+class ProcTimerEvent : public Event
+{
+private:	
+    unsigned int tmID;
+    timeout_func_t tmFunc;
+    
+public:
+
+    ProcTimerEvent( timeout_func_t timeout, timers_t *timer ) :
+      Event( PROC_MODULE_TIMER,
+             timer->ival_msec/1000, timer->ival_msec%1000,
+             ((timer->flags & TM_RECURRING) ? timer->ival_msec : 0),
+             timer->flags & TM_ALIGNED),
+      tmID(timer->id),
+      tmFunc(timeout)
+      {}
+    
+    int signalTimeout() { return tmFunc( tmID ); }
+
 };
 
 

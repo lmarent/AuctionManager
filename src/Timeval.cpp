@@ -87,10 +87,8 @@ struct timeval Timeval::sub0(struct timeval num, struct timeval sub)
 
 int Timeval::gettimeofday(struct timeval *tv, struct timezone *tz)
 {
-    // use timestamps from the trace
-    tv->tv_sec = g_time.tv_sec;
-    tv->tv_usec = g_time.tv_usec;
-    return 0;
+    // use timestamps from the system
+    return ::gettimeofday(tv,tz);
 
 }
  

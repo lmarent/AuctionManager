@@ -39,7 +39,7 @@
 #include "AuctionIdSource.h"
 
 
-//! rule list
+//! auction list
 typedef vector<Auction*>            auctionDB_t;
 typedef vector<Auction*>::iterator  auctionDBIter_t;
 

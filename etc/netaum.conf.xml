@@ -12,7 +12,8 @@
     <PREF NAME="FilterDefFile">/home/luis/AuctionManager/etc/fielddef.xml</PREF>
     <!-- filter constant file -->
     <PREF NAME="FilterConstFile">/home/luis/AuctionManager/etc/fieldval.xml</PREF>     
-    
+    <!-- auction file to load at start -->
+    <PREF NAME="AuctionFile">/home/luis/AuctionManager/etc/example_auctions1.xml</PREF>
   </MAIN>
   <CONTROL>
     <!-- enable remote control interface -->
