@@ -83,7 +83,7 @@ class ProcModule : public Module
 
     virtual string getModuleType() 
     { 
-        return "packet processing"; 
+        return "auction processing"; 
     }
 
     virtual int getVersion()     

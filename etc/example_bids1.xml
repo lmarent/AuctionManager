@@ -15,7 +15,7 @@
     </ELEMENT>
     
     <AUCTION SET="General" NAME="1">
-		<PREF NAME="Duration">100</PREF>
+		<PREF NAME="Duration">60</PREF>
     </AUCTION>
     
   </BID>  

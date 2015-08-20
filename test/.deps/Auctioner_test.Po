@@ -247,15 +247,15 @@
  ../include/XMLParser.h ../include/ProcModuleInterface.h \
  ../include/metadata.h ../include/FieldDefParser.h \
  ../include/FieldValue.h ../include/BidManager.h ../include/BidIdSource.h \
- ../include/Bid.h ../include/BidFileParser.h ../include/FieldValParser.h \
+ ../include/Bid.h ../include/Auction.h ../include/AuctionTimer.h \
+ ../include/BidFileParser.h ../include/FieldValParser.h \
  ../include/MAPIBidParser.h ../include/EventScheduler.h \
- ../include/Event.h ../include/AuctionFileParser.h ../include/Auction.h \
- ../include/AuctionTimer.h ../include/AuctionIdSource.h \
- ../include/AuctionManagerInfo.h ../include/Timeval.h \
- ../include/AuctionManager.h ../include/MAPIAuctionParser.h \
- ../include/CtrlComm.h ../include/AuctionManagerComponent.h \
- ../lib/httpd/httpd.h /usr/include/syslog.h \
- /usr/include/x86_64-linux-gnu/sys/syslog.h \
+ ../include/Event.h ../include/AuctionFileParser.h \
+ ../include/AuctionIdSource.h ../include/AuctionManagerInfo.h \
+ ../include/Timeval.h ../include/AuctionManager.h \
+ ../include/MAPIAuctionParser.h ../include/CtrlComm.h \
+ ../include/AuctionManagerComponent.h ../lib/httpd/httpd.h \
+ /usr/include/syslog.h /usr/include/x86_64-linux-gnu/sys/syslog.h \
  /usr/include/x86_64-linux-gnu/bits/syslog-path.h /usr/include/grp.h \
  /usr/include/x86_64-linux-gnu/sys/signal.h \
  /usr/include/x86_64-linux-gnu/sys/utsname.h \
@@ -957,6 +957,10 @@
 
 ../include/Bid.h:
 
+../include/Auction.h:
+
+../include/AuctionTimer.h:
+
 ../include/BidFileParser.h:
 
 ../include/FieldValParser.h:
@@ -968,10 +972,6 @@
 ../include/Event.h:
 
 ../include/AuctionFileParser.h:
-
-../include/Auction.h:
-
-../include/AuctionTimer.h:
 
 ../include/AuctionIdSource.h:
 

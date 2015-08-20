@@ -218,9 +218,10 @@
  ../include/Constants.h ../include/ConstantsAum.h ../include/XMLParser.h \
  ../include/Bid.h ../include/ConfigParser.h \
  ../include/ProcModuleInterface.h ../include/metadata.h \
- ../include/FieldDefParser.h ../include/FieldValue.h \
- ../include/FieldValParser.h ../include/BidIdSource.h \
- ../include/ParserFcts.h ../include/Constants.h
+ ../include/FieldDefParser.h ../include/FieldValue.h ../include/Auction.h \
+ ../include/AuctionTimer.h ../include/FieldValParser.h \
+ ../include/BidIdSource.h ../include/ParserFcts.h ../include/Constants.h \
+ ../include/Timeval.h
 
 /usr/include/stdc-predef.h:
 
@@ -838,6 +839,10 @@
 
 ../include/FieldValue.h:
 
+../include/Auction.h:
+
+../include/AuctionTimer.h:
+
 ../include/FieldValParser.h:
 
 ../include/BidIdSource.h:
@@ -845,3 +850,5 @@
 ../include/ParserFcts.h:
 
 ../include/Constants.h:
+
+../include/Timeval.h:

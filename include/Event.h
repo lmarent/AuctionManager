@@ -42,6 +42,8 @@ typedef enum
 {
       ADD_BIDS = 0,
       REMOVE_BIDS,
+      ADD_BID_AUCTION,
+      REMOVE_BID_AUCTION,
       ADD_AUCTIONS,
       REMOVE_AUCTIONS,
       ACTIVATE_AUCTIONS,
@@ -62,6 +64,8 @@ const string eventNames[] =
 {
       "Add-bids",
       "Remove-bids",
+      "Add-Bid-Auction",
+      "Delete-Bid-Auction",
       "Add-Auctions",
       "Remove-Auctions",
       "Activate-Auctions",
@@ -299,6 +303,89 @@ class ActivateAuctionsEvent : public Event
          
          return ret;
      }
+};
+
+
+class InsertBidAuctionEvent : public Event
+{
+  private:
+	Bid * bid;
+	string auctionSet;
+	string auctionName;
+	
+  public:
+
+    InsertBidAuctionEvent(struct timeval time, Bid *_bid, 
+							string _auctionSet, string _auctionName) 
+      : Event(ADD_BID_AUCTION, time), bid(_bid), auctionSet(_auctionSet),
+		auctionName(_auctionName){}
+
+     InsertBidAuctionEvent(time_t offs_sec, Bid *_bid, string _auctionSet, 
+							string _auctionName) 
+      : Event(ADD_BID_AUCTION, offs_sec), bid(_bid), auctionSet(_auctionSet),
+		auctionName(_auctionName) {}
+
+     InsertBidAuctionEvent(Bid *_bid, string _auctionSet, 
+							string _auctionName ) 
+      : Event(ADD_BID_AUCTION), bid(_bid), auctionSet(_auctionSet),
+		auctionName(_auctionName) {}
+
+	 Bid * getBid()
+	 {
+	     return bid;
+	 }
+	 
+	 string getAuctionSet()
+	 {
+		 return auctionSet;
+	 }
+	 
+	 string getAuctionName()
+	 {
+		 return auctionName;
+	 }
+
+};
+
+
+class RemoveBidAuctionEvent : public Event
+{
+  private:
+	Bid * bid;
+	string auctionSet;
+	string auctionName;
+	
+  public:
+
+    RemoveBidAuctionEvent(struct timeval time, Bid *_bid, 
+							string _auctionSet, string _auctionName) 
+      : Event(REMOVE_BID_AUCTION, time), bid(_bid), auctionSet(_auctionSet),
+		auctionName(_auctionName){}
+
+     RemoveBidAuctionEvent(time_t offs_sec, Bid *_bid, string _auctionSet, 
+							string _auctionName) 
+      : Event(REMOVE_BID_AUCTION, offs_sec), bid(_bid), auctionSet(_auctionSet),
+		auctionName(_auctionName) {}
+
+     RemoveBidAuctionEvent(Bid *_bid, string _auctionSet, 
+							string _auctionName ) 
+      : Event(REMOVE_BID_AUCTION), bid(_bid), auctionSet(_auctionSet),
+		auctionName(_auctionName) {}
+
+	 Bid * getBid()
+	 {
+		 return bid;
+	 }
+	 
+	 string getAuctionSet()
+	 {
+		 return auctionSet;
+	 }
+	 
+	 string getAuctionName()
+	 {
+		 return auctionName;
+	 }
 };
 
 

@@ -30,16 +30,18 @@
 
 #include "Bid.h"
 #include "Error.h"
+#include "ParserFcts.h"
+#include "Timeval.h"
+
 
 
 /* ------------------------- Bid ------------------------- */
 
-Bid::Bid(int _uid, string sname, string rname, elementList_t &elements,
+Bid::Bid(time_t now, string sname, string rname, elementList_t &elements,
 		 bidAuctionList_t &ba)
-  : uid(_uid), bidName(rname), setName(sname), state(BS_NEW), 
+  : uid(0), setName(sname), bidName(rname), state(BS_NEW), 
 	elementList(elements), auctionList(ba)
 {
-    unsigned long duration;
 
     log = Logger::getInstance();
     ch = log->createChannel("Bid");
@@ -50,13 +52,16 @@ Bid::Bid(int _uid, string sname, string rname, elementList_t &elements,
 
 }
 
-Bid::Bid(int id, const Bid &rhs)
-  :uid(id), state(BS_NEW)
+Bid::Bid( const Bid &rhs )
+  : uid(0), state(BS_NEW)
 {
-	bidName = rhs.bidName;
+
+    log = Logger::getInstance();
+    ch = log->createChannel("Bid");
+
+	uid = rhs.uid;
 	setName = rhs.setName;
-	startTime = rhs.startTime;
-	endTime = rhs.endTime;
+	bidName = rhs.bidName;
 	
 	// Copy elements part of the bid.
 	elementListConstIter_t iter;
@@ -90,11 +95,41 @@ Bid::Bid(int id, const Bid &rhs)
 	}
 	
 	// Copy auctions part of the bid
-	bidAuctionListConstIter_t iter;
-	for (iter = (rhs.auctionList).begin(); iter != (rhs.auctionList).end(); ++iter ){
+	bidAuctionListConstIter_t iter_act;
+	for (iter_act = (rhs.auctionList).begin(); iter_act != (rhs.auctionList).end(); ++iter_act )
+	{
 		bid_auction_t auction;
-		auction.auctionSet = iter->auctionSet;
-		auction.auctionName = iter->auctionName;
+		auction.auctionSet = iter_act->auctionSet;
+		auction.auctionName = iter_act->auctionName;
+		auction.start = iter_act->start;
+		auction.stop = iter_act->stop;
+
+		bidIntervalListConstIter_t inter_iter;
+		for ( inter_iter = iter_act->intervals.begin(); 
+					inter_iter != iter_act->intervals.end(); ++inter_iter){
+
+			interval_t ientry;
+           	ientry.interval = inter_iter->interval;
+           	ientry.align = inter_iter->align;
+			auction.intervals.push_back(ientry);
+		}
+				
+		
+		// Copy Misc items.
+		miscListConstIter_t misc_iter;
+		for ( misc_iter = iter_act->miscList.begin(); 
+					misc_iter != iter_act->miscList.end(); ++misc_iter){
+			configItem_t item;
+			item.group = (misc_iter->second).group;
+			item.module = (misc_iter->second).module;
+			item.name = (misc_iter->second).name;
+			item.value = (misc_iter->second).value;
+			item.type = (misc_iter->second).type;
+			
+			auction.miscList[misc_iter->first] = item;
+		}
+		
+		
 		auctionList.push_back(auction);
 	}
 	
@@ -147,10 +182,11 @@ string Bid::toString(element_t &elem)
 string Bid::getInfo()
 {
 	std::stringstream output;
-	output << "uid:" << getUId() << std::endl;
-	output << "StartTime:" << getStartTime() 
-			<< " EndTime:" << getEndTime() 
-			<< " NbrElements:" << elementList.size()
+
+	output << "Set:" << getSetName() 
+		   << " Name:" << getBidName();
+
+	output 	<< " NbrElements:" << elementList.size()
 			<< std::endl;
 	
 	elementListIter_t iter;
@@ -161,10 +197,30 @@ string Bid::getInfo()
 	output  << "Nbr Auctions:" << auctionList.size();
 	bidAuctionListIter_t ait;
 	for (ait = auctionList.begin(); ait != auctionList.end(); ++ait ){
-		output << "AuctionSet:" << ait->auctionSet 
-			   << " AuctionName:" << ait->auctionName << std::endl;
+		output << " AuctionSet:" << ait->auctionSet
+			   << " AuctionName:" << ait->auctionName 
+			   << " Start: " << Timeval::toString(ait->start) 
+			   << " Stop:" << Timeval::toString(ait->stop) << std::endl;
+
+		bidIntervalListIter_t inter_iter;
+		for ( inter_iter = ait->intervals.begin(); 
+				inter_iter != ait->intervals.end(); ++inter_iter){
+			output << "Interval:" << inter_iter->interval 
+				   << "Align:" << inter_iter->align 
+				   << endl;
+		}
+			   		
+		miscListIter_t misc_iter;
+		for ( misc_iter = ait->miscList.begin(); misc_iter != ait->miscList.end(); ++misc_iter){
+			output << "miscItem:" << misc_iter->first 
+				   << "Value:" << (misc_iter->second).value
+				   << endl;
+		}
+		 
 	}
 	
 	
 	return output.str();
 }
+
+

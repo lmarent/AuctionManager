@@ -117,14 +117,20 @@ am_auctionManager_OBJECTS = auctionManager-Error.$(OBJEXT) \
 	auctionManager-CtrlComm.$(OBJEXT) \
 	auctionManager-XMLParser.$(OBJEXT) \
 	auctionManager-Bid.$(OBJEXT) \
+	auctionManager-AuctionIdSource.$(OBJEXT) \
+	auctionManager-Auction.$(OBJEXT) \
+	auctionManager-AuctionManager.$(OBJEXT) \
+	auctionManager-AuctionFileParser.$(OBJEXT) \
+	auctionManager-MAPIAuctionParser.$(OBJEXT) \
 	auctionManager-BidIdSource.$(OBJEXT) \
 	auctionManager-BidManager.$(OBJEXT) \
 	auctionManager-BidFileParser.$(OBJEXT) \
 	auctionManager-AUMProcessor.$(OBJEXT) \
 	auctionManager-AuctionManagerInfo.$(OBJEXT) \
 	auctionManager-AuctionTimer.$(OBJEXT) \
-	auctionManager-AuctionManager.$(OBJEXT) \
-	auctionManager-AuctionManagerComponent.$(OBJEXT)
+	auctionManager-AuctionManagerComponent.$(OBJEXT) \
+	auctionManager-Auctioner.$(OBJEXT) \
+	auctionManager-main.$(OBJEXT)
 auctionManager_OBJECTS = $(am_auctionManager_OBJECTS)
 auctionManager_DEPENDENCIES =  \
 	$(top_builddir)/lib/getopt_long/libgetopt_long.a \
@@ -352,7 +358,9 @@ top_builddir = ..
 top_srcdir = ..
 AUTOMAKE_OPTIONS = foreign
 #AM_CXXFLAGS = -O2  
-AM_CXXFLAGS = -g -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING
+AM_CXXFLAGS = -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
+				-g -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING
+
 auctionManager_SOURCES = Error.cpp \
 						  Event.cpp \
 						  EventScheduler.cpp \
@@ -375,13 +383,20 @@ auctionManager_SOURCES = Error.cpp \
 						  CtrlComm.cpp \
 						  XMLParser.cpp \
 						  Bid.cpp \
+						  AuctionIdSource.cpp \
+						  Auction.cpp \
+						  AuctionManager.cpp \
+						  AuctionFileParser.cpp \
+						  MAPIAuctionParser.cpp \
 						  BidIdSource.cpp \
 						  BidManager.cpp \
 						  BidFileParser.cpp \
 						  AUMProcessor.cpp \
 						  AuctionManagerInfo.cpp \
 						  AuctionTimer.cpp \
-						  AuctionManager.cpp AuctionManagerComponent.cpp
+						  AuctionManagerComponent.cpp \
+						  Auctioner.cpp \
+						  main.cpp
 
 auctionManager_CPPFLAGS = -I$(top_srcdir)/include -I$(top_srcdir)/lib/getopt_long \
 						  -I$(top_srcdir)/lib/httpd
@@ -393,7 +408,10 @@ auctionManager_LDADD = $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 
 # what flags you want to pass to the C compiler & linker
 AM_CPPFLAGS = -g -I../include  -I/usr/local/include/libnl3   -I/usr/local/include/libnl3  
-AM_LDFLAGS =  -L/usr/local/lib -lnl-3   -L/usr/local/lib -lnl-route-3 -lnl-3  
+AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
+			 $(top_builddir)/lib/httpd/libhttpd.a \
+			    -lxml2
+
 LDADD =  
 all: all-am
 
@@ -490,10 +508,14 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/auctionManager-AUMProcessor.Po
+include ./$(DEPDIR)/auctionManager-Auction.Po
+include ./$(DEPDIR)/auctionManager-AuctionFileParser.Po
+include ./$(DEPDIR)/auctionManager-AuctionIdSource.Po
 include ./$(DEPDIR)/auctionManager-AuctionManager.Po
 include ./$(DEPDIR)/auctionManager-AuctionManagerComponent.Po
 include ./$(DEPDIR)/auctionManager-AuctionManagerInfo.Po
 include ./$(DEPDIR)/auctionManager-AuctionTimer.Po
+include ./$(DEPDIR)/auctionManager-Auctioner.Po
 include ./$(DEPDIR)/auctionManager-Bid.Po
 include ./$(DEPDIR)/auctionManager-BidFileParser.Po
 include ./$(DEPDIR)/auctionManager-BidIdSource.Po
@@ -511,6 +533,7 @@ include ./$(DEPDIR)/auctionManager-FieldDefParser.Po
 include ./$(DEPDIR)/auctionManager-FieldValParser.Po
 include ./$(DEPDIR)/auctionManager-FieldValue.Po
 include ./$(DEPDIR)/auctionManager-Logger.Po
+include ./$(DEPDIR)/auctionManager-MAPIAuctionParser.Po
 include ./$(DEPDIR)/auctionManager-MAPIBidParser.Po
 include ./$(DEPDIR)/auctionManager-Module.Po
 include ./$(DEPDIR)/auctionManager-ModuleLoader.Po
@@ -519,6 +542,7 @@ include ./$(DEPDIR)/auctionManager-ParserFcts.Po
 include ./$(DEPDIR)/auctionManager-ProcModule.Po
 include ./$(DEPDIR)/auctionManager-Timeval.Po
 include ./$(DEPDIR)/auctionManager-XMLParser.Po
+include ./$(DEPDIR)/auctionManager-main.Po
 
 .cpp.o:
 	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -852,6 +876,76 @@ auctionManager-Bid.obj: Bid.cpp
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-Bid.obj `if test -f 'Bid.cpp'; then $(CYGPATH_W) 'Bid.cpp'; else $(CYGPATH_W) '$(srcdir)/Bid.cpp'; fi`
 
+auctionManager-AuctionIdSource.o: AuctionIdSource.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-AuctionIdSource.o -MD -MP -MF $(DEPDIR)/auctionManager-AuctionIdSource.Tpo -c -o auctionManager-AuctionIdSource.o `test -f 'AuctionIdSource.cpp' || echo '$(srcdir)/'`AuctionIdSource.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-AuctionIdSource.Tpo $(DEPDIR)/auctionManager-AuctionIdSource.Po
+#	$(AM_V_CXX)source='AuctionIdSource.cpp' object='auctionManager-AuctionIdSource.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AuctionIdSource.o `test -f 'AuctionIdSource.cpp' || echo '$(srcdir)/'`AuctionIdSource.cpp
+
+auctionManager-AuctionIdSource.obj: AuctionIdSource.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-AuctionIdSource.obj -MD -MP -MF $(DEPDIR)/auctionManager-AuctionIdSource.Tpo -c -o auctionManager-AuctionIdSource.obj `if test -f 'AuctionIdSource.cpp'; then $(CYGPATH_W) 'AuctionIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/AuctionIdSource.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-AuctionIdSource.Tpo $(DEPDIR)/auctionManager-AuctionIdSource.Po
+#	$(AM_V_CXX)source='AuctionIdSource.cpp' object='auctionManager-AuctionIdSource.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AuctionIdSource.obj `if test -f 'AuctionIdSource.cpp'; then $(CYGPATH_W) 'AuctionIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/AuctionIdSource.cpp'; fi`
+
+auctionManager-Auction.o: Auction.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-Auction.o -MD -MP -MF $(DEPDIR)/auctionManager-Auction.Tpo -c -o auctionManager-Auction.o `test -f 'Auction.cpp' || echo '$(srcdir)/'`Auction.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-Auction.Tpo $(DEPDIR)/auctionManager-Auction.Po
+#	$(AM_V_CXX)source='Auction.cpp' object='auctionManager-Auction.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-Auction.o `test -f 'Auction.cpp' || echo '$(srcdir)/'`Auction.cpp
+
+auctionManager-Auction.obj: Auction.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-Auction.obj -MD -MP -MF $(DEPDIR)/auctionManager-Auction.Tpo -c -o auctionManager-Auction.obj `if test -f 'Auction.cpp'; then $(CYGPATH_W) 'Auction.cpp'; else $(CYGPATH_W) '$(srcdir)/Auction.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-Auction.Tpo $(DEPDIR)/auctionManager-Auction.Po
+#	$(AM_V_CXX)source='Auction.cpp' object='auctionManager-Auction.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-Auction.obj `if test -f 'Auction.cpp'; then $(CYGPATH_W) 'Auction.cpp'; else $(CYGPATH_W) '$(srcdir)/Auction.cpp'; fi`
+
+auctionManager-AuctionManager.o: AuctionManager.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-AuctionManager.o -MD -MP -MF $(DEPDIR)/auctionManager-AuctionManager.Tpo -c -o auctionManager-AuctionManager.o `test -f 'AuctionManager.cpp' || echo '$(srcdir)/'`AuctionManager.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-AuctionManager.Tpo $(DEPDIR)/auctionManager-AuctionManager.Po
+#	$(AM_V_CXX)source='AuctionManager.cpp' object='auctionManager-AuctionManager.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AuctionManager.o `test -f 'AuctionManager.cpp' || echo '$(srcdir)/'`AuctionManager.cpp
+
+auctionManager-AuctionManager.obj: AuctionManager.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-AuctionManager.obj -MD -MP -MF $(DEPDIR)/auctionManager-AuctionManager.Tpo -c -o auctionManager-AuctionManager.obj `if test -f 'AuctionManager.cpp'; then $(CYGPATH_W) 'AuctionManager.cpp'; else $(CYGPATH_W) '$(srcdir)/AuctionManager.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-AuctionManager.Tpo $(DEPDIR)/auctionManager-AuctionManager.Po
+#	$(AM_V_CXX)source='AuctionManager.cpp' object='auctionManager-AuctionManager.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AuctionManager.obj `if test -f 'AuctionManager.cpp'; then $(CYGPATH_W) 'AuctionManager.cpp'; else $(CYGPATH_W) '$(srcdir)/AuctionManager.cpp'; fi`
+
+auctionManager-AuctionFileParser.o: AuctionFileParser.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-AuctionFileParser.o -MD -MP -MF $(DEPDIR)/auctionManager-AuctionFileParser.Tpo -c -o auctionManager-AuctionFileParser.o `test -f 'AuctionFileParser.cpp' || echo '$(srcdir)/'`AuctionFileParser.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-AuctionFileParser.Tpo $(DEPDIR)/auctionManager-AuctionFileParser.Po
+#	$(AM_V_CXX)source='AuctionFileParser.cpp' object='auctionManager-AuctionFileParser.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AuctionFileParser.o `test -f 'AuctionFileParser.cpp' || echo '$(srcdir)/'`AuctionFileParser.cpp
+
+auctionManager-AuctionFileParser.obj: AuctionFileParser.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-AuctionFileParser.obj -MD -MP -MF $(DEPDIR)/auctionManager-AuctionFileParser.Tpo -c -o auctionManager-AuctionFileParser.obj `if test -f 'AuctionFileParser.cpp'; then $(CYGPATH_W) 'AuctionFileParser.cpp'; else $(CYGPATH_W) '$(srcdir)/AuctionFileParser.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-AuctionFileParser.Tpo $(DEPDIR)/auctionManager-AuctionFileParser.Po
+#	$(AM_V_CXX)source='AuctionFileParser.cpp' object='auctionManager-AuctionFileParser.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AuctionFileParser.obj `if test -f 'AuctionFileParser.cpp'; then $(CYGPATH_W) 'AuctionFileParser.cpp'; else $(CYGPATH_W) '$(srcdir)/AuctionFileParser.cpp'; fi`
+
+auctionManager-MAPIAuctionParser.o: MAPIAuctionParser.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-MAPIAuctionParser.o -MD -MP -MF $(DEPDIR)/auctionManager-MAPIAuctionParser.Tpo -c -o auctionManager-MAPIAuctionParser.o `test -f 'MAPIAuctionParser.cpp' || echo '$(srcdir)/'`MAPIAuctionParser.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-MAPIAuctionParser.Tpo $(DEPDIR)/auctionManager-MAPIAuctionParser.Po
+#	$(AM_V_CXX)source='MAPIAuctionParser.cpp' object='auctionManager-MAPIAuctionParser.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-MAPIAuctionParser.o `test -f 'MAPIAuctionParser.cpp' || echo '$(srcdir)/'`MAPIAuctionParser.cpp
+
+auctionManager-MAPIAuctionParser.obj: MAPIAuctionParser.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-MAPIAuctionParser.obj -MD -MP -MF $(DEPDIR)/auctionManager-MAPIAuctionParser.Tpo -c -o auctionManager-MAPIAuctionParser.obj `if test -f 'MAPIAuctionParser.cpp'; then $(CYGPATH_W) 'MAPIAuctionParser.cpp'; else $(CYGPATH_W) '$(srcdir)/MAPIAuctionParser.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-MAPIAuctionParser.Tpo $(DEPDIR)/auctionManager-MAPIAuctionParser.Po
+#	$(AM_V_CXX)source='MAPIAuctionParser.cpp' object='auctionManager-MAPIAuctionParser.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-MAPIAuctionParser.obj `if test -f 'MAPIAuctionParser.cpp'; then $(CYGPATH_W) 'MAPIAuctionParser.cpp'; else $(CYGPATH_W) '$(srcdir)/MAPIAuctionParser.cpp'; fi`
+
 auctionManager-BidIdSource.o: BidIdSource.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-BidIdSource.o -MD -MP -MF $(DEPDIR)/auctionManager-BidIdSource.Tpo -c -o auctionManager-BidIdSource.o `test -f 'BidIdSource.cpp' || echo '$(srcdir)/'`BidIdSource.cpp
 	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-BidIdSource.Tpo $(DEPDIR)/auctionManager-BidIdSource.Po
@@ -936,20 +1030,6 @@ auctionManager-AuctionTimer.obj: AuctionTimer.cpp
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AuctionTimer.obj `if test -f 'AuctionTimer.cpp'; then $(CYGPATH_W) 'AuctionTimer.cpp'; else $(CYGPATH_W) '$(srcdir)/AuctionTimer.cpp'; fi`
 
-auctionManager-AuctionManager.o: AuctionManager.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-AuctionManager.o -MD -MP -MF $(DEPDIR)/auctionManager-AuctionManager.Tpo -c -o auctionManager-AuctionManager.o `test -f 'AuctionManager.cpp' || echo '$(srcdir)/'`AuctionManager.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-AuctionManager.Tpo $(DEPDIR)/auctionManager-AuctionManager.Po
-#	$(AM_V_CXX)source='AuctionManager.cpp' object='auctionManager-AuctionManager.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AuctionManager.o `test -f 'AuctionManager.cpp' || echo '$(srcdir)/'`AuctionManager.cpp
-
-auctionManager-AuctionManager.obj: AuctionManager.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-AuctionManager.obj -MD -MP -MF $(DEPDIR)/auctionManager-AuctionManager.Tpo -c -o auctionManager-AuctionManager.obj `if test -f 'AuctionManager.cpp'; then $(CYGPATH_W) 'AuctionManager.cpp'; else $(CYGPATH_W) '$(srcdir)/AuctionManager.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-AuctionManager.Tpo $(DEPDIR)/auctionManager-AuctionManager.Po
-#	$(AM_V_CXX)source='AuctionManager.cpp' object='auctionManager-AuctionManager.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AuctionManager.obj `if test -f 'AuctionManager.cpp'; then $(CYGPATH_W) 'AuctionManager.cpp'; else $(CYGPATH_W) '$(srcdir)/AuctionManager.cpp'; fi`
-
 auctionManager-AuctionManagerComponent.o: AuctionManagerComponent.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-AuctionManagerComponent.o -MD -MP -MF $(DEPDIR)/auctionManager-AuctionManagerComponent.Tpo -c -o auctionManager-AuctionManagerComponent.o `test -f 'AuctionManagerComponent.cpp' || echo '$(srcdir)/'`AuctionManagerComponent.cpp
 	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-AuctionManagerComponent.Tpo $(DEPDIR)/auctionManager-AuctionManagerComponent.Po
@@ -963,6 +1043,34 @@ auctionManager-AuctionManagerComponent.obj: AuctionManagerComponent.cpp
 #	$(AM_V_CXX)source='AuctionManagerComponent.cpp' object='auctionManager-AuctionManagerComponent.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AuctionManagerComponent.obj `if test -f 'AuctionManagerComponent.cpp'; then $(CYGPATH_W) 'AuctionManagerComponent.cpp'; else $(CYGPATH_W) '$(srcdir)/AuctionManagerComponent.cpp'; fi`
+
+auctionManager-Auctioner.o: Auctioner.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-Auctioner.o -MD -MP -MF $(DEPDIR)/auctionManager-Auctioner.Tpo -c -o auctionManager-Auctioner.o `test -f 'Auctioner.cpp' || echo '$(srcdir)/'`Auctioner.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-Auctioner.Tpo $(DEPDIR)/auctionManager-Auctioner.Po
+#	$(AM_V_CXX)source='Auctioner.cpp' object='auctionManager-Auctioner.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-Auctioner.o `test -f 'Auctioner.cpp' || echo '$(srcdir)/'`Auctioner.cpp
+
+auctionManager-Auctioner.obj: Auctioner.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-Auctioner.obj -MD -MP -MF $(DEPDIR)/auctionManager-Auctioner.Tpo -c -o auctionManager-Auctioner.obj `if test -f 'Auctioner.cpp'; then $(CYGPATH_W) 'Auctioner.cpp'; else $(CYGPATH_W) '$(srcdir)/Auctioner.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-Auctioner.Tpo $(DEPDIR)/auctionManager-Auctioner.Po
+#	$(AM_V_CXX)source='Auctioner.cpp' object='auctionManager-Auctioner.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-Auctioner.obj `if test -f 'Auctioner.cpp'; then $(CYGPATH_W) 'Auctioner.cpp'; else $(CYGPATH_W) '$(srcdir)/Auctioner.cpp'; fi`
+
+auctionManager-main.o: main.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-main.o -MD -MP -MF $(DEPDIR)/auctionManager-main.Tpo -c -o auctionManager-main.o `test -f 'main.cpp' || echo '$(srcdir)/'`main.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-main.Tpo $(DEPDIR)/auctionManager-main.Po
+#	$(AM_V_CXX)source='main.cpp' object='auctionManager-main.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-main.o `test -f 'main.cpp' || echo '$(srcdir)/'`main.cpp
+
+auctionManager-main.obj: main.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-main.obj -MD -MP -MF $(DEPDIR)/auctionManager-main.Tpo -c -o auctionManager-main.obj `if test -f 'main.cpp'; then $(CYGPATH_W) 'main.cpp'; else $(CYGPATH_W) '$(srcdir)/main.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-main.Tpo $(DEPDIR)/auctionManager-main.Po
+#	$(AM_V_CXX)source='main.cpp' object='auctionManager-main.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-main.obj `if test -f 'main.cpp'; then $(CYGPATH_W) 'main.cpp'; else $(CYGPATH_W) '$(srcdir)/main.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1175,6 +1283,7 @@ uninstall-am: uninstall-binPROGRAMS
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS
 
+#				-I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

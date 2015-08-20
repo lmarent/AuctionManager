@@ -38,7 +38,9 @@ test_runner_SOURCES = 	@top_srcdir@/src/Error.cpp \
 						@top_srcdir@/src/AUMProcessor.cpp \
 						@top_srcdir@/src/ConfigManager.cpp \
 						@top_srcdir@/src/AuctionManager.cpp \
+						@top_srcdir@/src/Allocation.cpp \
 						@top_srcdir@/src/Auctioner.cpp \
+						@top_srcdir@/test/Timeval_test.cpp \
 						@top_srcdir@/test/FieldValue_test.cpp \
 						@top_srcdir@/test/FieldDefParser_test.cpp \
 						@top_srcdir@/test/FieldValParser_test.cpp \
@@ -46,10 +48,11 @@ test_runner_SOURCES = 	@top_srcdir@/src/Error.cpp \
 						@top_srcdir@/test/BidFileParser_test.cpp \
 						@top_srcdir@/test/AuctionFileParser_test.cpp \
 						@top_srcdir@/test/Bid_test.cpp \
+						@top_srcdir@/test/Allocation_test.cpp \
 						@top_srcdir@/test/AuctionTimer_test.cpp \
 						@top_srcdir@/test/Bid_Manager_test.cpp \
 						@top_srcdir@/test/AuctionManager_test.cpp \
-						@top_srcdir@/test/Auctioner_test.cpp \
+						@top_srcdir@/test/AUMProcessor_test.cpp \
 						@top_srcdir@/test/test_runner.cpp
 
 if ENABLE_DEBUG

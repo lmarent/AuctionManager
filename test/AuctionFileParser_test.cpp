@@ -42,11 +42,8 @@ void AuctionFileParser_Test::setUp()
 	try
 	{
 		ptrAuctionFileParser = new AuctionFileParser(filename);
-		
-		cout << "Created auction parser" << endl;
-		
+				
 		idSource = new AuctionIdSource(1); // Unique.
-		cout << "Finish setup" << endl;
 		
 	}catch (Error &e)
 	{

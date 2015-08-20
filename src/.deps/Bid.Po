@@ -219,7 +219,9 @@
  /usr/include/libxml2/libxml/xmlmemory.h \
  /usr/include/libxml2/libxml/threads.h ../include/XMLParser.h \
  ../include/ProcModuleInterface.h ../include/metadata.h \
- ../include/FieldDefParser.h ../include/FieldValue.h ../include/Error.h
+ ../include/FieldDefParser.h ../include/FieldValue.h ../include/Auction.h \
+ ../include/AuctionTimer.h ../include/Error.h ../include/ParserFcts.h \
+ ../include/Timeval.h
 
 /usr/include/stdc-predef.h:
 
@@ -835,4 +837,12 @@
 
 ../include/FieldValue.h:
 
+../include/Auction.h:
+
+../include/AuctionTimer.h:
+
 ../include/Error.h:
+
+../include/ParserFcts.h:
+
+../include/Timeval.h:

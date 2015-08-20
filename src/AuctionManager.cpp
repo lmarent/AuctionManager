@@ -55,6 +55,7 @@ AuctionManager::~AuctionManager()
 #ifdef DEBUG
     log->dlog(ch,"Shutdown");
 #endif
+
     for (iter = auctionDB.begin(); iter != auctionDB.end(); iter++) {
         if (*iter != NULL) {
             // delete auction
@@ -65,6 +66,11 @@ AuctionManager::~AuctionManager()
     for (auctionDoneIter_t i = auctionDone.begin(); i != auctionDone.end(); i++) {
         saveDelete(*i);
     }
+
+#ifdef DEBUG
+    log->dlog(ch,"Finish shutdown");
+#endif
+
 }
 
 
@@ -232,11 +238,13 @@ void AuctionManager::addAuctions(auctionDB_t * _auctions, EventScheduler *e)
         try {
             
             addAuction(a);
+
             start[a->getStart()].push_back(a);
             if (a->getStop()) 
             {
                 stop[a->getStop()].push_back(a);
             }
+
         } catch (Error &e ) {
             saveDelete(a);
             // if only one rule return error
@@ -275,8 +283,8 @@ void AuctionManager::addAuction(Auction *a)
 {
   
 #ifdef DEBUG    
-    log->dlog(ch, "adding new auction with Id = %d, name = '%s'",
-              a->getUId(), a->getAuctionName().c_str());
+    log->dlog(ch, "adding new auction with set = %s, name = '%s'",
+              a->getSetName().c_str(), a->getAuctionName().c_str());
 #endif  
 				  
 			  
@@ -297,7 +305,7 @@ void AuctionManager::addAuction(Auction *a)
         a->setState(AS_VALID);
 
 #ifdef DEBUG    
-		log->dlog(ch, "Auction Id = '%d'", a->getUId());
+		log->dlog(ch, "Auction Id = #%d ", a->getUId());
 #endif 
 
         // resize vector if necessary

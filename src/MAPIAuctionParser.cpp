@@ -101,10 +101,18 @@ void MAPIAuctionParser::parse(auctionDB_t *auctions,
         n = args[0].find(".");
         if (n > 0) {
             sname = args[0].substr(0, n);
+            // use lower case internally
+            transform(sname.begin(), sname.end(), sname.begin(), ToLower());
+            
             rname = args[0].substr(n+1, tmp.length()-n);
+            
+            // use lower case internally
+            transform(rname.begin(), rname.end(), rname.begin(), ToLower());
         } else {
             sname = "0";
             rname = args[0];
+            // use lower case internally
+            transform(rname.begin(), rname.end(), rname.begin(), ToLower());
         }
 
         // parse the rest of the args
@@ -210,8 +218,7 @@ void MAPIAuctionParser::parse(auctionDB_t *auctions,
     
         // add rule
         try {
-            Auction *a = new Auction(now, sname, rname, action, 
-									 miscs);
+            Auction *a = new Auction(now, sname, rname, action, miscs);
             auctions->push_back(a);
         } catch (Error &e) {
             log->elog(ch, e);

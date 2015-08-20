@@ -30,6 +30,7 @@
 #include "BidFileParser.h"
 #include "ParserFcts.h"
 #include "Constants.h"
+#include "Timeval.h"
 
 
 BidFileParser::BidFileParser(string filename)
@@ -66,7 +67,7 @@ configItem_t BidFileParser::parsePref(xmlNodePtr cur)
     try {
         ParserFcts::parseItem(item.type, item.value);
     } catch (Error &e) {    
-        throw Error("Rule Parser Error: parse value error at line %d: %s", XML_GET_LINE(cur), 
+        throw Error("Bid Parser Error: parse value error at line %d: %s", XML_GET_LINE(cur), 
                     e.getError().c_str());
     }
 
@@ -134,6 +135,133 @@ BidFileParser::parseFieldValue(fieldValList_t *fieldVals, string value, field_t 
     }
 }
 
+/* functions for accessing the templates */
+string BidFileParser::getMiscVal(miscList_t *_miscList, string name)
+{
+    miscListIter_t iter;
+
+    iter = _miscList->find(name);
+    if (iter != _miscList->end()) {
+        return iter->second.value;
+    } else {
+        return "";
+    }
+}
+
+
+/* ------------------------- parseTime ------------------------- */
+
+time_t BidFileParser::parseTime(string timestr)
+{
+    struct tm  t;
+  
+    if (timestr[0] == '+') {
+        // relative time in secs to start
+        try {
+	    struct tm tm;
+            int secs = ParserFcts::parseInt(timestr.substr(1,timestr.length()));
+            time_t start = time(NULL) + secs;
+            return mktime(localtime_r(&start,&tm));
+        } catch (Error &e) {
+            throw Error("Incorrect relative time value '%s'", timestr.c_str());
+        }
+    } else {
+        // absolute time
+        if (timestr.empty() || (strptime(timestr.c_str(), TIME_FORMAT.c_str(), &t) == NULL)) {
+            return 0;
+        }
+    }
+    return mktime(&t);
+}
+
+
+void BidFileParser::calculateIntervals(time_t now, bid_auction_t *auction)
+{
+
+    unsigned long duration;
+        
+    /* time stuff */
+    auction->start = now;
+        
+    // stop = 0 indicates infinite running time
+    auction->stop = 0;
+    
+    // duration = 0 indicates no duration set
+    duration = 0;
+		
+	string sstart = getMiscVal(&(auction->miscList), "Start");
+	string sstop = getMiscVal(&(auction->miscList), "Stop");
+	string sduration = getMiscVal(&(auction->miscList), "Duration");		
+	string sinterval = getMiscVal(&(auction->miscList), "Interval");
+	string salign = getMiscVal(&(auction->miscList), "Align");
+
+    if (!sstart.empty() && !sstop.empty() && !sduration.empty()) {
+        throw Error(409, "illegal to specify: start+stop+duration time");
+    }
+	
+    if (!sstart.empty()) {
+        auction->start = parseTime(sstart);
+        if(auction->start == 0) {
+            throw Error(410, "invalid start time %s", sstart.c_str());
+        }
+    }
+
+    if (!sstop.empty()) {
+        auction->stop = parseTime(sstop);
+        if(auction->stop == 0) {
+            throw Error(411, "invalid stop time %s", sstop.c_str());
+        }
+    }
+	
+    if (!sduration.empty()) {
+        duration = ParserFcts::parseULong(sduration);
+    }
+
+    if ( duration > 0) {
+        if (auction->stop) {
+            // stop + duration specified
+            auction->start = auction->stop - duration;
+        } else {
+            // stop [+ start] specified
+            auction->stop = auction->start + duration;
+        }
+    }
+	
+    // now start has a defined value, while stop may still be zero 
+    // indicating an infinite rule
+	    
+    // do we have a stop time defined that is in the past ?
+    if ((auction->stop != 0) && (auction->stop <= now)) {
+        throw Error(300, "task running time is already over");
+    }
+	
+    if (auction->start < now) {
+        // start late tasks immediately
+        auction->start = now;
+    }
+		
+    // get export module params
+        
+    int _interval = 0;
+		
+	if (!sinterval.empty()){
+		_interval = ParserFcts::parseInt(sinterval);
+    }
+    int _align = (!salign.empty()) ? 1 : 0;
+				
+	if (_interval > 0) {
+		interval_t ientry;
+        ientry.interval = _interval;
+        ientry.align = _align;
+			
+#ifdef DEBUG
+    log->dlog(ch, "Interval: %d - Align:%d", _interval, _align);
+#endif    
+		auction->intervals.push_back(ientry); 
+    }				
+
+}
+
 
 void BidFileParser::parse(fieldDefList_t *fieldDefs, 
 						  fieldValList_t *fieldVals, 
@@ -142,10 +270,13 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 {
     xmlNodePtr cur, cur2, cur3;
     string sname;
-
+	time_t now = time(NULL);
     cur = xmlDocGetRootElement(XMLDoc);
 
     sname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
+	// use lower case internally
+	transform(sname.begin(), sname.end(), sname.begin(), ToLower());
+    
 
 #ifdef DEBUG
     log->dlog(ch, "agent %s", sname.c_str());
@@ -162,6 +293,8 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
             fieldList_t fields;
 
             bname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
+			// use lower case internally
+			transform(bname.begin(), bname.end(), bname.begin(), ToLower());
 
             cur2 = cur->xmlChildrenNode;
 
@@ -174,7 +307,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
                     elem.name = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"NAME"));
 
                     if (elem.name.empty()) {
-                        throw Error("Rule Parser Error: missing name at line %d", XML_GET_LINE(cur2));
+                        throw Error("Bid Parser Error: missing name at line %d", XML_GET_LINE(cur2));
                     }
                     // use lower case internally
                     transform(elem.name.begin(), elem.name.end(), elem.name.begin(), 
@@ -270,6 +403,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
                         // get action specific PREFs
                         cur3 = cur3->next;
                     }
+					calculateIntervals(now, &auction);
 					auctions.push_back(auction);
                 }
                 cur2 = cur2->next;
@@ -278,11 +412,11 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 
             // add bid
             try {
-				unsigned short uid = idSource->newId();
-                Bid *b = new Bid((int) uid, sname, bname, elements, auctions);
+                
+                Bid *b = new Bid(now, sname, bname, elements, auctions);
 #ifdef DEBUG
 				// debug info
-				log->dlog(ch, "bid %s.%s %s", sname.c_str(), bname.c_str(), (b->getInfo()).c_str());
+				log->dlog(ch, "parsed bid %s.%s", sname.c_str(), bname.c_str());
 #endif
                 bids->push_back(b);
             } catch (Error &e) {

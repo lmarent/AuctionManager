@@ -76,20 +76,21 @@ void Bid_Test::setUp()
 							&fieldVals, 
 							new_bids,
 							idSource );
-		
+			
 		Bid *copy = (*new_bids)[0];
-		ptrBid1 = new Bid(2,*copy);
-		ptrBid2 = new Bid(3,*((*new_bids)[0]));
-		
+				
+		ptrBid1 = new Bid(*copy);
+		ptrBid2 = new Bid(*((*new_bids)[0]));
+				
 		CPPUNIT_ASSERT( (ptrBid1->getInfo()).compare(((*new_bids)[0])->getInfo()) == 0 );
-		
+				
 		for (int i = 0; i < new_bids->size() ; i++)
 		{
 			delete(((*new_bids)[i]));
 		}
 		new_bids->clear();
 		delete new_bids;
-						
+								
 	}
 	catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
@@ -110,7 +111,6 @@ void Bid_Test::tearDown()
 
 void Bid_Test::testBids() 
 {
-
 
 }
 

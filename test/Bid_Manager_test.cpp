@@ -75,11 +75,11 @@ void Bid_Manager_Test::setUp()
 		
 		CPPUNIT_ASSERT( new_bids->size() == 1 );
 		
-		ptrBid1 = new Bid(3,*((*new_bids)[0]));
-		ptrBid2 = new Bid(4,*((*new_bids)[0]));
-		ptrBid3 = new Bid(4,*((*new_bids)[0]));
-		ptrBid4 = new Bid(5,*((*new_bids)[0]));
-		ptrBid5 = new Bid(6,*((*new_bids)[0]));
+		ptrBid1 = new Bid(*((*new_bids)[0]));
+		ptrBid2 = new Bid(*((*new_bids)[0]));
+		ptrBid3 = new Bid(*((*new_bids)[0]));
+		ptrBid4 = new Bid(*((*new_bids)[0]));
+		ptrBid5 = new Bid(*((*new_bids)[0]));
 
 		auto_ptr<EventScheduler> _evnt(new EventScheduler());
         evnt = _evnt;

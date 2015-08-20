@@ -38,12 +38,6 @@ int Auctioner::enableCtrl = 0;
 int g_timeout = 0;
 
 
-/*
-  version string embedded into executable file
-  can be found via 'strings <path>/netmate | grep version'
-*/
-const char *NETAUM_VERSION = "NETAuM version " VERSION ", (c) 2014-2015 Universidad de los Andes, Colombia";
-
 const char *NETAUM_OPTIONS = "compile options: "
 "multi-threading support = "
 #ifdef ENABLE_THREADS
@@ -400,6 +394,7 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 
       }
       break;
+    
     case GET_INFO:
       {
           // get info types from event
@@ -417,6 +412,7 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
           }
       }
       break;
+    
     case GET_MODINFO:
       {
           // get module information from loaded module (proc mods only now)
@@ -433,6 +429,7 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
           }
       }
       break;
+    
     case ADD_BIDS:
       {
           bidDB_t *new_bids = NULL;
@@ -476,9 +473,9 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 				EventScheduler to do this some time later.
 			  */
 			  if (fds == NULL ) {
-			  Event *e = evnt->getNextEvent();
-			  handleEvent(e, NULL);
-			  saveDelete(e);
+				  Event *e = evnt->getNextEvent();
+				  handleEvent(e, NULL);
+				  saveDelete(e);
 			  }
 
           } catch (Error &e) {
@@ -541,7 +538,6 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
       }
       break;
 
-
     case ADD_BIDS_CTRLCOMM:
       {
           bidDB_t *new_bids = NULL;
@@ -572,6 +568,27 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
       }
       break; 	
 
+	case ADD_BID_AUCTION:
+	  {
+#ifdef DEBUG
+        log->dlog(ch,"processing event add bid auction" );
+#endif		  
+		  try
+		  {
+
+				Bid *b = ((InsertBidAuctionEvent *) e)->getBid();
+
+				string auctionSet = ((InsertBidAuctionEvent *) e)->getAuctionSet();          
+				string auctionName = ((InsertBidAuctionEvent *) e)->getAuctionName();
+                    
+				proc->addBidAuction(auctionSet, auctionName, b);
+		   }
+		   catch (Error &err) {
+				log->dlog( ch, err.getError().c_str() );
+		   }
+	  }
+	  break;
+
     case ACTIVATE_AUCTIONS:
       {
 
@@ -586,20 +603,36 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
           aucm->activateAuctions(auctions, evnt.get());
       }
       break;
+
     case REMOVE_BIDS:
       {
 
 #ifdef DEBUG
         log->dlog(ch,"processing event remove bids" );
 #endif
-		  // TODO AM: understand what has to be done.
-          //bidDB_t *bids = ((ActivateBidsEvent *)e)->getBids();
+          bidDB_t *bids = ((RemoveBidsEvent *)e)->getBids();
 	  	  
           // now get rid of the expired bid
-          //proc->delBids(bids);
-          //bidm->delBids(bids, evnt.get());
+          proc->delBids(bids);
+          bidm->delBids(bids, evnt.get());
       }
       break;
+
+	case REMOVE_BID_AUCTION:
+	  {
+#ifdef DEBUG
+        log->dlog(ch,"processing event remove bid from auction" );
+#endif
+		try{
+            Bid *b = ((RemoveBidAuctionEvent *) e)->getBid();
+            string auctionSet = ((RemoveBidAuctionEvent *) e)->getAuctionSet();
+            string auctionName = ((RemoveBidAuctionEvent *) e)->getAuctionName();
+           proc->delBidAuction(auctionSet, auctionName, b);
+        } catch(Error &err) {
+			log->dlog( ch, err.getError().c_str() );
+		}  
+	  }
+	  break;
 
     case REMOVE_BIDS_CTRLCOMM:
       {
@@ -623,8 +656,14 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
                   if (rptr == NULL) {
                       throw Error("no such bid");
                   }
-	  
-                  proc->delBid(rptr);
+                  
+				  bidAuctionListIter_t bidauct_iter;
+				  for (bidauct_iter = (rptr->getAuctions())->begin(); 
+						bidauct_iter != (rptr->getAuctions())->end(); ++bidauct_iter ){
+						proc->delBidAuction(bidauct_iter->auctionSet, 
+											 bidauct_iter->auctionName, rptr);
+				  }
+                  
                   bidm->delBid(rptr, evnt.get());
 
               } else {
@@ -640,8 +679,14 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 
                   for (bidIndexIter_t i = bids->begin(); i != bids->end(); i++) {
                       Bid *rptr = bidm->getBid(i->second);
-	
-                      proc->delBid(rptr);
+
+					  bidAuctionListIter_t bidauct_iter;
+					  for (bidauct_iter = (rptr->getAuctions())->begin(); 
+						  bidauct_iter != (rptr->getAuctions())->end(); ++bidauct_iter ){
+						  proc->delBidAuction(bidauct_iter->auctionSet, 
+											 bidauct_iter->auctionName, rptr);
+				      }
+
                       bidm->delBid(rptr, evnt.get());
                   }
               }

@@ -145,9 +145,12 @@ string ProcModule::makeModuleInfoXML()
 
 ProcModule::~ProcModule()
 {
+#ifdef DEBUG
+    s_log->dlog(s_ch, "Shutting down %s", getModName().c_str() );
+#endif
+
 	configItemList_t list = cnf->getItems(confgroup, getOwnName() );
 	configParam_t *params = cnf->getParamList(list);
-	
     funcList->destroyModule(params);
 
 #ifdef DEBUG

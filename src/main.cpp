@@ -2,6 +2,12 @@
 
 #include "stdincpp.h"
 #include "Auctioner.h"
+#include "ParserFcts.h"
+#include "ConstantsAum.h"
+#include "Constants.h"
+
+
+const char *NETAUM_VERSION = "NETAuM version " VERSION ", (c) 2014-2015 Universidad de los Andes, Colombia";
 
 
 // Log functions are not used before the logger is initialized

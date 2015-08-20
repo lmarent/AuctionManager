@@ -51,13 +51,13 @@ typedef struct {
 
     ppaction_t action; // action module data.
     Auction *auction; // auction to start execution.
-    bidDB_t *bids;  // Bids competing in the auction.
+    bidDB_t bids;  // Bids competing in the auction.
     
 } auctionProcess_t;
 
 //! action list for each auction
-typedef vector<auctionProcess_t>            auctionProcessList_t;
-typedef vector<auctionProcess_t>::iterator  auctionProcessListIter_t;
+typedef map<int, auctionProcess_t>            auctionProcessList_t;
+typedef map<int, auctionProcess_t>::iterator  auctionProcessListIter_t;
 
 
 /*! \short   manage and execute algoirthms for a set of auctions.
@@ -92,30 +92,25 @@ class AUMProcessor : public AuctionManagerComponent
     //!   destroy a Auction Processor object, to be overloaded
     virtual ~AUMProcessor();
 
-    //! add bids
-    virtual void addBids( bidDB_t *bids, EventScheduler *e );
-
     //! add auctions
     virtual void addAuctions( auctionDB_t *auctions, EventScheduler *e );
-
-    //! add bids
-    virtual void addBids( bidDB_t *bids );
-
-    //! delete bids
-    virtual void delBids( bidDB_t *bids );
 
     //! delete bids
     virtual void delAuctions( auctionDB_t *aucts );
 
+    //! delete bids
+    virtual void delBids( bidDB_t *bids );
+
+
     //! execute the algorithm
     int executeAuction(int rid, string rname);
 
-    /*! \short   add a Bid and its associated actions to bid list
-        \arg \c b   pointer to bid
-        \arg \c e   pointer to event scheduler (timer events)
-        \returns 0 - on success, <0 - else
+    /*! \short   add a Bid to auction bid list
+        \arg \c auctionSet    Auction set
+        \arg \c auctionName   Auction name
+        \arg \c b 			  Pointer to bid to insert
     */
-    int addBid( Bid *b, EventScheduler *e );
+    void addBidAuction(string auctionSet, string auctionName, Bid *b );
 
 
     /*! \short   add a Auction and its associated auction process list
@@ -126,11 +121,12 @@ class AUMProcessor : public AuctionManagerComponent
     int addAuction( Auction *a, EventScheduler *e );
 
 
-    /*! \short   delete a Bid from the bid list
-        \arg \c b  pointer to bid
-        \returns 0 - on success, <0 - else
+    /*! \short   delete a Bid to auction bid list
+        \arg \c auctionSet    Auction set
+        \arg \c auctionName   Auction name
+        \arg \c b 			  Pointer to bid to delete
     */
-    int delBid( Bid *b );
+    void delBidAuction( string auctionSet, string auctionName, Bid *b );
 
 
     /*! \short   delete an Auction from the auction process list

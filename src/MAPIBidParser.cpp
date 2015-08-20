@@ -26,7 +26,8 @@
 */
 
 #include "MAPIBidParser.h"
-
+#include "ParserFcts.h"
+#include "Timeval.h"
 
 MAPIBidParser::MAPIBidParser(string filename)
     : fileName(filename)
@@ -91,6 +92,132 @@ void MAPIBidParser::parseFieldValue(fieldValList_t *fieldVals, string value, fie
     }
 }
 
+/* functions for accessing the templates */
+string MAPIBidParser::getMiscVal(miscList_t *_miscList, string name)
+{
+    miscListIter_t iter;
+
+    iter = _miscList->find(name);
+    if (iter != _miscList->end()) {
+        return iter->second.value;
+    } else {
+        return "";
+    }
+}
+
+
+/* ------------------------- parseTime ------------------------- */
+time_t MAPIBidParser::parseTime(string timestr)
+{
+    struct tm  t;
+  
+    if (timestr[0] == '+') {
+        // relative time in secs to start
+        try {
+	    struct tm tm;
+            int secs = ParserFcts::parseInt(timestr.substr(1,timestr.length()));
+            time_t start = time(NULL) + secs;
+            return mktime(localtime_r(&start,&tm));
+        } catch (Error &e) {
+            throw Error("Incorrect relative time value '%s'", timestr.c_str());
+        }
+    } else {
+        // absolute time
+        if (timestr.empty() || (strptime(timestr.c_str(), TIME_FORMAT.c_str(), &t) == NULL)) {
+            return 0;
+        }
+    }
+    return mktime(&t);
+}
+
+
+void MAPIBidParser::calculateIntervals(time_t now, bid_auction_t *auction)
+{
+
+    unsigned long duration;
+        
+    /* time stuff */
+    auction->start = now;
+        
+    // stop = 0 indicates infinite running time
+    auction->stop = 0;
+    
+    // duration = 0 indicates no duration set
+    duration = 0;
+		
+	string sstart = getMiscVal(&(auction->miscList), "Start");
+	string sstop = getMiscVal(&(auction->miscList), "Stop");
+	string sduration = getMiscVal(&(auction->miscList), "Duration");		
+	string sinterval = getMiscVal(&(auction->miscList), "Interval");
+	string salign = getMiscVal(&(auction->miscList), "Align");
+
+    if (!sstart.empty() && !sstop.empty() && !sduration.empty()) {
+        throw Error(409, "illegal to specify: start+stop+duration time");
+    }
+	
+    if (!sstart.empty()) {
+        auction->start = parseTime(sstart);
+        if(auction->start == 0) {
+            throw Error(410, "invalid start time %s", sstart.c_str());
+        }
+    }
+
+    if (!sstop.empty()) {
+        auction->stop = parseTime(sstop);
+        if(auction->stop == 0) {
+            throw Error(411, "invalid stop time %s", sstop.c_str());
+        }
+    }
+	
+    if (!sduration.empty()) {
+        duration = ParserFcts::parseULong(sduration);
+    }
+
+    if ( duration > 0) {
+        if (auction->stop) {
+            // stop + duration specified
+            auction->start = auction->stop - duration;
+        } else {
+            // stop [+ start] specified
+            auction->stop = auction->start + duration;
+        }
+    }
+	
+    // now start has a defined value, while stop may still be zero 
+    // indicating an infinite rule
+	    
+    // do we have a stop time defined that is in the past ?
+    if ((auction->stop != 0) && (auction->stop <= now)) {
+        throw Error(300, "task running time is already over");
+    }
+	
+    if (auction->start < now) {
+        // start late tasks immediately
+        auction->start = now;
+    }
+		
+    // get export module params
+        
+    int _interval = 0;
+		
+	if (!sinterval.empty()){
+		_interval = ParserFcts::parseInt(sinterval);
+    }
+    int _align = (!salign.empty()) ? 1 : 0;
+				
+	if (_interval > 0) {
+		interval_t ientry;
+        ientry.interval = _interval;
+        ientry.align = _align;
+			
+#ifdef DEBUG
+    log->dlog(ch, "Interval: %d - Align:%d", _interval, _align);
+#endif    
+		auction->intervals.push_back(ientry); 
+    }				
+
+}
+
 
 void MAPIBidParser::parse(fieldDefList_t *fieldDefs, 
 						  fieldValList_t *fieldVals, 
@@ -107,6 +234,7 @@ void MAPIBidParser::parse(fieldDefList_t *fieldDefs,
     string tmp;
     int n = 0, n2 = 0;
     string line;
+    time_t now = time(NULL);
 
     // each line contains 1 bid
     while (getline(in, line)) {    
@@ -152,10 +280,18 @@ void MAPIBidParser::parse(fieldDefList_t *fieldDefs,
         n = args[0].find(".");
         if (n > 0) {
             sname = args[0].substr(0, n);
+            // use lower case internally
+            transform(sname.begin(), sname.end(), sname.begin(), ToLower());
+            
             rname = args[0].substr(n+1, tmp.length()-n);
+            // use lower case internally
+            transform(rname.begin(), rname.end(), rname.begin(), ToLower());
+            
         } else {
             sname = "0";
             rname = args[0];
+            // use lower case internally
+            transform(rname.begin(), rname.end(), rname.begin(), ToLower());
         }
 
         // parse the rest of the args
@@ -228,9 +364,22 @@ void MAPIBidParser::parse(fieldDefList_t *fieldDefs,
                       {
                           // only one auction per -a parameter
                           bid_auction_t auction;
+                          string name = args[ind++];
+                          n = name.find(".");
                           
                           // auction: <set.name> [<param>=<value> , ...]
-                          auction.name = args[ind++];
+                          auction.auctionSet  = name.substr(0,n);
+                          // use lower case internally
+						  transform(auction.auctionSet.begin(), 
+							        auction.auctionSet.end(), 
+							        auction.auctionSet.begin(), ToLower());
+            
+                          auction.auctionName = tmp.substr(n+1, name.length()-n);
+                          // use lower case internally
+						  transform(auction.auctionName.begin(), 
+							        auction.auctionName.end(), 
+							        auction.auctionName.begin(), ToLower());
+                          
                           
                           // bid field of the element
                           while ((ind<argc) && (args[ind][0] != '-')) {
@@ -264,6 +413,7 @@ void MAPIBidParser::parse(fieldDefList_t *fieldDefs,
 							  }  
                               ind++;
                           }        
+                          calculateIntervals(now, &auction);
                           auctions.push_back(auction);
                       }
                       
@@ -277,8 +427,7 @@ void MAPIBidParser::parse(fieldDefList_t *fieldDefs,
       
         // add bid
         try {
-            unsigned short uid = idSource->newId();
-            Bid *b = new Bid((int) uid, sname, rname, elements, auctions);
+            Bid *b = new Bid(now, sname, rname, elements, auctions);
             bids->push_back(b);
 
 #ifdef DEBUG

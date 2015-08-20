@@ -46,8 +46,6 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
     log = Logger::getInstance();
     ch = log->createChannel("Auction");
     
-    cout << "Channel to be use:" << ch << endl;
-
 #ifdef DEBUG
     log->dlog(ch, "Auction constructor");
 #endif    

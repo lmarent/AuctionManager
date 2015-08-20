@@ -3,7 +3,10 @@
 <FIELDDEF>
   <!-- General fields -->
   <DEF LENGTH="6" TYPE="UInt32" >Quantity</DEF>
+  <!-- Reserve price -->
   <DEF LENGTH="6" TYPE="Double" >UnitPrice</DEF>
+  <DEF LENGTH="6" TYPE="Double" >Budget</DEF>
+  
 
 
 </FIELDDEF>

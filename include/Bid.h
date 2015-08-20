@@ -33,6 +33,8 @@
 #include "ConfigParser.h"
 #include "ProcModuleInterface.h"
 #include "Auction.h"
+#include "AuctionTimer.h"
+
 
 //! Bid's states during lifecycle
 typedef enum
@@ -51,13 +53,22 @@ typedef struct
     fieldList_t fields;
 } element_t;
 
+//! execution list intervals.
+typedef vector<interval_t>            bidIntervalList_t;
+typedef vector<interval_t>::iterator  bidIntervalListIter_t;
+typedef vector<interval_t>::const_iterator  bidIntervalListConstIter_t;
+
 //! This bid applies to bid in this auction.
 typedef struct
 {
 	string auctionSet;
 	string auctionName;
 	miscList_t miscList;
-	interval_t interval;
+	bidIntervalList_t intervals;
+    //! define the bid-auction running time properties
+    time_t start;
+    time_t stop;
+	
 } bid_auction_t;
 
 //! element list (only push_back & sequential access)
@@ -65,9 +76,9 @@ typedef list<element_t>            elementList_t;
 typedef list<element_t>::iterator  elementListIter_t;
 typedef list<element_t>::const_iterator  elementListConstIter_t;
 
-typedef list<bid_auction_t>					bidAuctionList_t;
-typedef list<bid_auction_t>::iterator		bidAuctionListIter_t;
-typedef list<bid_auction_t>::iterator		bidAuctionListConstIter_t;
+typedef list<bid_auction_t>						bidAuctionList_t;
+typedef list<bid_auction_t>::iterator			bidAuctionListIter_t;
+typedef list<bid_auction_t>::const_iterator		bidAuctionListConstIter_t;
 
 class Bid
 {
@@ -77,11 +88,26 @@ private:
 
 public:
 
-	Bid(int id, string sname, string rname, elementList_t &e, bidAuctionList_t &ba);
+	
+    /*! \short   This function creates a new object instance. It recalculates intervals.
+        \returns a new object instance.
+    */
+	Bid( time_t now, string sname, string rname, elementList_t &e, bidAuctionList_t &ba );
 
-	Bid(int id, const Bid &rhs);
+	Bid( const Bid &rhs );
 
 	~Bid();
+
+    int getUId() 
+    { 
+        return uid;
+    }
+    
+    void setUId(int nuid)
+    {
+        uid = nuid;
+    }
+
 		
     void setState(bidState_t s) 
     { 
@@ -91,22 +117,6 @@ public:
     bidState_t getState()
     {
         return state;
-    }
-
-	
-    time_t getStartTime()
-    {
-        return startTime;
-    }
-    
-    time_t getEndTime()
-    {
-        return endTime;
-    }
-
-    int getUId() 
-    { 
-        return uid;
     }
 
     void setSetName(string _setName)
@@ -134,12 +144,6 @@ public:
 	
 	string toString(element_t &elem);
 	
-    //! parse Start time string
-    time_t parseStartTime(string timestr);
-	
-    //! parse End time string
-    time_t parseEndTime(string timestr);
-
 
     /*! \short   get names and values (parameters) of configured elements
         \returns a pointer (link) to a list that contains the configured elements for this bid
@@ -162,13 +166,7 @@ protected:
 
     //! name of the agent set this bid belongs to
     string setName;
-    
-    //! start time 
-    time_t startTime;
-
-    //! end time 
-    time_t endTime;
-
+   
 	//! state of this rule
     bidState_t state;
 

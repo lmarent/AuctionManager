@@ -219,10 +219,10 @@ bidDB_t *BidManager::parseBids(string fname)
     try {	
 
         // load the field def list
-        loadFieldDefs(fname);
+        loadFieldDefs(fieldDefFileName);
 	
         // load the field val list
-        loadFieldVals(fname);
+        loadFieldVals(fieldValFileName);
 	
         BidFileParser rfp = BidFileParser(fname);
         rfp.parse(&fieldDefs, &fieldVals, new_bids, &idSource);
@@ -293,15 +293,18 @@ void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
         Bid *b = (*iter);
         
         try {
+
             addBid(b);
-			// TODO AM: Correct this part of the code.
-			/*
-            start[b->getStart()].push_back(b);
-            if (b->getStop()) 
-            {
-                stop[b->getStop()].push_back(b);
-            }
-            */
+
+            bidAuctionListIter_t auct_iter;
+            for ( auct_iter = (b->getAuctions())->begin(); 
+                    auct_iter != (b->getAuctions())->end(); ++auct_iter ){ 
+				start[auct_iter->start].push_back(b);
+				if (auct_iter->stop) 
+				{
+					stop[auct_iter->stop].push_back(b);
+				}
+			}
         } catch (Error &e ) {
             saveDelete(b);
             // if only one rule return error
@@ -317,18 +320,57 @@ void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
     log->dlog(ch, "Start all bids - it is going to activate them");
 #endif      
 
-    // TODO AM: look how to start or stop bids.
-    /*
     // group rules with same start time
     for (iter2 = start.begin(); iter2 != start.end(); iter2++) {
-        e->addEvent(new ActivateBidsEvent(iter2->first-now, iter2->second));
+		bidDBIter_t bids_iter;
+		// Iterates over the bids starting.
+		for (bids_iter = (iter2->second).begin(); 
+				bids_iter != (iter2->second).end(); bids_iter++) { 
+			Bid *bid = (*bids_iter);
+			// Iterates over the auctions configured for the bid.
+			bidAuctionListIter_t auct_iter = (bid->getAuctions())->begin();
+			while ( auct_iter != (bid->getAuctions())->end()){ 
+				// If the starttime for the auction is actually the same.
+				if (auct_iter->start ==  iter2->first)
+				{
+					
+#ifdef DEBUG    
+					log->dlog(ch, "Schedulling new event - set: %s, name:  %s", 
+							  (auct_iter->auctionSet).c_str(), 
+							    (auct_iter->auctionName).c_str());
+#endif 					
+					e->addEvent(new InsertBidAuctionEvent(iter2->first-now, 
+														  bid, 
+														  auct_iter->auctionSet,
+														  auct_iter->auctionName));
+				}
+				++auct_iter;
+			}
+		}
     }
     
     // group rules with same stop time
     for (iter2 = stop.begin(); iter2 != stop.end(); iter2++) {
-        e->addEvent(new RemoveBidsEvent(iter2->first-now, iter2->second));
+		bidDBIter_t bids_iter;
+		// Iterates over the bids starting.
+		for (bids_iter = (iter2->second).begin(); 
+				bids_iter != (iter2->second).end(); bids_iter++) {
+			Bid *bid = (*bids_iter); 
+			// Iterates over the auctions configured for the bid.
+			bidAuctionListIter_t auct_iter = (bid->getAuctions())->begin();		
+			while (auct_iter != (bid->getAuctions())->end()) 
+			{
+				if (auct_iter->stop ==  iter2->first){	  
+					e->addEvent(new RemoveBidAuctionEvent(iter2->first-now, 
+														  bid, 
+														  auct_iter->auctionSet,
+														  auct_iter->auctionName));
+				}
+				++auct_iter;
+			}
+		}
     }
-	*/
+
 #ifdef DEBUG    
     log->dlog(ch, "Finished adding bids");
 #endif      
@@ -356,6 +398,10 @@ void BidManager::addBid(Bid *b)
     }
 
     try {
+
+		// Assigns the new Id.
+		b->setUId(idSource.newId());
+
         // could do some more checks here
         b->setState(BS_VALID);
 

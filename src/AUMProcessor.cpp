@@ -92,16 +92,6 @@ AUMProcessor::~AUMProcessor()
 
 }
 
-// add bids
-void AUMProcessor::addBids( bidDB_t *bids, EventScheduler *e )
-{
-    bidDBIter_t iter;
-   
-    for (iter = bids->begin(); iter != bids->end(); iter++) {
-        addBid(*iter, e);
-    }
-}
-
 // add Auctions
 void AUMProcessor::addAuctions( auctionDB_t *auctions, EventScheduler *e )
 {
@@ -122,25 +112,6 @@ void AUMProcessor::addAuctions( auctionDB_t *auctions, EventScheduler *e )
 #endif
 
 
-}
-
-
-
-// add bids
-void AUMProcessor::addBids( bidDB_t *bids )
-{
-
-}
-
-
-// delete bids
-void AUMProcessor::delBids(bidDB_t *bids)
-{
-    bidDBIter_t iter;
-
-    for (iter = bids->begin(); iter != bids->end(); iter++) {
-        delBid(*iter);
-    }
 }
 
 // delete auctions
@@ -171,9 +142,34 @@ int AUMProcessor::executeAuction(int rid, string rname)
 
 /* ------------------------- addBid ------------------------- */
 
-int AUMProcessor::addBid( Bid *b, EventScheduler *e )
+void AUMProcessor::addBidAuction( string auctionSet, string auctionName, Bid *b )
 {
 
+#ifdef DEBUG
+    log->dlog(ch, "adding Bid #%d to auction- Set:%s name:%s", b->getUId(), 
+				auctionSet.c_str(), auctionName.c_str());
+#endif
+
+    AUTOLOCK(threaded, &maccess);
+
+    auctionProcessListIter_t iter;
+    bool found=false;
+
+    for (iter = auctions.begin(); iter != auctions.end(); iter++) 
+    {
+        Auction *auction = (iter->second).auction; 
+        
+        if ((auctionSet.compare(auction->getSetName()) == 0) && 
+             (auctionName.compare(auction->getAuctionName()) == 0)){
+			((iter->second).bids).push_back(b);
+			found=true;
+		}
+    }
+	
+	if (found==false){
+		throw Error("Auction not found: set:%s: name:%s", 
+						auctionSet.c_str(), auctionName.c_str());
+	}
 }
 
 /* ------------------------- addAuction ------------------------- */
@@ -194,11 +190,13 @@ int AUMProcessor::addAuction( Auction *a, EventScheduler *evs )
     action_t *action = a->getAction();
 
 #ifdef DEBUG
-    log->dlog(ch, "Adding auction #%d", auctionId);
+    log->dlog(ch, "Adding auction #%d - set:%s, name:%s", 
+				 auctionId, a->getSetName().c_str(), a->getAuctionName().c_str());
 #endif  
 
     AUTOLOCK(threaded, &maccess);  
 
+	entry.auction = a;
     entry.action.module = NULL;
     entry.action.params = NULL;
 
@@ -228,12 +226,8 @@ int AUMProcessor::addAuction( Auction *a, EventScheduler *evs )
             entry.action.module->addTimerEvents( *evs );
 		
 		}
-		// make sure the vector of rules is large enough
-		if ((unsigned int)auctionId + 1 > auctions.size()) {
-			auctions.reserve( auctionId*2 + 1);
-			auctions.resize(auctionId + 1 );
-		}
-		// success ->enter struct into internal table
+
+		// success ->enter struct into internal map
 		auctions[auctionId] = entry;
 
     } 
@@ -273,21 +267,72 @@ int AUMProcessor::addAuction( Auction *a, EventScheduler *evs )
 }
 
 
+void AUMProcessor::delBids(bidDB_t *bids)
+{
+	bidDBIter_t bid_iter;   
+	for (bid_iter = bids->begin(); bid_iter!= bids->end(); ++bid_iter ){
+		Bid *bid = *bid_iter;
+		bidAuctionListIter_t auction_iter;
+		for (auction_iter = (bid->getAuctions())->begin(); 
+			 auction_iter!= (bid->getAuctions())->end(); ++auction_iter){
+			 try{
+			     delBidAuction(auction_iter->auctionSet, 
+								  auction_iter->auctionName, bid );
+			 } catch(Error &err){
+				  log->elog( ch, err.getError().c_str() );
+			 }
+		}		 
+	}
+}
+
 /* ------------------------- delBid ------------------------- */
 
-int AUMProcessor::delBid( Bid *b )
+void AUMProcessor::delBidAuction( string auctionSet, string auctionName, Bid *b )
 {
     int bidId = b->getUId();
 
 #ifdef DEBUG
-    log->dlog(ch, "deleting Bid #%d", bidId);
+    log->dlog(ch, "deleting Bid #%d to auction- Set:%s name:%s", bidId,
+			  auctionSet.c_str(), auctionName.c_str());
 #endif
 
     AUTOLOCK(threaded, &maccess);
+    
+    string bidSet = b->getSetName();
+    string bidName = b-> getBidName();
+    bool deleted=false;
+    bool auctionFound= false;
 
-	// TODO AM: implement this procedure.
+    auctionProcessListIter_t iter;
 
-    return 0;
+    for (iter = auctions.begin(); iter != auctions.end(); iter++) 
+    {
+        Auction *auction = (iter->second).auction; 
+        if ((auctionSet.compare(auction->getSetName()) == 0) && 
+             (auctionName.compare(auction->getAuctionName()) == 0)){
+			auctionFound= true;
+			bidDBIter_t bid_iter;
+			bid_iter = ((iter->second).bids).begin();
+			while (bid_iter != ((iter->second).bids).end()) {
+				if ((bidSet.compare((*bid_iter)->getSetName()) == 0) &&
+					(bidName.compare((*bid_iter)->getBidName()) == 0)){
+					((iter->second).bids).erase(bid_iter);
+					deleted=true;
+				}
+				++bid_iter;
+			} 
+		}
+    }
+	
+	if (auctionFound==false){
+		throw Error("Auction not found: set:%s: name:%s", 
+						auctionSet.c_str(), auctionName.c_str());
+	}
+
+	if (deleted==false){
+		throw Error("Bid not found: set:%s: name:%s", 
+						bidSet.c_str(), bidName.c_str());
+	}
 }
 
 

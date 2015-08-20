@@ -50,6 +50,16 @@ class MAPIBidParser
     
     string lookup(fieldValList_t *fieldVals, string fvalue, field_t *f);
 
+	//! Calculates intervals associated to auction.
+	void calculateIntervals(time_t now, bid_auction_t *auction);
+
+    //! parse time string
+    time_t parseTime(string timestr);
+
+    //! get a value by name from the misc rule attriutes
+    string getMiscVal(miscList_t *miscList, string name);    
+
+
   public:
 
     MAPIBidParser(string fname);

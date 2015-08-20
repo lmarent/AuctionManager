@@ -245,16 +245,16 @@
  /usr/include/libxml2/libxml/xmlmemory.h \
  /usr/include/libxml2/libxml/threads.h ../include/XMLParser.h \
  ../include/ProcModuleInterface.h ../include/metadata.h \
- ../include/FieldDefParser.h ../include/FieldValue.h \
- ../include/FieldValue.h ../include/FieldValParser.h \
- ../include/FieldDefParser.h ../include/BidIdSource.h \
- ../include/BidFileParser.h ../include/Bid.h ../include/FieldValParser.h \
- ../include/BidIdSource.h ../include/BidManager.h \
- ../include/BidFileParser.h ../include/MAPIBidParser.h \
- ../include/EventScheduler.h ../include/Event.h \
- ../include/AuctionFileParser.h ../include/Auction.h \
- ../include/AuctionTimer.h ../include/AuctionIdSource.h \
- ../include/AuctionManagerInfo.h ../include/Timeval.h
+ ../include/FieldDefParser.h ../include/FieldValue.h ../include/Auction.h \
+ ../include/AuctionTimer.h ../include/FieldValue.h \
+ ../include/FieldValParser.h ../include/FieldDefParser.h \
+ ../include/BidIdSource.h ../include/BidFileParser.h ../include/Bid.h \
+ ../include/FieldValParser.h ../include/BidIdSource.h \
+ ../include/BidManager.h ../include/BidFileParser.h \
+ ../include/MAPIBidParser.h ../include/EventScheduler.h \
+ ../include/Event.h ../include/AuctionFileParser.h \
+ ../include/AuctionIdSource.h ../include/AuctionManagerInfo.h \
+ ../include/Timeval.h
 
 /usr/include/stdc-predef.h:
 
@@ -938,6 +938,10 @@
 
 ../include/FieldValue.h:
 
+../include/Auction.h:
+
+../include/AuctionTimer.h:
+
 ../include/FieldValue.h:
 
 ../include/FieldValParser.h:
@@ -965,10 +969,6 @@
 ../include/Event.h:
 
 ../include/AuctionFileParser.h:
-
-../include/Auction.h:
-
-../include/AuctionTimer.h:
 
 ../include/AuctionIdSource.h:
 

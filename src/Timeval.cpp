@@ -114,3 +114,59 @@ int Timeval::settimeofday(const struct timeval *tv)
 
   return 0;
 }
+
+ssize_t Timeval::format_timeval2(const time_t t, char *buf, size_t sz)
+{
+	ssize_t written = -1;
+	struct tm *gm = localtime(&t);
+
+	if (gm)
+	{
+		written = (ssize_t)strftime(buf, sz, "%Y-%m-%d %H:%M:%S", gm);
+	}
+	return written;	
+}
+
+ssize_t Timeval::format_timeval(const struct timeval *tv, char *buf, size_t sz)
+{
+	ssize_t written = -1;
+	struct tm *gm = localtime(&tv->tv_sec);
+
+	if (gm)
+	{
+		written = (ssize_t)strftime(buf, sz, "%Y-%m-%d %H:%M:%S", gm);
+		if ((written > 0) && ((size_t)written < sz))
+		{
+			int w = snprintf(buf+written, sz-(size_t)written, ".%06dZ", tv->tv_usec);
+			written = (w > 0) ? written + w : -1;
+		}
+	}
+	return written;	
+}
+
+
+std::string Timeval::toString(const struct timeval tv)
+{
+	char buf[28];
+	if (format_timeval(&tv, buf, sizeof(buf)) > 0) {
+		string val_return(buf);
+		return val_return;
+	}
+	else{
+		std::string val_return("");
+		return val_return;
+	}
+}
+
+std::string Timeval::toString(time_t t)
+{
+	char buf[28];
+	if (format_timeval2(t, buf, sizeof(buf)) > 0) {
+		std::string val_return(buf);
+		return val_return;
+	}
+	else{
+		std::string val_return("");
+		return val_return;
+	}
+}

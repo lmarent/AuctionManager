@@ -84,7 +84,7 @@ void EventScheduler::addEvent(Event *ev)
 	
 #ifdef DEBUG
 	struct timeval tv = ev->getTime();
-    log->dlog(ch,"new event %s - time: %s", eventNames[ev->getType()].c_str(), (toString(tv)).c_str());
+    log->dlog(ch,"new event %s - time: %s", eventNames[ev->getType()].c_str(), (Timeval::toString(tv)).c_str());
 #endif
     
     events.insert(make_pair(ev->getTime(),ev));
@@ -245,7 +245,6 @@ struct timeval EventScheduler::getNextEventTime()
         Event *ev = events.begin()->second;
 		Timeval::gettimeofday(&now, NULL);
 		
-		struct timeval tv = ev->getTime();
         rv = Timeval::sub0(ev->getTime(), now);
         
         // be 100us fuzzy
@@ -259,34 +258,6 @@ struct timeval EventScheduler::getNextEventTime()
     } 
     return rv;
 }
-
-ssize_t EventScheduler::format_timeval(struct timeval *tv, char *buf, size_t sz)
-{
-	ssize_t written = -1;
-	struct tm *gm = localtime(&tv->tv_sec);
-
-	if (gm)
-	{
-		written = (ssize_t)strftime(buf, sz, "%Y-%m-%d %H:%M:%S", gm);
-		if ((written > 0) && ((size_t)written < sz))
-		{
-			int w = snprintf(buf+written, sz-(size_t)written, ".%06dZ", tv->tv_usec);
-			written = (w > 0) ? written + w : -1;
-		}
-	}
-	return written;	
-}
-
-string 
-EventScheduler::toString(struct timeval tv)
-{
-	char buf[28];
-	if (format_timeval(&tv, buf, sizeof(buf)) > 0) {
-		string val_return(buf);
-		return val_return;
-	}
-}
-
 
 
 /* ------------------------- dump ------------------------- */

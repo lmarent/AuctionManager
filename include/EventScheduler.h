@@ -69,9 +69,6 @@ class EventScheduler
     int ch;       //!< logging channel number used by objects of this class
 
     eventList_t events;    //!< event list
-
-    ssize_t format_timeval(struct timeval *tv, char *buf, size_t sz);
-
     
   public:
     
@@ -119,9 +116,6 @@ class EventScheduler
 
     //! dump an EventScheduler object
     void dump(ostream &os);
-
-    //! print a time val in readable format.
-    string toString(const struct timeval tv);
 
 };
 

@@ -55,7 +55,7 @@ class Auctioner
     // FIXME document!
     static int s_sigpipe[2];
  
-  private:
+  protected:
     
     //!< start time of the Auctioner
     time_t startTime;

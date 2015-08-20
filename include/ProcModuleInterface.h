@@ -32,6 +32,7 @@
 #include "stdinc.h"
 #include "metadata.h"
 #include "FieldDefParser.h"
+#include "Allocation.h"
 
 // configuration parameter passed to the module
 typedef struct {
@@ -166,6 +167,10 @@ typedef std::list<field_t>::iterator  fieldListIter_t;
 typedef std::list<field_t>::const_iterator  fieldListconstIter_t;
 
 
+//! Allocation list
+typedef vector<Allocation*>            allocationDB_t;
+typedef vector<Allocation*>::iterator  allocationDBIter_t;
+
 
 typedef int (*proc_timeout_func_t)( int timerID, void *flowdata );
 
@@ -188,7 +193,7 @@ void destroyModule( configParam_t *params );
     \arg \c  flowdata  - Data to execute the auction process.
     \returns 0 - on success (parameters are valid), <0 - else
 */
-void execute( configParam_t *params, void **flowdata );
+void execute( configParam_t *params, bidDB_t *bids, void **flowdata );
 
 
 /*! \short   get list of default timers for this proc module

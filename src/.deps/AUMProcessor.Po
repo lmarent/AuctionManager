@@ -221,10 +221,10 @@
  ../include/FieldValue.h ../include/AuctionTimer.h ../include/Module.h \
  ../include/ConfigManager.h ../include/ConfigParser.h \
  ../include/CommandLineArgs.h ../lib/getopt_long/getopt_long.h \
- ../include/EventScheduler.h ../include/Bid.h ../include/Event.h \
- ../include/BidFileParser.h ../include/FieldValParser.h \
- ../include/BidIdSource.h ../include/AuctionFileParser.h \
- ../include/Auction.h ../include/AuctionIdSource.h \
+ ../include/EventScheduler.h ../include/Bid.h ../include/Auction.h \
+ ../include/Event.h ../include/BidFileParser.h \
+ ../include/FieldValParser.h ../include/BidIdSource.h \
+ ../include/AuctionFileParser.h ../include/AuctionIdSource.h \
  ../include/AuctionManagerInfo.h ../include/Timeval.h \
  ../include/ModuleLoader.h ../include/AuctionManagerComponent.h \
  ../lib/httpd/httpd.h /usr/include/syslog.h \
@@ -867,6 +867,8 @@
 
 ../include/Bid.h:
 
+../include/Auction.h:
+
 ../include/Event.h:
 
 ../include/BidFileParser.h:
@@ -876,8 +878,6 @@
 ../include/BidIdSource.h:
 
 ../include/AuctionFileParser.h:
-
-../include/Auction.h:
 
 ../include/AuctionIdSource.h:
 

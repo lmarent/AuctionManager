@@ -1,5 +1,5 @@
 
-/*! \file   BidManager.h
+/*! \file   AuctionManager.h
 
     Copyright 2014-2015 Universidad de los Andes, Bogotá, Colombia
 

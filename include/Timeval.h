@@ -31,12 +31,18 @@
 
 
 #include <iostream>
+#include <string>
+#include <sys/types.h>
 
 
 class Timeval
 {
   private:
     static struct timeval g_time;
+    
+    static ssize_t format_timeval(const struct timeval *tv, char *buf, size_t sz);
+    
+    static ssize_t format_timeval2(const time_t t, char *buf, size_t sz);
 
   public:
 
@@ -59,6 +65,12 @@ class Timeval
     //! set the time (used when reading the time from a pcap file)
     // return 0 if ok and -1 if time is in the past (reordering)
     static int settimeofday(const struct timeval *tv);
+        
+    //! print a time val in readable format.
+    static std::string toString(const struct timeval tv);
+    
+    //! print time in readable format.
+    static std::string toString(time_t t);
 
 };
 

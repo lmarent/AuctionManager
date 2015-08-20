@@ -80,12 +80,15 @@ void AuctionFileParser::parse( auctionDB_t *auctions,
     xmlNodePtr cur, cur2, cur3;
     string sname;
     actionList_t globalActionList;
+    miscList_t globalMiscList;
     time_t now = time(NULL);
     string defaultActGbl;
 
     cur = xmlDocGetRootElement(XMLDoc);
 
     sname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
+    // use lower case internally
+    transform(sname.begin(), sname.end(), sname.begin(), ToLower());
 
 #ifdef DEBUG
     log->dlog(ch, "Auction set %s", sname.c_str());
@@ -119,7 +122,10 @@ void AuctionFileParser::parse( auctionDB_t *auctions,
                     if (a.name.empty()) {
                         throw Error("Auction Parser Error: missing name at line %d", XML_GET_LINE(cur2));
                     }
-
+                    
+					// use lower case internally
+					transform(a.name.begin(), a.name.end(), a.name.begin(), ToLower());
+					
                     defaultActGbl = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"DEFAULT"));
                     if (defaultActGbl.empty()) {
                         throw Error("Auction Parser Error: missing name at line %d", XML_GET_LINE(cur2));

@@ -35,12 +35,14 @@ void destroyModule( configParam_t *params)
 
 }
 
-void execute( configParam_t *params, void **flowdata )
+void execute( configParam_t *params, bidDB_t *bids, void **allocationData )
 {
 
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start execute \n");
 #endif
+
+	Bid **bids  
 
 
 #ifdef DEBUG
@@ -121,8 +123,6 @@ const char* getModuleInfo( int i )
     case I_HOMEPAGE:   return "http://homepage";
     default: return NULL;
     }
-
-
 
 #ifdef DEBUG
 	fprintf( stdout, "bas module: end getModuleInfo \n");

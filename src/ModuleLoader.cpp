@@ -81,10 +81,6 @@ ModuleLoader::ModuleLoader( ConfigManager *cnf, string basedir,
 #endif	
 			loadModule(mod.c_str(), 1);
 			
-			// If the user tries to load more than one module, the system only loads the first one.
-			n =  modules.length();
-			break; 
-
 			// skip additional ws
 			n = modules.find_first_not_of(" \t", n2);
 		}
@@ -107,14 +103,20 @@ ModuleLoader::~ModuleLoader()
     moduleListIter_t iter;
 
 #ifdef DEBUG
-    s_log->dlog(ch, "Shutdown");
+    s_log->dlog(ch, "starting Shutdown");
 #endif
 
     // close each dymamic library we have opened so far
     for (iter = modules.begin(); iter != modules.end(); iter++) {	
-        s_log->log(ch, "unloading module '%s'", (iter->first).c_str());
         saveDelete(iter->second); // deleting a Module
+        s_log->log(ch, "unloading module '%s'", (iter->first).c_str());
     }
+
+#ifdef DEBUG
+    s_log->dlog(ch, "ending Shutdown");
+#endif
+
+
 }
 
 
@@ -271,12 +273,12 @@ Module *ModuleLoader::loadModule( string libname, int preload )
 	
         module->link();             // increase sue counter in this module
         modules[libname] = module;  // and finally store the module
-        /*
+			
+#ifdef DEBUG    
         s_log->log(ch, "loaded %s module '%s'",
 		   module->getModuleType().c_str(), libname.c_str());
-        */
-        s_log->log(ch, "loaded module '%s'", libname.c_str());
-        
+#endif	            
+                
         return module;
         
     } catch (Error &e) {

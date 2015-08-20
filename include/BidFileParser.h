@@ -41,7 +41,7 @@
 #include "BidIdSource.h"
 
 
-//! rule list
+//! Bid list
 typedef vector<Bid*>            bidDB_t;
 typedef vector<Bid*>::iterator  bidDBIter_t;
 
@@ -60,7 +60,15 @@ class BidFileParser : public XMLParser
 
 	//! parse a field value
 	void parseFieldValue(fieldValList_t *fieldVals, string value, field_t *f);   
-    
+		
+	//! Calculates intervals associated to auction.
+	void calculateIntervals(time_t now, bid_auction_t *auction);
+
+    //! parse time string
+    time_t parseTime(string timestr);
+
+    //! get a value by name from the misc rule attriutes
+    string getMiscVal(miscList_t *miscList, string name);    
 
   public:
 

@@ -129,7 +129,9 @@ am_test_runner_OBJECTS = ../src/Error.$(OBJEXT) \
 	../src/AUMProcessor.$(OBJEXT) \
 	../src/ConfigManager.$(OBJEXT) \
 	../src/AuctionManager.$(OBJEXT) \
+	../src/Allocation.$(OBJEXT) \
 	../src/Auctioner.$(OBJEXT) \
+	../test/Timeval_test.$(OBJEXT) \
 	../test/FieldValue_test.$(OBJEXT) \
 	../test/FieldDefParser_test.$(OBJEXT) \
 	../test/FieldValParser_test.$(OBJEXT) \
@@ -137,10 +139,11 @@ am_test_runner_OBJECTS = ../src/Error.$(OBJEXT) \
 	../test/BidFileParser_test.$(OBJEXT) \
 	../test/AuctionFileParser_test.$(OBJEXT) \
 	../test/Bid_test.$(OBJEXT) \
+	../test/Allocation_test.$(OBJEXT) \
 	../test/AuctionTimer_test.$(OBJEXT) \
 	../test/Bid_Manager_test.$(OBJEXT) \
 	../test/AuctionManager_test.$(OBJEXT) \
-	../test/Auctioner_test.$(OBJEXT) \
+	../test/AUMProcessor_test.$(OBJEXT) \
 	../test/test_runner.$(OBJEXT)
 test_runner_OBJECTS = $(am_test_runner_OBJECTS)
 test_runner_LDADD = $(LDADD)
@@ -605,7 +608,9 @@ test_runner_SOURCES = ../src/Error.cpp \
 						../src/AUMProcessor.cpp \
 						../src/ConfigManager.cpp \
 						../src/AuctionManager.cpp \
+						../src/Allocation.cpp \
 						../src/Auctioner.cpp \
+						../test/Timeval_test.cpp \
 						../test/FieldValue_test.cpp \
 						../test/FieldDefParser_test.cpp \
 						../test/FieldValParser_test.cpp \
@@ -613,10 +618,11 @@ test_runner_SOURCES = ../src/Error.cpp \
 						../test/BidFileParser_test.cpp \
 						../test/AuctionFileParser_test.cpp \
 						../test/Bid_test.cpp \
+						../test/Allocation_test.cpp \
 						../test/AuctionTimer_test.cpp \
 						../test/Bid_Manager_test.cpp \
 						../test/AuctionManager_test.cpp \
-						../test/Auctioner_test.cpp \
+						../test/AUMProcessor_test.cpp \
 						../test/test_runner.cpp
 
 #AM_CXXFLAGS = -O2 -I../include $(CPPUNIT_CFLAGS) \
@@ -774,6 +780,9 @@ clean-checkPROGRAMS:
 ../src/AuctionManager.$(OBJEXT):  \
 	../src/$(am__dirstamp) \
 	../src/$(DEPDIR)/$(am__dirstamp)
+../src/Allocation.$(OBJEXT):  \
+	../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
 ../src/Auctioner.$(OBJEXT):  \
 	../src/$(am__dirstamp) \
 	../src/$(DEPDIR)/$(am__dirstamp)
@@ -783,6 +792,9 @@ clean-checkPROGRAMS:
 ../test/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) ../test/$(DEPDIR)
 	@: > ../test/$(DEPDIR)/$(am__dirstamp)
+../test/Timeval_test.$(OBJEXT):  \
+	../test/$(am__dirstamp) \
+	../test/$(DEPDIR)/$(am__dirstamp)
 ../test/FieldValue_test.$(OBJEXT):  \
 	../test/$(am__dirstamp) \
 	../test/$(DEPDIR)/$(am__dirstamp)
@@ -804,6 +816,9 @@ clean-checkPROGRAMS:
 ../test/Bid_test.$(OBJEXT):  \
 	../test/$(am__dirstamp) \
 	../test/$(DEPDIR)/$(am__dirstamp)
+../test/Allocation_test.$(OBJEXT):  \
+	../test/$(am__dirstamp) \
+	../test/$(DEPDIR)/$(am__dirstamp)
 ../test/AuctionTimer_test.$(OBJEXT):  \
 	../test/$(am__dirstamp) \
 	../test/$(DEPDIR)/$(am__dirstamp)
@@ -813,7 +828,7 @@ clean-checkPROGRAMS:
 ../test/AuctionManager_test.$(OBJEXT):  \
 	../test/$(am__dirstamp) \
 	../test/$(DEPDIR)/$(am__dirstamp)
-../test/Auctioner_test.$(OBJEXT):  \
+../test/AUMProcessor_test.$(OBJEXT):  \
 	../test/$(am__dirstamp) \
 	../test/$(DEPDIR)/$(am__dirstamp)
 ../test/test_runner.$(OBJEXT):  \
@@ -833,6 +848,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ../src/$(DEPDIR)/AUMProcessor.Po
+include ../src/$(DEPDIR)/Allocation.Po
 include ../src/$(DEPDIR)/Auction.Po
 include ../src/$(DEPDIR)/AuctionFileParser.Po
 include ../src/$(DEPDIR)/AuctionIdSource.Po
@@ -867,17 +883,19 @@ include ../src/$(DEPDIR)/ParserFcts.Po
 include ../src/$(DEPDIR)/ProcModule.Po
 include ../src/$(DEPDIR)/Timeval.Po
 include ../src/$(DEPDIR)/XMLParser.Po
+include ../test/$(DEPDIR)/AUMProcessor_test.Po
+include ../test/$(DEPDIR)/Allocation_test.Po
 include ../test/$(DEPDIR)/AuctionFileParser_test.Po
 include ../test/$(DEPDIR)/AuctionIdSource_test.Po
 include ../test/$(DEPDIR)/AuctionManager_test.Po
 include ../test/$(DEPDIR)/AuctionTimer_test.Po
-include ../test/$(DEPDIR)/Auctioner_test.Po
 include ../test/$(DEPDIR)/BidFileParser_test.Po
 include ../test/$(DEPDIR)/Bid_Manager_test.Po
 include ../test/$(DEPDIR)/Bid_test.Po
 include ../test/$(DEPDIR)/FieldDefParser_test.Po
 include ../test/$(DEPDIR)/FieldValParser_test.Po
 include ../test/$(DEPDIR)/FieldValue_test.Po
+include ../test/$(DEPDIR)/Timeval_test.Po
 include ../test/$(DEPDIR)/test_runner.Po
 
 .cpp.o:
