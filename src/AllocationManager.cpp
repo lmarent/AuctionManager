@@ -175,219 +175,113 @@ Allocation *AllocationManager::getAllocaton(string aset, string aname,
 }
 
 
-/* -------------------- getBids -------------------- */
-
-bidIndex_t *BidManager::getBids(string sname)
+allocationDB_t AllocationManager::getAllocations()
 {
-    bidSetIndexIter_t iter;
+    allocationDB_t ret;
 
-    iter = bidSetIndex.find(sname);
-    if (iter != bidSetIndex.end()) {
-        return &(iter->second);
-    }
-
-    return NULL;
-}
-
-bidDB_t BidManager::getBids()
-{
-    bidDB_t ret;
-
-    for (bidSetIndexIter_t r = bidSetIndex.begin(); r != bidSetIndex.end(); r++) {
-        for (bidIndexIter_t i = r->second.begin(); i != r->second.end(); i++) {
-            ret.push_back(getBid(i->second));
-        }
+    allocationDBIter_t iter;
+    for (iter = allocationDB.begin(); iter != allocationDB.end(); iter++) {
+       ret.push_back(*iter);
     }
 
     return ret;
 }
 
-/* ----------------------------- parseBids --------------------------- */
-
-bidDB_t *BidManager::parseBids(string fname)
-{
-
-#ifdef DEBUG
-    log->dlog(ch,"ParseBids");
-#endif
-
-    bidDB_t *new_bids = new bidDB_t();
-
-    try {	
-
-        // load the field def list
-        loadFieldDefs(fieldDefFileName);
-	
-        // load the field val list
-        loadFieldVals(fieldValFileName);
-	
-        BidFileParser rfp = BidFileParser(fname);
-        rfp.parse(&fieldDefs, &fieldVals, new_bids, &idSource);
-
-#ifdef DEBUG
-    log->dlog(ch, "bids parsed");
-#endif
-
-        return new_bids;
-
-    } catch (Error &e) {
-
-        for(bidDBIter_t i=new_bids->begin(); i != new_bids->end(); i++) {
-           saveDelete(*i);
-        }
-        saveDelete(new_bids);
-        throw e;
-    }
-}
-
-
-/* -------------------- parseBidsBuffer -------------------- */
-
-bidDB_t *BidManager::parseBidsBuffer(char *buf, int len, int mapi)
-{
-    bidDB_t *new_bids = new bidDB_t();
-
-    try {
-        // load the filter def list
-        loadFieldDefs("");
-	
-        // load the filter val list
-        loadFieldVals("");
-			
-        if (mapi) {
-             MAPIBidParser rfp = MAPIBidParser(buf, len);
-             rfp.parse(&fieldDefs, &fieldVals, new_bids, &idSource);
-        } else {
-            BidFileParser rfp = BidFileParser(buf, len);
-            rfp.parse(&fieldDefs, &fieldVals, new_bids, &idSource);
-        }
-
-        return new_bids;
-	
-    } catch (Error &e) {
-
-        for(bidDBIter_t i=new_bids->begin(); i != new_bids->end(); i++) {
-            saveDelete(*i);
-        }
-        saveDelete(new_bids);
-        throw e;
-    }
-}
-
-
 /* ---------------------------------- addBids ----------------------------- */
 
-void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
+void AllocationManager::addAllocations(allocationDB_t * _allocations, EventScheduler *e)
 {
-    bidDBIter_t        iter;
-    bidTimeIndex_t     start;
-    bidTimeIndex_t     stop;
-    bidTimeIndexIter_t iter2;
+    allocationDBIter_t        iter;
+    allocationTimeIndex_t     start;
+    allocationTimeIndex_t     stop;
+    allocationTimeIndexIter_t iter2;
     time_t              now = time(NULL);
     
-    // add bids
-    for (iter = _bids->begin(); iter != _bids->end(); iter++) {
-        Bid *b = (*iter);
+    // add allocations
+    for (iter = _allocations->begin(); iter != _allocations->end(); iter++) {
+        Allocation *a = (*iter);
         
         try {
 
-            addBid(b);
+            addAllocation(a);
 
-            bidAuctionListIter_t auct_iter;
-            for ( auct_iter = (b->getAuctions())->begin(); 
-                    auct_iter != (b->getAuctions())->end(); ++auct_iter ){ 
-				start[auct_iter->start].push_back(b);
-				if (auct_iter->stop) 
+            allocationIntervalListIter_t inter_iter;
+            for ( inter_iter = (a->getIntervals())->begin(); 
+                    inter_iter != (a->getIntervals())->end(); ++inter_iter ){ 
+				start[inter_iter->start].push_back(a);
+				if (inter_iter->stop) 
 				{
-					stop[auct_iter->stop].push_back(b);
+					stop[inter_iter->stop].push_back(a);
 				}
 			}
         } catch (Error &e ) {
-            saveDelete(b);
-            // if only one rule return error
+            saveDelete(a);
+            // if only one allocation return error
             if (_bids->size() == 1) {
                 throw e;
             }
-            // FIXME else return number of successively installed bids
+            // FIXME else return number of successively installed allocations
         }
       
     }
     
 #ifdef DEBUG    
-    log->dlog(ch, "Start all bids - it is going to activate them");
+    log->dlog(ch, "Start all allocations - it is going to activate them");
 #endif      
 
     // group rules with same start time
     for (iter2 = start.begin(); iter2 != start.end(); iter2++) {
-		bidDBIter_t bids_iter;
-		// Iterates over the bids starting.
-		for (bids_iter = (iter2->second).begin(); 
-				bids_iter != (iter2->second).end(); bids_iter++) { 
-			Bid *bid = (*bids_iter);
-			// Iterates over the auctions configured for the bid.
-			bidAuctionListIter_t auct_iter = (bid->getAuctions())->begin();
-			while ( auct_iter != (bid->getAuctions())->end()){ 
-				// If the starttime for the auction is actually the same.
-				if (auct_iter->start ==  iter2->first)
-				{
+		allocationDBIter_t allocs_iter;
+		// Iterates over the allocations starting.
+		for (allocs_iter = (iter2->second).begin(); 
+				allocs_iter != (iter2->second).end(); allocs_iter++) { 
+			Allocation *alloc = (*allocs_iter);
+			
 					
 #ifdef DEBUG    
-					log->dlog(ch, "Schedulling new event - set: %s, name:  %s", 
-							  (auct_iter->auctionSet).c_str(), 
-							    (auct_iter->auctionName).c_str());
+			log->dlog(ch, "Schedulling new event - set: %s, name:  %s", 
+ 					  (inter_iter->auctionSet).c_str(), 
+				    (inter_iter->auctionName).c_str());
 #endif 					
-					e->addEvent(new InsertBidAuctionEvent(iter2->first-now, 
-														  bid, 
-														  auct_iter->auctionSet,
-														  auct_iter->auctionName));
-				}
-				++auct_iter;
-			}
+			e->addEvent(new InsertAllocationEvent(iter2->first-now, alloc);
 		}
     }
     
-    // group rules with same stop time
+    // group allocations with same stop time
     for (iter2 = stop.begin(); iter2 != stop.end(); iter2++) {
-		bidDBIter_t bids_iter;
-		// Iterates over the bids starting.
-		for (bids_iter = (iter2->second).begin(); 
-				bids_iter != (iter2->second).end(); bids_iter++) {
-			Bid *bid = (*bids_iter); 
-			// Iterates over the auctions configured for the bid.
-			bidAuctionListIter_t auct_iter = (bid->getAuctions())->begin();		
-			while (auct_iter != (bid->getAuctions())->end()) 
-			{
-				if (auct_iter->stop ==  iter2->first){	  
-					e->addEvent(new RemoveBidAuctionEvent(iter2->first-now, 
-														  bid, 
-														  auct_iter->auctionSet,
-														  auct_iter->auctionName));
-				}
-				++auct_iter;
-			}
+		allocationDBIter_t allocs_iter;
+		// Iterates over the allocations stoping.
+		for (allocs_iter = (iter2->second).begin(); 
+				allocs_iter != (iter2->second).end(); allocs_iter++) {
+			Allocation *alloc = (*allocs_iter); 
+
+			e->addEvent(new RemoveBidAuctionEvent(iter2->first-now, alloc );
 		}
     }
 
 #ifdef DEBUG    
-    log->dlog(ch, "Finished adding bids");
+    log->dlog(ch, "Finished adding allocations");
 #endif      
 
 }
 
 
-/* -------------------- addBid -------------------- */
+/* -------------------- addAllocation -------------------- */
 
-void BidManager::addBid(Bid *b)
+void AllocationManager::addAllocation(Allocation *a)
 {
   
 #ifdef DEBUG    
-    log->dlog(ch, "adding new bid with name = '%s'",
-              b->getBidName().c_str());
+    log->dlog(ch, "adding new allocation with name = %s.%s.%s.%s",
+              a->getAuctionSet().c_str(), 
+              a->getAuctionName().c_str(),
+              a->getBidSet().c_str(),
+              a->getBidName().c_str());
 #endif  
 				  
 			  
-    // test for presence of bidSource/bidName combination
-    // in bidDatabase in particular set
+    // test for presence of allocationSource/allocationName combination
+    // in allocation database in particular set
     if (getBid(b->getSetName(), b->getBidName())) {
         log->elog(ch, "bid %s.%s already installed",
                   b->getSetName().c_str(), b->getBidName().c_str());

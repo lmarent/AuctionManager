@@ -56,8 +56,8 @@ typedef list<Allocation*>            allocationDone_t;
 typedef list<Allocation*>::iterator  allocationDoneIter_t;
 
 //! index allocations by time
-typedef map<time_t, allocationDB_t>            bidTimeIndex_t;
-typedef map<time_t, allocationDB_t>::iterator  bidTimeIndexIter_t;
+typedef map<time_t, allocationDB_t>            allocationTimeIndex_t;
+typedef map<time_t, allocationDB_t>::iterator  allocationTimeIndexIter_t;
 
 
 /*! \short   manage adding/deleting of complete allocation descriptions
@@ -146,7 +146,7 @@ class AllocationManager
     */
     Allocation *getAllocaton(string aset, string aname, string bset, string bname);
 
-    /*! \short  get all bids in bidset with name sname 
+    /*! \short  get all bids in bidset with name bname 
          \arg \c bset - bid set
          \arg \c bname - bid name
     */
