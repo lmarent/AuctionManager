@@ -59,6 +59,17 @@ int   _listpos;
 /* align macro */
 #define ALIGN( var, type ) var = ( var + sizeof(type)-1 )/sizeof(type) * sizeof(type)
 
+void initializeField(field_t *f)
+{
+	// Initialize the values for the field.
+	for (int i=0 ; i < MAX_FIELD_SET_SIZE; i++)
+	{
+		FieldValue fielvalue;
+		f->value.push_back(fielvalue);
+	}
+
+}
+
 /*! Parse parameter functions */
 
 long parseLong( string s )
@@ -164,7 +175,8 @@ int parseBool(string s)
     }
 	
 }
-inline float parseFloat(string s)
+
+float parseFloat(string s)
 {
     char *errp = NULL;
     float n;
@@ -178,7 +190,7 @@ inline float parseFloat(string s)
     return n;	
 }
 
-inline double parseDouble(string s)
+double parseDouble(string s)
 {
     char *errp = NULL;
     double n;

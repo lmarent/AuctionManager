@@ -121,7 +121,8 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-bas_la_DEPENDENCIES = ProcModule.lo ProcError.lo
+bas_la_DEPENDENCIES = ProcModule.lo ProcError.lo \
+	../foundation/src/libfoundation.la
 am_bas_la_OBJECTS = bas_la-bas.lo
 bas_la_OBJECTS = $(am_bas_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -334,9 +335,6 @@ mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
-poco_CFLAGS = @poco_CFLAGS@
-poco_LDFLAGS = @poco_LDFLAGS@
-poco_LIBS = @poco_LIBS@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
@@ -349,20 +347,29 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = ProcModule.h ProcModule.cpp ProcError.cpp
-INCLUDES = -I$(top_srcdir)/include \
-				  -I/usr/src/linux/include
-
 lib_LTLIBRARIES = bas.la
-@ENABLE_DEBUG_FALSE@AM_CFLAGS = -O2 -fPIC @NL3_CFLAGS@ @NL_ROUTE_3_CFLAGS@
-@ENABLE_DEBUG_TRUE@AM_CFLAGS = -g -DDEBUG -DPROFILING -fPIC @NL3_CFLAGS@ @NL_ROUTE_3_CFLAGS@
-@ENABLE_DEBUG_FALSE@AM_CXXFLAGS = -O2 @NL3_CFLAGS@ @NL_ROUTE_3_CFLAGS@
-@ENABLE_DEBUG_TRUE@AM_CXXFLAGS = -g -DDEBUG -DPROFILING @NL3_CFLAGS@ @NL_ROUTE_3_CFLAGS@
-bas_la_CPPFLAGS = -I$(top_srcdir)/include \
+@ENABLE_DEBUG_FALSE@AM_CFLAGS = -I$(top_srcdir)/foundation/include \
+@ENABLE_DEBUG_FALSE@			  -I/usr/src/linux/include \
+@ENABLE_DEBUG_FALSE@			  -O2 -fPIC 
+
+@ENABLE_DEBUG_TRUE@AM_CFLAGS = -I$(top_srcdir)/foundation/include \
+@ENABLE_DEBUG_TRUE@			  -I/usr/src/linux/include \
+@ENABLE_DEBUG_TRUE@			  -g -DDEBUG -DPROFILING -D_GLIBCXX_DEBUG -fPIC 
+
+@ENABLE_DEBUG_FALSE@AM_CXXFLAGS = -I$(top_srcdir)/foundation/include \
+@ENABLE_DEBUG_FALSE@			    -I/usr/src/linux/include \
+@ENABLE_DEBUG_FALSE@			    -O2 
+
+@ENABLE_DEBUG_TRUE@AM_CXXFLAGS = -I$(top_srcdir)/foundation/include \
+@ENABLE_DEBUG_TRUE@			    -I/usr/src/linux/include \
+@ENABLE_DEBUG_TRUE@			    -g -DDEBUG -DPROFILING -D_GLIBCXX_DEBUG
+
+bas_la_CPPFLAGS = -I$(top_srcdir)/foundation/include \
 				  -I/usr/src/linux/include
 
-bas_la_LDFLAGS = -export-dynamic -module @NL3_LIBS@ @NL_ROUTE_3_LIBS@
+bas_la_LDFLAGS = -export-dynamic -module 
 bas_la_SOURCES = bas.cpp
-bas_la_LIBADD = ProcModule.lo ProcError.lo
+bas_la_LIBADD = ProcModule.lo ProcError.lo ../foundation/src/libfoundation.la
 all: all-am
 
 .SUFFIXES:

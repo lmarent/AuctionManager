@@ -32,11 +32,25 @@
 
 
 #include "ProcModuleInterface.h"
-#include "stdincpp.h"
+#include "Allocation.h"
+#include "Field.h"
+#include "FieldValue.h"
+#include "Bid.h"
+#include "stdincpp.h" 
 
 /*! Functions for reading parameters and filters, 
  *  It is assumed that data is already verified. */
- 
+
+typedef struct
+{
+	string bidSet;
+	string bidName;
+	string elementName;
+	double quantity;
+	double sellPrice;
+} alloc_proc_t;
+
+void initializeField(field_t *f); 
  
 long parseLong( string s );
 
@@ -56,9 +70,9 @@ int parseInt( string s );
 
 int parseBool( string s);
 
-inline float parseFloat( string s);
+float parseFloat( string s);
 
-inline double parseDouble( string s);
+double parseDouble( string s);
 
 /*! \short   declaration of struct containing all function pointers of a module */
 extern ProcModuleInterface_t func;

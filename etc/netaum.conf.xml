@@ -13,7 +13,7 @@
     <!-- filter constant file -->
     <PREF NAME="FilterConstFile">/home/luis/AuctionManager/etc/fieldval.xml</PREF>     
     <!-- auction file to load at start -->
-    <PREF NAME="AuctionFile">/home/luis/AuctionManager/etc/example_auctions1.xml</PREF>
+    <PREF NAME="AuctionFile">/home/luis/AuctionManager/etc/example_auctions2.xml</PREF>
   </MAIN>
   <CONTROL>
     <!-- enable remote control interface -->

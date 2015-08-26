@@ -1,0 +1,21 @@
+<?xml version ="1.0" encoding="UTF-8"?>
+<!DOCTYPE RESOURCE_REQUEST_SET SYSTEM "resourcerequestfile.dtd"> 
+<RESOURCE_REQUEST_SET ID="Set1">
+
+  <RESOURCE_REQUEST ID="1">    
+	<FIELD NAME="quantity">2</FIELD>
+	<FIELD NAME="budget">0.3</FIELD>		
+	<FIELD NAME="maxvalue">0.16</FIELD>
+	
+	<INTERVAL NAME="interval1">
+		<!-- Duration  -->
+		<PREF NAME="Duration">100</PREF>
+    </INTERVAL>
+	<INTERVAL NAME="interval2">
+		<!-- Duration  -->
+		<PREF NAME="Duration">100</PREF>
+    </INTERVAL>
+
+  </RESOURCE_REQUEST>
+  
+</RESOURCE_REQUEST_SET>

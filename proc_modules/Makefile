@@ -121,7 +121,8 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-bas_la_DEPENDENCIES = ProcModule.lo ProcError.lo
+bas_la_DEPENDENCIES = ProcModule.lo ProcError.lo \
+	../foundation/src/libfoundation.la
 am_bas_la_OBJECTS = bas_la-bas.lo
 bas_la_OBJECTS = $(am_bas_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
@@ -334,9 +335,6 @@ mandir = ${datarootdir}/man
 mkdir_p = $(MKDIR_P)
 oldincludedir = /usr/include
 pdfdir = ${docdir}
-poco_CFLAGS = 
-poco_LDFLAGS = 
-poco_LIBS = 
 prefix = /usr/local
 program_transform_name = s,x,x,
 psdir = ${docdir}
@@ -349,20 +347,29 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 EXTRA_DIST = ProcModule.h ProcModule.cpp ProcError.cpp
-INCLUDES = -I$(top_srcdir)/include \
-				  -I/usr/src/linux/include
-
 lib_LTLIBRARIES = bas.la
-#AM_CFLAGS = -O2 -fPIC -I/usr/local/include/libnl3   -I/usr/local/include/libnl3  
-AM_CFLAGS = -g -DDEBUG -DPROFILING -fPIC -I/usr/local/include/libnl3   -I/usr/local/include/libnl3  
-#AM_CXXFLAGS = -O2 -I/usr/local/include/libnl3   -I/usr/local/include/libnl3  
-AM_CXXFLAGS = -g -DDEBUG -DPROFILING -I/usr/local/include/libnl3   -I/usr/local/include/libnl3  
-bas_la_CPPFLAGS = -I$(top_srcdir)/include \
+#AM_CFLAGS = -I$(top_srcdir)/foundation/include \
+#			  -I/usr/src/linux/include \
+#			  -O2 -fPIC 
+
+AM_CFLAGS = -I$(top_srcdir)/foundation/include \
+			  -I/usr/src/linux/include \
+			  -g -DDEBUG -DPROFILING -D_GLIBCXX_DEBUG -fPIC 
+
+#AM_CXXFLAGS = -I$(top_srcdir)/foundation/include \
+#			    -I/usr/src/linux/include \
+#			    -O2 
+
+AM_CXXFLAGS = -I$(top_srcdir)/foundation/include \
+			    -I/usr/src/linux/include \
+			    -g -DDEBUG -DPROFILING -D_GLIBCXX_DEBUG
+
+bas_la_CPPFLAGS = -I$(top_srcdir)/foundation/include \
 				  -I/usr/src/linux/include
 
-bas_la_LDFLAGS = -export-dynamic -module -L/usr/local/lib -lnl-3   -L/usr/local/lib -lnl-route-3 -lnl-3  
+bas_la_LDFLAGS = -export-dynamic -module 
 bas_la_SOURCES = bas.cpp
-bas_la_LIBADD = ProcModule.lo ProcError.lo
+bas_la_LIBADD = ProcModule.lo ProcError.lo ../foundation/src/libfoundation.la
 all: all-am
 
 .SUFFIXES:

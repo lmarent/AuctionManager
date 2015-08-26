@@ -41,7 +41,9 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/bits/concept_check.h \
  /usr/include/c++/4.8/bits/stl_iterator_base_types.h \
  /usr/include/c++/4.8/bits/stl_iterator_base_funcs.h \
- /usr/include/c++/4.8/debug/debug.h \
+ /usr/include/c++/4.8/debug/debug.h /usr/include/c++/4.8/debug/macros.h \
+ /usr/include/c++/4.8/debug/functions.h \
+ /usr/include/c++/4.8/debug/formatter.h /usr/include/c++/4.8/typeinfo \
  /usr/include/c++/4.8/bits/stl_iterator.h \
  /usr/include/c++/4.8/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++locale.h \
@@ -77,11 +79,23 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/bits/locale_facets.tcc \
  /usr/include/c++/4.8/bits/basic_ios.tcc \
  /usr/include/c++/4.8/bits/ostream.tcc /usr/include/c++/4.8/istream \
- /usr/include/c++/4.8/bits/istream.tcc /usr/include/libio.h \
+ /usr/include/c++/4.8/bits/istream.tcc /usr/include/c++/4.8/map \
+ /usr/include/c++/4.8/bits/stl_tree.h /usr/include/c++/4.8/bits/stl_map.h \
+ /usr/include/c++/4.8/bits/stl_multimap.h /usr/include/c++/4.8/debug/map \
+ /usr/include/c++/4.8/debug/map.h \
+ /usr/include/c++/4.8/debug/safe_sequence.h \
+ /usr/include/c++/4.8/debug/safe_base.h \
+ /usr/include/c++/4.8/ext/concurrence.h \
+ /usr/include/c++/4.8/debug/safe_sequence.tcc \
+ /usr/include/c++/4.8/debug/safe_iterator.h \
+ /usr/include/c++/4.8/debug/safe_iterator.tcc \
+ /usr/include/c++/4.8/utility /usr/include/c++/4.8/bits/stl_relops.h \
+ /usr/include/c++/4.8/debug/multimap.h /usr/include/libio.h \
  /usr/include/_G_config.h /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
- /usr/include/x86_64-linux-gnu/bits/sys_errlist.h ../include/ProcError.h \
- ../include/stdincpp.h ../include/stdinc.h ../config.h \
- /usr/include/stdlib.h /usr/include/x86_64-linux-gnu/bits/waitflags.h \
+ /usr/include/x86_64-linux-gnu/bits/sys_errlist.h \
+ ../foundation/include/ProcError.h ../foundation/include/stdincpp.h \
+ ../foundation/include/stdinc.h ../config.h /usr/include/stdlib.h \
+ /usr/include/x86_64-linux-gnu/bits/waitflags.h \
  /usr/include/x86_64-linux-gnu/bits/waitstatus.h /usr/include/alloca.h \
  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
  /usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed/limits.h \
@@ -156,24 +170,20 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/bits/stl_uninitialized.h \
  /usr/include/c++/4.8/bits/stl_vector.h \
  /usr/include/c++/4.8/bits/stl_bvector.h \
- /usr/include/c++/4.8/bits/vector.tcc /usr/include/c++/4.8/deque \
- /usr/include/c++/4.8/bits/stl_deque.h \
- /usr/include/c++/4.8/bits/deque.tcc /usr/include/c++/4.8/map \
- /usr/include/c++/4.8/bits/stl_tree.h /usr/include/c++/4.8/bits/stl_map.h \
- /usr/include/c++/4.8/bits/stl_multimap.h \
+ /usr/include/c++/4.8/bits/vector.tcc /usr/include/c++/4.8/debug/vector \
+ /usr/include/c++/4.8/deque /usr/include/c++/4.8/bits/stl_deque.h \
+ /usr/include/c++/4.8/bits/deque.tcc /usr/include/c++/4.8/debug/deque \
  /usr/include/c++/4.8/ext/hash_map \
  /usr/include/c++/4.8/backward/backward_warning.h \
  /usr/include/c++/4.8/backward/hashtable.h /usr/include/c++/4.8/iterator \
  /usr/include/c++/4.8/bits/stream_iterator.h \
- /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/utility \
- /usr/include/c++/4.8/bits/stl_relops.h \
- /usr/include/c++/4.8/bits/stl_algo.h /usr/include/c++/4.8/cstdlib \
- /usr/include/c++/4.8/bits/algorithmfwd.h \
+ /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
+ /usr/include/c++/4.8/cstdlib /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h \
  /usr/include/c++/4.8/bits/stl_tempbuf.h \
  /usr/include/c++/4.8/backward/hash_fun.h /usr/include/c++/4.8/list \
  /usr/include/c++/4.8/bits/stl_list.h /usr/include/c++/4.8/bits/list.tcc \
- /usr/include/c++/4.8/locale \
+ /usr/include/c++/4.8/debug/list /usr/include/c++/4.8/locale \
  /usr/include/c++/4.8/bits/locale_facets_nonio.h \
  /usr/include/c++/4.8/ctime \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/time_members.h \
@@ -183,10 +193,13 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/bits/stl_raw_storage_iter.h \
  /usr/include/c++/4.8/backward/auto_ptr.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/bitset \
+ /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/debug/set \
+ /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
+ /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
  /usr/include/c++/4.8/iomanip ProcModule.h \
- ../include/ProcModuleInterface.h ../include/metadata.h \
- ../include/FieldDefParser.h /usr/include/libxml2/libxml/parser.h \
+ ../foundation/include/ProcModuleInterface.h \
+ ../foundation/include/metadata.h ../foundation/include/FieldDefParser.h \
+ /usr/include/libxml2/libxml/parser.h \
  /usr/include/libxml2/libxml/xmlversion.h \
  /usr/include/libxml2/libxml/xmlexports.h \
  /usr/include/libxml2/libxml/tree.h \
@@ -203,10 +216,16 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
  /usr/include/libxml2/libxml/globals.h /usr/include/libxml2/libxml/SAX.h \
  /usr/include/libxml2/libxml/xlink.h /usr/include/libxml2/libxml/SAX2.h \
  /usr/include/libxml2/libxml/xmlmemory.h \
- /usr/include/libxml2/libxml/threads.h ../include/Logger.h \
- ../include/ProcError.h ../include/Error.h ../include/Threads.h \
- ../include/Constants.h ../include/ConstantsAum.h ../include/XMLParser.h \
- ../include/FieldValue.h ../include/stdincpp.h
+ /usr/include/libxml2/libxml/threads.h ../foundation/include/Logger.h \
+ ../foundation/include/ProcError.h ../foundation/include/Error.h \
+ ../foundation/include/Threads.h ../foundation/include/Constants.h \
+ ../foundation/include/ConstantsAum.h ../foundation/include/XMLParser.h \
+ ../foundation/include/Field.h ../foundation/include/FieldValue.h \
+ ../foundation/include/Allocation.h ../foundation/include/ConfigParser.h \
+ ../foundation/include/ProcModuleInterface.h \
+ ../foundation/include/Field.h ../foundation/include/FieldValue.h \
+ ../foundation/include/Bid.h ../foundation/include/AuctionTimer.h \
+ ../foundation/include/stdincpp.h
 
 /usr/include/stdc-predef.h:
 
@@ -314,6 +333,14 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
 
 /usr/include/c++/4.8/debug/debug.h:
 
+/usr/include/c++/4.8/debug/macros.h:
+
+/usr/include/c++/4.8/debug/functions.h:
+
+/usr/include/c++/4.8/debug/formatter.h:
+
+/usr/include/c++/4.8/typeinfo:
+
 /usr/include/c++/4.8/bits/stl_iterator.h:
 
 /usr/include/c++/4.8/bits/localefwd.h:
@@ -404,6 +431,36 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
 
 /usr/include/c++/4.8/bits/istream.tcc:
 
+/usr/include/c++/4.8/map:
+
+/usr/include/c++/4.8/bits/stl_tree.h:
+
+/usr/include/c++/4.8/bits/stl_map.h:
+
+/usr/include/c++/4.8/bits/stl_multimap.h:
+
+/usr/include/c++/4.8/debug/map:
+
+/usr/include/c++/4.8/debug/map.h:
+
+/usr/include/c++/4.8/debug/safe_sequence.h:
+
+/usr/include/c++/4.8/debug/safe_base.h:
+
+/usr/include/c++/4.8/ext/concurrence.h:
+
+/usr/include/c++/4.8/debug/safe_sequence.tcc:
+
+/usr/include/c++/4.8/debug/safe_iterator.h:
+
+/usr/include/c++/4.8/debug/safe_iterator.tcc:
+
+/usr/include/c++/4.8/utility:
+
+/usr/include/c++/4.8/bits/stl_relops.h:
+
+/usr/include/c++/4.8/debug/multimap.h:
+
 /usr/include/libio.h:
 
 /usr/include/_G_config.h:
@@ -412,11 +469,11 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
 
 /usr/include/x86_64-linux-gnu/bits/sys_errlist.h:
 
-../include/ProcError.h:
+../foundation/include/ProcError.h:
 
-../include/stdincpp.h:
+../foundation/include/stdincpp.h:
 
-../include/stdinc.h:
+../foundation/include/stdinc.h:
 
 ../config.h:
 
@@ -636,19 +693,15 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
 
 /usr/include/c++/4.8/bits/vector.tcc:
 
+/usr/include/c++/4.8/debug/vector:
+
 /usr/include/c++/4.8/deque:
 
 /usr/include/c++/4.8/bits/stl_deque.h:
 
 /usr/include/c++/4.8/bits/deque.tcc:
 
-/usr/include/c++/4.8/map:
-
-/usr/include/c++/4.8/bits/stl_tree.h:
-
-/usr/include/c++/4.8/bits/stl_map.h:
-
-/usr/include/c++/4.8/bits/stl_multimap.h:
+/usr/include/c++/4.8/debug/deque:
 
 /usr/include/c++/4.8/ext/hash_map:
 
@@ -661,10 +714,6 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
 /usr/include/c++/4.8/bits/stream_iterator.h:
 
 /usr/include/c++/4.8/algorithm:
-
-/usr/include/c++/4.8/utility:
-
-/usr/include/c++/4.8/bits/stl_relops.h:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
 
@@ -683,6 +732,8 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
 /usr/include/c++/4.8/bits/stl_list.h:
 
 /usr/include/c++/4.8/bits/list.tcc:
+
+/usr/include/c++/4.8/debug/list:
 
 /usr/include/c++/4.8/locale:
 
@@ -710,17 +761,25 @@ bas_la-bas.lo: bas.cpp /usr/include/stdc-predef.h \
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+/usr/include/c++/4.8/debug/set:
+
+/usr/include/c++/4.8/debug/set.h:
+
+/usr/include/c++/4.8/debug/multiset.h:
+
 /usr/include/c++/4.8/bitset:
+
+/usr/include/c++/4.8/debug/bitset:
 
 /usr/include/c++/4.8/iomanip:
 
 ProcModule.h:
 
-../include/ProcModuleInterface.h:
+../foundation/include/ProcModuleInterface.h:
 
-../include/metadata.h:
+../foundation/include/metadata.h:
 
-../include/FieldDefParser.h:
+../foundation/include/FieldDefParser.h:
 
 /usr/include/libxml2/libxml/parser.h:
 
@@ -766,20 +825,36 @@ ProcModule.h:
 
 /usr/include/libxml2/libxml/threads.h:
 
-../include/Logger.h:
+../foundation/include/Logger.h:
 
-../include/ProcError.h:
+../foundation/include/ProcError.h:
 
-../include/Error.h:
+../foundation/include/Error.h:
 
-../include/Threads.h:
+../foundation/include/Threads.h:
 
-../include/Constants.h:
+../foundation/include/Constants.h:
 
-../include/ConstantsAum.h:
+../foundation/include/ConstantsAum.h:
 
-../include/XMLParser.h:
+../foundation/include/XMLParser.h:
 
-../include/FieldValue.h:
+../foundation/include/Field.h:
 
-../include/stdincpp.h:
+../foundation/include/FieldValue.h:
+
+../foundation/include/Allocation.h:
+
+../foundation/include/ConfigParser.h:
+
+../foundation/include/ProcModuleInterface.h:
+
+../foundation/include/Field.h:
+
+../foundation/include/FieldValue.h:
+
+../foundation/include/Bid.h:
+
+../foundation/include/AuctionTimer.h:
+
+../foundation/include/stdincpp.h:

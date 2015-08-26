@@ -631,7 +631,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_unique_file="src/AuctionManager.cpp"
+ac_unique_file="foundation/src/AuctionManager.cpp"
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
@@ -658,12 +658,11 @@ ENABLE_TEST
 ENABLE_NF
 OS
 REL_DATE
-poco_LDFLAGS
-poco_LIBS
-poco_CFLAGS
 DOXY
-BUILD_NQRSH_FALSE
-BUILD_NQRSH_TRUE
+BUILD_NARSH_FALSE
+BUILD_NARSH_TRUE
+BUILD_NAGTRSH_FALSE
+BUILD_NAGTRSH_TRUE
 CURL_FALSE
 CURL_TRUE
 CURL_LIBS
@@ -18325,11 +18324,19 @@ fi
 
 
  if test "$XSLTLIB" && test "$CURL_LIBS"; then
-  BUILD_NQRSH_TRUE=
-  BUILD_NQRSH_FALSE='#'
+  BUILD_NAGTRSH_TRUE=
+  BUILD_NAGTRSH_FALSE='#'
 else
-  BUILD_NQRSH_TRUE='#'
-  BUILD_NQRSH_FALSE=
+  BUILD_NAGTRSH_TRUE='#'
+  BUILD_NAGTRSH_FALSE=
+fi
+
+ if test "$XSLTLIB" && test "$CURL_LIBS"; then
+  BUILD_NARSH_TRUE=
+  BUILD_NARSH_FALSE='#'
+else
+  BUILD_NARSH_TRUE='#'
+  BUILD_NARSH_FALSE=
 fi
 
 
@@ -18454,12 +18461,7 @@ _ACEOF
 
 
 
-
-
-
-
-
-ac_config_files="$ac_config_files Makefile lib/getpass/Makefile lib/httpd/Makefile lib/getopt_long/Makefile narsh/Makefile proc_modules/Makefile src/Makefile test/Makefile"
+ac_config_files="$ac_config_files Makefile lib/getpass/Makefile lib/httpd/Makefile lib/getopt_long/Makefile nagtrsh/Makefile foundation/src/Makefile foundation/test/Makefile proc_modules/Makefile auctioner/src/Makefile auctioner/test/Makefile user_agent/src/Makefile user_agent/test/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -18627,8 +18629,12 @@ if test -z "${CURL_TRUE}" && test -z "${CURL_FALSE}"; then
   as_fn_error $? "conditional \"CURL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${BUILD_NQRSH_TRUE}" && test -z "${BUILD_NQRSH_FALSE}"; then
-  as_fn_error $? "conditional \"BUILD_NQRSH\" was never defined.
+if test -z "${BUILD_NAGTRSH_TRUE}" && test -z "${BUILD_NAGTRSH_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_NAGTRSH\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_NARSH_TRUE}" && test -z "${BUILD_NARSH_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_NARSH\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -19605,10 +19611,14 @@ do
     "lib/getpass/Makefile") CONFIG_FILES="$CONFIG_FILES lib/getpass/Makefile" ;;
     "lib/httpd/Makefile") CONFIG_FILES="$CONFIG_FILES lib/httpd/Makefile" ;;
     "lib/getopt_long/Makefile") CONFIG_FILES="$CONFIG_FILES lib/getopt_long/Makefile" ;;
-    "narsh/Makefile") CONFIG_FILES="$CONFIG_FILES narsh/Makefile" ;;
+    "nagtrsh/Makefile") CONFIG_FILES="$CONFIG_FILES nagtrsh/Makefile" ;;
+    "foundation/src/Makefile") CONFIG_FILES="$CONFIG_FILES foundation/src/Makefile" ;;
+    "foundation/test/Makefile") CONFIG_FILES="$CONFIG_FILES foundation/test/Makefile" ;;
     "proc_modules/Makefile") CONFIG_FILES="$CONFIG_FILES proc_modules/Makefile" ;;
-    "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
-    "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
+    "auctioner/src/Makefile") CONFIG_FILES="$CONFIG_FILES auctioner/src/Makefile" ;;
+    "auctioner/test/Makefile") CONFIG_FILES="$CONFIG_FILES auctioner/test/Makefile" ;;
+    "user_agent/src/Makefile") CONFIG_FILES="$CONFIG_FILES user_agent/src/Makefile" ;;
+    "user_agent/test/Makefile") CONFIG_FILES="$CONFIG_FILES user_agent/test/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

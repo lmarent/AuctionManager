@@ -5,7 +5,7 @@ AC_PREREQ([2.68])
 AC_INIT([auctionManager],[0.1],[la.marentes455@uniandes.edu.co])
 AM_INIT_AUTOMAKE([subdir-objects])
 LT_INIT
-AC_CONFIG_SRCDIR([src/AuctionManager.cpp])
+AC_CONFIG_SRCDIR([foundation/src/AuctionManager.cpp])
 
 ## ------------------------Begin instantiation part 
 ## Meaning:
@@ -311,8 +311,9 @@ AC_SUBST(CURL_CFLAGS)
 AC_SUBST(CURL_LIBS)
 
 
-dnl # dont try to build nqrsh if we don't have the libs
-AM_CONDITIONAL(BUILD_NQRSH, test "$XSLTLIB" && test "$CURL_LIBS") 
+dnl # dont try to build nagtrsh if we don't have the libs
+AM_CONDITIONAL(BUILD_NAGTRSH, test "$XSLTLIB" && test "$CURL_LIBS") 
+AM_CONDITIONAL(BUILD_NARSH, test "$XSLTLIB" && test "$CURL_LIBS") 
 
 
 dnl # checks for programs
@@ -356,11 +357,6 @@ AC_DEFINE_UNQUOTED(DEF_LIBDIR, "$DEF_LIBDIR", "lib dir")
 DEF_BINDIR=`eval echo ${bindir}`
 AC_DEFINE_UNQUOTED(DEF_BINDIR, "$DEF_BINDIR", "bin dir")
 
-
-AC_SUBST(poco_CFLAGS)
-AC_SUBST(poco_LIBS)
-AC_SUBST(poco_LDFLAGS)
-
 AC_SUBST(VERSION)
 AC_SUBST(REL_DATE)
 AC_SUBST(OS)
@@ -392,9 +388,13 @@ AC_CONFIG_FILES([Makefile \
 				 lib/getpass/Makefile \
   				 lib/httpd/Makefile \
 				 lib/getopt_long/Makefile \
-				 narsh/Makefile \
+				 nagtrsh/Makefile \
+				 foundation/src/Makefile \
+				 foundation/test/Makefile \
 				 proc_modules/Makefile \
-                 src/Makefile \
-                 test/Makefile ] )
+				 auctioner/src/Makefile \
+				 auctioner/test/Makefile \
+                 user_agent/src/Makefile \
+                 user_agent/test/Makefile ] )
 
 AC_OUTPUT

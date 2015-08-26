@@ -111,7 +111,9 @@ ProcModule.lo: ProcModule.cpp /usr/include/stdc-predef.h ProcModule.h \
  /usr/include/c++/4.8/bits/concept_check.h \
  /usr/include/c++/4.8/bits/stl_iterator_base_types.h \
  /usr/include/c++/4.8/bits/stl_iterator_base_funcs.h \
- /usr/include/c++/4.8/debug/debug.h \
+ /usr/include/c++/4.8/debug/debug.h /usr/include/c++/4.8/debug/macros.h \
+ /usr/include/c++/4.8/debug/functions.h \
+ /usr/include/c++/4.8/debug/formatter.h /usr/include/c++/4.8/typeinfo \
  /usr/include/c++/4.8/bits/stl_iterator.h \
  /usr/include/c++/4.8/bits/localefwd.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++locale.h \
@@ -158,24 +160,31 @@ ProcModule.lo: ProcModule.cpp /usr/include/stdc-predef.h ProcModule.h \
  /usr/include/c++/4.8/bits/stl_uninitialized.h \
  /usr/include/c++/4.8/bits/stl_vector.h \
  /usr/include/c++/4.8/bits/stl_bvector.h \
- /usr/include/c++/4.8/bits/vector.tcc /usr/include/c++/4.8/deque \
+ /usr/include/c++/4.8/bits/vector.tcc /usr/include/c++/4.8/debug/vector \
+ /usr/include/c++/4.8/utility /usr/include/c++/4.8/bits/stl_relops.h \
+ /usr/include/c++/4.8/debug/safe_sequence.h \
+ /usr/include/c++/4.8/debug/safe_base.h \
+ /usr/include/c++/4.8/ext/concurrence.h \
+ /usr/include/c++/4.8/debug/safe_sequence.tcc \
+ /usr/include/c++/4.8/debug/safe_iterator.h \
+ /usr/include/c++/4.8/debug/safe_iterator.tcc /usr/include/c++/4.8/deque \
  /usr/include/c++/4.8/bits/stl_deque.h \
- /usr/include/c++/4.8/bits/deque.tcc /usr/include/c++/4.8/map \
- /usr/include/c++/4.8/bits/stl_tree.h /usr/include/c++/4.8/bits/stl_map.h \
- /usr/include/c++/4.8/bits/stl_multimap.h \
+ /usr/include/c++/4.8/bits/deque.tcc /usr/include/c++/4.8/debug/deque \
+ /usr/include/c++/4.8/map /usr/include/c++/4.8/bits/stl_tree.h \
+ /usr/include/c++/4.8/bits/stl_map.h \
+ /usr/include/c++/4.8/bits/stl_multimap.h /usr/include/c++/4.8/debug/map \
+ /usr/include/c++/4.8/debug/map.h /usr/include/c++/4.8/debug/multimap.h \
  /usr/include/c++/4.8/ext/hash_map \
  /usr/include/c++/4.8/backward/backward_warning.h \
  /usr/include/c++/4.8/backward/hashtable.h /usr/include/c++/4.8/iterator \
  /usr/include/c++/4.8/bits/stream_iterator.h \
- /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/utility \
- /usr/include/c++/4.8/bits/stl_relops.h \
- /usr/include/c++/4.8/bits/stl_algo.h /usr/include/c++/4.8/cstdlib \
- /usr/include/c++/4.8/bits/algorithmfwd.h \
+ /usr/include/c++/4.8/algorithm /usr/include/c++/4.8/bits/stl_algo.h \
+ /usr/include/c++/4.8/cstdlib /usr/include/c++/4.8/bits/algorithmfwd.h \
  /usr/include/c++/4.8/bits/stl_heap.h \
  /usr/include/c++/4.8/bits/stl_tempbuf.h \
  /usr/include/c++/4.8/backward/hash_fun.h /usr/include/c++/4.8/list \
  /usr/include/c++/4.8/bits/stl_list.h /usr/include/c++/4.8/bits/list.tcc \
- /usr/include/c++/4.8/locale \
+ /usr/include/c++/4.8/debug/list /usr/include/c++/4.8/locale \
  /usr/include/c++/4.8/bits/locale_facets_nonio.h \
  /usr/include/c++/4.8/ctime \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/time_members.h \
@@ -185,7 +194,9 @@ ProcModule.lo: ProcModule.cpp /usr/include/stdc-predef.h ProcModule.h \
  /usr/include/c++/4.8/bits/stl_raw_storage_iter.h \
  /usr/include/c++/4.8/backward/auto_ptr.h /usr/include/c++/4.8/set \
  /usr/include/c++/4.8/bits/stl_set.h \
- /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/bitset \
+ /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/debug/set \
+ /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
+ /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
  /usr/include/c++/4.8/iomanip /usr/include/libxml2/libxml/parser.h \
  /usr/include/libxml2/libxml/xmlversion.h \
  /usr/include/libxml2/libxml/xmlexports.h \
@@ -206,7 +217,10 @@ ProcModule.lo: ProcModule.cpp /usr/include/stdc-predef.h ProcModule.h \
  /usr/include/libxml2/libxml/threads.h ../include/Logger.h \
  ../include/ProcError.h ../include/Error.h ../include/Threads.h \
  ../include/Constants.h ../include/ConstantsAum.h ../include/XMLParser.h \
- ../include/FieldValue.h ../include/stdincpp.h ../include/ProcError.h
+ ../include/Field.h ../include/FieldValue.h ../include/Allocation.h \
+ ../include/ConfigParser.h ../include/ProcModuleInterface.h \
+ ../include/Field.h ../include/FieldValue.h ../include/Bid.h \
+ ../include/AuctionTimer.h ../include/stdincpp.h ../include/ProcError.h
 
 /usr/include/stdc-predef.h:
 
@@ -524,6 +538,14 @@ ProcModule.h:
 
 /usr/include/c++/4.8/debug/debug.h:
 
+/usr/include/c++/4.8/debug/macros.h:
+
+/usr/include/c++/4.8/debug/functions.h:
+
+/usr/include/c++/4.8/debug/formatter.h:
+
+/usr/include/c++/4.8/typeinfo:
+
 /usr/include/c++/4.8/bits/stl_iterator.h:
 
 /usr/include/c++/4.8/bits/localefwd.h:
@@ -642,11 +664,31 @@ ProcModule.h:
 
 /usr/include/c++/4.8/bits/vector.tcc:
 
+/usr/include/c++/4.8/debug/vector:
+
+/usr/include/c++/4.8/utility:
+
+/usr/include/c++/4.8/bits/stl_relops.h:
+
+/usr/include/c++/4.8/debug/safe_sequence.h:
+
+/usr/include/c++/4.8/debug/safe_base.h:
+
+/usr/include/c++/4.8/ext/concurrence.h:
+
+/usr/include/c++/4.8/debug/safe_sequence.tcc:
+
+/usr/include/c++/4.8/debug/safe_iterator.h:
+
+/usr/include/c++/4.8/debug/safe_iterator.tcc:
+
 /usr/include/c++/4.8/deque:
 
 /usr/include/c++/4.8/bits/stl_deque.h:
 
 /usr/include/c++/4.8/bits/deque.tcc:
+
+/usr/include/c++/4.8/debug/deque:
 
 /usr/include/c++/4.8/map:
 
@@ -655,6 +697,12 @@ ProcModule.h:
 /usr/include/c++/4.8/bits/stl_map.h:
 
 /usr/include/c++/4.8/bits/stl_multimap.h:
+
+/usr/include/c++/4.8/debug/map:
+
+/usr/include/c++/4.8/debug/map.h:
+
+/usr/include/c++/4.8/debug/multimap.h:
 
 /usr/include/c++/4.8/ext/hash_map:
 
@@ -667,10 +715,6 @@ ProcModule.h:
 /usr/include/c++/4.8/bits/stream_iterator.h:
 
 /usr/include/c++/4.8/algorithm:
-
-/usr/include/c++/4.8/utility:
-
-/usr/include/c++/4.8/bits/stl_relops.h:
 
 /usr/include/c++/4.8/bits/stl_algo.h:
 
@@ -689,6 +733,8 @@ ProcModule.h:
 /usr/include/c++/4.8/bits/stl_list.h:
 
 /usr/include/c++/4.8/bits/list.tcc:
+
+/usr/include/c++/4.8/debug/list:
 
 /usr/include/c++/4.8/locale:
 
@@ -716,7 +762,15 @@ ProcModule.h:
 
 /usr/include/c++/4.8/bits/stl_multiset.h:
 
+/usr/include/c++/4.8/debug/set:
+
+/usr/include/c++/4.8/debug/set.h:
+
+/usr/include/c++/4.8/debug/multiset.h:
+
 /usr/include/c++/4.8/bitset:
+
+/usr/include/c++/4.8/debug/bitset:
 
 /usr/include/c++/4.8/iomanip:
 
@@ -778,7 +832,23 @@ ProcModule.h:
 
 ../include/XMLParser.h:
 
+../include/Field.h:
+
 ../include/FieldValue.h:
+
+../include/Allocation.h:
+
+../include/ConfigParser.h:
+
+../include/ProcModuleInterface.h:
+
+../include/Field.h:
+
+../include/FieldValue.h:
+
+../include/Bid.h:
+
+../include/AuctionTimer.h:
 
 ../include/stdincpp.h:
 

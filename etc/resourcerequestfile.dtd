@@ -1,0 +1,24 @@
+<?xml version ="1.0" encoding="UTF-8"?>
+<!-- The Document Type Definition (DTD) for the file -->
+
+<!ELEMENT RESOURCE_REQUEST_SET (RESOURCE_REQUEST*)>
+<!ATTLIST RESOURCE_REQUEST_SET
+          ID CDATA #REQUIRED>
+
+<!ELEMENT RESOURCE_REQUEST (FIELD|INTERVAL)*>
+<!ATTLIST RESOURCE_REQUEST
+        ID CDATA #REQUIRED>
+
+<!ELEMENT FIELD (#PCDATA)>
+<!ATTLIST FIELD
+        NAME CDATA #REQUIRED
+        TYPE (UInt8|SInt8|UInt16|SInt16|UInt32|SInt32|UInt64|SInt64|Bool|Binary|String|Float32|Float64) "String">
+                
+<!ELEMENT INTERVAL (PREF*)>
+<!ATTLIST INTERVAL
+        NAME CDATA #REQUIRED>
+
+<!ELEMENT PREF (#PCDATA)>
+<!ATTLIST PREF
+        NAME CDATA #REQUIRED
+        TYPE (UInt8|SInt8|UInt16|SInt16|UInt32|SInt32|UInt64|SInt64|Bool|Binary|String) "String">

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE CONFIG SYSTEM "config.dtd"> 
+<CONFIG>
+  <MAIN>
+    <!-- verbose level for logging -->
+    <PREF NAME="VerboseLevel" TYPE="UInt8">4</PREF>
+    <!-- log file name -->
+    <PREF NAME="LogFile">/home/luis/AuctionManager/etc/log/netagent.log</PREF>
+    <!-- pid file location -->
+    <PREF NAME="PidFile">/tmp/netagent.pid</PREF>
+    <!-- filter attribute definition file -->    
+    <PREF NAME="FilterDefFile">/home/luis/AuctionManager/etc/fielddef.xml</PREF>
+    <!-- filter constant file -->
+    <PREF NAME="FilterConstFile">/home/luis/AuctionManager/etc/fieldval.xml</PREF>     
+    <!-- auction file to load at start -->
+    <PREF NAME="AuctionFile">/home/luis/AuctionManager/etc/example_auctions2.xml</PREF>
+  </MAIN>
+  <CONTROL>
+    <!-- enable remote control interface -->
+    <PREF NAME="Enable" TYPE="Bool">yes</PREF>
+    <!-- port for control connections -->
+    <PREF NAME="ControlPort" TYPE="UInt16">12248</PREF>
+    <!-- use SSL encryption -->
+    <PREF NAME="UseSSL" TYPE="Bool">no</PREF>
+    <!-- use IPv6 (if no IPv6 interface present IP4 will be used) -->
+    <PREF NAME="UseIPv6" TYPE="Bool">no</PREF>
+    <!-- log all incoming control requests -->
+    <PREF NAME="LogOnConnect" TYPE="Bool">yes</PREF>
+    <!-- log all agent commands -->
+    <PREF NAME="LogCommand" TYPE="Bool">yes</PREF>
+    <!-- access list -->
+    <ACCESS>
+      <ALLOW TYPE="Host">All</ALLOW>
+      <ALLOW TYPE="User">admin:admin</ALLOW>
+      <DENY>All</DENY>
+    </ACCESS>
+  </CONTROL>
+  <AGENT_PROCESSOR>
+    <!-- run as separate thread -->
+    <PREF NAME="Thread" TYPE="Bool">no</PREF>
+    <!-- Auctioner server data-->
+    <PREF NAME="AuctionerServer" TYPE="IPAddr">no</PREF>
+    <PREF NAME="Auctionerport" TYPE="UInt16">no</PREF>
+    <PREF NAME="User" TYPE="String">no</PREF>
+    <PREF NAME="Password" TYPE="String">no</PREF>
+    <!-- Agent Parameters-->
+    
+  </AGENT_PROCESSOR>  
+</CONFIG>

@@ -1,28 +1,95 @@
-
-
 #include <sys/types.h>
 #include <time.h>     
 #include <iostream>
+#include <map>
 #include <stdio.h>
 #include "ProcError.h"
 #include "ProcModule.h"
 
-void initModule( configParam_t *params )
+const int MOD_INIT_REQUIRED_PARAMS = 1;
+
+// Variables given as parameters.
+double bandwidth_to_sell = 0;
+double reserve_price = 0;
+
+double getResourceAvailability( configParam_t *params )
 {
+ 
+	 cout << "Starting getResourceAvailability" << endl;
+	
+     double bandwidth = 0;
+     int numparams = 0;
+     
+     while (params[0].name != NULL) {
+		// in all the application we establish the rates and 
+		// burst parameters in bytes
+				
+        if (!strcmp(params[0].name, "Bandwidth")) {
+			bandwidth = (double) parseDouble( params[0].value );
+			numparams++;
+		}
+        params++;
+     }
+     
+     if (numparams == 0)
+		throw ProcError(AUM_PROC_PARAMETER_ERROR, 
+					"bas init module - not enought parameters");
+	
+	if (bandwidth <= 0)
+		throw ProcError(AUM_PROC_BANDWIDTH_AVAILABLE_ERROR, 
+					"bas init module - The given bandwidth parameter is incorrect");
 
-#ifdef DEBUG
-	fprintf( stdout, "bas module: start init module \n");
-#endif
+	cout << "Ending getResourceAvailability - Bandwidth:" << bandwidth << endl;
+	
+	return bandwidth;
+     
+}
 
 
-
-#ifdef DEBUG
-	fprintf( stdout, "bas module: end init module \n");
-#endif
+double getReservePrice( configParam_t *params )
+{
+     double price = 0;
+     int numparams = 0;
+     
+     cout << "Starting getReservePrice" << endl;
+     
+     while (params[0].name != NULL) {
+		// in all the application we establish the rates and 
+		// burst parameters in bytes
+				
+        if (!strcmp(params[0].name, "ReservePrice")) {
+			price = (double) parseDouble( params[0].value );
+			numparams++;
+		}
+        params++;
+     }
+     
+     if (numparams == 0)
+		throw ProcError(AUM_PROC_PARAMETER_ERROR, 
+					"bas init module - not enought parameters");
+	
+	if (price < 0)
+		throw ProcError(AUM_PRICE_RESERVE_ERROR, 
+					"bas init module - The given reserve price is incorrect");
+	
+	cout << "Ending getReservePrice" << price << endl;
+		
+	return price;
+     
 
 }
 
-void destroyModule( configParam_t *params)
+
+void initModule( configParam_t *params )
+{
+
+	cout <<  "bas module: start init module" << endl;
+
+	cout << "bas module: end init module" << endl;
+
+}
+
+void destroyModule( configParam_t *params )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start destroy module \n");
@@ -35,19 +102,190 @@ void destroyModule( configParam_t *params)
 
 }
 
-void execute( configParam_t *params, bidDB_t *bids, void **allocationData )
+double getDoubleField(fieldList_t *fields, string name)
+{
+	cout << "starting getDoubleField" << name << "num fields:" << fields->size() << endl;
+	
+	fieldListIter_t field_iter;
+		
+	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
+	{
+	
+		if ((field_iter->name).compare(name) == 0 ){
+			return parseDouble( ((field_iter->value)[0]).getValue());
+		}
+	}
+	
+	throw ProcError(AUM_FIELD_NOT_FOUND_ERROR, 
+					"bas init module - The given field was not included");
+}
+
+string double_to_string (double value)
+{
+	std::ostringstream s;
+	s << value;
+	return s.str();
+}
+
+string makeKey(string auctionSet, string auctionName, 
+				  string bidSet, string bidName)
+{
+	return auctionSet + auctionName + bidSet + bidName;
+}
+
+Allocation *createAllocation(string auctionSet, string auctionName, 
+							  string bidSet, string bidName, 
+							  fieldDefList_t *fieldDefs, 
+							  double quantity, double price)
+{										  		
+	fieldList_t fields;
+		
+	field_t field1;
+		
+	fieldDefListIter_t iter; 
+	iter = fieldDefs->find("quantity");
+	field1.name = iter->second.name;
+	field1.len = iter->second.len;
+	field1.type = iter->second.type;
+	string fvalue =double_to_string(quantity);
+	field1.parseFieldValue(fvalue);
+						
+	field_t field2;
+
+	iter = fieldDefs->find("unitprice");
+	field2.name = iter->second.name;
+	field2.len = iter->second.len;
+	field2.type = iter->second.type;
+	string fvalue2 = double_to_string(price);
+	field2.parseFieldValue(fvalue2);
+		
+	fields.push_back(field1);
+	fields.push_back(field2);
+
+	allocationIntervalList_t interv;	
+	
+    Allocation *alloc = new Allocation(auctionSet, auctionName, 
+										bidSet, bidName, fields, interv);
+
+	
+	return alloc;
+}
+
+void incrementQuantityAllocation(Allocation *allocation, double quantity)
+{
+	fieldList_t *fields = allocation->getFields();
+	
+	fieldListIter_t field_iter;
+	
+	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
+	{
+		if ((field_iter->name).compare("quantity")){
+			field_t field = *field_iter;
+			double temp_qty = parseDouble( ((field.value)[0]).getValue());
+			temp_qty += quantity;
+			string fvalue = double_to_string(temp_qty);
+			field_iter->parseFieldValue(fvalue);
+			break;
+		}
+	}
+	
+}
+
+void execute( configParam_t *params, string aset, string aname, 
+			  fieldDefList_t *fieldDefs,  bidDB_t *bids, 
+			   allocationDB_t **allocationdata )
 {
 
-#ifdef DEBUG
-	fprintf( stdout, "bas module: start execute \n");
-#endif
+	cout << "bas module: start execute" << (int) bids->size() << endl;
 
-	Bid **bids  
+	bandwidth_to_sell = getResourceAvailability(params);
+	reserve_price = getReservePrice( params );
 
+	std::multimap<double, alloc_proc_t>  orderedBids;
+	// Order Bids by elements.
+	bidDBIter_t bid_iter; 
+	
+	for (bid_iter = bids->begin(); bid_iter != bids->end(); ++bid_iter ){
+		Bid * bid = *bid_iter;
+				
+		elementList_t *elems = bid->getElements();
+				
+		elementListIter_t elem_iter;
+		for ( elem_iter = elems->begin(); elem_iter != elems->end(); ++elem_iter )
+		{
+			double price = getDoubleField(&(elem_iter->fields), "unitprice");
+			double quantity = getDoubleField(&(elem_iter->fields), "quantity");
+			alloc_proc_t alloc;
+		
+			alloc.bidSet = bid->getSetName();
+			alloc.bidName = bid->getBidName();
+			alloc.elementName = elem_iter->name;
+			alloc.quantity = quantity;
+			orderedBids.insert(make_pair(price,alloc));
+		}
+	}
 
-#ifdef DEBUG
-	fprintf( stdout, "bas module: end execute \n");
-#endif
+	double qtyAvailable = bandwidth_to_sell;
+	double sellPrice = 0;
+	
+	cout << "bas module- qty available:" << qtyAvailable << endl;
+	
+	std::multimap<double, alloc_proc_t>::iterator it = orderedBids.end();
+	do
+	{ 
+	    --it;
+                
+        if ( qtyAvailable < (it->second).quantity){
+			(it->second).quantity = qtyAvailable;
+			if (qtyAvailable > 0){
+				sellPrice = it->first; 
+				qtyAvailable = 0;
+			 }
+		}
+		else{
+			qtyAvailable = qtyAvailable - (it->second).quantity;
+			sellPrice = it->first;
+		}
+		
+	} while (it != orderedBids.begin());
+
+	cout << "bas module: after executing the auction" << (int) bids->size() << endl;
+	
+	map<string,Allocation *> allocations;
+	map<string,Allocation *>::iterator alloc_iter;
+	
+	// Creates allocations
+	it = orderedBids.end();
+	do
+	{
+	    --it;
+	    
+		if (allocations.find(makeKey(aset, 
+			aname,(it->second).bidSet, (it->second).bidName )) != allocations.end()){
+			alloc_iter = allocations.find(makeKey(aset, aname,
+								(it->second).bidSet, (it->second).bidName ));
+			incrementQuantityAllocation(alloc_iter->second, (it->second).quantity); 					
+		}
+		else{
+			Allocation *alloc = createAllocation(aset, aname, 
+												   (it->second).bidSet, (it->second).bidName, 
+													fieldDefs, 
+													(it->second).quantity, sellPrice);
+			allocations[makeKey(aset, aname,
+								(it->second).bidSet, (it->second).bidName)] = alloc;
+		}
+	    
+	} while (it != orderedBids.begin());
+	
+	// Convert from the map to the final allocationDB result
+	allocationDB_t dbResult;
+	for ( alloc_iter = allocations.begin(); 
+				alloc_iter != allocations.end(); ++alloc_iter )
+	{
+		(*allocationdata)->push_back(alloc_iter->second);
+	}
+	
+	cout << "bas module: end execute" <<  endl;
 }
 
 timers_t* getTimers( )
@@ -65,7 +303,7 @@ timers_t* getTimers( )
 
 }
 
-void destroy( configParam_t *params, void *flowdata )
+void destroy( configParam_t *params, allocationDB_t *allocationdata )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start destroy \n");

@@ -1,0 +1,49 @@
+AUTOMAKE_OPTIONS = foreign
+
+# Rules for the test code (use `make check` to execute)
+TESTS = test_runner
+check_PROGRAMS = $(TESTS)
+
+test_runner_SOURCES = 	@top_srcdir@/foundation/src/BidIdSource.cpp \
+						@top_srcdir@/foundation/src/AuctionIdSource.cpp \
+						@top_srcdir@/foundation/src/MAPIAuctionParser.cpp \
+						@top_srcdir@/foundation/src/Auction.cpp \
+						@top_srcdir@/foundation/src/AuctionFileParser.cpp \
+						@top_srcdir@/foundation/src/AuctionManagerInfo.cpp \
+						@top_srcdir@/foundation/src/AuctionManagerComponent.cpp \
+						@top_srcdir@/foundation/src/BidManager.cpp \
+						@top_srcdir@/foundation/src/CommandLineArgs.cpp \
+						@top_srcdir@/foundation/src/ConfigManager.cpp \
+						@top_srcdir@/foundation/src/AuctionManager.cpp \
+						@top_srcdir@/foundation/src/AllocationIdSource.cpp \
+						@top_srcdir@/foundation/src/AllocationManager.cpp \
+						@top_srcdir@/foundation/test/Timeval_test.cpp \
+						@top_srcdir@/foundation/test/FieldValue_test.cpp \
+						@top_srcdir@/foundation/test/FieldDefParser_test.cpp \
+						@top_srcdir@/foundation/test/FieldValParser_test.cpp \
+						@top_srcdir@/foundation/test/AuctionIdSource_test.cpp \
+						@top_srcdir@/foundation/test/BidFileParser_test.cpp \
+						@top_srcdir@/foundation/test/AuctionFileParser_test.cpp \
+						@top_srcdir@/foundation/test/Bid_test.cpp \
+						@top_srcdir@/foundation/test/Allocation_test.cpp \
+						@top_srcdir@/foundation/test/AuctionTimer_test.cpp \
+						@top_srcdir@/foundation/test/Bid_Manager_test.cpp \
+						@top_srcdir@/foundation/test/Allocation_Manager_test.cpp \
+						@top_srcdir@/foundation/test/AuctionManager_test.cpp \
+						@top_srcdir@/foundation/test/test_runner.cpp
+
+if ENABLE_DEBUG
+  AM_CXXFLAGS = -g -I@top_srcdir@/foundation/include $(CPPUNIT_CFLAGS) \
+			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
+			    -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING -DINTEL
+else
+  AM_CXXFLAGS = -O2 -I@top_srcdir@/foundation/include $(CPPUNIT_CFLAGS) \
+			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd 
+endif
+			     
+AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
+			 $(top_builddir)/lib/httpd/libhttpd.a \
+			 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ \
+			 -L$(abs_top_builddir)/foundation/src/.libs -lfoundation 	
+			 	 
+LDADD = -lfoundation

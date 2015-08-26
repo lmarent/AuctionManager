@@ -393,7 +393,7 @@ on `(hostname || uname -n) 2>/dev/null | sed 1q`
 "
 
 # Files that config.status was made for.
-config_files=" Makefile lib/getpass/Makefile lib/httpd/Makefile lib/getopt_long/Makefile narsh/Makefile proc_modules/Makefile src/Makefile test/Makefile"
+config_files=" Makefile lib/getpass/Makefile lib/httpd/Makefile lib/getopt_long/Makefile nagtrsh/Makefile foundation/src/Makefile foundation/test/Makefile proc_modules/Makefile auctioner/src/Makefile auctioner/test/Makefile user_agent/src/Makefile user_agent/test/Makefile"
 config_headers=" config.h"
 config_commands=" depfiles libtool"
 
@@ -807,10 +807,14 @@ do
     "lib/getpass/Makefile") CONFIG_FILES="$CONFIG_FILES lib/getpass/Makefile" ;;
     "lib/httpd/Makefile") CONFIG_FILES="$CONFIG_FILES lib/httpd/Makefile" ;;
     "lib/getopt_long/Makefile") CONFIG_FILES="$CONFIG_FILES lib/getopt_long/Makefile" ;;
-    "narsh/Makefile") CONFIG_FILES="$CONFIG_FILES narsh/Makefile" ;;
+    "nagtrsh/Makefile") CONFIG_FILES="$CONFIG_FILES nagtrsh/Makefile" ;;
+    "foundation/src/Makefile") CONFIG_FILES="$CONFIG_FILES foundation/src/Makefile" ;;
+    "foundation/test/Makefile") CONFIG_FILES="$CONFIG_FILES foundation/test/Makefile" ;;
     "proc_modules/Makefile") CONFIG_FILES="$CONFIG_FILES proc_modules/Makefile" ;;
-    "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
-    "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
+    "auctioner/src/Makefile") CONFIG_FILES="$CONFIG_FILES auctioner/src/Makefile" ;;
+    "auctioner/test/Makefile") CONFIG_FILES="$CONFIG_FILES auctioner/test/Makefile" ;;
+    "user_agent/src/Makefile") CONFIG_FILES="$CONFIG_FILES user_agent/src/Makefile" ;;
+    "user_agent/test/Makefile") CONFIG_FILES="$CONFIG_FILES user_agent/test/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -902,12 +906,11 @@ S["ENABLE_TEST"]=""
 S["ENABLE_NF"]=""
 S["OS"]="UNIX"
 S["REL_DATE"]=""
-S["poco_LDFLAGS"]=""
-S["poco_LIBS"]=""
-S["poco_CFLAGS"]=""
 S["DOXY"]="doxygen"
-S["BUILD_NQRSH_FALSE"]="#"
-S["BUILD_NQRSH_TRUE"]=""
+S["BUILD_NARSH_FALSE"]="#"
+S["BUILD_NARSH_TRUE"]=""
+S["BUILD_NAGTRSH_FALSE"]="#"
+S["BUILD_NAGTRSH_TRUE"]=""
 S["CURL_FALSE"]="#"
 S["CURL_TRUE"]=""
 S["CURL_LIBS"]="-lcurl  "
@@ -1158,7 +1161,7 @@ D["HAVE_LIBXML_PARSER_H"]=" 1"
 D["HAVE_LIBXSLT_TRANSFORM_H"]=" 1"
 D["HAVE_LIBXSLT_XSLTUTILS_H"]=" 1"
 D["HAVE_CURL"]=" 1"
-D["BUILD_TIME"]=" \"20/08/2015 16:13:39\""
+D["BUILD_TIME"]=" \"26/08/2015 13:45:24\""
 D["DEF_SYSCONFDIR"]=" \"/home/luis/AuctionManager/etc\""
 D["DEF_STATEDIR"]=" \"/usr/local/var\""
 D["DEF_LIBDIR"]=" \"/usr/local/lib/auctionmanager\""
