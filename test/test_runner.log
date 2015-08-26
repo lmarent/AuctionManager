@@ -1,5 +1,0 @@
-FieldValue_Test::testGetters : OK
-FieldValue_Test::testFieldValues : OK
-FieldDefParser_Test::testParser : OK
-FieldValParser_Test::testParser : OK
-BidFileParser_Test::testParser(null):1826219960: parser error : 
