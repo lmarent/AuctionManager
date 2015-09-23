@@ -37,6 +37,8 @@
 #include "ResourceRequestFileParser.h"
 #include "MAPIResourceRequestParser.h"
 
+namespace auction
+{
 
 // index by set id and name
 typedef map<string, int>            					resourceRequestIndex_t;
@@ -207,5 +209,6 @@ class ResourceRequestManager
 //! overload for <<, so that a ResourceRequestManager object can be thrown into an iostream
 ostream& operator<< ( ostream &os, ResourceRequestManager &rm );
 
+}; // namespace auction
 
 #endif // _RESOURCE_REQUEST_MANAGER_H_

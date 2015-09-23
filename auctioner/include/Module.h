@@ -29,10 +29,11 @@
 #ifndef _MODULE_H_
 #define _MODULE_H_
 
-
 #include "stdincpp.h"
 #include "Logger.h"
 
+namespace auction
+{
 
 //! FIXME missing documentation
 typedef void* libHandle_t;
@@ -150,5 +151,6 @@ class Module
 //! overload for <<, so that a Module object can be thrown into an ostream
 ostream& operator<< ( ostream &os, Module &obj );
 
+}; // namespace auction
 
 #endif // _MODULE_H_

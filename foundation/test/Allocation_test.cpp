@@ -7,12 +7,14 @@
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include <config.h>
 #include "Allocation.h"
 #include "FieldValue.h"
 #include "FieldValParser.h"
 #include "FieldDefParser.h"
 #include "BidIdSource.h"
 
+using namespace auction;
 
 class Allocation_Test : public CppUnit::TestFixture {
 

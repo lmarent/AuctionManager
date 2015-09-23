@@ -38,6 +38,8 @@
 #include "ProcModuleInterface.h"
 #include "EventScheduler.h"
 
+namespace auction
+{
 
 // default flow idle timeout
 const time_t FLOW_IDLE_TIMEOUT = 30;
@@ -234,6 +236,8 @@ class AllocationManager
 
 //! overload for <<, so that a BidManager object can be thrown into an iostream
 ostream& operator<< ( ostream &os, AllocationManager &rm );
+
+}; // namespace auction
 
 
 #endif // _ALLOCATIONMANAGER_H_

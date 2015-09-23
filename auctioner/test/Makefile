@@ -108,8 +108,10 @@ am_test_runner_OBJECTS =  \
 	../../auctioner/test/test_runner.$(OBJEXT)
 test_runner_OBJECTS = $(am_test_runner_OBJECTS)
 test_runner_LDADD = $(LDADD)
+am__DEPENDENCIES_1 =
 test_runner_DEPENDENCIES =  \
-	$(top_builddir)/foundation/src/libfoundation.la
+	$(top_builddir)/foundation/src/libfoundation.la \
+	$(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
@@ -429,6 +431,8 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 IPTABLES_VERSION = 
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS =  -L/lib -L/usr/local/lib -L/usr/lib  -ltermcap -lxml2
+LIBIPAP_CFLAGS = -I/usr/local/include/ipap  
+LIBIPAP_LIBS = -L/usr/local/lib/ipap -lipap  
 LIBOBJS = 
 LIBS = -ldl 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
@@ -546,11 +550,13 @@ test_runner_SOURCES = ../../auctioner/src/PageRepository.cpp \
 
 #AM_CXXFLAGS = -O2 -I../../foundation/include $(CPPUNIT_CFLAGS) \
 #				-I../../auctioner/include \
+#				$(LIBIPAP_CFLAGS) \
 #			    -I$(top_srcdir)/lib/getopt_long \
 #			    -I$(top_srcdir)/lib/httpd 
 
 AM_CXXFLAGS = -g -I../../foundation/include $(CPPUNIT_CFLAGS) \
 				-I../../auctioner/include \
+				$(LIBIPAP_CFLAGS) \
 			    -I$(top_srcdir)/lib/getopt_long \
 			    -I$(top_srcdir)/lib/httpd \
 			    -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING -DINTEL
@@ -559,9 +565,10 @@ AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit \
 			 $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 			 $(top_builddir)/lib/httpd/libhttpd.a \
 			    -lxml2 \
-			 -L$(abs_top_builddir)/foundation/src/libfoundation.la	
+			 -L$(abs_top_builddir)/foundation/src/libfoundation.la \
+			 $(LIBIPAP_LIBS)	
 
-LDADD = $(top_builddir)/foundation/src/libfoundation.la	
+LDADD = $(top_builddir)/foundation/src/libfoundation.la	$(LIBIPAP_LIBS)
 all: all-am
 
 .SUFFIXES:

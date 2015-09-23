@@ -1,0 +1,47 @@
+<?xml version ="1.0" encoding="UTF-8"?>
+<!DOCTYPE FIELDDEF SYSTEM "fielddef.dtd">
+<FIELDDEF>
+  
+  <!-- Reserved for price -->
+  <DEF LENGTH="8" TYPE="Float" >MaxUnitValuation</DEF>
+  <DEF LENGTH="8" TYPE="Float" >UnitValue</DEF>
+  <DEF LENGTH="8" TYPE="Float" >UnitBudget</DEF>
+  <DEF LENGTH="8" TYPE="Float" >TotalBudget</DEF>
+  <!-- General fields -->
+
+  <DEF LENGTH="4" TYPE="UInt32" >AuctioningTimeSeconds</DEF>
+  <DEF LENGTH="8" TYPE="UInt64" >AuctioningTimeMilliSeconds</DEF>
+  <DEF LENGTH="8" TYPE="UInt64" >AuctioningTimeMicroSeconds</DEF>
+  <DEF LENGTH="8" TYPE="UInt64" >AuctioningTimeNanoSeconds</DEF>
+  <DEF LENGTH="4" TYPE="UInt16" >AuctioningAlgorithmCode</DEF>
+  <DEF LENGTH="4" TYPE="IPAddr" >SourceIpv4Address</DEF>
+  <DEF LENGTH="1" TYPE="UInt8" >SourceIpv4PrefixLenght</DEF>
+  <DEF LENGTH="4" TYPE="IPAddr" >DestinationIpv4Address</DEF>
+  <DEF LENGTH="1" TYPE="UInt8" >DestinationIpv4PrefixLen</DEF>
+  <DEF LENGTH="16" TYPE="IP6Addr" >SourceIpv6Address</DEF>
+  <DEF LENGTH="16" TYPE="IP6Addr" >DestinationIpv6Address</DEF>
+  <DEF LENGTH="1" TYPE="UInt8" >SourceIpv6PrefixLenght</DEF>
+  <DEF LENGTH="1" TYPE="UInt8" >DestinationIpv6PrefixLenght</DEF>
+  <DEF LENGTH="65535" TYPE="Binary" >PaddingOctects</DEF>
+  <DEF LENGTH="65535" TYPE="Binary" >IpHeaderPacketSection</DEF>
+  <DEF LENGTH="65535" TYPE="Binary" >IpPayloadPacketSection</DEF>
+  <DEF LENGTH="65535" TYPE="Binary" >DataLinkFrameSection</DEF>
+  <DEF LENGTH="6" TYPE="Binary" >SourceMacAddress</DEF>
+  <DEF LENGTH="6" TYPE="Binary" >PostDestinationMacAddress</DEF>
+  
+  <!-- Fields for identifiers-->
+  <DEF LENGTH="128" TYPE="String" >IdAuction</DEF>
+  <DEF LENGTH="128" TYPE="String" >IdBid</DEF>
+  <DEF LENGTH="128" TYPE="String" >IdAllocation</DEF>
+  <DEF LENGTH="128" TYPE="String" >IdRecord</DEF>
+
+  <!-- Fields for intervals -->
+  <DEF LENGTH="4" TYPE="UInt32" >StartSeconds</DEF>
+  <DEF LENGTH="4" TYPE="UInt32" >EndSeconds</DEF>
+  <DEF LENGTH="8" TYPE="UInt64" >StartMilliSeconds</DEF>
+  <DEF LENGTH="8" TYPE="UInt64" >EndMilliSeconds</DEF>
+  <DEF LENGTH="128" TYPE="String" >AuctioningAlgorithName</DEF>
+
+  <!-- Fields for quantities -->
+  <DEF LENGTH="8" TYPE="Float" >Quantity</DEF>
+</FIELDDEF>

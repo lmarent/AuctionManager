@@ -25,10 +25,11 @@
     $Id: FieldDefParser.cpp 748 2015-07-23 17:00:00 amarentes $
 */
 
-#include "FieldDefParser.h"
 #include "ParserFcts.h"
 #include "Constants.h"
+#include "FieldDefParser.h"
 
+using namespace auction;
 
 FieldDefParser::FieldDefParser(string filename)
     : XMLParser(FIELDDEF_DTD, filename, "FIELDDEF")
@@ -52,7 +53,14 @@ fieldDefItem_t FieldDefParser::parseDef(xmlNodePtr cur)
    
     item.type = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"TYPE"));
     item.len = FieldValue::getTypeLength(item.type);
+    
     try {
+		item.eno = ParserFcts::parseInt(
+			xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ENO")), 0);
+
+		item.ftype = ParserFcts::parseInt(
+			xmlCharToString(xmlGetProp(cur, (const xmlChar *)"FTYPE")), 0);		
+		
         if ((item.type == "Binary") || (item.type == "String")) {
             item.len = ParserFcts::parseULong(xmlCharToString(xmlGetProp(cur, (const xmlChar *)"LENGTH")),0,
                                               MAX_FIELD_LEN);

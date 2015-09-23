@@ -28,6 +28,7 @@
 
 #include "AuctionManagerInfo.h"
 
+using namespace auction;
 
 char *AuctionManagerInfo::INFOS[] = { "all", 
                              "version",

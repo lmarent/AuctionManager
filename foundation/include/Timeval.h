@@ -58,7 +58,7 @@ class Timeval
     static struct timeval sub0(struct timeval num, struct timeval sub);
 
     //! function for reading the current time
-    static int gettimeofday(struct timeval *tv, struct timezone *tz); 
+    static int gettimeofdayown(struct timeval *tv, struct timezone *tz); 
     
     static time_t time(time_t *t);
 
@@ -72,6 +72,6 @@ class Timeval
     //! print time in readable format.
     static std::string toString(time_t t);
 
-};
+}; // namespace auction
 
 #endif // _TIMEVAL_H_

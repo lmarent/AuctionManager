@@ -30,7 +30,7 @@ netagent_SOURCES =  ResourceRequest.cpp \
 
 netagent_CPPFLAGS = -I$(top_srcdir)/user_agent/include \
 					      -I$(top_srcdir)/lib/getopt_long \
-						  -I$(top_srcdir)/lib/httpd
+						  -I$(top_srcdir)/lib/httpd $(LIBIPAP_CFLAGS)
 
 netagent_LDADD = $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 					   $(top_builddir)/lib/httpd/libhttpd.a \
@@ -44,6 +44,6 @@ AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit \
 			 $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 			 $(top_builddir)/lib/httpd/libhttpd.a \
 			 $(top_builddir)/foundation/src/libfoundation.la \
-			 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@
+			 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ $(LIBIPAP_LIBS)
 			 
-LDADD = 
+LDADD = $(LIBIPAP_LIBS)

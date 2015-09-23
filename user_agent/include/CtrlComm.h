@@ -31,12 +31,14 @@
 
 
 #include "stdincpp.h"
-#include "AuctionManagerComponent.h"
 #include "httpd.h"
+#include "AuctionManagerComponent.h"
 #include "AgentManagerInfo.h"
 #include "PageRepository.h"
 
 
+namespace auction
+{
 
 //! ctrlcomm flags 
 const int LOG_CONNECT = 0x1;
@@ -60,7 +62,7 @@ typedef struct
     It uses HTTP as the underlying transport protocol (HTTPD)  
 */
 
-class CtrlComm : public AuctionManagerComponent
+class CtrlComm : public auction::AuctionManagerComponent
 {
   private:
 
@@ -70,22 +72,22 @@ class CtrlComm : public AuctionManagerComponent
     int  portnum; //!< number of the port that will be listened on
     int flags;    //!< store configured features of CtrlComm
 
-    configADList_t accessList; //!< the ACCESS/DENY list from the config file
+    auction::configADList_t accessList; //!< the ACCESS/DENY list from the config file
 
     //! event returned to auction after handleFDEvent
-    CtrlCommEvent *retEvent;
+    auction::CtrlCommEvent *retEvent;
 
     //! pointer to event vector
-    eventVec_t *retEventVec;
+    auction::eventVec_t *retEventVec;
 
     //! repository for static preloaded response documents
-    PageRepository pcache;
+    auction::PageRepository pcache;
 
     //! preloaded template for replies
     string rtemplate;
 
     //! add to accessList all entries from list with host known by DNS
-    void checkHosts( configADList_t &list, bool useIPv6 );
+    void checkHosts( auction::configADList_t &list, bool useIPv6 );
 
     //! parse an incoming request
     parseReq_t parseRequest(struct REQUEST *req);
@@ -97,7 +99,7 @@ class CtrlComm : public AuctionManagerComponent
         \arg \c cnf        link to config manager
         \arg \c threaded   if 1 run as separate thread
     */
-    CtrlComm(ConfigManager *cnf, int threaded=0);
+    CtrlComm(auction::ConfigManager *cnf, int threaded=0);
     
 
     //!  destroy a CtrlComm object
@@ -144,7 +146,7 @@ class CtrlComm : public AuctionManagerComponent
     int logError(int eno, int loglevel, char *txt, char *peerhost);
     
     //! handle file descriptor event
-    int handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds);
+    int handleFDEvent(auction::eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds);
     
     //! send OK response message
     void sendMsg(string msg, struct REQUEST *req, fd_sets_t *fds, int quote=1);
@@ -204,5 +206,6 @@ class CtrlComm : public AuctionManagerComponent
 //! overload for <<, so that a CtrlComm object can be thrown into an ostream
 ostream& operator<< ( ostream &os, CtrlComm &obj );
 
+};
 
 #endif // _CTRLCOMM_H_

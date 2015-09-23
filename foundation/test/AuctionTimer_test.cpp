@@ -9,6 +9,7 @@
 
 #include "AuctionTimer.h"
 
+using namespace auction;
 
 class AuctionTimer_Test : public CppUnit::TestFixture {
 

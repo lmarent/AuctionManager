@@ -27,11 +27,12 @@
 
 */
 
-#include "BidFileParser.h"
 #include "ParserFcts.h" 
+#include "BidFileParser.h"
 #include "Constants.h"
 #include "Timeval.h"
 
+using namespace auction;
 
 BidFileParser::BidFileParser(string filename)
     : XMLParser(BIDFILE_DTD, filename, "AGENT")
@@ -304,7 +305,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
                 if ((!xmlStrcmp(cur2->name, (const xmlChar *)"ELEMENT")) && (cur2->ns == ns)) {
                     element_t elem;
 
-                    elem.name = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"NAME"));
+                    elem.name = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"ID"));
 
                     if (elem.name.empty()) {
                         throw Error("Bid Parser Error: missing name at line %d", XML_GET_LINE(cur2));
@@ -367,8 +368,13 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
                 if ((!xmlStrcmp(cur2->name, (const xmlChar *)"AUCTION")) && (cur2->ns == ns)) {
                     bid_auction_t auction;
 
-                    auction.auctionSet = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"SET"));
-                    auction.auctionName = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"NAME"));
+                    string id = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"ID"));
+                    if (id.find(".") == std::string::npos){
+						auction.auctionSet = DEFAULT_SETNAME;
+						auction.auctionName = id;
+					} else
+						auction.auctionSet = id.substr(0,id.find("."));
+						auction.auctionName = id.substr(id.find("."),id.size());
 
                     if (auction.auctionSet.empty() ) {
                         throw Error("Bid Parser Error: missing auction set at line %d", XML_GET_LINE(cur2));

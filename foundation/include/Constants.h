@@ -27,12 +27,13 @@
 */
 
 
-#include "config.h"
-
-
 #ifndef _CONSTANTS_H_
 #define _CONSTANTS_H_
 
+#include "config.h"
+
+namespace auction
+{
 
 // Auction.h
 extern const string DEFAULT_CONFIG_FILE;
@@ -90,5 +91,6 @@ extern const string HELP;      //!< help text in interactive shell
 extern const string CERT_FILE;
 #endif
 
+};
 
 #endif // _CONSTANTS_H_

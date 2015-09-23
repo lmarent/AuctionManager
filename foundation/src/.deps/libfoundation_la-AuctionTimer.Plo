@@ -1,7 +1,7 @@
 libfoundation_la-AuctionTimer.lo: AuctionTimer.cpp \
  /usr/include/stdc-predef.h ../../foundation/include/AuctionTimer.h \
- ../../foundation/include/stdincpp.h ../../foundation/include/stdinc.h \
- ../../config.h /usr/include/stdio.h /usr/include/features.h \
+ /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/stdinc.h \
+ /usr/include/stdio.h /usr/include/features.h \
  /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
@@ -58,8 +58,8 @@ libfoundation_la-AuctionTimer.lo: AuctionTimer.cpp \
  /usr/include/x86_64-linux-gnu/bits/fcntl-linux.h \
  /usr/include/x86_64-linux-gnu/bits/uio.h \
  /usr/include/x86_64-linux-gnu/bits/stat.h /usr/include/assert.h \
- /usr/lib/gcc/x86_64-linux-gnu/4.8/include/float.h /usr/include/ctype.h \
- /usr/include/dlfcn.h /usr/include/x86_64-linux-gnu/bits/dlfcn.h \
+ /usr/include/ctype.h /usr/include/dlfcn.h \
+ /usr/include/x86_64-linux-gnu/bits/dlfcn.h \
  /usr/include/x86_64-linux-gnu/sys/socket.h \
  /usr/include/x86_64-linux-gnu/sys/uio.h \
  /usr/include/x86_64-linux-gnu/bits/socket.h \
@@ -80,16 +80,7 @@ libfoundation_la-AuctionTimer.lo: AuctionTimer.cpp \
  /usr/include/rpc/netdb.h /usr/include/x86_64-linux-gnu/bits/netdb.h \
  /usr/include/pwd.h /usr/include/x86_64-linux-gnu/sys/wait.h \
  /usr/include/libgen.h /usr/include/pcap.h /usr/include/pcap/pcap.h \
- /usr/include/pcap/bpf.h /usr/include/net/ethernet.h \
- /usr/include/linux/if_ether.h /usr/include/linux/types.h \
- /usr/include/x86_64-linux-gnu/asm/types.h \
- /usr/include/asm-generic/types.h /usr/include/asm-generic/int-ll64.h \
- /usr/include/x86_64-linux-gnu/asm/bitsperlong.h \
- /usr/include/asm-generic/bitsperlong.h /usr/include/linux/posix_types.h \
- /usr/include/linux/stddef.h \
- /usr/include/x86_64-linux-gnu/asm/posix_types.h \
- /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
- /usr/include/asm-generic/posix_types.h /usr/include/c++/4.8/iostream \
+ /usr/include/pcap/bpf.h /usr/include/c++/4.8/iostream \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
@@ -196,20 +187,17 @@ libfoundation_la-AuctionTimer.lo: AuctionTimer.cpp \
  /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/debug/set \
  /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
  /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
- /usr/include/c++/4.8/iomanip ../../foundation/include/Logger.h \
- ../../foundation/include/ProcError.h ../../foundation/include/Error.h \
- ../../foundation/include/Threads.h ../../foundation/include/Constants.h \
- ../../foundation/include/ConstantsAum.h
+ /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/stdexcept \
+ /usr/local/include/ipap/Logger.h /usr/local/include/ipap/stdincpp.h \
+ /usr/local/include/ipap/Error.h /usr/local/include/ipap/ConstantsIpAp.h
 
 /usr/include/stdc-predef.h:
 
 ../../foundation/include/AuctionTimer.h:
 
-../../foundation/include/stdincpp.h:
+/usr/local/include/ipap/stdincpp.h:
 
-../../foundation/include/stdinc.h:
-
-../../config.h:
+/usr/local/include/ipap/stdinc.h:
 
 /usr/include/stdio.h:
 
@@ -365,8 +353,6 @@ libfoundation_la-AuctionTimer.lo: AuctionTimer.cpp \
 
 /usr/include/assert.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/4.8/include/float.h:
-
 /usr/include/ctype.h:
 
 /usr/include/dlfcn.h:
@@ -432,32 +418,6 @@ libfoundation_la-AuctionTimer.lo: AuctionTimer.cpp \
 /usr/include/pcap/pcap.h:
 
 /usr/include/pcap/bpf.h:
-
-/usr/include/net/ethernet.h:
-
-/usr/include/linux/if_ether.h:
-
-/usr/include/linux/types.h:
-
-/usr/include/x86_64-linux-gnu/asm/types.h:
-
-/usr/include/asm-generic/types.h:
-
-/usr/include/asm-generic/int-ll64.h:
-
-/usr/include/x86_64-linux-gnu/asm/bitsperlong.h:
-
-/usr/include/asm-generic/bitsperlong.h:
-
-/usr/include/linux/posix_types.h:
-
-/usr/include/linux/stddef.h:
-
-/usr/include/x86_64-linux-gnu/asm/posix_types.h:
-
-/usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
-
-/usr/include/asm-generic/posix_types.h:
 
 /usr/include/c++/4.8/iostream:
 
@@ -747,14 +707,12 @@ libfoundation_la-AuctionTimer.lo: AuctionTimer.cpp \
 
 /usr/include/c++/4.8/iomanip:
 
-../../foundation/include/Logger.h:
+/usr/include/c++/4.8/stdexcept:
 
-../../foundation/include/ProcError.h:
+/usr/local/include/ipap/Logger.h:
 
-../../foundation/include/Error.h:
+/usr/local/include/ipap/stdincpp.h:
 
-../../foundation/include/Threads.h:
+/usr/local/include/ipap/Error.h:
 
-../../foundation/include/Constants.h:
-
-../../foundation/include/ConstantsAum.h:
+/usr/local/include/ipap/ConstantsIpAp.h:

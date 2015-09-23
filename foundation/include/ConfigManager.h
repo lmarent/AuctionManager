@@ -43,6 +43,8 @@
     config options, groups and module names are case-sensitive
 */
 
+namespace auction
+{
 
 class ConfigManager
 {
@@ -158,5 +160,6 @@ class ConfigManager
 //! overload << for use on ConfigManager objects
 ostream& operator<< ( ostream &os, ConfigManager &cm );
 
+}; // namespace auction
 
 #endif // _CONFIGMANAGER_H_

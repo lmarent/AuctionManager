@@ -9,6 +9,7 @@
 
 #include "AuctionManager.h"
 
+using namespace auction;
 
 class AuctionManager_Test : public CppUnit::TestFixture {
 
@@ -38,11 +39,11 @@ CPPUNIT_TEST_SUITE_REGISTRATION( AuctionManager_Test );
 void AuctionManager_Test::setUp() 
 {
 	
-	const string filename = DEF_SYSCONFDIR "/example_bids1.xml";
-		
+	const string filename = DEF_SYSCONFDIR "/fielddef.xml";		
+	
 	try
 	{
-		auctionManagerPtr = new AuctionManager();
+		auctionManagerPtr = new AuctionManager(filename);
 		auto_ptr<EventScheduler> _evnt(new EventScheduler());
         evnt = _evnt;
 				

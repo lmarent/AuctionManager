@@ -28,6 +28,8 @@
 #include "EventSchedulerAgent.h"
 #include "Agent.h"
 
+using namespace auction;
+
 // min timeout for select() in us (10ms minimum on current UNIX!)
 const int AGENT_MIN_TIMEOUT = 10000;
 
@@ -44,7 +46,7 @@ struct timeval EventSchedulerAgent::getNextEventTime()
 
     if (events.begin() != events.end()) {
         Event *ev = events.begin()->second;
-		Timeval::gettimeofday(&now, NULL);
+		Timeval::gettimeofdayown(&now, NULL);
 		
         rv = Timeval::sub0(ev->getTime(), now);
         

@@ -1,11 +1,12 @@
 /* ------------------------- main() ------------------------- */
 
+#include "ParserFcts.h"
 #include "stdincpp.h"
 #include "Auctioner.h"
-#include "ParserFcts.h"
 #include "ConstantsAum.h"
 #include "Constants.h"
 
+using namespace auction;
 
 const char *NETAUM_VERSION = "NETAuM version " VERSION ", (c) 2014-2015 Universidad de los Andes, Colombia";
 

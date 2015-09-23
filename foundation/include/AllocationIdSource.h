@@ -33,6 +33,9 @@
 #include "Error.h"
 #include "Logger.h"
 
+namespace auction
+{
+
 
 /*! \short   generate unique id numbers
   
@@ -99,5 +102,6 @@ class AllocationIdSource
 //! overload for <<, so that a AllocationIdSource object can be thrown into an iostream
 ostream& operator<< ( ostream &os, AllocationIdSource &ris );
 
+}; // namespace auction
 
 #endif // _ALLOCATIONIDSOURCE_H_

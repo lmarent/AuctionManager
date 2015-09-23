@@ -29,6 +29,7 @@
 #include "EventScheduler.h"
 #include "Timeval.h"
 
+using namespace auction;
 
 // for reading from trace files that have time gaps: make sure that
 // event is not in the past
@@ -198,7 +199,7 @@ void EventScheduler::reschedNextEvent(Event *ev)
 
 #ifdef TIME_GAP_HACK
 	struct timeval now;
-	Timeval::gettimeofday(&now, NULL);
+	Timeval::gettimeofdayown(&now, NULL);
 	struct timeval d = Timeval::sub0(now, ev->getTime());
 	if (d.tv_sec > 0) {
 	  ev->setTime(now);
@@ -224,7 +225,7 @@ struct timeval EventScheduler::getNextEventTime()
 
     if (events.begin() != events.end()) {
         Event *ev = events.begin()->second;
-		Timeval::gettimeofday(&now, NULL);
+		Timeval::gettimeofdayown(&now, NULL);
 		
         rv = Timeval::sub0(ev->getTime(), now);
         

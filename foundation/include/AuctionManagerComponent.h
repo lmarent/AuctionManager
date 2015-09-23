@@ -41,6 +41,9 @@
 #include "httpd.h"
 
 
+namespace auction
+{
+
 // forward declaration
 class AuctionManagerComponent;
 
@@ -199,5 +202,6 @@ class AuctionManagerComponent
 
 };
 
+}; // namespace auction
 
 #endif // _AUCTIONMANAGERCOMPONENT_H_

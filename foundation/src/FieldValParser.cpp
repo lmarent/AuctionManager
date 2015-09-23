@@ -29,6 +29,7 @@
 #include "FieldValParser.h"
 #include "Constants.h"
 
+using namespace auction;
 
 FieldValParser::FieldValParser(string filename)
     : XMLParser(FIELDVAL_DTD, filename, "FIELDVAL")

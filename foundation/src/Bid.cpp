@@ -27,13 +27,12 @@
 
 
 #include <sstream>
-
+#include "ParserFcts.h"
 #include "Bid.h"
 #include "Error.h"
-#include "ParserFcts.h"
 #include "Timeval.h"
 
-
+using namespace auction;
 
 /* ------------------------- Bid ------------------------- */
 

@@ -37,6 +37,8 @@
 #include "AuctionManagerInfo.h"
 #include "Auction.h"
 
+namespace auction
+{
 
 //! event numbers
 typedef enum 
@@ -643,5 +645,6 @@ class RemoveAuctionsCtrlEvent : public CtrlCommEvent
 //! overload for << so that an Event object can be thrown into an ostream
 ostream& operator<< ( ostream &os, Event &ev );
 
+}; // namespace auction.
 
 #endif // _EVENT_H_

@@ -28,10 +28,12 @@
 
 #include <sstream>
 
+#include "ParserFcts.h"
 #include "Allocation.h"
 #include "Error.h"
-#include "ParserFcts.h"
 #include "Timeval.h"
+
+using namespace auction;
 
 Allocation::Allocation( string aset, string aname, string bset, string bname, 
 						fieldList_t &f, allocationIntervalList_t &alloc_inter )

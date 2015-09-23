@@ -33,6 +33,8 @@
 #include "libxml/parser.h"
 #include "Logger.h"
 
+namespace auction
+{
 
 class XMLParser
 {
@@ -73,7 +75,7 @@ class XMLParser
     XMLParser(string dtdname, char *buf, int len, string root);
 
     ~XMLParser();
-
+	
     string xmlCharToString(xmlChar *in);
     
     inline string getFileName() { return fileName; }
@@ -81,5 +83,8 @@ class XMLParser
     inline string getDtdName() { return dtdName; }
 
 };
+
+}; // namespace auction
+
 
 #endif // _XMLPARSER_H_

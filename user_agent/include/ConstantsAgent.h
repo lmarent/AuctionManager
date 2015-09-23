@@ -25,13 +25,15 @@
 	$Id: constants_agent.h 748 2015-08-25 8:24:00 amarentes $
 
 */
+#ifndef _CONSTANTS_AGENT_H_
+#define _CONSTANTS_AGENT_H_
+
 
 #include "config.h"
 
 
-#ifndef _CONSTANTS_AGENT_H_
-#define _CONSTANTS_AGENT_H_
-
+namespace auction
+{
 
 // Agent.h
 extern const string NETAGENT_DEFAULT_CONFIG_FILE;
@@ -52,5 +54,7 @@ extern const string NETAGENT_LOCK_FILE;
 
 // ResourceRequestFileParser.cpp
 extern const string RESOURCE_FILE_DTD;
+
+}; // namespace auction
 
 #endif // _CONSTANTS_AGENT_H_

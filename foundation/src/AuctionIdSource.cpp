@@ -28,7 +28,7 @@
 
 #include "AuctionIdSource.h"
 
-
+using namespace auction;
 
 AuctionIdSource::AuctionIdSource(int _unique)
   : num(-1), unique(_unique)

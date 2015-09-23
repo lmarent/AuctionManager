@@ -34,6 +34,8 @@
 #include "Field.h"
 #include "AuctionTimer.h"
 
+namespace auction
+{
 
 
 //! Bid's states during lifecycle
@@ -177,5 +179,7 @@ protected:
     bidAuctionList_t auctionList;
 
 };
+
+}; // namespace auction
 
 #endif // _BID_H_

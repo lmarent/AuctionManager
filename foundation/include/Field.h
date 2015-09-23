@@ -35,12 +35,19 @@
 #include "Error.h"
 #include "FieldValue.h"
 
+namespace auction
+{
+
 //! field definition
 typedef struct
 {
     string name;
     string type;
     unsigned short len;
+    
+    // Data to associate the field with the IPAP MESSAGE FIELDS.
+    int eno;
+    int ftype;
 } fieldDefItem_t;
 
 
@@ -131,5 +138,7 @@ typedef std::list<field_t>            fieldList_t;
 typedef std::list<field_t>::iterator  fieldListIter_t;
 typedef std::list<field_t>::const_iterator  fieldListconstIter_t;
 
+
+}; // namespace auction.
 
 #endif // _FIELD_H_

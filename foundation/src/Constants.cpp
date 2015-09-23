@@ -30,6 +30,8 @@
 #include "Constants.h"
 
 using namespace std;
+namespace auction
+{
 
 
 // Auction.h
@@ -99,3 +101,4 @@ const string HELP =  "" \
 "get_modinfo <mod_name>         get auction module information \n \n" \
 "any other text is sent to the server and the reply from the server is displayed.";
 
+};

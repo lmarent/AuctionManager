@@ -34,6 +34,9 @@
 #include "Logger.h"
 
 
+namespace auction
+{
+
 /*! \short   generate unique id numbers
   
     The BidIdSource class can generate unique 32 bit integer numbers for
@@ -99,5 +102,6 @@ class BidIdSource
 //! overload for <<, so that a BidIdSource object can be thrown into an iostream
 ostream& operator<< ( ostream &os, BidIdSource &ris );
 
+}; // namespace auction
 
 #endif // _BIDIDSOURCE_H_

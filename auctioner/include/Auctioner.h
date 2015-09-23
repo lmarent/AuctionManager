@@ -48,6 +48,9 @@
     detailed Auctioner class description
 */
 
+namespace auction
+{
+
 class Auctioner
 {
   public:
@@ -142,5 +145,6 @@ class Auctioner
 //! overload for <<, so that a Auctioner object can be thrown into an ostream
 std::ostream& operator<< ( std::ostream &os, Auctioner &obj );
 
+}; // namespace auction
 
 #endif // _Auctioner_H_

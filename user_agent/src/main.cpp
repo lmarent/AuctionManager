@@ -1,11 +1,12 @@
 /* ------------------------- main() ------------------------- */
 
+#include "ParserFcts.h"
 #include "stdincpp.h"
 #include "Agent.h"
-#include "ParserFcts.h"
 #include "ConstantsAgent.h"
 #include "Constants.h"
 
+using namespace auction;
 
 const char *NETAGENT_VERSION = "NET_AGENT version " VERSION ", (c) 2014-2015 Universidad de los Andes, Colombia";
 

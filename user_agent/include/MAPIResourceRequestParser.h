@@ -32,6 +32,9 @@
 #include "stdincpp.h"
 #include "ResourceRequestFileParser.h"
 
+namespace auction
+{
+
 //! parser for API text Resource Request syntax
 
 class MAPIResourceRequestParser
@@ -75,5 +78,6 @@ class MAPIResourceRequestParser
 
 };
 
+}; // namespace auction
 
 #endif // _MAPI_RESOURCE_REQUEST_PARSER_H_

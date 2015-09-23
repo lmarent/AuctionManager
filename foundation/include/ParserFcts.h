@@ -29,9 +29,12 @@
 #ifndef _PARSERFCTS_H_
 #define _PARSERFCTS_H_
 
-
+#include "config.h"
+#include "stdinc.h"
 #include "stdincpp.h"
 
+namespace auction
+{
 
 class ParserFcts
 {
@@ -57,5 +60,8 @@ class ParserFcts
     static void parseItem(string type, string value);
 
 };
+
+}; // namespace auction
+
 
 #endif // _PARSERFCTS_H_

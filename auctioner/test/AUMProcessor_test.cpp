@@ -9,11 +9,13 @@
 
 #include "AUMProcessor.h"
 #include "Constants.h"
+#include "ConstantsAum.h"
 #include "BidManager.h"
 #include "ConfigManager.h"
 #include "EventScheduler.h"
 #include "AuctionManager.h"
 
+using namespace auction;
 
 class AUMProcessor_Test : public CppUnit::TestFixture {
 
@@ -101,7 +103,7 @@ void AUMProcessor_Test::setUp()
 		auto_ptr<EventScheduler> _evnt(new EventScheduler());
         evnt = _evnt;		
 		
-		auctionManagerPtr = new AuctionManager();
+		auctionManagerPtr = new AuctionManager(fieldname);
 
 		const string filenameAuctions = DEF_SYSCONFDIR "/example_auctions2.xml";
 		

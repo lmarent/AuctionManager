@@ -25,13 +25,12 @@
     $Id: AgentProcessor.cpp 748 2015-08-25 11:25:00Z amarentes $
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 
-#include "AgentProcessor.h"
 #include "ParserFcts.h"
+#include <stdinc.h>
+#include "AgentProcessor.h"
 
-
+using namespace auction;
 
 /* ------------------------- AUMProcessor ------------------------- */
 

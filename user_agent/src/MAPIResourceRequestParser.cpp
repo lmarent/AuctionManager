@@ -25,9 +25,12 @@
     $Id: MAPIResourceRequestParser.cpp 2015-08-26 08:10:00 amarentes $
 */
 
-#include "MAPIResourceRequestParser.h"
 #include "ParserFcts.h"
+#include "Constants.h"
+#include "MAPIResourceRequestParser.h"
 #include "Timeval.h"
+
+using namespace auction;
 
 MAPIResourceRequestParser::MAPIResourceRequestParser(string filename)
     : fileName(filename)

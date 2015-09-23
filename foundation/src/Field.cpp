@@ -27,6 +27,8 @@
 
 #include "Field.h"
 
+using namespace auction;
+
 field_t::field_t(const field_t &param)
 {
 	name = param.name;

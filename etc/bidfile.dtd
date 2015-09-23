@@ -12,19 +12,18 @@
 <!ELEMENT FIELD (#PCDATA)>
 <!ATTLIST FIELD
         NAME CDATA #REQUIRED
-        TYPE (UInt8|SInt8|UInt16|SInt16|UInt32|SInt32|UInt64|SInt64|Bool|Binary|String|Float32|Float64) "String">
+        TYPE (UInt8|SInt8|UInt16|SInt16|UInt32|SInt32|UInt64|SInt64|Bool|Binary|String|Float|Double|IPAddr|IP6Addr) "String">
         
 <!ELEMENT ELEMENT (FIELD*)>
 <!ATTLIST ELEMENT
-        NAME CDATA #REQUIRED>
+        ID CDATA #REQUIRED>
 
 <!ELEMENT AUCTION (PREF*) >
 <!ATTLIST AUCTION
-        SET CDATA #REQUIRED
-        NAME CDATA #REQUIRED  >
+        ID CDATA #REQUIRED  >
 
 <!ELEMENT PREF (#PCDATA)>
 <!ATTLIST PREF
         NAME CDATA #REQUIRED
-        TYPE (UInt8|SInt8|UInt16|SInt16|UInt32|SInt32|UInt64|SInt64|Bool|Binary|String) "String">
+        TYPE (UInt8|SInt8|UInt16|SInt16|UInt32|SInt32|UInt64|SInt64|Bool|Binary|String|Float|Double|IPAddr|IP6Addr) "String">
         

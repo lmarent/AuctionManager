@@ -26,10 +26,11 @@
     $Id: FieldValue.cpp 748 2015-07-23 15:30:00Z amarentes $
 */
 
+#include "ParserFcts.h"
 #include "FieldValue.h"
 #include "Error.h"
-#include "ParserFcts.h"
 
+using namespace auction;
 
 FieldValue::FieldValue(string type, string _value)
     : ftype(type), len(0)

@@ -30,6 +30,7 @@
 #include "Logger.h"
 #include "ConfigManager.h"
 
+using namespace auction;
 
 /* ------------------------- ConfigManager ------------------------- */
 

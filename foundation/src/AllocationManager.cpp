@@ -30,6 +30,8 @@
 #include "AllocationManager.h"
 #include "Constants.h"
 
+using namespace auction;
+
 /* ------------------------- AllocationManager ------------------------- */
 
 AllocationManager::AllocationManager( string fdname) 

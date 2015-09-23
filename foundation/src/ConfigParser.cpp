@@ -33,6 +33,7 @@
 #include "Constants.h"
 #include "ConstantsAum.h"
 
+using namespace auction;
 
 // init static members
 string ConfigParser::bindir = "";
@@ -235,7 +236,7 @@ string configItemList_t::getValue( string name )
 
 /* -------------------- << for configItem_t -------------------- */
 
-ostream& operator<< ( ostream &os, configItem_t &item )
+ostream& auction::operator<< ( ostream &os, configItem_t &item )
 {
     os << "group = " << item.group << ", module = " << item.module
        << ", name = " << item.name << ", value = " << item.value
@@ -246,12 +247,13 @@ ostream& operator<< ( ostream &os, configItem_t &item )
 
 /* -------------------- << for configItemList_t -------------------- */
 
-ostream& operator<< ( ostream &os, configItemList_t &list )
+ostream& auction::operator<< ( ostream &os, configItemList_t &list )
 {
     configItemListIter_t iter;
 
     for (iter = list.begin(); iter != list.end(); iter++) {
-        os << (*iter);
+        configItem_t item = (*iter);
+        operator<< (os, item );
     }
     return os;
 }
@@ -259,7 +261,7 @@ ostream& operator<< ( ostream &os, configItemList_t &list )
 
 /* -------------------- << for configADItem_t -------------------- */
 
-ostream& operator<< ( ostream &os, configADItem_t &item )
+ostream& auction::operator<< ( ostream &os, configADItem_t &item )
 {
     
     if (item.type == "Host") {
@@ -276,7 +278,7 @@ ostream& operator<< ( ostream &os, configADItem_t &item )
 
 /* -------------------- << for configItemADList_t -------------------- */
 
-ostream& operator<< ( ostream &os, configADList_t &list )
+ostream& auction::operator<< ( ostream &os, configADList_t &list )
 {
     configADListIter_t iter;
     

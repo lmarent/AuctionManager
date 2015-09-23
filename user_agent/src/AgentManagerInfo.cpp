@@ -28,6 +28,8 @@
 
 #include "AgentManagerInfo.h"
 
+using namespace auction;
+
 
 char *AgentManagerInfo::INFOS[] = { "all", 
                              "version",

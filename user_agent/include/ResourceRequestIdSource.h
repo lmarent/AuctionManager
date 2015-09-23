@@ -33,6 +33,8 @@
 #include "Error.h"
 #include "Logger.h"
 
+namespace auction
+{
 
 /*! \short   generate unique id numbers
   
@@ -96,5 +98,6 @@ class ResourceRequestIdSource
 //! overload for <<, so that a ResourceRequestIdSource object can be thrown into an iostream
 ostream& operator<< ( ostream &os, ResourceRequestIdSource &ris );
 
+}; // namespace auction
 
 #endif // _RESOURCE_REQUEST_IDSOURCE_H_

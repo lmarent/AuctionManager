@@ -33,6 +33,8 @@
 #include "ProcModuleInterface.h"
 
 
+using namespace auction;
+
 /* ------------------------- init static ------------------------- */
 
 Logger *ModuleLoader::s_log = NULL;
@@ -373,7 +375,7 @@ int ModuleLoader::fetchMagic( libHandle_t libHandle )
 
 /* ------------------------- operator<< ------------------------- */
 
-ostream& operator<< ( ostream &os, ModuleLoader &ml )
+ostream& auction::operator<< ( ostream &os, ModuleLoader &ml )
 {
     ml.dump(os);
     return os;

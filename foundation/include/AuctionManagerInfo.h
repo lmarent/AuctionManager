@@ -33,6 +33,9 @@
 #include <iostream>
 #include "Error.h"
 
+namespace auction
+{
+
 //! types of information available via get_info command
 enum infoType_t {
     I_UNKNOWN = -1,
@@ -110,5 +113,6 @@ public:
 
 };
 
+}; // namespace auction
 
 #endif // _AUCTIONMANAGERINFO_H_

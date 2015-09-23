@@ -30,6 +30,9 @@
 
 #include "EventScheduler.h"
 
+namespace auction
+{
+
 class EventSchedulerAuctioner : public EventScheduler
 {
 
@@ -41,5 +44,7 @@ public:
     struct timeval getNextEventTime();
 		
 };
+
+}; // namespace auction
 
 #endif // _EVENTSCHEDULER_AUCTIONER_H_

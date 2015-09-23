@@ -663,6 +663,8 @@ BUILD_NARSH_FALSE
 BUILD_NARSH_TRUE
 BUILD_NAGTRSH_FALSE
 BUILD_NAGTRSH_TRUE
+LIBIPAP_LIBS
+LIBIPAP_CFLAGS
 CURL_FALSE
 CURL_TRUE
 CURL_LIBS
@@ -847,7 +849,9 @@ NL3_LIBS
 NL_ROUTE_3_CFLAGS
 NL_ROUTE_3_LIBS
 CURL_CFLAGS
-CURL_LIBS'
+CURL_LIBS
+LIBIPAP_CFLAGS
+LIBIPAP_LIBS'
 
 
 # Initialize some variables set by options.
@@ -1522,6 +1526,10 @@ Some influential environment variables:
               linker flags for NL_ROUTE_3, overriding pkg-config
   CURL_CFLAGS C compiler flags for CURL, overriding pkg-config
   CURL_LIBS   linker flags for CURL, overriding pkg-config
+  LIBIPAP_CFLAGS 
+              C compiler flags for LIBIPAP, overriding pkg-config
+  LIBIPAP_LIBS 
+              linker flags for LIBIPAP, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -17456,7 +17464,7 @@ $as_echo "@%:@define HAVE_SYS_WAIT_H 1" >>confdefs.h
 
 fi
 
-for ac_header in net/bpf.h net/ethernet.h ether.h arpa/inet.h fcntl.h float.h types.h limits.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h termios.h unistd.h float.h
+for ac_header in net/bpf.h net/ethernet.h ether.h arpa/inet.h fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h termios.h unistd.h float.h types.h limits.h 
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_cxx_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -18319,6 +18327,100 @@ else
   CURL_FALSE=
 fi
 
+
+
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBIPAP" >&5
+$as_echo_n "checking for LIBIPAP... " >&6; }
+
+if test -n "$LIBIPAP_CFLAGS"; then
+    pkg_cv_LIBIPAP_CFLAGS="$LIBIPAP_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libipap-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libipap-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBIPAP_CFLAGS=`$PKG_CONFIG --cflags "libipap-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes 
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBIPAP_LIBS"; then
+    pkg_cv_LIBIPAP_LIBS="$LIBIPAP_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libipap-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libipap-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBIPAP_LIBS=`$PKG_CONFIG --libs "libipap-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes 
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+        
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        LIBIPAP_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libipap-0.0" 2>&1`
+        else 
+	        LIBIPAP_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libipap-0.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$LIBIPAP_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (libipap-0.0) were not met:
+
+$LIBIPAP_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables LIBIPAP_CFLAGS
+and LIBIPAP_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5        
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables LIBIPAP_CFLAGS
+and LIBIPAP_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }        
+else
+	LIBIPAP_CFLAGS=$pkg_cv_LIBIPAP_CFLAGS
+	LIBIPAP_LIBS=$pkg_cv_LIBIPAP_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	
+fi
 
 
 

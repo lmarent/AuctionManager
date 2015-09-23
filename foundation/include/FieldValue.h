@@ -30,9 +30,12 @@
 #ifndef _FIELDVALUE_H_
 #define _FIELDVALUE_H_
 
-
+#include "stdinc.h"
 #include "stdincpp.h"
 #include "Error.h"
+
+namespace auction
+{
 
 //! maximum length of a field value
 const unsigned short MAX_FIELD_LEN = 32;
@@ -134,5 +137,6 @@ class FieldValue
     string getInfo(void);
 };
 
+}; // namespace auction
 
 #endif // _FIELDVALUE_H_

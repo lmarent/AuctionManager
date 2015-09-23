@@ -37,7 +37,10 @@
 #include "Auction.h"
 #include "ConfigParser.h"
 #include "AuctionIdSource.h"
+#include "IpAp_message.h"
 
+namespace auction
+{
 
 //! auction list
 typedef vector<Auction*>            auctionDB_t;
@@ -53,6 +56,12 @@ class AuctionFileParser : public XMLParser
     //! parse a config item
     configItem_t parsePref(xmlNodePtr cur);    
 
+	//! parse field for templates
+	auctionTemplateField_t parseField(xmlNodePtr cur, 
+									  fieldDefList_t *fieldDefs,
+									  ipap_message *message);
+
+
   public:
 
     AuctionFileParser( string fname );
@@ -61,9 +70,14 @@ class AuctionFileParser : public XMLParser
 
     virtual ~AuctionFileParser() {}
 
-    //! parse rules and add parsed rules to the list of rules
-    virtual void parse( auctionDB_t *bids,
-					    AuctionIdSource *idSource );
+    //! parse an auction from the data contained in a xml file. 
+    //! put new templates in message.
+    virtual void parse( fieldDefList_t *fieldDefs, 
+						auctionDB_t *bids,
+					    AuctionIdSource *idSource,
+					    ipap_message *messageOut );
 };
+
+}; // namespace auction
 
 #endif // _AUCTIONFILEPARSER_H_

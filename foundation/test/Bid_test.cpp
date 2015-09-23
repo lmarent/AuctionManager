@@ -7,6 +7,7 @@
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include <config.h>
 #include "Bid.h"
 #include "FieldValue.h"
 #include "FieldValParser.h"
@@ -14,6 +15,7 @@
 #include "BidIdSource.h"
 #include "BidFileParser.h"
 
+using namespace auction;
 
 class Bid_Test : public CppUnit::TestFixture {
 

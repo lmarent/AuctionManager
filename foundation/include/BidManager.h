@@ -39,6 +39,8 @@
 #include "MAPIBidParser.h"
 #include "EventScheduler.h"
 
+namespace auction
+{
 
 // default flow idle timeout
 const time_t FLOW_IDLE_TIMEOUT = 30;
@@ -89,7 +91,7 @@ class BidManager
     //! list with bids done
     bidDone_t bidDone;
 
-	//! filter definitions
+	//! field definitions
     fieldDefList_t fieldDefs;
 
     //! filter values
@@ -214,5 +216,6 @@ class BidManager
 //! overload for <<, so that a BidManager object can be thrown into an iostream
 ostream& operator<< ( ostream &os, BidManager &rm );
 
+}; // namespace auction
 
 #endif // _BIDMANAGER_H_

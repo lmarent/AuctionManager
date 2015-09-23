@@ -14,6 +14,7 @@
 #include "FieldDefParser.h"
 #include "BidIdSource.h"
 
+using namespace auction;
 
 class BidFileParser_Test : public CppUnit::TestFixture {
 

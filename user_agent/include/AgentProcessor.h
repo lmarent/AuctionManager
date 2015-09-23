@@ -37,6 +37,8 @@
 #include "Logger.h"
 #include "EventScheduler.h"
 
+namespace auction
+{
 
 typedef struct {
 
@@ -159,5 +161,6 @@ class AgentProcessor : public AuctionManagerComponent
 //! overload for <<, so that a Agent Processor object can be thrown into an iostream
 ostream& operator<< ( ostream &os, AgentProcessor &pe );
 
+}; // namespace auction
 
 #endif // _AGENT_PROCESSOR_H_

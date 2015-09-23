@@ -10,6 +10,8 @@
 #include "AuctionIdSource.h"
 
 
+using namespace auction;
+
 class AuctionIdSource_Test : public CppUnit::TestFixture {
 
 	CPPUNIT_TEST_SUITE( AuctionIdSource_Test );

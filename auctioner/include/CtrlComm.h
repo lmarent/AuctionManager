@@ -31,12 +31,13 @@
 
 
 #include "stdincpp.h"
-#include "AuctionManagerComponent.h"
 #include "httpd.h"
+#include "AuctionManagerComponent.h"
 #include "AuctionManagerInfo.h"
 #include "PageRepository.h"
 
-
+namespace auction
+{
 
 //! ctrlcomm flags 
 const int LOG_CONNECT = 0x1;
@@ -203,5 +204,6 @@ class CtrlComm : public AuctionManagerComponent
 //! overload for <<, so that a CtrlComm object can be thrown into an ostream
 ostream& operator<< ( ostream &os, CtrlComm &obj );
 
+}; // namespace auction
 
 #endif // _CTRLCOMM_H_

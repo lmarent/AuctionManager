@@ -12,6 +12,7 @@
 #include "FieldDefParser.h"
 #include "ResourceRequestIdSource.h"
 
+using namespace auction;
 
 class ResourceRequest_Test : public CppUnit::TestFixture {
 

@@ -10,6 +10,7 @@
 #include "ParserFcts.h"
 #include "FieldDefParser.h"
 
+using namespace auction;
 
 class FieldDefParser_Test : public CppUnit::TestFixture {
 
@@ -59,7 +60,7 @@ void FieldDefParser_Test::testParser()
 	
 	ptrFieldParsers->parse(list);
 		
-	CPPUNIT_ASSERT( list->size() == 3 );
+	CPPUNIT_ASSERT( list->size() == 7 );
 	
 	delete(list);
 }

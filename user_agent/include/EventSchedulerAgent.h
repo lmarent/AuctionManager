@@ -30,6 +30,9 @@
 
 #include "EventScheduler.h"
 
+namespace auction
+{
+
 class EventSchedulerAgent : public EventScheduler
 {
 
@@ -48,7 +51,8 @@ public:
     */
     void delResourceRequestEvents(int uid);
 	
-		
 };
+
+}; // namespace auction
 
 #endif // _EVENT_SCHEDULER_AGENT_H_

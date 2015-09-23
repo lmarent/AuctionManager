@@ -34,6 +34,8 @@
 #include "FieldDefParser.h"
 #include "Field.h"
 
+namespace auction
+{
 
 class Allocation;
 class Bid;
@@ -234,5 +236,8 @@ typedef struct {
     char* (*getErrorMsg)( int code );
 
 } ProcModuleInterface_t;
+
+}; // namespace auction
+
 
 #endif /* __PROCMODULEINTERFACE_H */

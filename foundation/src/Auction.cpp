@@ -27,17 +27,22 @@
 
 
 #include <sstream>
+#include <assert.h>
 
+#include "ParserFcts.h"
 #include "Auction.h"
 #include "Error.h"
-#include "ParserFcts.h"
+#include "IpAp_def.h"
+#include "IpAp_message.h"
 
+using namespace auction;
 
 /* ------------------------- Auction ------------------------- */
 
 Auction::Auction(time_t now, string sname, string aname, action_t &a, 
-				 miscList_t &m )
-   : state(AS_NEW), auctionName(aname), setName(sname), action(a), 
+				 miscList_t &m, auctionTemplateFieldList_t &templFields,
+				 ipap_message *message )
+   : state(AS_NEW), auctionName(aname), resource(), setName(sname), action(a), 
 	 miscList(m)
 {
 
@@ -122,7 +127,6 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
         }
 		
         // get export module params
-        
         int interval = 0;
 		if (!sinterval.empty()) {
 			interval = ParserFcts::parseInt(sinterval);
@@ -140,15 +144,100 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
     log->dlog(ch, "Interval: %d - Align:%d", interval, align);
 #endif    
 			
-           	intervals[ientry].insert(a.name); 
+           	mainInterval = ientry;
 	    }
-	     
+	    
+	    // Iterate over the field templates to calculate the number of 
+	    // fields in the template bid and template allocation.
+	    auctionTemplateFieldListIter_t fieldIter;
+	    int numBidFields = 0;
+	    int numAllocFields = 0;
+	    int numOptBidFields = 0;
+	    for (fieldIter = templFields.begin(); fieldIter != templFields.end();  ++fieldIter)
+	    {
+			if ((fieldIter->second).isBidtemplate){ numBidFields++; }
+			if ((fieldIter->second).isOptBidTemplate){ numOptBidFields++; }
+			if ((fieldIter->second).isAllocTemplate){ numAllocFields++; }
+		} 
 
+#ifdef DEBUG
+    log->dlog(ch, "bid template fields: %d - opt bid template fields:%d \
+					- allocation template fields:%d", 
+						numBidFields, numOptBidFields, numAllocFields);
+#endif  
+		
+	    // Create the bid template associated with the auction
+	    uint16_t templId = message->new_data_template(numBidFields, IPAP_SETID_BID_TEMPLATE);
+	    for (fieldIter = templFields.begin(); fieldIter != templFields.end(); ++fieldIter)
+	    {
+			if ((fieldIter->second).isBidtemplate){
+				message->add_field(templId, (fieldIter->second).field.eno,
+											(fieldIter->second).field.ftype);
+			}
+		} 
+
+		// Add a reference to the template.
+		templates.add_template(message->get_template_object(templId));
+
+#ifdef DEBUG
+		log->dlog(ch, "template Bid Id %d", templId);
+#endif  
+
+		// The user can create an auction without option field templates.
+		if (numOptBidFields > 0){
+			// Create the bid options template associated with the auction.
+			uint16_t templOptId = message->new_data_template(numOptBidFields,
+									IPAP_OPTNS_BID_TEMPLATE);
+								
+			for (fieldIter = templFields.begin(); fieldIter != templFields.end(); ++fieldIter)
+			{
+				if ((fieldIter->second).isOptBidTemplate){
+					message->add_field(templOptId, (fieldIter->second).field.eno,
+												   (fieldIter->second).field.ftype);
+				}
+			} 
+			// Add a reference to the template.
+			templates.add_template(message->get_template_object(templOptId));
+
+#ifdef DEBUG
+			log->dlog(ch, "template Option Bid Id %d NumFields:%d", templOptId, numOptBidFields);
+#endif 
+		}
+		else{
+#ifdef DEBUG
+			log->dlog(ch, "Without fields to define the option Bid template");
+#endif 		
+		}	
+		// create the allocation template associated with the auction
+		uint16_t templAllocId = message->new_data_template(numAllocFields, 
+							IPAP_SETID_ALLOCATION_TEMPLATE);
+							
+	    for (fieldIter = templFields.begin(); fieldIter != templFields.end(); ++fieldIter)
+	    {
+			if ((fieldIter->second).isAllocTemplate){
+				message->add_field(templAllocId, (fieldIter->second).field.eno,
+											(fieldIter->second).field.ftype);			
+			}
+		} 
+
+#ifdef DEBUG
+		log->dlog(ch, "template Allocation Id %d", templAllocId);
+#endif  
+
+		
+		// Add a reference to both templates.
+		templates.add_template(message->get_template_object(templAllocId));
+
+#ifdef DEBUG
+		log->dlog(ch, "Ending Constructor Auction");
+#endif 
+
+    } catch(ipap_bad_argument &e){
+		throw Error("Auction %s.%s: %s", sname.c_str(), aname.c_str(), e.what());	
     } catch (Error &e) {    
         state = AS_ERROR;
         throw Error("Auction %s.%s: %s", sname.c_str(), aname.c_str(), e.getError().c_str());
     }
-
 
 }
 
@@ -180,16 +269,9 @@ Auction::Auction(const Auction &rhs):
 	} 
 	
 	
-	// Copy intervals
-	intervalListConstIter_t it;
-	for (it = (rhs.intervals).begin(); it != (rhs.intervals).end(); ++it)
-	{
-		interval_t inter;
-		inter.interval = (it->first).interval;
-		inter.align = (it->first).align;
-		intervals[inter].insert(action.name); 
-	}
-	
+	// Copy the main interval
+	mainInterval = rhs.mainInterval;
+		
 	// Copy miscList
 	miscListConstIter_t misc_it;
 	miscList.clear();
@@ -213,7 +295,7 @@ Auction::~Auction()
 {
 #ifdef DEBUG
     log->dlog(ch, "Auction destructor Id: %d", uid);
-#endif    
+#endif
 
 }
 
@@ -294,6 +376,20 @@ miscList_t *Auction::getMisc()
     return &miscList;
 }
 
+/* ------------------- getTemplateList ---------------------- */
+
+ipap_template_container * Auction::getTemplateList()
+{
+	return &templates;
+}
+
+/* --------------- getTemplateAssociations ------------------ */
+
+remoteAssociationTemplateList_t * Auction::getTemplateAssociations()
+{
+	return &templateAssociationList;
+}
+
 
 /* ------------------------- dump ------------------------- */
 
@@ -369,19 +465,10 @@ string Auction::getInfo(void)
     s << " | ";
 
 
-	intervalListIter_t it = intervals.begin();
-	while (it != intervals.end())
-	{
-		s << "Interval:" << (it->first).interval << "align:" << (it->first).align;
-		
-		++it;
-		
-		if (it != intervals.end()){
-			s << ", ";
-		}
-	}
-	
+	s << "Interval:" << (mainInterval).interval << "align:" << (mainInterval).align;
+			
     s << endl;
 
     return s.str();
 }
+

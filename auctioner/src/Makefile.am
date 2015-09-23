@@ -25,7 +25,7 @@ auctionManager_SOURCES =  EventSchedulerAuctioner.cpp \
 
 auctionManager_CPPFLAGS = -I$(top_srcdir)/lib/getopt_long \
 						  -I$(top_srcdir)/lib/httpd \
-						  -I$(top_srcdir)/auctioner/include
+						  -I$(top_srcdir)/auctioner/include $(LIBIPAP_CFLAGS)
 
 auctionManager_LDADD = $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 					   $(top_builddir)/lib/httpd/libhttpd.a \
@@ -37,6 +37,6 @@ AM_CPPFLAGS = -g -I@top_srcdir@/include
 AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 			 $(top_builddir)/lib/httpd/libhttpd.a \
 			 $(top_builddir)/foundation/src/libfoundation.la \
-			 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@
+			 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ $(LIBIPAP_LIBS)
 			 
-LDADD = ../foundation/src/libfoundation.la
+LDADD = ../foundation/src/libfoundation.la $(LIBIPAP_LIBS)

@@ -10,6 +10,7 @@
 #include "ParserFcts.h"
 #include "FieldValParser.h"
 
+using namespace auction;
 
 class FieldValParser_Test : public CppUnit::TestFixture {
 

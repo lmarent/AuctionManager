@@ -36,9 +36,10 @@
 #include "AuctionIdSource.h"
 #include "Auction.h"
 #include "AuctionFileParser.h"
-#include "MAPIAuctionParser.h"
 #include "EventScheduler.h"
 
+namespace auction
+{
 
 // AuctionDB definition is currently in AuctionFileParser.h
 
@@ -61,9 +62,9 @@ struct lttexp
 {
     bool operator()(const procdef_t e1, const procdef_t e2) const
     {
-      if  ((e1.i.interval < e2.i.interval) ||
-           (e1.i.align < e2.i.align) ||
-           (e1.e < e2.e)) {
+      if  ((e1.interval.interval < e2.interval.interval) ||
+           (e1.interval.align < e2.interval.align) ||
+           (strcmp(e1.procname.c_str(), e2.procname.c_str()))) {
           return 1;
       } else {
           return 0;
@@ -104,6 +105,14 @@ class AuctionManager
     //! list with auctions done
     auctionDone_t auctionDone;
 
+	//! field definitions
+    fieldDefList_t fieldDefs;
+
+	ipap_message *message;		///< Empty message for creating copies of it.
+
+    // name of filter def and filter vals files
+    string fieldDefFileName;
+	
     // pool of unique bid ids
     AuctionIdSource idSource;
 
@@ -112,6 +121,11 @@ class AuctionManager
        \arg \c auctionname - name of the finished auction (source.name)
     */
     void storeAuctionAsDone(Auction *a);
+
+
+    //! load filter definitions
+    void loadFieldDefs(string fname);
+
 
   public:
 
@@ -127,7 +141,7 @@ class AuctionManager
 
     /*! \short   construct and initialize a AuctionManager object
      */
-    AuctionManager(); // Ok
+    AuctionManager(string fdname); // Ok
 
     //! destroy a AuctionManager object
     ~AuctionManager(); //Ok
@@ -210,5 +224,6 @@ class AuctionManager
 //! overload for <<, so that a AuctionManager object can be thrown into an iostream
 ostream& operator<< ( ostream &os, AuctionManager &rm );
 
+}; // namespace auction
 
 #endif // _AUCTION_MANAGER_H_

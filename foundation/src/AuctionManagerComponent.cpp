@@ -28,6 +28,8 @@
 
 #include "AuctionManagerComponent.h"
 
+using namespace auction;
+
 AuctionManagerComponent::AuctionManagerComponent(ConfigManager *_cnf, string name, int thread )
     :   running(0), cname(name), threaded(thread),  cnf(_cnf)
 {

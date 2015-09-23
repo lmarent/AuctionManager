@@ -25,11 +25,13 @@
 */
 
 
-#include "Auctioner.h"
 #include "ParserFcts.h"
+#include "httpd.h"
+#include "Auctioner.h"
 #include "ConstantsAum.h"
 #include "EventAuctioner.h"
 
+using namespace auction;
 
 // globals in AuctionManager class
 int Auctioner::s_sigpipe[2];
@@ -188,7 +190,7 @@ Auctioner::Auctioner( int argc, char *argv[])
                                                     conf->getValue("FieldConstFile", "MAIN")));
         bidm = _bidm;
         
-        auto_ptr<AuctionManager> _aucm(new AuctionManager());
+        auto_ptr<AuctionManager> _aucm(new AuctionManager(conf->getValue("FieldDefFile", "MAIN")));
         aucm = _aucm;
 
         
@@ -901,7 +903,7 @@ void Auctioner::dump(ostream &os)
 
 /* ------------------------- operator<< ------------------------- */
 
-ostream& operator<<(ostream &os, Auctioner &obj)
+ostream& auction::operator<<(ostream &os, Auctioner &obj)
 {
     obj.dump(os);
     return os;
@@ -1008,26 +1010,23 @@ void Auctioner::activateAuctions(auctionDB_t *auctions, EventScheduler *e)
         a->setState(AS_ACTIVE);
 		
 		// Create the execution intervals
-		intervalList_t *ilist = a->getIntervals();
-        for (intervalListIter_t i = ilist->begin(); i != ilist->end(); i++) {
-             procdef_t entry;
-
-             entry.i = i->first;
-             entry.e = i->second;
-              
-             intervals[entry].push_back(a);
-        }
+		interval_t inter = a->getInterval();
+		action_t *action = a->getAction();
+        procdef_t entry;
+        entry.interval = inter;
+        entry.procname = action->name;              
+        intervals[entry].push_back(a);
     }
 
     // group by export interval
     for (iter2 = intervals.begin(); iter2 != intervals.end(); iter2++) {
-        unsigned long i = iter2->first.i.interval;
+        unsigned long i = iter2->first.interval.interval;
 #ifdef DEBUG    
     log->dlog(ch, "Activate auctions - Execution interval: %lu", i );
 #endif  
 
-        e->addEvent(new PushExecutionEvent(i, iter2->second, iter2->first.e,
-                                        i * 1000, iter2->first.i.align));
+        e->addEvent(new PushExecutionEvent(i, iter2->second, iter2->first.procname,
+                                        i * 1000, iter2->first.interval.align));
     }
     
 

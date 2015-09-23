@@ -12,8 +12,12 @@
   </GLOBAL>
   <AUCTION ID="1">
     <ACTION NAME="bas" DEFAULT="true">
-    <PREF NAME="Bandwidth" TYPE="Float64">8</PREF>
-    <PREF NAME="ReservePrice" TYPE="Float64">0.012</PREF>    
+    <PREF NAME="Bandwidth" TYPE="Float32">8</PREF>
+    <PREF NAME="ReservePrice" TYPE="Float64">0.012</PREF>
     </ACTION>
+	<FIELD BID_TEMPL="yes" BID_OPT_TEMPL="no" ALLOC_TEMPL="yes">quantity</FIELD>
+	<FIELD BID_TEMPL="yes" BID_OPT_TEMPL="no">unitbudget</FIELD>
+	<FIELD BID_TEMPL="yes" ALLOC_TEMPL="yes">unitprice</FIELD>
+	<FIELD BID_OPT_TEMPL="yes">duration</FIELD>	
   </AUCTION>
 </AUCTIONSET>

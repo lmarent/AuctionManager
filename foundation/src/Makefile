@@ -122,16 +122,14 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libfoundation_la_LIBADD =
-am_libfoundation_la_OBJECTS = libfoundation_la-Logger.lo \
-	libfoundation_la-AuctionTimer.lo \
+am_libfoundation_la_OBJECTS = libfoundation_la-AuctionTimer.lo \
 	libfoundation_la-ConfigParser.lo \
 	libfoundation_la-ConfigManager.lo \
 	libfoundation_la-CommandLineArgs.lo \
 	libfoundation_la-Constants.lo libfoundation_la-ConstantsAum.lo \
-	libfoundation_la-Error.lo libfoundation_la-FieldValue.lo \
-	libfoundation_la-Field.lo libfoundation_la-ParserFcts.lo \
-	libfoundation_la-Timeval.lo libfoundation_la-XMLParser.lo \
-	libfoundation_la-Allocation.lo \
+	libfoundation_la-FieldValue.lo libfoundation_la-Field.lo \
+	libfoundation_la-ParserFcts.lo libfoundation_la-Timeval.lo \
+	libfoundation_la-XMLParser.lo libfoundation_la-Allocation.lo \
 	libfoundation_la-FieldDefParser.lo \
 	libfoundation_la-FieldValParser.lo libfoundation_la-Bid.lo \
 	libfoundation_la-BidFileParser.lo \
@@ -264,6 +262,8 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 IPTABLES_VERSION = 
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS =  -L/lib -L/usr/local/lib -L/usr/lib  -ltermcap -lxml2
+LIBIPAP_CFLAGS = -I/usr/local/include/ipap  
+LIBIPAP_LIBS = -L/usr/local/lib/ipap -lipap  
 LIBOBJS = 
 LIBS = -ldl 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
@@ -367,6 +367,7 @@ target_alias =
 top_build_prefix = ../../
 top_builddir = ../..
 top_srcdir = ../..
+ACLOCAL_AMFLAGS = -I m4
 lib_LTLIBRARIES = libfoundation.la
 #AM_CXXFLAGS = -I$(top_srcdir)/lib/getopt_long \
 #				-I$(top_srcdir)/lib/httpd \
@@ -377,16 +378,15 @@ AM_CXXFLAGS = -I$(top_srcdir)/lib/getopt_long \
 				-g  -fPIC -fno-inline -DDEBUG -D_GLIBCXX_DEBUG
 
 libfoundation_la_CPPFLAGS = -I$(top_srcdir) \
-							-I$(top_srcdir)/foundation/include
+							-I$(top_srcdir)/foundation/include \
+							$(LIBIPAP_CFLAGS)
 
-libfoundation_la_SOURCES = Logger.cpp \
-                          AuctionTimer.cpp \
+libfoundation_la_SOURCES = AuctionTimer.cpp \
                           ConfigParser.cpp \
                           ConfigManager.cpp \
                           CommandLineArgs.cpp \
 						  Constants.cpp \
 						  ConstantsAum.cpp \
-						  Error.cpp \
 						  FieldValue.cpp \
 						  Field.cpp \
 						  ParserFcts.cpp \
@@ -507,14 +507,12 @@ include ./$(DEPDIR)/libfoundation_la-ConfigManager.Plo
 include ./$(DEPDIR)/libfoundation_la-ConfigParser.Plo
 include ./$(DEPDIR)/libfoundation_la-Constants.Plo
 include ./$(DEPDIR)/libfoundation_la-ConstantsAum.Plo
-include ./$(DEPDIR)/libfoundation_la-Error.Plo
 include ./$(DEPDIR)/libfoundation_la-Event.Plo
 include ./$(DEPDIR)/libfoundation_la-EventScheduler.Plo
 include ./$(DEPDIR)/libfoundation_la-Field.Plo
 include ./$(DEPDIR)/libfoundation_la-FieldDefParser.Plo
 include ./$(DEPDIR)/libfoundation_la-FieldValParser.Plo
 include ./$(DEPDIR)/libfoundation_la-FieldValue.Plo
-include ./$(DEPDIR)/libfoundation_la-Logger.Plo
 include ./$(DEPDIR)/libfoundation_la-MAPIAuctionParser.Plo
 include ./$(DEPDIR)/libfoundation_la-MAPIBidParser.Plo
 include ./$(DEPDIR)/libfoundation_la-ParserFcts.Plo
@@ -544,13 +542,6 @@ include ./$(DEPDIR)/libfoundation_la-XMLParser.Plo
 #	$(AM_V_CXX)source='$<' object='$@' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(LTCXXCOMPILE) -c -o $@ $<
-
-libfoundation_la-Logger.lo: Logger.cpp
-	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-Logger.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-Logger.Tpo -c -o libfoundation_la-Logger.lo `test -f 'Logger.cpp' || echo '$(srcdir)/'`Logger.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-Logger.Tpo $(DEPDIR)/libfoundation_la-Logger.Plo
-#	$(AM_V_CXX)source='Logger.cpp' object='libfoundation_la-Logger.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-Logger.lo `test -f 'Logger.cpp' || echo '$(srcdir)/'`Logger.cpp
 
 libfoundation_la-AuctionTimer.lo: AuctionTimer.cpp
 	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-AuctionTimer.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-AuctionTimer.Tpo -c -o libfoundation_la-AuctionTimer.lo `test -f 'AuctionTimer.cpp' || echo '$(srcdir)/'`AuctionTimer.cpp
@@ -593,13 +584,6 @@ libfoundation_la-ConstantsAum.lo: ConstantsAum.cpp
 #	$(AM_V_CXX)source='ConstantsAum.cpp' object='libfoundation_la-ConstantsAum.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-ConstantsAum.lo `test -f 'ConstantsAum.cpp' || echo '$(srcdir)/'`ConstantsAum.cpp
-
-libfoundation_la-Error.lo: Error.cpp
-	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-Error.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-Error.Tpo -c -o libfoundation_la-Error.lo `test -f 'Error.cpp' || echo '$(srcdir)/'`Error.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-Error.Tpo $(DEPDIR)/libfoundation_la-Error.Plo
-#	$(AM_V_CXX)source='Error.cpp' object='libfoundation_la-Error.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-Error.lo `test -f 'Error.cpp' || echo '$(srcdir)/'`Error.cpp
 
 libfoundation_la-FieldValue.lo: FieldValue.cpp
 	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-FieldValue.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-FieldValue.Tpo -c -o libfoundation_la-FieldValue.lo `test -f 'FieldValue.cpp' || echo '$(srcdir)/'`FieldValue.cpp

@@ -23,18 +23,18 @@ test_runner_SOURCES = 	@top_srcdir@/user_agent/src/ResourceRequest.cpp \
 
 if ENABLE_DEBUG
   AM_CXXFLAGS = -g -I@top_srcdir@/foundation/include $(CPPUNIT_CFLAGS) \
-				-I@top_srcdir@/user_agent/include \
+				-I@top_srcdir@/user_agent/include $(LIBIPAP_CFLAGS) \
 			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
 			    -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING -DINTEL
 else
   AM_CXXFLAGS = -O2 -I@top_srcdir@/foundation/include $(CPPUNIT_CFLAGS) \
-				-I@top_srcdir@/user_agent/include \
+				-I@top_srcdir@/user_agent/include $(LIBIPAP_CFLAGS) \
 			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd
 endif
 			     
 AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 			 $(top_builddir)/lib/httpd/libhttpd.a \
 			 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ \
-			 -L$(abs_top_builddir)/foundation/src/libfoundation.la
+			 -L$(abs_top_builddir)/foundation/src/libfoundation.la $(LIBIPAP_LIBS)
 			 	 
-LDADD = $(top_builddir)/foundation/src/libfoundation.la
+LDADD = $(top_builddir)/foundation/src/libfoundation.la $(LIBIPAP_LIBS)

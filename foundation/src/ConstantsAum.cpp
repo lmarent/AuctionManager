@@ -30,6 +30,8 @@
 #include "ConstantsAum.h"
 
 using namespace std;
+namespace auction
+{
 
 // AuctionManager.h
 const string NETAUM_DEFAULT_CONFIG_FILE = DEF_SYSCONFDIR "/netaum.conf.xml";
@@ -48,3 +50,4 @@ const string AUM_CONFIGFILE_DTD  = DEF_SYSCONFDIR "/netaum.conf.dtd";
 const string QOS_CERT_FILE = DEF_SYSCONFDIR "/netaum.pem";
 #endif
 
+};

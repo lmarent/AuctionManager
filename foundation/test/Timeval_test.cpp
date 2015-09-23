@@ -45,9 +45,9 @@ void Timeval_Test::test()
 	struct timeval time2;
 	std::string time1Str, time2Str;
 	
-	Timeval::gettimeofday(&time1,NULL);
+	Timeval::gettimeofdayown(&time1,NULL);
 	sleep(2);
-	Timeval::gettimeofday(&time2,NULL);
+	Timeval::gettimeofdayown(&time2,NULL);
 	time1Str = Timeval::toString(time1.tv_sec);
 	time2Str = Timeval::toString(time2.tv_sec);
 	

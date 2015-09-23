@@ -2,10 +2,13 @@
 <!DOCTYPE FIELDDEF SYSTEM "fielddef.dtd">
 <FIELDDEF>
   <!-- General fields -->
-  <DEF LENGTH="6" TYPE="Double" >Quantity</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="33">Quantity</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="2">UnitPrice</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="3">UnitBudget</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="1">MaxValue</DEF>
+  <DEF LENGTH="4" TYPE="SInt32" ENO="0" FTYPE="5">Duration</DEF>
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="38">Bandwidth</DEF>
   <!-- Reserve price -->
-  <DEF LENGTH="6" TYPE="Double" >UnitPrice</DEF>
-  <DEF LENGTH="6" TYPE="Double" >Budget</DEF>
-  <DEF LENGTH="6" TYPE="Double" >MaxValue</DEF>
-
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="39">ReservePrice</DEF>
+  
 </FIELDDEF>

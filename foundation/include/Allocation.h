@@ -33,6 +33,9 @@
 #include "ConfigParser.h"
 #include "ProcModuleInterface.h"
 
+namespace auction
+{
+
 
 //! Allocation's states during lifecycle
 typedef enum
@@ -180,5 +183,9 @@ protected:
 
 
 };
+
+}; // namespace auction
+
+
 
 #endif // _ALLOCATION_H_

@@ -1,8 +1,7 @@
 libfoundation_la-BidFileParser.lo: BidFileParser.cpp \
- /usr/include/stdc-predef.h ../../foundation/include/BidFileParser.h \
- ../../foundation/include/stdincpp.h ../../foundation/include/stdinc.h \
- ../../config.h /usr/include/stdio.h /usr/include/features.h \
- /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/include/stdc-predef.h ../../foundation/include/ParserFcts.h \
+ ../../config.h /usr/local/include/ipap/stdinc.h /usr/include/stdio.h \
+ /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
@@ -89,7 +88,9 @@ libfoundation_la-BidFileParser.lo: BidFileParser.cpp \
  /usr/include/linux/stddef.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
- /usr/include/asm-generic/posix_types.h /usr/include/c++/4.8/iostream \
+ /usr/include/asm-generic/posix_types.h \
+ /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/stdinc.h \
+ /usr/include/c++/4.8/iostream \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
@@ -196,7 +197,9 @@ libfoundation_la-BidFileParser.lo: BidFileParser.cpp \
  /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/debug/set \
  /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
  /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
- /usr/include/c++/4.8/iomanip /usr/include/libxml2/libxml/parser.h \
+ /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/stdexcept \
+ ../../foundation/include/BidFileParser.h \
+ /usr/include/libxml2/libxml/parser.h \
  /usr/include/libxml2/libxml/xmlversion.h \
  /usr/include/libxml2/libxml/xmlexports.h \
  /usr/include/libxml2/libxml/tree.h \
@@ -213,31 +216,28 @@ libfoundation_la-BidFileParser.lo: BidFileParser.cpp \
  /usr/include/libxml2/libxml/globals.h /usr/include/libxml2/libxml/SAX.h \
  /usr/include/libxml2/libxml/xlink.h /usr/include/libxml2/libxml/SAX2.h \
  /usr/include/libxml2/libxml/xmlmemory.h \
- /usr/include/libxml2/libxml/threads.h ../../foundation/include/Logger.h \
- ../../foundation/include/ProcError.h ../../foundation/include/Error.h \
- ../../foundation/include/Threads.h ../../foundation/include/Constants.h \
- ../../foundation/include/ConstantsAum.h \
+ /usr/include/libxml2/libxml/threads.h /usr/local/include/ipap/Logger.h \
+ /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/Error.h \
+ /usr/local/include/ipap/ConstantsIpAp.h \
  ../../foundation/include/XMLParser.h \
  ../../foundation/include/ProcModuleInterface.h \
  ../../foundation/include/metadata.h \
  ../../foundation/include/FieldDefParser.h \
- ../../foundation/include/Field.h ../../foundation/include/FieldValue.h \
+ ../../foundation/include/Field.h /usr/local/include/ipap/Error.h \
+ ../../foundation/include/FieldValue.h \
  ../../foundation/include/ConfigParser.h \
  ../../foundation/include/FieldValParser.h \
  ../../foundation/include/BidIdSource.h ../../foundation/include/Bid.h \
  ../../foundation/include/AuctionTimer.h \
- ../../foundation/include/ParserFcts.h \
  ../../foundation/include/Constants.h ../../foundation/include/Timeval.h
 
 /usr/include/stdc-predef.h:
 
-../../foundation/include/BidFileParser.h:
-
-../../foundation/include/stdincpp.h:
-
-../../foundation/include/stdinc.h:
+../../foundation/include/ParserFcts.h:
 
 ../../config.h:
+
+/usr/local/include/ipap/stdinc.h:
 
 /usr/include/stdio.h:
 
@@ -486,6 +486,10 @@ libfoundation_la-BidFileParser.lo: BidFileParser.cpp \
 /usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
 
 /usr/include/asm-generic/posix_types.h:
+
+/usr/local/include/ipap/stdincpp.h:
+
+/usr/local/include/ipap/stdinc.h:
 
 /usr/include/c++/4.8/iostream:
 
@@ -775,6 +779,10 @@ libfoundation_la-BidFileParser.lo: BidFileParser.cpp \
 
 /usr/include/c++/4.8/iomanip:
 
+/usr/include/c++/4.8/stdexcept:
+
+../../foundation/include/BidFileParser.h:
+
 /usr/include/libxml2/libxml/parser.h:
 
 /usr/include/libxml2/libxml/xmlversion.h:
@@ -819,17 +827,13 @@ libfoundation_la-BidFileParser.lo: BidFileParser.cpp \
 
 /usr/include/libxml2/libxml/threads.h:
 
-../../foundation/include/Logger.h:
+/usr/local/include/ipap/Logger.h:
 
-../../foundation/include/ProcError.h:
+/usr/local/include/ipap/stdincpp.h:
 
-../../foundation/include/Error.h:
+/usr/local/include/ipap/Error.h:
 
-../../foundation/include/Threads.h:
-
-../../foundation/include/Constants.h:
-
-../../foundation/include/ConstantsAum.h:
+/usr/local/include/ipap/ConstantsIpAp.h:
 
 ../../foundation/include/XMLParser.h:
 
@@ -840,6 +844,8 @@ libfoundation_la-BidFileParser.lo: BidFileParser.cpp \
 ../../foundation/include/FieldDefParser.h:
 
 ../../foundation/include/Field.h:
+
+/usr/local/include/ipap/Error.h:
 
 ../../foundation/include/FieldValue.h:
 
@@ -852,8 +858,6 @@ libfoundation_la-BidFileParser.lo: BidFileParser.cpp \
 ../../foundation/include/Bid.h:
 
 ../../foundation/include/AuctionTimer.h:
-
-../../foundation/include/ParserFcts.h:
 
 ../../foundation/include/Constants.h:
 

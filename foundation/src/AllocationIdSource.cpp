@@ -29,6 +29,7 @@
 #include "AllocationIdSource.h"
 
 
+using namespace auction;
 
 AllocationIdSource::AllocationIdSource(int _unique)
   : num(-1), unique(_unique)

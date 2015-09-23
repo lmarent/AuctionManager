@@ -31,6 +31,9 @@
 
 using namespace std;
 
+namespace auction
+{
+
 // Agent.h
 const string NETAGENT_DEFAULT_CONFIG_FILE = DEF_SYSCONFDIR "/netagnt.conf.xml";
 const string NETAGENT_LOCK_FILE   = DEF_SYSCONFDIR "/netagent.pid";
@@ -49,3 +52,5 @@ const string QOS_CERT_FILE = DEF_SYSCONFDIR "/netagent.pem";
 
 // ResourceRequestFileParser.cpp
 const string RESOURCE_FILE_DTD = DEF_SYSCONFDIR "/resourcerequestfile.dtd";
+
+};

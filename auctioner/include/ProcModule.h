@@ -37,6 +37,8 @@
 #include "ConfigManager.h"
 #include "EventSchedulerAuctioner.h"
 
+namespace auction
+{
 
 
 /*! \short   container class that stores information about an evaluation module
@@ -156,5 +158,6 @@ class ProcModule : public Module
 //! overload for <<, so that a ProcModule object can be thrown into an ostream
 ostream& operator<< ( ostream &os, ProcModule &obj );
 
+}; // namespace auction  
 
 #endif // _PROCMODULE_H_

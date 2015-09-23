@@ -2,20 +2,28 @@
 <!-- The Document Type Definition (DTD) for the file -->
 
 <!ELEMENT AUCTIONSET (GLOBAL, AUCTION*)>
-<!ELEMENT GLOBAL (ACTION|PREF)*>
-<!-- global configuration is overruled by per auction configuration -->
-<!ELEMENT AUCTION (ACTION, PREF*)>
 <!ATTLIST AUCTIONSET
           ID CDATA #REQUIRED>
+
+<!ELEMENT GLOBAL (ACTION|PREF)*>
+<!-- global configuration is overruled by per auction configuration -->
+          
+<!ELEMENT AUCTION (ACTION, FIELD*)>
 <!ATTLIST AUCTION
         ID CDATA #REQUIRED>
+
+<!ELEMENT ACTION (PREF*)>
+<!ATTLIST ACTION
+        NAME CDATA #REQUIRED
+        DEFAULT CDATA #REQUIRED >
+        
 <!ELEMENT PREF (#PCDATA)>
 <!ATTLIST PREF
         NAME CDATA #REQUIRED
         TYPE (UInt8|SInt8|UInt16|SInt16|UInt32|SInt32|UInt64|SInt64|Bool|Binary|String|Float32|Float64) "String">
-<!ELEMENT ACTION (PREF*)>
-<!ATTLIST ACTION
-        NAME CDATA #REQUIRED
-        DEFAULT CDATA #REQUIRED 
->
-
+                
+<!ELEMENT FIELD (#PCDATA)>
+<!ATTLIST FIELD
+        BID_TEMPL CDATA #IMPLIED
+        BID_OPT_TEMPL CDATA #IMPLIED
+        ALLOC_TEMPL CDATA #IMPLIED>

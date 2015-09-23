@@ -25,14 +25,18 @@
 $Id: CtrlComm.cpp 748 2015-07-31 9:25:00 amarentes $
 */
 
+#include "ParserFcts.h"
+#include "httpd.h"
 #include "Error.h"
 #include "Logger.h"
 #include "AuctionTimer.h"
 #include "CtrlComm.h"
+#include "EventAuctioner.h"
 #include "AuctionManager.h"
 #include "Bid.h"
 #include "Constants.h"
 
+using namespace auction;
 
 CtrlComm *CtrlComm::s_instance = NULL;
 
@@ -685,7 +689,7 @@ void CtrlComm::dump( ostream &os )
 
 /* ------------------------- operator<< ------------------------- */
 
-ostream& operator<< ( ostream &os, CtrlComm &cio )
+ostream& auction::operator<< ( ostream &os, CtrlComm &cio )
 {
     cio.dump(os);
     return os;

@@ -28,6 +28,8 @@
 
 #include "XMLParser.h"
 
+using namespace auction;
+
 string XMLParser::err, XMLParser::warn;
 
 XMLParser::XMLParser(string dtdname, string fname, string root)

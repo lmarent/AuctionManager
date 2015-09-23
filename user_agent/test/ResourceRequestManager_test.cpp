@@ -14,6 +14,7 @@
 #include "ResourceRequestFileParser.h"
 #include "ResourceRequestManager.h"
 
+using namespace auction;
 
 class ResourceRequestManager_Test : public CppUnit::TestFixture {
 

@@ -27,6 +27,8 @@
 #include "PageRepository.h"
 
 
+using namespace auction;
+
 void PageRepository::addPageFile( string url, string fname )
 {
     string line;

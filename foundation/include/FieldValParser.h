@@ -36,6 +36,8 @@
 #include "FieldValue.h"
 #include "FieldDefParser.h"
 
+namespace auction
+{
 
 //! filter value
 typedef struct
@@ -69,6 +71,8 @@ class FieldValParser : public XMLParser
     //! add parsed field values to list
     virtual void parse(fieldValList_t *list);
 };
+
+}; // namespace auction
 
 
 #endif // _FIELD_VALPARSER_H_

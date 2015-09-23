@@ -34,6 +34,8 @@
 #include "ConfigParser.h"
 #include "ProcModuleInterface.h"
 
+namespace auction
+{
 
 //! resource request's states during lifecycle
 typedef enum
@@ -155,5 +157,7 @@ protected:
 	resourceReqIntervalList_t intervals;
 
 };
+
+}; // namespace auction
 
 #endif // _RESOURCE_REQUEST_H_

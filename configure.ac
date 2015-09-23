@@ -200,7 +200,7 @@ AC_CHECK_SIZEOF(off_t)
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([net/bpf.h net/ethernet.h ether.h arpa/inet.h fcntl.h float.h types.h limits.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h termios.h unistd.h float.h])
+AC_CHECK_HEADERS([net/bpf.h net/ethernet.h ether.h arpa/inet.h fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h termios.h unistd.h float.h types.h limits.h ])
 
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -309,6 +309,10 @@ PKG_CHECK_MODULES(CURL,
 AM_CONDITIONAL(CURL, test -n "$CURL_LIBS")
 AC_SUBST(CURL_CFLAGS)
 AC_SUBST(CURL_LIBS)
+
+PKG_CHECK_MODULES([LIBIPAP], [libipap-0.0])
+AC_SUBST([LIBIPAP_CFLAGS])
+AC_SUBST([LIBIPAP_LIBS])
 
 
 dnl # dont try to build nagtrsh if we don't have the libs

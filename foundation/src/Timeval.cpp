@@ -30,7 +30,6 @@
 #include "Timeval.h"
 #include "Error.h"
 
-
 // global time.
 struct timeval Timeval::g_time = {0, 0};
 
@@ -85,10 +84,10 @@ struct timeval Timeval::sub0(struct timeval num, struct timeval sub)
     return rv;
 }
 
-int Timeval::gettimeofday(struct timeval *tv, struct timezone *tz)
+int Timeval::gettimeofdayown(struct timeval *tv, struct timezone *tz)
 {
     // use timestamps from the system
-    return ::gettimeofday(tv,tz);
+    return gettimeofday(tv,tz);
 
 }
  

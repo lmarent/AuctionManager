@@ -25,9 +25,12 @@
     $Id: MAPIBidParser.cpp 2015-07-24 15:14:00 amarentes $
 */
 
-#include "MAPIBidParser.h"
 #include "ParserFcts.h"
+#include "Constants.h"
+#include "MAPIBidParser.h"
 #include "Timeval.h"
+
+using namespace auction;
 
 MAPIBidParser::MAPIBidParser(string filename)
     : fileName(filename)

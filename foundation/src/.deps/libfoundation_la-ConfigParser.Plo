@@ -1,7 +1,7 @@
 libfoundation_la-ConfigParser.lo: ConfigParser.cpp \
  /usr/include/stdc-predef.h ../../config.h \
- ../../foundation/include/Logger.h ../../foundation/include/stdincpp.h \
- ../../foundation/include/stdinc.h /usr/include/stdio.h \
+ /usr/local/include/ipap/Logger.h /usr/local/include/ipap/stdincpp.h \
+ /usr/local/include/ipap/stdinc.h /usr/include/stdio.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
@@ -196,12 +196,10 @@ libfoundation_la-ConfigParser.lo: ConfigParser.cpp \
  /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/debug/set \
  /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
  /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
- /usr/include/c++/4.8/iomanip ../../foundation/include/ProcError.h \
- ../../foundation/include/Error.h ../../foundation/include/Threads.h \
- ../../foundation/include/Constants.h \
- ../../foundation/include/ConstantsAum.h \
+ /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/stdexcept \
+ /usr/local/include/ipap/Error.h /usr/local/include/ipap/ConstantsIpAp.h \
  ../../foundation/include/ConfigParser.h \
- /usr/include/libxml2/libxml/parser.h \
+ /usr/local/include/ipap/stdincpp.h /usr/include/libxml2/libxml/parser.h \
  /usr/include/libxml2/libxml/xmlversion.h \
  /usr/include/libxml2/libxml/xmlexports.h \
  /usr/include/libxml2/libxml/tree.h \
@@ -218,10 +216,10 @@ libfoundation_la-ConfigParser.lo: ConfigParser.cpp \
  /usr/include/libxml2/libxml/globals.h /usr/include/libxml2/libxml/SAX.h \
  /usr/include/libxml2/libxml/xlink.h /usr/include/libxml2/libxml/SAX2.h \
  /usr/include/libxml2/libxml/xmlmemory.h \
- /usr/include/libxml2/libxml/threads.h ../../foundation/include/Logger.h \
+ /usr/include/libxml2/libxml/threads.h \
  ../../foundation/include/XMLParser.h \
- ../../foundation/include/FieldValue.h \
- ../../foundation/include/ParserFcts.h \
+ ../../foundation/include/FieldValue.h /usr/local/include/ipap/stdinc.h \
+ /usr/local/include/ipap/Error.h ../../foundation/include/ParserFcts.h \
  ../../foundation/include/Constants.h \
  ../../foundation/include/ConstantsAum.h
 
@@ -229,11 +227,11 @@ libfoundation_la-ConfigParser.lo: ConfigParser.cpp \
 
 ../../config.h:
 
-../../foundation/include/Logger.h:
+/usr/local/include/ipap/Logger.h:
 
-../../foundation/include/stdincpp.h:
+/usr/local/include/ipap/stdincpp.h:
 
-../../foundation/include/stdinc.h:
+/usr/local/include/ipap/stdinc.h:
 
 /usr/include/stdio.h:
 
@@ -771,17 +769,15 @@ libfoundation_la-ConfigParser.lo: ConfigParser.cpp \
 
 /usr/include/c++/4.8/iomanip:
 
-../../foundation/include/ProcError.h:
+/usr/include/c++/4.8/stdexcept:
 
-../../foundation/include/Error.h:
+/usr/local/include/ipap/Error.h:
 
-../../foundation/include/Threads.h:
-
-../../foundation/include/Constants.h:
-
-../../foundation/include/ConstantsAum.h:
+/usr/local/include/ipap/ConstantsIpAp.h:
 
 ../../foundation/include/ConfigParser.h:
+
+/usr/local/include/ipap/stdincpp.h:
 
 /usr/include/libxml2/libxml/parser.h:
 
@@ -827,11 +823,13 @@ libfoundation_la-ConfigParser.lo: ConfigParser.cpp \
 
 /usr/include/libxml2/libxml/threads.h:
 
-../../foundation/include/Logger.h:
-
 ../../foundation/include/XMLParser.h:
 
 ../../foundation/include/FieldValue.h:
+
+/usr/local/include/ipap/stdinc.h:
+
+/usr/local/include/ipap/Error.h:
 
 ../../foundation/include/ParserFcts.h:
 

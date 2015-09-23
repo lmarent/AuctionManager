@@ -26,10 +26,11 @@
 
 */
 
-
+#include "config.h"
 #include "ParserFcts.h"
 #include "Error.h"
 
+using namespace auction;
 
 long ParserFcts::parseLong(string s, long min, long max)
 {

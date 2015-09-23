@@ -41,6 +41,8 @@
 #include "BidIdSource.h"
 #include "Bid.h"
 
+namespace auction
+{
 
 class BidFileParser : public XMLParser
 {
@@ -81,5 +83,7 @@ class BidFileParser : public XMLParser
 					   bidDB_t *bids,
 					   BidIdSource *idSource );
 };
+
+}; // namespace auction
 
 #endif // _RULEFILEPARSER_H_

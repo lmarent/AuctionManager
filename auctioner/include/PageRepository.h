@@ -31,6 +31,9 @@
 
 #include "stdincpp.h"
 
+namespace auction
+{
+
 //! url to page content map
 typedef map<string,string>            repository_t;
 typedef map<string,string>::iterator  repositoryIter_t;
@@ -68,6 +71,7 @@ class PageRepository
 
     string getFileName( string url );
 };
-  
+
+}; // namespace auction  
 
 #endif // _PAGE_REPOSITORY_H_

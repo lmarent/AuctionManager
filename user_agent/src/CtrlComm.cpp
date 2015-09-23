@@ -34,13 +34,16 @@ $Id: CtrlComm.cpp 748 2015-07-31 9:25:00 amarentes $
 #include "Constants.h"
 #include "EventAgent.h"
 
+using namespace std;
+using namespace auction;
+
 
 CtrlComm *CtrlComm::s_instance = NULL;
 
 
 /* ------------------------- CtrlComm ------------------------- */
 
-CtrlComm::CtrlComm(ConfigManager *cnf, int threaded)
+CtrlComm::CtrlComm(auction::ConfigManager *cnf, int threaded)
     : AuctionManagerComponent(cnf, "CtrlComm",threaded),
       portnum(0), flags(0)
 {
@@ -50,7 +53,7 @@ CtrlComm::CtrlComm(ConfigManager *cnf, int threaded)
     log->dlog(ch, "Starting" );
 #endif
   
-    portnum = DEF_PORT;
+    portnum = auction::DEF_PORT;
 	
     // get port number from config manager if available
     string txt = cnf->getValue("ControlPort", "CONTROL");
@@ -103,16 +106,16 @@ CtrlComm::CtrlComm(ConfigManager *cnf, int threaded)
     }
     
     // load html/xsl files
-    pcache.addPageFile("/",             MAIN_PAGE_FILE );
-    pcache.addPageFile("/help",         MAIN_PAGE_FILE );
-    pcache.addPageFile("/xsl/reply.xsl", XSL_PAGE_FILE );
+    pcache.addPageFile("/",             auction::MAIN_PAGE_FILE );
+    pcache.addPageFile("/help",         auction::MAIN_PAGE_FILE );
+    pcache.addPageFile("/xsl/reply.xsl", auction::XSL_PAGE_FILE );
 
     // load reply template
     string line;
-    ifstream in(REPLY_TEMPLATE.c_str());
+    ifstream in(auction::REPLY_TEMPLATE.c_str());
     
     if (!in) {
-        throw Error("cannot access/read file '%s'", REPLY_TEMPLATE.c_str());
+        throw Error("cannot access/read file '%s'", auction::REPLY_TEMPLATE.c_str());
     }
 
     while (getline(in, line)) {
@@ -152,7 +155,7 @@ int CtrlComm::accessCheck(char *host, char *user)
     }
 #endif
 
-    configADListIter_t iter;
+    auction::configADListIter_t iter;
     std::cout << "entering in check user by host" << std::endl;
     // host check
     if (host != NULL) {
@@ -161,7 +164,7 @@ int CtrlComm::accessCheck(char *host, char *user)
                 ((iter->value == "All") ||
                  (!strcmp(iter->resolve_addr.c_str(), host)))) {
                 std::cout << "returning ok" << std::endl;
-                return ((iter->ad == ALLOW) ? 0 : -1);
+                return ((iter->ad == auction::ALLOW) ? 0 : -1);
             }
         }
     }
@@ -178,7 +181,7 @@ int CtrlComm::accessCheck(char *host, char *user)
                 ((iter->value == "All") ||
                  (!strncmp(iter->value.c_str(), user,
                            strlen(iter->value.c_str()))))) {
-                return ((iter->ad == ALLOW) ? 0 : -1);
+                return ((iter->ad == auction::ALLOW) ? 0 : -1);
             }
         }
     }
@@ -189,11 +192,11 @@ int CtrlComm::accessCheck(char *host, char *user)
 
 /* -------------------- checkHosts -------------------- */
 
-void CtrlComm::checkHosts( configADList_t &list, bool useIPv6 )
+void CtrlComm::checkHosts( auction::configADList_t &list, bool useIPv6 )
 {
     int rc;
-    configADItem_t entry;
-    configADListIter_t iter;
+    auction::configADItem_t entry;
+    auction::configADListIter_t iter;
     struct addrinfo ask, *tmp, *res = NULL;
     
     sethostent(1);
@@ -223,7 +226,7 @@ void CtrlComm::checkHosts( configADList_t &list, bool useIPv6 )
                 }
                 
                 if (rc == 0) {
-                    configADItem_t entry = *iter;		    
+                    auction::configADItem_t entry = *iter;		    
                     char host[65];
                     bool isIPv4addr;
                     
@@ -365,7 +368,7 @@ void CtrlComm::sendErrMsg(string msg, struct REQUEST *req, fd_sets_t *fds)
 
 /* -------------------- handleFDEvent -------------------- */
 
-int CtrlComm::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds)
+int CtrlComm::handleFDEvent(auction::eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds)
 {
     assert(e != NULL);
 
@@ -469,7 +472,7 @@ int CtrlComm::processCmd(struct REQUEST *req)
 #endif
 
 #ifdef PROFILING
-    ini = AuctionTimer::readTSC();
+    ini = auction::AuctionTimer::readTSC();
 #endif
 
 #ifdef DEBUG
@@ -504,7 +507,7 @@ int CtrlComm::processCmd(struct REQUEST *req)
             req->body = strdup(page.c_str());  // FIXME not very performant
             req->mime = get_mime((char *) pcache.getFileName(preq.comm).c_str());
             // generate Expires header
-            req->lifespan = EXPIRY_TIME;
+            req->lifespan = auction::EXPIRY_TIME;
             // immediatly send response
             httpd_send_immediate_response(req);
             
@@ -525,9 +528,9 @@ int CtrlComm::processCmd(struct REQUEST *req)
     }
     
 #ifdef PROFILING
-    end = AuctionTimer::readTSC();
+    end = auction::AuctionTimer::readTSC();
    
-    cerr << "parse cmd in " << AuctionTimer::ticks2ns(end-ini) << " ns" << endl;
+    cerr << "parse cmd in " << auction::AuctionTimer::ticks2ns(end-ini) << " ns" << endl;
 #endif
 
     if (retEvent != NULL) {
@@ -552,9 +555,9 @@ char *CtrlComm::processAddBid(parseReq_t *preq)
     // FIXME sufficient?
     if (bid->second.find("!DOCTYPE BIDSET") <= bid->second.length()) {
         // assume xml bid def
-        retEvent = new AddBidsCtrlEvent((char *) bid->second.c_str(), bid->second.size());
+        retEvent = new auction::AddBidsCtrlEvent((char *) bid->second.c_str(), bid->second.size());
     } else {
-        retEvent = new AddBidsCtrlEvent((char *) bid->second.c_str(), bid->second.size(), 1);
+        retEvent = new auction::AddBidsCtrlEvent((char *) bid->second.c_str(), bid->second.size(), 1);
     }
 
     return NULL;
@@ -571,7 +574,7 @@ char *CtrlComm::processDelBid(parseReq_t *preq )
         throw Error("rm_bid: missing parameter 'BidID'" );
     }
     
-    retEvent = new RemoveBidsCtrlEvent(id->second);
+    retEvent = new auction::RemoveBidsCtrlEvent(id->second);
   
     return NULL;
 }
@@ -581,7 +584,7 @@ char *CtrlComm::processDelBid(parseReq_t *preq )
 
 char *CtrlComm::processGetInfo( parseReq_t *preq )
 {
-    AgentManagerInfo infos;
+    auction::AgentManagerInfo infos;
 
     paramListIter_t type = preq->params.find("IType");
     paramListIter_t param = preq->params.find("IParam");
@@ -596,7 +599,7 @@ char *CtrlComm::processGetInfo( parseReq_t *preq )
         infos.addInfo(type->second, param->second);
     }
 
-    retEvent = new GetInfoEvent(infos.getList());
+    retEvent = new auction::GetInfoEvent(infos.getList());
     
     return NULL;
 }

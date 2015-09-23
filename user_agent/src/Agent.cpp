@@ -25,11 +25,13 @@
 */
 
 
+#include "ParserFcts.h"
+#include "httpd.h"
 #include "Agent.h"
 #include "EventAgent.h"
-#include "ParserFcts.h"
 #include "ConstantsAgent.h"
 
+using namespace auction;
 
 
 // globals in AuctionManager class
@@ -178,7 +180,7 @@ Agent::Agent( int argc, char *argv[])
                                                     conf->getValue("FieldConstFile", "MAIN")));
         bidm = _bidm;
         
-        auto_ptr<AuctionManager> _aucm(new AuctionManager());
+        auto_ptr<AuctionManager> _aucm(new AuctionManager(conf->getValue("FieldDefFile", "MAIN")));
         aucm = _aucm;
         
         auto_ptr<EventSchedulerAgent> _evnt(new EventSchedulerAgent());
@@ -756,7 +758,7 @@ void Agent::run()
                             stop = 1;
                             break;
                         case 'D':
-                            cerr << *this;
+                             cerr << *this;
                             break;
                         case 'A':
                             // next event
@@ -850,7 +852,7 @@ void Agent::dump(ostream &os)
 
 /* ------------------------- operator<< ------------------------- */
 
-ostream& operator<<(ostream &os, Agent &obj)
+ostream& auction::operator<<(ostream &os, Agent &obj)
 {
     obj.dump(os);
     return os;

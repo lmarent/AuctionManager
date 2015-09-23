@@ -34,6 +34,8 @@
 #include "stdincpp.h"
 #include "Logger.h"
 
+namespace auction
+{
 
 /*! \short predefined identifiers for auction processes slots */
 enum auctSlots 
@@ -188,5 +190,6 @@ class AuctionTimer
 //! overload for <<, so that a AuctionTimer object can be thrown into an ostream
 ostream& operator<< ( ostream &os, AuctionTimer &obj );
 
+}; // namespace auction
 
 #endif // _AUCTIONTIMER_H_

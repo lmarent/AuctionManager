@@ -35,6 +35,8 @@
 #include "Error.h"
 #include "Logger.h"
 
+namespace auction
+{
 
 
 //! command line arg
@@ -129,5 +131,6 @@ class CommandLineArgs
 
 };
 
+};
 
 #endif // _COMMANDLINEARGS_H_

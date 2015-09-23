@@ -225,6 +225,8 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 IPTABLES_VERSION = 
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS =  -L/lib -L/usr/local/lib -L/usr/lib  -ltermcap -lxml2
+LIBIPAP_CFLAGS = -I/usr/local/include/ipap  
+LIBIPAP_LIBS = -L/usr/local/lib/ipap -lipap  
 LIBOBJS = 
 LIBS = -ldl 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
@@ -350,7 +352,7 @@ auctionManager_SOURCES = EventSchedulerAuctioner.cpp \
 
 auctionManager_CPPFLAGS = -I$(top_srcdir)/lib/getopt_long \
 						  -I$(top_srcdir)/lib/httpd \
-						  -I$(top_srcdir)/auctioner/include
+						  -I$(top_srcdir)/auctioner/include $(LIBIPAP_CFLAGS)
 
 auctionManager_LDADD = $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 					   $(top_builddir)/lib/httpd/libhttpd.a \
@@ -363,9 +365,9 @@ AM_CPPFLAGS = -g -I../../include
 AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 			 $(top_builddir)/lib/httpd/libhttpd.a \
 			 $(top_builddir)/foundation/src/libfoundation.la \
-			    -lxml2
+			    -lxml2 $(LIBIPAP_LIBS)
 
-LDADD = ../foundation/src/libfoundation.la
+LDADD = ../foundation/src/libfoundation.la $(LIBIPAP_LIBS)
 all: all-am
 
 .SUFFIXES:

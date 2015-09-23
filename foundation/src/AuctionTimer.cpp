@@ -28,6 +28,7 @@
 
 #include "AuctionTimer.h"
 
+using namespace auction;
 
 const int FBUFSZ = 1000;
 const char* CPUINFO = "/proc/cpuinfo";

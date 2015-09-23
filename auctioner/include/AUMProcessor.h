@@ -39,6 +39,9 @@
 #include "Logger.h"
 #include "EventScheduler.h"
 
+namespace auction
+{
+
 typedef struct
 {
     ProcModule *module;
@@ -184,5 +187,6 @@ class AUMProcessor : public AuctionManagerComponent
 //! overload for <<, so that a Auction Processor object can be thrown into an iostream
 ostream& operator<< ( ostream &os, AUMProcessor &pe );
 
+}; // namespace auction
 
 #endif // _AUMPROCESSOR_H_

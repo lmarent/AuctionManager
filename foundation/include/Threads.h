@@ -33,6 +33,9 @@ using namespace std;
 #include <pthread.h>
 
 
+namespace auction
+{
+
 #ifdef ENABLE_THREADS
 #ifdef HAVE_PTHREAD_H
 
@@ -164,6 +167,9 @@ struct autoLock
 #define AUTOLOCK(threaded, access)   // empty
 
 #endif // ENABLE_THREADS
+
+}; // namespace auction
+
 
 
 #endif // _THREADS_H_

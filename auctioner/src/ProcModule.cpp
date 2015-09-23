@@ -23,6 +23,7 @@
     $Id: ProcModule.cpp 748 2015-07-31 14:16:00 amarentes $
 */
 
+#include "ParserFcts.h"
 #include "Error.h"
 #include "Logger.h"
 #include "ProcError.h"
@@ -31,6 +32,8 @@
 #include "ConfigManager.h"
 #include "EventAuctioner.h"
 
+
+using namespace auction;
 
 /* ----- init static class members ----- */
 
@@ -287,7 +290,7 @@ void ProcModule::dump( ostream &os )
 
 /* ------------------------- operator<< ------------------------- */
 
-ostream& operator<< ( ostream &os, ProcModule &obj )
+ostream& auction::operator<< ( ostream &os, ProcModule &obj )
 {
     obj.dump(os);
     return os;

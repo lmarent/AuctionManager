@@ -11,8 +11,9 @@
 #include "FieldValue.h"
 
 
-class FieldValue_Test;
+using namespace auction;
 
+class FieldValue_Test;
 
 /*
  * We use a subclass for testing and make the test case a friend. This

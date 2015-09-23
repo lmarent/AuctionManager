@@ -43,6 +43,9 @@
 #include "AuctionManagerComponent.h"
 #include "AgentProcessor.h"
 
+namespace auction
+{
+
 /*! \short   Agent class description
   
     detailed Agent class description
@@ -139,5 +142,6 @@ class Agent
 //! overload for <<, so that a Agent object can be thrown into an ostream
 std::ostream& operator<< ( std::ostream &os, Agent &obj );
 
+};  // namespace auction
 
 #endif // _AGENT_H_

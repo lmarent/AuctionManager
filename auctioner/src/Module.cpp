@@ -30,6 +30,7 @@
 #include "Logger.h"
 #include "Module.h"
 
+using namespace auction;
 
 /* ------------------------- Module ------------------------- */
 
@@ -104,7 +105,7 @@ void Module::dump( ostream &os )
 
 /* ------------------------- operator<< ------------------------- */
 
-ostream& operator<< ( ostream &os, Module &obj )
+ostream& auction::operator<< ( ostream &os, Module &obj )
 {
     obj.dump(os);
     return os;

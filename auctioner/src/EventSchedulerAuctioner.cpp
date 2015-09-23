@@ -28,6 +28,8 @@
 #include "EventSchedulerAuctioner.h"
 #include "Auctioner.h"
 
+using namespace auction;
+
 // min timeout for select() in us (10ms minimum on current UNIX!)
 const int AUCTIONER_MIN_TIMEOUT = 10000;
 
@@ -44,7 +46,7 @@ struct timeval EventSchedulerAuctioner::getNextEventTime()
 
     if (events.begin() != events.end()) {
         Event *ev = events.begin()->second;
-		Timeval::gettimeofday(&now, NULL);
+		Timeval::gettimeofdayown(&now, NULL);
 		
         rv = Timeval::sub0(ev->getTime(), now);
         

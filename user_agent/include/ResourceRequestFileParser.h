@@ -40,6 +40,8 @@
 #include "ResourceRequestIdSource.h"
 #include "ResourceRequest.h"
 
+namespace auction
+{
 
 //! Allocation list
 typedef vector<ResourceRequest*>            resourceRequestDB_t;
@@ -81,5 +83,7 @@ class ResourceRequestFileParser : public XMLParser
 					   resourceRequestDB_t *requests,
 					   ResourceRequestIdSource *idSource );
 };
+
+}; // namespace auction
 
 #endif // _RESOURCEREQUEST_FILEPARSER_H_

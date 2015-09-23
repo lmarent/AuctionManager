@@ -16,8 +16,6 @@
 
 using namespace CppUnit;
 
-
-
 /*
  * Run the test suite, return 0 on success, 1 on error.
  */

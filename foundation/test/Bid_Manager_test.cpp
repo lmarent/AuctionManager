@@ -15,6 +15,7 @@
 #include "BidFileParser.h"
 #include "BidManager.h"
 
+using namespace auction;
 
 class Bid_Manager_Test : public CppUnit::TestFixture {
 

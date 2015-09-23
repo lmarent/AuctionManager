@@ -31,6 +31,8 @@
 // #include "CtrlComm.h"
 #include "Constants.h"
 
+using namespace auction;
+
 /* ------------------------- BidManager ------------------------- */
 
 BidManager::BidManager( string fdname, string fvname) 

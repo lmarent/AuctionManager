@@ -28,6 +28,7 @@
 
 #include "CommandLineArgs.h"
 
+using namespace auction;
 
 static const int INDENTATION = 14;
 static const int INDENTATION2 = 25;

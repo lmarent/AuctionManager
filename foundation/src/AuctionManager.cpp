@@ -31,10 +31,12 @@
 // #include "CtrlComm.h"
 #include "Constants.h"
 
+using namespace auction;
+
 /* ------------------------- AuctionManager ------------------------- */
 
-AuctionManager::AuctionManager() 
-    : auctions(0), 
+AuctionManager::AuctionManager(string fdname) 
+    : auctions(0), fieldDefFileName(fdname),
 	  idSource(1)
 {
     log = Logger::getInstance();
@@ -42,7 +44,8 @@ AuctionManager::AuctionManager()
 #ifdef DEBUG
     log->dlog(ch,"Starting");
 #endif
-
+	
+	message = new ipap_message();
 }
 
 
@@ -67,12 +70,13 @@ AuctionManager::~AuctionManager()
         saveDelete(*i);
     }
 
+	saveDelete(message);
+
 #ifdef DEBUG
     log->dlog(ch,"Finish shutdown");
 #endif
 
 }
-
 
 /* -------------------- isReadableFile -------------------- */
 
@@ -86,6 +90,37 @@ static int isReadableFile( string fileName ) {
     } else {
         return 0;
     }
+}
+
+
+/* -------------------- loadFieldDefs -------------------- */
+
+void AuctionManager::loadFieldDefs(string fname)
+{
+    if (fieldDefFileName.empty()) {
+        if (fname.empty()) {
+            fname = FIELDDEF_FILE;
+		}
+    } else {
+        fname = fieldDefFileName;
+    }
+
+#ifdef DEBUG
+    log->dlog(ch, "filename %s", fname.c_str());
+#endif
+
+    if (isReadableFile(fname)) {
+        if (fieldDefs.empty() && !fname.empty()) {
+            FieldDefParser f = FieldDefParser(fname.c_str());
+            f.parse(&fieldDefs);
+        }
+    
+    }else{
+#ifdef DEBUG
+    log->dlog(ch, "filename %s is not readable", fname.c_str());
+#endif    
+    }
+    
 }
 
 /* -------------------------- getAuction ----------------------------- */
@@ -172,9 +207,13 @@ auctionDB_t *AuctionManager::parseAuctions(string fname)
     auctionDB_t *new_auctions = new auctionDB_t();
 
     try {	
+
+        // load the field def list
+        loadFieldDefs(fieldDefFileName);
 	
         AuctionFileParser afp = AuctionFileParser(fname);
-        afp.parse(new_auctions, &idSource);
+
+        afp.parse(&fieldDefs, new_auctions, &idSource, message);
 
 #ifdef DEBUG
     log->dlog(ch, "Auctions parsed");
@@ -200,14 +239,13 @@ auctionDB_t *AuctionManager::parseAuctionsBuffer(char *buf, int len, int mapi)
     auctionDB_t *new_auctions = new auctionDB_t();
 
     try {
+
+        // load the field def list
+        loadFieldDefs(fieldDefFileName);
 			
-        if (mapi) {
-             MAPIAuctionParser afp = MAPIAuctionParser(buf, len);
-             afp.parse(new_auctions, &idSource);
-        } else {
-            AuctionFileParser afp = AuctionFileParser(buf, len);
-            afp.parse(new_auctions, &idSource);
-        }
+        AuctionFileParser afp = AuctionFileParser(buf, len);
+        
+        afp.parse(&fieldDefs, new_auctions, &idSource, message);
 
         return new_auctions;
 	

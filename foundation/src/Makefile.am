@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = -I m4
+
 lib_LTLIBRARIES = libfoundation.la
 
 if ENABLE_DEBUG
@@ -11,16 +13,15 @@ else
 endif
 
 libfoundation_la_CPPFLAGS = -I$(top_srcdir) \
-							-I$(top_srcdir)/foundation/include
+							-I$(top_srcdir)/foundation/include \
+							$(LIBIPAP_CFLAGS)
 
-libfoundation_la_SOURCES = Logger.cpp \
-                          AuctionTimer.cpp \
+libfoundation_la_SOURCES = AuctionTimer.cpp \
                           ConfigParser.cpp \
                           ConfigManager.cpp \
                           CommandLineArgs.cpp \
 						  Constants.cpp \
 						  ConstantsAum.cpp \
-						  Error.cpp \
 						  FieldValue.cpp \
 						  Field.cpp \
 						  ParserFcts.cpp \

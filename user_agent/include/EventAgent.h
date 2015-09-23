@@ -38,6 +38,9 @@
 #include "Auction.h"
 #include "Event.h"
 
+namespace auction
+{
+
 /* --------------------------------- events ------------------------------ */
 
 
@@ -146,5 +149,6 @@ class RemoveResourceRequestsEvent : public Event
     }
 };
 
+}; // namespace auction
 
 #endif // _EVENT_AGENT_H_

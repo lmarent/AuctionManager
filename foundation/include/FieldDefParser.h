@@ -35,7 +35,9 @@
 #include "XMLParser.h"
 #include "Field.h"
 
-
+namespace auction
+{
+	
 class FieldDefParser : public XMLParser
 {
 
@@ -57,5 +59,6 @@ class FieldDefParser : public XMLParser
     virtual void parse(fieldDefList_t *list);
 };
 
+}; // namespace auction
 
 #endif // _FIELD_DEFPARSER_H_

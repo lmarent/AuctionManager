@@ -32,6 +32,8 @@
 #ifndef _CONSTANTS_AUM_H_
 #define _CONSTANTS_AUM_H_
 
+namespace auction
+{
 
 // AuctionManager.h
 extern const string NETAUM_DEFAULT_CONFIG_FILE;
@@ -47,5 +49,7 @@ extern const string AUM_CONFIGFILE_DTD;
 // certificate file location (SSL)
 extern const string AUM_CERT_FILE;
 #endif
+
+};
 
 #endif // _CONSTANTS_AUM_H_

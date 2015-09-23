@@ -27,11 +27,14 @@
 
 */
 
-#include "ResourceRequestFileParser.h"
 #include "ParserFcts.h" 
 #include "Constants.h"
+#include "ResourceRequestFileParser.h"
 #include "Timeval.h"
 #include "ConstantsAgent.h"
+
+using namespace std;
+using namespace auction;
 
 
 ResourceRequestFileParser::ResourceRequestFileParser(string filename)
@@ -50,7 +53,8 @@ ResourceRequestFileParser::ResourceRequestFileParser(char *buf, int len)
 }
 
 
-configItem_t ResourceRequestFileParser::parsePref(xmlNodePtr cur)
+configItem_t 
+ResourceRequestFileParser::parsePref(xmlNodePtr cur)
 {
     configItem_t item;
 
@@ -119,7 +123,8 @@ ResourceRequestFileParser::parseFieldValue(string value, field_t *f)
 }
 
 /* functions for accessing the templates */
-string ResourceRequestFileParser::getMiscVal(miscList_t *_miscList, string name)
+string 
+ResourceRequestFileParser::getMiscVal(miscList_t *_miscList, string name)
 {
     miscListIter_t iter;
 
@@ -134,7 +139,8 @@ string ResourceRequestFileParser::getMiscVal(miscList_t *_miscList, string name)
 
 /* ------------------------- parseTime ------------------------- */
 
-time_t ResourceRequestFileParser::parseTime(string timestr)
+time_t 
+ResourceRequestFileParser::parseTime(string timestr)
 {
     struct tm  t;
   
@@ -158,7 +164,8 @@ time_t ResourceRequestFileParser::parseTime(string timestr)
 }
 
 
-void ResourceRequestFileParser::calculateInterval(time_t now, miscList_t *miscList, 
+void 
+ResourceRequestFileParser::calculateInterval(time_t now, miscList_t *miscList, 
 							resourceReq_interval_t *resInterval)
 {
 
@@ -247,7 +254,8 @@ void ResourceRequestFileParser::calculateInterval(time_t now, miscList_t *miscLi
 }
 
 
-void ResourceRequestFileParser::parse(fieldDefList_t *fieldDefs, 
+void 
+ResourceRequestFileParser::parse(fieldDefList_t *fieldDefs, 
 									  resourceRequestDB_t *requests,
 									  ResourceRequestIdSource *idSource )
 {

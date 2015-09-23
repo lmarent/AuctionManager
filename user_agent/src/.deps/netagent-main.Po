@@ -1,7 +1,7 @@
 netagent-main.o: main.cpp /usr/include/stdc-predef.h \
- ../../foundation/include/stdincpp.h ../../foundation/include/stdinc.h \
- ../../config.h /usr/include/stdio.h /usr/include/features.h \
- /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ ../../foundation/include/ParserFcts.h ../../config.h \
+ /usr/local/include/ipap/stdinc.h /usr/include/stdio.h \
+ /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
@@ -88,7 +88,9 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
  /usr/include/linux/stddef.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
- /usr/include/asm-generic/posix_types.h /usr/include/c++/4.8/iostream \
+ /usr/include/asm-generic/posix_types.h \
+ /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/stdinc.h \
+ /usr/include/c++/4.8/iostream \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
@@ -195,14 +197,12 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/debug/set \
  /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
  /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
- /usr/include/c++/4.8/iomanip ../../user_agent/include/Agent.h \
- ../../foundation/include/Error.h ../../foundation/include/stdincpp.h \
- ../../foundation/include/Logger.h ../../foundation/include/ProcError.h \
- ../../foundation/include/Error.h ../../foundation/include/Threads.h \
- ../../foundation/include/Constants.h \
- ../../foundation/include/ConstantsAum.h \
+ /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/stdexcept \
+ ../../user_agent/include/Agent.h /usr/local/include/ipap/Error.h \
+ /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/Logger.h \
+ /usr/local/include/ipap/Error.h /usr/local/include/ipap/ConstantsIpAp.h \
  ../../foundation/include/CommandLineArgs.h \
- ../../lib/getopt_long/getopt_long.h ../../foundation/include/Logger.h \
+ ../../lib/getopt_long/getopt_long.h \
  ../../foundation/include/ConfigManager.h \
  /usr/include/libxml2/libxml/parser.h \
  /usr/include/libxml2/libxml/xmlversion.h \
@@ -238,20 +238,31 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
  ../../foundation/include/EventScheduler.h \
  ../../foundation/include/Event.h \
  ../../foundation/include/AuctionFileParser.h \
- ../../foundation/include/Auction.h \
+ ../../foundation/include/Auction.h ../../foundation/include/Constants.h \
+ /usr/local/include/ipap/IpAp_template_container.h \
+ /usr/local/include/ipap/IpAp_template.h \
+ /usr/local/include/ipap/IpAp_field.h /usr/local/include/ipap/IpAp_def.h \
+ /usr/local/include/ipap/IpAp_value_field.h \
+ /usr/local/include/ipap/IpAp_exception.h \
+ /usr/local/include/ipap/IpAp_message.h /usr/local/include/ipap/Logger.h \
+ /usr/local/include/ipap/IpAp_field_container.h \
+ /usr/local/include/ipap/IpAp_data_record.h \
+ /usr/local/include/ipap/IpAp_field_key.h \
+ /usr/local/include/ipap/IpAp_t.h \
+ /usr/local/include/ipap/IpAp_template_container.h \
  ../../foundation/include/AuctionIdSource.h \
  ../../foundation/include/AuctionManagerInfo.h \
  ../../foundation/include/Timeval.h \
  ../../foundation/include/AuctionManager.h \
- ../../foundation/include/MAPIAuctionParser.h \
- ../../user_agent/include/CtrlComm.h \
- ../../foundation/include/AuctionManagerComponent.h \
- ../../foundation/include/ConfigManager.h ../../lib/httpd/httpd.h \
+ ../../user_agent/include/CtrlComm.h ../../lib/httpd/httpd.h \
  /usr/include/syslog.h /usr/include/x86_64-linux-gnu/sys/syslog.h \
  /usr/include/x86_64-linux-gnu/bits/syslog-path.h /usr/include/grp.h \
  /usr/include/x86_64-linux-gnu/sys/signal.h \
  /usr/include/x86_64-linux-gnu/sys/utsname.h \
  /usr/include/x86_64-linux-gnu/bits/utsname.h /usr/include/netinet/tcp.h \
+ ../../foundation/include/AuctionManagerComponent.h \
+ ../../foundation/include/ConfigManager.h \
+ ../../foundation/include/Threads.h \
  ../../user_agent/include/AgentManagerInfo.h \
  ../../user_agent/include/PageRepository.h \
  ../../user_agent/include/EventSchedulerAgent.h \
@@ -259,16 +270,15 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
  ../../foundation/include/Constants.h \
  ../../user_agent/include/AgentProcessor.h ../../foundation/include/Bid.h \
  ../../foundation/include/Allocation.h \
- ../../foundation/include/ParserFcts.h \
  ../../user_agent/include/ConstantsAgent.h
 
 /usr/include/stdc-predef.h:
 
-../../foundation/include/stdincpp.h:
-
-../../foundation/include/stdinc.h:
+../../foundation/include/ParserFcts.h:
 
 ../../config.h:
+
+/usr/local/include/ipap/stdinc.h:
 
 /usr/include/stdio.h:
 
@@ -517,6 +527,10 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
 /usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
 
 /usr/include/asm-generic/posix_types.h:
+
+/usr/local/include/ipap/stdincpp.h:
+
+/usr/local/include/ipap/stdinc.h:
 
 /usr/include/c++/4.8/iostream:
 
@@ -806,29 +820,23 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
 
 /usr/include/c++/4.8/iomanip:
 
+/usr/include/c++/4.8/stdexcept:
+
 ../../user_agent/include/Agent.h:
 
-../../foundation/include/Error.h:
+/usr/local/include/ipap/Error.h:
 
-../../foundation/include/stdincpp.h:
+/usr/local/include/ipap/stdincpp.h:
 
-../../foundation/include/Logger.h:
+/usr/local/include/ipap/Logger.h:
 
-../../foundation/include/ProcError.h:
+/usr/local/include/ipap/Error.h:
 
-../../foundation/include/Error.h:
-
-../../foundation/include/Threads.h:
-
-../../foundation/include/Constants.h:
-
-../../foundation/include/ConstantsAum.h:
+/usr/local/include/ipap/ConstantsIpAp.h:
 
 ../../foundation/include/CommandLineArgs.h:
 
 ../../lib/getopt_long/getopt_long.h:
-
-../../foundation/include/Logger.h:
 
 ../../foundation/include/ConfigManager.h:
 
@@ -914,6 +922,34 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
 
 ../../foundation/include/Auction.h:
 
+../../foundation/include/Constants.h:
+
+/usr/local/include/ipap/IpAp_template_container.h:
+
+/usr/local/include/ipap/IpAp_template.h:
+
+/usr/local/include/ipap/IpAp_field.h:
+
+/usr/local/include/ipap/IpAp_def.h:
+
+/usr/local/include/ipap/IpAp_value_field.h:
+
+/usr/local/include/ipap/IpAp_exception.h:
+
+/usr/local/include/ipap/IpAp_message.h:
+
+/usr/local/include/ipap/Logger.h:
+
+/usr/local/include/ipap/IpAp_field_container.h:
+
+/usr/local/include/ipap/IpAp_data_record.h:
+
+/usr/local/include/ipap/IpAp_field_key.h:
+
+/usr/local/include/ipap/IpAp_t.h:
+
+/usr/local/include/ipap/IpAp_template_container.h:
+
 ../../foundation/include/AuctionIdSource.h:
 
 ../../foundation/include/AuctionManagerInfo.h:
@@ -922,13 +958,7 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
 
 ../../foundation/include/AuctionManager.h:
 
-../../foundation/include/MAPIAuctionParser.h:
-
 ../../user_agent/include/CtrlComm.h:
-
-../../foundation/include/AuctionManagerComponent.h:
-
-../../foundation/include/ConfigManager.h:
 
 ../../lib/httpd/httpd.h:
 
@@ -948,6 +978,12 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
 
 /usr/include/netinet/tcp.h:
 
+../../foundation/include/AuctionManagerComponent.h:
+
+../../foundation/include/ConfigManager.h:
+
+../../foundation/include/Threads.h:
+
 ../../user_agent/include/AgentManagerInfo.h:
 
 ../../user_agent/include/PageRepository.h:
@@ -963,7 +999,5 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
 ../../foundation/include/Bid.h:
 
 ../../foundation/include/Allocation.h:
-
-../../foundation/include/ParserFcts.h:
 
 ../../user_agent/include/ConstantsAgent.h:

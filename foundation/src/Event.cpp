@@ -32,11 +32,12 @@
 #include "Timeval.h"
 #include "AuctionManager.h"
 
+using namespace auction;
 
 Event::Event(event_t typ, unsigned long ival, int align)
     : type(typ), interval(ival)
 {
-    Timeval::gettimeofday(&when, NULL);
+    Timeval::gettimeofdayown(&when, NULL);
 
     if (align) {
         doAlign();
@@ -48,7 +49,7 @@ Event::Event(event_t typ, time_t offs_sec, time_t offs_usec, unsigned long ival,
     : type(typ), interval(ival)
 {
 
-    Timeval::gettimeofday(&when, NULL);
+    Timeval::gettimeofdayown(&when, NULL);
     
     when.tv_sec += offs_sec;
     when.tv_usec += offs_usec;

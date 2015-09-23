@@ -34,6 +34,8 @@
 #include "ConfigManager.h"
 #include "Module.h"
 
+namespace auction
+{
 
 /*! \short   struct that stores data for a loaded dynamic library
 
@@ -195,5 +197,6 @@ class ModuleLoader
 //! overload for <<, so that a ModuleLoader object can be thrown into an iostream
 ostream& operator<< ( ostream &os, ModuleLoader &ml );
 
+}; // namespace auction
 
 #endif // _MODULELOADER_H_

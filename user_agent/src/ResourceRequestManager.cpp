@@ -30,6 +30,8 @@
 #include "ResourceRequestManager.h"
 #include "Constants.h"
 
+using namespace auction;
+
 /* ------------------------- ResourceRequestManager ------------------------- */
 
 ResourceRequestManager::ResourceRequestManager( string fdname) 

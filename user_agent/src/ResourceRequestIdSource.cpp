@@ -29,6 +29,7 @@
 #include "ResourceRequestIdSource.h"
 
 
+using namespace auction;
 
 ResourceRequestIdSource::ResourceRequestIdSource(int _unique)
   : num(-1), unique(_unique)

@@ -114,8 +114,10 @@ am_test_runner_OBJECTS =  \
 	@top_srcdir@/user_agent/test/test_runner.$(OBJEXT)
 test_runner_OBJECTS = $(am_test_runner_OBJECTS)
 test_runner_LDADD = $(LDADD)
+am__DEPENDENCIES_1 =
 test_runner_DEPENDENCIES =  \
-	$(top_builddir)/foundation/src/libfoundation.la
+	$(top_builddir)/foundation/src/libfoundation.la \
+	$(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -435,6 +437,8 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 IPTABLES_VERSION = @IPTABLES_VERSION@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBIPAP_CFLAGS = @LIBIPAP_CFLAGS@
+LIBIPAP_LIBS = @LIBIPAP_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -557,20 +561,20 @@ test_runner_SOURCES = @top_srcdir@/user_agent/src/ResourceRequest.cpp \
 						@top_srcdir@/user_agent/test/test_runner.cpp
 
 @ENABLE_DEBUG_FALSE@AM_CXXFLAGS = -O2 -I@top_srcdir@/foundation/include $(CPPUNIT_CFLAGS) \
-@ENABLE_DEBUG_FALSE@				-I@top_srcdir@/user_agent/include \
+@ENABLE_DEBUG_FALSE@				-I@top_srcdir@/user_agent/include $(LIBIPAP_CFLAGS) \
 @ENABLE_DEBUG_FALSE@			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd
 
 @ENABLE_DEBUG_TRUE@AM_CXXFLAGS = -g -I@top_srcdir@/foundation/include $(CPPUNIT_CFLAGS) \
-@ENABLE_DEBUG_TRUE@				-I@top_srcdir@/user_agent/include \
+@ENABLE_DEBUG_TRUE@				-I@top_srcdir@/user_agent/include $(LIBIPAP_CFLAGS) \
 @ENABLE_DEBUG_TRUE@			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
 @ENABLE_DEBUG_TRUE@			    -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING -DINTEL
 
 AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 			 $(top_builddir)/lib/httpd/libhttpd.a \
 			 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ \
-			 -L$(abs_top_builddir)/foundation/src/libfoundation.la
+			 -L$(abs_top_builddir)/foundation/src/libfoundation.la $(LIBIPAP_LIBS)
 
-LDADD = $(top_builddir)/foundation/src/libfoundation.la
+LDADD = $(top_builddir)/foundation/src/libfoundation.la $(LIBIPAP_LIBS)
 all: all-am
 
 .SUFFIXES:

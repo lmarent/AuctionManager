@@ -30,7 +30,9 @@
 #define _EVENT_AUCTIONER_H_
 
 
+#include "ParserFcts.h"
 #include "stdincpp.h"
+#include "ProcModule.h"
 #include "ProcModuleInterface.h"
 #include "BidFileParser.h"
 #include "AuctionFileParser.h"
@@ -38,37 +40,38 @@
 #include "Auction.h"
 #include "Event.h"
 
+namespace auction
+{
+
 /* --------------------------------- events ------------------------------ */
-
-
 
 
 class PushExecutionEvent : public Event
 {
   private:
     auctionDB_t auctions;
-    procnames_t procs;
+    string proc;
     int final;
 
   public:
 
-    PushExecutionEvent(struct timeval time, auctionDB_t &a, procnames_t e, unsigned long ival=0, int align=0) 
-      : Event(PUSH_EXECUTION, time, ival, align), auctions(a), procs(e), final(0) {  }
+    PushExecutionEvent(struct timeval time, auctionDB_t &a, string procName, unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, time, ival, align), auctions(a), proc(procName), final(0) {  }
 
-    PushExecutionEvent(time_t offs_sec, auctionDB_t &a, procnames_t e, unsigned long ival=0, int align=0) 
-      : Event(PUSH_EXECUTION, offs_sec, 0, ival, align), auctions(a), procs(e), final(0) { }
+    PushExecutionEvent(time_t offs_sec, auctionDB_t &a, string procName, unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, offs_sec, 0, ival, align), auctions(a), proc(procName), final(0) { }
 
-    PushExecutionEvent(auctionDB_t &a, procnames_t e, unsigned long ival=0, int align=0) 
-      : Event(PUSH_EXECUTION, ival, align), auctions(a), procs(e), final(0) { }
+    PushExecutionEvent(auctionDB_t &a, string procName, unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, ival, align), auctions(a), proc(procName), final(0) { }
 
     auctionDB_t *getAuctions()
     {
         return &auctions;
     }
     
-    procnames_t getProcMods()
+    string getProcMod()
     {
-        return procs;
+        return proc;
     }
 
     int deleteAuction(int uid)
@@ -170,6 +173,6 @@ class GetModInfoEvent : public CtrlCommEvent
     }
 };
 
-
+}; // namespace auction
 
 #endif // _EVENT_AUCTIONER_H_

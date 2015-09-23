@@ -4,17 +4,17 @@
 
   <BID ID="1">    
 
-    <ELEMENT NAME="element1">
+    <ELEMENT ID="element1">
 		<FIELD NAME="quantity">1</FIELD>
 		<FIELD NAME="unitprice">0.15</FIELD>		
     </ELEMENT>
 
-    <ELEMENT NAME="element2">
+    <ELEMENT ID="element2">
 		<FIELD NAME="quantity">2</FIELD>
 		<FIELD NAME="unitprice">0.16</FIELD>		
     </ELEMENT>
     
-    <AUCTION SET="General" NAME="1">
+    <AUCTION ID="General.1">
 		<PREF NAME="Duration">60</PREF>
     </AUCTION>
     

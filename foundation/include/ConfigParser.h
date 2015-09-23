@@ -34,6 +34,8 @@
 #include "Logger.h"
 #include "XMLParser.h"
 
+namespace auction
+{
 
 //! configuration item
 typedef struct configItem
@@ -45,8 +47,6 @@ typedef struct configItem
     string type;
 } configItem_t;
 
-//! overload operator << for configItem_t so that it can be thorown in an ostream
-ostream& operator<< ( ostream &os, configItem_t &item );
 
 //! allow or deny
 typedef enum 
@@ -66,9 +66,6 @@ typedef struct
     string resolve_addr;
 } configADItem_t;
 
-//! overload operator << for configADItem_t so that it can be thorown in an ostream
-ostream& operator<< ( ostream &os, configADItem_t &item );
-
 //! list of config items
 class configItemList_t : public list<configItem_t> {
   public:
@@ -82,9 +79,6 @@ typedef list<configItem_t>::const_iterator configItemListConstIter_t;
 //! list of access items
 typedef list<configADItem_t> configADList_t;
 typedef list<configADItem_t>::iterator configADListIter_t;
-
-ostream& operator<< ( ostream &os, configItemList_t &list );
-ostream& operator<< ( ostream &os, configADList_t &list );
 
 //! misc list (random access based on name required)
 typedef map<string,configItem_t>            miscList_t;
@@ -125,5 +119,20 @@ class ConfigParser : public XMLParser
     virtual void parse(configItemList_t *list, configADList_t *alist);
 
 };
+
+//! overload operator << for configItem_t so that it can be thorown in an ostream
+ostream& operator<< ( ostream &os, configItem_t &item );
+
+//! overload operator << for configItemList_t
+ostream& operator<< ( ostream &os, configItemList_t &list );
+
+//! overload operator << for configADList_t
+ostream& operator<< ( ostream &os, configADList_t &list );
+
+//! overload operator << for configADItem_t so that it can be thorown in an ostream
+ostream& operator<< ( ostream &os, configADItem_t &item );
+
+
+}; // namespace auction
 
 #endif //_CONFIGPARSER_H_

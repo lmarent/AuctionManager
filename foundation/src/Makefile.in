@@ -122,16 +122,14 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libfoundation_la_LIBADD =
-am_libfoundation_la_OBJECTS = libfoundation_la-Logger.lo \
-	libfoundation_la-AuctionTimer.lo \
+am_libfoundation_la_OBJECTS = libfoundation_la-AuctionTimer.lo \
 	libfoundation_la-ConfigParser.lo \
 	libfoundation_la-ConfigManager.lo \
 	libfoundation_la-CommandLineArgs.lo \
 	libfoundation_la-Constants.lo libfoundation_la-ConstantsAum.lo \
-	libfoundation_la-Error.lo libfoundation_la-FieldValue.lo \
-	libfoundation_la-Field.lo libfoundation_la-ParserFcts.lo \
-	libfoundation_la-Timeval.lo libfoundation_la-XMLParser.lo \
-	libfoundation_la-Allocation.lo \
+	libfoundation_la-FieldValue.lo libfoundation_la-Field.lo \
+	libfoundation_la-ParserFcts.lo libfoundation_la-Timeval.lo \
+	libfoundation_la-XMLParser.lo libfoundation_la-Allocation.lo \
 	libfoundation_la-FieldDefParser.lo \
 	libfoundation_la-FieldValParser.lo libfoundation_la-Bid.lo \
 	libfoundation_la-BidFileParser.lo \
@@ -264,6 +262,8 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 IPTABLES_VERSION = @IPTABLES_VERSION@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBIPAP_CFLAGS = @LIBIPAP_CFLAGS@
+LIBIPAP_LIBS = @LIBIPAP_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -367,6 +367,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+ACLOCAL_AMFLAGS = -I m4
 lib_LTLIBRARIES = libfoundation.la
 @ENABLE_DEBUG_FALSE@AM_CXXFLAGS = -I$(top_srcdir)/lib/getopt_long \
 @ENABLE_DEBUG_FALSE@				-I$(top_srcdir)/lib/httpd \
@@ -377,16 +378,15 @@ lib_LTLIBRARIES = libfoundation.la
 @ENABLE_DEBUG_TRUE@				-g  -fPIC -fno-inline -DDEBUG -D_GLIBCXX_DEBUG
 
 libfoundation_la_CPPFLAGS = -I$(top_srcdir) \
-							-I$(top_srcdir)/foundation/include
+							-I$(top_srcdir)/foundation/include \
+							$(LIBIPAP_CFLAGS)
 
-libfoundation_la_SOURCES = Logger.cpp \
-                          AuctionTimer.cpp \
+libfoundation_la_SOURCES = AuctionTimer.cpp \
                           ConfigParser.cpp \
                           ConfigManager.cpp \
                           CommandLineArgs.cpp \
 						  Constants.cpp \
 						  ConstantsAum.cpp \
-						  Error.cpp \
 						  FieldValue.cpp \
 						  Field.cpp \
 						  ParserFcts.cpp \
@@ -507,14 +507,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-ConfigParser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-Constants.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-ConstantsAum.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-Error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-Event.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-EventScheduler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-Field.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-FieldDefParser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-FieldValParser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-FieldValue.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-Logger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-MAPIAuctionParser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-MAPIBidParser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-ParserFcts.Plo@am__quote@
@@ -544,13 +542,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
-
-libfoundation_la-Logger.lo: Logger.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-Logger.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-Logger.Tpo -c -o libfoundation_la-Logger.lo `test -f 'Logger.cpp' || echo '$(srcdir)/'`Logger.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-Logger.Tpo $(DEPDIR)/libfoundation_la-Logger.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='Logger.cpp' object='libfoundation_la-Logger.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-Logger.lo `test -f 'Logger.cpp' || echo '$(srcdir)/'`Logger.cpp
 
 libfoundation_la-AuctionTimer.lo: AuctionTimer.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-AuctionTimer.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-AuctionTimer.Tpo -c -o libfoundation_la-AuctionTimer.lo `test -f 'AuctionTimer.cpp' || echo '$(srcdir)/'`AuctionTimer.cpp
@@ -593,13 +584,6 @@ libfoundation_la-ConstantsAum.lo: ConstantsAum.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='ConstantsAum.cpp' object='libfoundation_la-ConstantsAum.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-ConstantsAum.lo `test -f 'ConstantsAum.cpp' || echo '$(srcdir)/'`ConstantsAum.cpp
-
-libfoundation_la-Error.lo: Error.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-Error.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-Error.Tpo -c -o libfoundation_la-Error.lo `test -f 'Error.cpp' || echo '$(srcdir)/'`Error.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-Error.Tpo $(DEPDIR)/libfoundation_la-Error.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='Error.cpp' object='libfoundation_la-Error.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-Error.lo `test -f 'Error.cpp' || echo '$(srcdir)/'`Error.cpp
 
 libfoundation_la-FieldValue.lo: FieldValue.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-FieldValue.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-FieldValue.Tpo -c -o libfoundation_la-FieldValue.lo `test -f 'FieldValue.cpp' || echo '$(srcdir)/'`FieldValue.cpp

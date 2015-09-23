@@ -33,6 +33,8 @@
 #include "AuctionManager.h"
 
 
+using namespace auction;
+
 Event::Event(event_t typ, unsigned long ival, int align)
     : type(typ), interval(ival)
 {

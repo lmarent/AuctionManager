@@ -25,15 +25,13 @@
     $Id: AUMProcessor.cpp 748 2015-07-23 14:33:00Z amarentes $
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-
+#include "ParserFcts.h"
+#include "stdinc.h"
 #include "ProcError.h"
 #include "AUMProcessor.h"
 #include "Module.h"
-#include "ParserFcts.h"
 
-
+using namespace auction;
 
 /* ------------------------- AUMProcessor ------------------------- */
 
@@ -311,7 +309,7 @@ int AUMProcessor::addAuction( Auction *a, EventScheduler *evs )
 	
 	catch (ProcError &e)
 	{
-        log->elog(ch, e);
+        log->elog(ch, e.getError().c_str());
         errNo = e.getErrorNo();
         errStr = e.getError();
 		exThrown = true;		
@@ -528,7 +526,7 @@ void AUMProcessor::dump( ostream &os )
 
 /* ------------------------- operator<< ------------------------- */
 
-ostream& operator<< ( ostream &os, AUMProcessor &pe )
+ostream& auction::operator<< ( ostream &os, AUMProcessor &pe )
 {
     pe.dump(os);
     return os;

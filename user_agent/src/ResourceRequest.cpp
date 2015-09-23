@@ -26,12 +26,12 @@
 */
 
 
-#include <sstream>
-
+#include "ParserFcts.h"
 #include "ResourceRequest.h"
 #include "Error.h"
-#include "ParserFcts.h"
 #include "Timeval.h"
+
+using namespace auction;
 
 ResourceRequest::ResourceRequest( string rset, string rname, fieldList_t &f, 
 								resourceReqIntervalList_t &resReqInter )

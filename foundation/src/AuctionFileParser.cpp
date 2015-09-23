@@ -27,10 +27,11 @@
 
 */
 
-#include "AuctionFileParser.h"
 #include "ParserFcts.h"
 #include "Constants.h"
+#include "AuctionFileParser.h"
 
+using namespace auction;
 
 AuctionFileParser::AuctionFileParser(string filename)
     : XMLParser(AUCTIONFILE_DTD, filename, "AUCTIONSET")
@@ -52,7 +53,10 @@ configItem_t AuctionFileParser::parsePref(xmlNodePtr cur)
 {
     configItem_t item;
 
-    item.name = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"NAME"));
+	item.name = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"NAME"));
+	// use lower case internally
+	transform(item.name.begin(), item.name.end(), item.name.begin(), ToLower());
+    
     if (item.name.empty()) {
         throw Error("Auction Parser Error: missing name at line %d", XML_GET_LINE(cur));
     }
@@ -73,8 +77,96 @@ configItem_t AuctionFileParser::parsePref(xmlNodePtr cur)
     return item;
 }
 
-void AuctionFileParser::parse( auctionDB_t *auctions,
-							   AuctionIdSource *idSource )
+
+auctionTemplateField_t AuctionFileParser::parseField(xmlNodePtr cur, 
+										   fieldDefList_t *fieldDefs,
+										   ipap_message *message)
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting parseField");
+#endif
+
+    
+    // check if item can be parsed
+    try {
+
+		auctionTemplateField_t fieldTempl;
+		string sBid, sAlloc, sOptBid, name;
+		bool bidTempl = false;
+		bool optBidTempl = false;
+		bool allocTempl = false;
+
+		sBid = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"BID_TEMPL"));
+		sOptBid = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"BID_OPT_TEMPL"));
+		sAlloc = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ALLOC_TEMPL"));
+		
+		if (!sBid.empty()){
+			bidTempl = ParserFcts::parseBool(sBid);		
+		}
+		
+		if (!sAlloc.empty()){
+			allocTempl = ParserFcts::parseBool(sAlloc);
+		}
+		
+		if (!sOptBid.empty()){
+			optBidTempl = ParserFcts::parseBool(sOptBid);
+		}
+		
+		name = xmlCharToString(xmlNodeListGetString(XMLDoc, cur->xmlChildrenNode, 1));
+		if (name.empty()) {
+			throw Error("Auction Parser Error: missing field name at line %d", XML_GET_LINE(cur));
+		}
+
+#ifdef DEBUG
+		log->dlog(ch, "Name:%s sBid: %d sOptBid:%d sAlloc:%d", name.c_str(), bidTempl, 
+						optBidTempl, allocTempl);
+#endif		
+
+
+		// use lower case internally
+		transform(name.begin(), name.end(), name.begin(), ToLower());
+    
+		// lookup in field definitions list
+		fieldDefListIter_t iter;
+		iter = fieldDefs->find(name);
+		if (iter != fieldDefs->end()) {
+			// set according to definition
+			ipap_field field = message->get_field_definition(
+								iter->second.eno, iter->second.ftype);
+				
+			fieldTempl.field = iter->second;
+			fieldTempl.length = field.get_field_type().length;
+			fieldTempl.isBidtemplate = bidTempl;
+			fieldTempl.isOptBidTemplate = optBidTempl;
+			fieldTempl.isAllocTemplate = allocTempl;			
+		}
+		else{
+			throw Error("Auction Parser Error: field name %s at \
+							line %d not valid", name.c_str(), XML_GET_LINE(cur));
+        }
+
+#ifdef DEBUG
+		log->dlog(ch, "Ending parseField");
+#endif
+		
+		return fieldTempl;
+
+    } catch(ipap_bad_argument &e) {
+		throw Error("Auction Parser Error: invalid ipap_field \
+						at line %d", XML_GET_LINE(cur));
+	} catch (Error &e) {    
+        throw Error("Auction Parser Error: parse value error at \
+					line %d: %s", XML_GET_LINE(cur), e.getError().c_str());
+   }
+
+}
+
+
+void AuctionFileParser::parse( fieldDefList_t *fieldDefs, 
+							   auctionDB_t *auctions,
+							   AuctionIdSource *idSource,
+							   ipap_message *messageOut )
 {
 
     xmlNodePtr cur, cur2, cur3;
@@ -119,13 +211,13 @@ void AuctionFileParser::parse( auctionDB_t *auctions,
                     action_t a;
 
                     a.name = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"NAME"));
+					// use lower case internally
+					transform(a.name.begin(), a.name.end(), a.name.begin(), ToLower());
+
                     if (a.name.empty()) {
                         throw Error("Auction Parser Error: missing name at line %d", XML_GET_LINE(cur2));
                     }
-                    
-					// use lower case internally
-					transform(a.name.begin(), a.name.end(), a.name.begin(), ToLower());
-					
+                    					
                     defaultActGbl = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"DEFAULT"));
                     if (defaultActGbl.empty()) {
                         throw Error("Auction Parser Error: missing name at line %d", XML_GET_LINE(cur2));
@@ -167,6 +259,7 @@ void AuctionFileParser::parse( auctionDB_t *auctions,
             string rname;
             actionList_t actions = globalActionList;
             miscList_t miscs = globalMiscList;
+			auctionTemplateFieldList_t templFields;
 
             rname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
 
@@ -182,12 +275,21 @@ void AuctionFileParser::parse( auctionDB_t *auctions,
                     miscs[item.name] = item;
 
                 }
+
+                // get FIELD
+                if ((!xmlStrcmp(cur2->name, (const xmlChar *)"FIELD")) && (cur2->ns == ns)) {
+                    // parse
+                    auctionTemplateField_t templField = parseField(cur2, fieldDefs, messageOut); 	
+                    // add
+                    templFields[templField.field.name] = templField;
+                }
        
                 if ((!xmlStrcmp(cur2->name, (const xmlChar *)"ACTION")) && (cur2->ns == ns)) {
                     action_t a;
                     string defaultAct;
 
                     a.name = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"NAME"));
+                    
                     if (a.name.empty()) {
                         throw Error("Auction Parser Error: missing name at line %d", XML_GET_LINE(cur2));
                     }
@@ -248,7 +350,7 @@ void AuctionFileParser::parse( auctionDB_t *auctions,
 				}
 				
                 Auction *a = new Auction(now, sname, rname, action, 
-										 miscs );
+										 miscs, templFields, messageOut );
                 auctions->push_back(a);
             } catch (Error &e) {
                 log->elog(ch, e);

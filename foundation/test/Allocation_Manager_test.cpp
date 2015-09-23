@@ -9,6 +9,7 @@
 
 #include "AllocationManager.h"
 
+using namespace auction;
 
 class Allocation_Manager_Test : public CppUnit::TestFixture {
 
@@ -62,10 +63,10 @@ void Allocation_Manager_Test::createAllocations()
 		string bSet2 = "Agent2";
 		string bName2 = "1";
 		
-		fieldList_t fields;		
+		auction::fieldList_t fields;		
 		field_t field1;
 		
-		fieldDefListIter_t iter; 
+		auction::fieldDefListIter_t iter; 
 		iter = manager->getFieldDef()->find("quantity");
 		field1.len = iter->second.len;
 		field1.type = iter->second.type;
@@ -97,7 +98,7 @@ void Allocation_Manager_Test::createAllocations()
 
 		ptrAllocation1 = new Allocation(aSet, aName, bSet1, bName1, fields, intervals);		
 		
-		fieldList_t fields2;
+		auction::fieldList_t fields2;
 		allocationIntervalList_t intervals2;
 		
 		ptrAllocation2 = new Allocation(aSet, aName, bSet2, bName2, fields2, intervals2);

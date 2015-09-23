@@ -32,6 +32,9 @@
 #include "stdincpp.h"
 #include "BidFileParser.h"
 
+namespace auction
+{
+
 //! parser for API text Bid syntax
 
 class MAPIBidParser
@@ -75,6 +78,8 @@ class MAPIBidParser
 					   BidIdSource *idSource );
 
 };
+
+}; // namespace auction
 
 
 #endif // _MAPI_BID_PARSER_H_

@@ -30,9 +30,16 @@
 #define _AUCTION_H_
 
 #include "stdincpp.h"
+#include "Constants.h"
 #include "Logger.h"
 #include "AuctionTimer.h"
 #include "ConfigParser.h"
+#include "IpAp_template_container.h"
+#include "IpAp_message.h"
+#include "Field.h"
+
+namespace auction
+{
 
 //! rule states during lifecycle
 typedef enum
@@ -54,26 +61,33 @@ typedef struct
 } action_t;
 
 
-//! process module names
-typedef set<string> procnames_t;
-typedef set<string>::iterator procnamesIter_t;
-
-//! execution list intervals.
-typedef map<interval_t, procnames_t, lttint>            intervalList_t;
-typedef map<interval_t, procnames_t, lttint>::iterator  intervalListIter_t;
-typedef map<interval_t, procnames_t, lttint>::const_iterator  intervalListConstIter_t;
-
 typedef struct 
 {
-    interval_t i;
-    procnames_t e;
+    interval_t interval;
+    string procname;
 } procdef_t;
+
+typedef struct
+{
+	fieldDefItem_t field;
+    ssize_t length;
+	bool isBidtemplate;
+	bool isOptBidTemplate;
+	bool isAllocTemplate;
+} auctionTemplateField_t;
 
 //! action list (only push_back & sequential access)
 typedef list<action_t>            actionList_t;
 typedef list<action_t>::iterator  actionListIter_t;
 typedef list<action_t>::const_iterator  actionListConstIter_t;
 
+typedef map<uint16_t,uint16_t> 	  				remoteAssociationTemplateList_t;
+typedef map<uint16_t,uint16_t>::iterator 		remoteAssociationTemplateListIter_t;
+typedef map<uint16_t,uint16_t>::const_iterator 	remoteAssociationTemplateListConstIter_t;
+
+typedef map<string, auctionTemplateField_t>						auctionTemplateFieldList_t;
+typedef map<string, auctionTemplateField_t>::iterator			auctionTemplateFieldListIter_t;
+typedef map<string, auctionTemplateField_t>::const_iterator		auctionTemplateFieldLisConstIter_t;
 
 class Auction
 {
@@ -87,7 +101,7 @@ class Auction
     time_t stop;
 
 	//! define the execution intervals.
-	intervalList_t	intervals;
+	interval_t	mainInterval;
 
     //! unique auctionID of this auction instance (has to be provided)
     int uid;
@@ -124,6 +138,12 @@ class Auction
     //! get a value by name from the misc rule attriutes
     string getMiscVal(string name);
 
+	//! Templates asociated with the auction. 
+	ipap_template_container templates;
+
+	//! Relations between the local template and the remote template.
+	remoteAssociationTemplateList_t templateAssociationList;
+	
   public:
     
     void setState(AuctionState_t s) 
@@ -187,21 +207,25 @@ class Auction
     }
     
     
-    intervalList_t *getIntervals()
+    interval_t getInterval()
     {
-        return &intervals;
+        return mainInterval;
     }
      
             
     /*! \short   construct and initialize a Auction object
-        \arg \c now   current timestamp
-        \arg \c sname   auction set name
-        \arg \c s  rname  auction name
-        \arg \c a  action
-        \arg \c m  list of misc parameters
+        \arg \c now   		current timestamp
+        \arg \c sname   	auction set name
+        \arg \c s  			aname  auction name
+        \arg \c a  			action
+        \arg \c m  			list of misc parameters
+        \arg \c templFields	field list to be used in auction templates
+        \arg \c message  	message where we include the new templates. 
+        
     */
-    Auction(time_t now, string sname, string rname, action_t &a
-		    , miscList_t &m );
+    Auction(time_t now, string sname, string aname, action_t &a, 
+			miscList_t &m, auctionTemplateFieldList_t &templFields,
+		    ipap_message *message );
 
 	/*! \short  construct an auction from another auction
 	  	\arg \c rhs auction to copy from
@@ -223,15 +247,35 @@ class Auction
     */
     miscList_t *getMisc();
 
+
+    /*! \short   get all templates added.
+
+        \returns a pointer (link) to templates.
+    */	
+    ipap_template_container * getTemplateList(void);
+    
+
+    /*! \short   get template associations
+
+        \returns a pointer (link) to a template associations that contains  
+                 the id of the local template and the id of the remote 
+                 template.
+    */
+	remoteAssociationTemplateList_t * getTemplateAssociations(void);
+
+
     //! dump a Auction object
     void dump( ostream &os );
 
     //! get rule info string
     string getInfo(void);
-
+	
 };
 
 //! overload for <<, so that a Auction object can be thrown into an iostream
 ostream& operator<< ( ostream &os, Auction &ai );	
+
+}; // namespace auction
+
 
 #endif // _AUCTION_H_

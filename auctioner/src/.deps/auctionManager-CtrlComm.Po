@@ -1,6 +1,6 @@
 auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
- ../../foundation/include/Error.h ../../foundation/include/stdincpp.h \
- ../../foundation/include/stdinc.h ../../config.h /usr/include/stdio.h \
+ ../../foundation/include/ParserFcts.h ../../config.h \
+ /usr/local/include/ipap/stdinc.h /usr/include/stdio.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
@@ -88,7 +88,9 @@ auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  /usr/include/linux/stddef.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
- /usr/include/asm-generic/posix_types.h /usr/include/c++/4.8/iostream \
+ /usr/include/asm-generic/posix_types.h \
+ /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/stdinc.h \
+ /usr/include/c++/4.8/iostream \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
@@ -195,13 +197,18 @@ auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/bits/stl_multiset.h /usr/include/c++/4.8/debug/set \
  /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
  /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
- /usr/include/c++/4.8/iomanip ../../foundation/include/Logger.h \
- ../../foundation/include/ProcError.h ../../foundation/include/Error.h \
- ../../foundation/include/Threads.h ../../foundation/include/Constants.h \
- ../../foundation/include/ConstantsAum.h \
+ /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/stdexcept \
+ ../../lib/httpd/httpd.h /usr/include/syslog.h \
+ /usr/include/x86_64-linux-gnu/sys/syslog.h \
+ /usr/include/x86_64-linux-gnu/bits/syslog-path.h /usr/include/grp.h \
+ /usr/include/x86_64-linux-gnu/sys/signal.h \
+ /usr/include/x86_64-linux-gnu/sys/utsname.h \
+ /usr/include/x86_64-linux-gnu/bits/utsname.h /usr/include/netinet/tcp.h \
+ /usr/local/include/ipap/Error.h /usr/local/include/ipap/stdincpp.h \
+ /usr/local/include/ipap/Logger.h /usr/local/include/ipap/Error.h \
+ /usr/local/include/ipap/ConstantsIpAp.h \
  ../../foundation/include/AuctionTimer.h \
- ../../foundation/include/Logger.h ../../auctioner/include/CtrlComm.h \
- ../../foundation/include/stdincpp.h \
+ ../../auctioner/include/CtrlComm.h \
  ../../foundation/include/AuctionManagerComponent.h \
  ../../foundation/include/AuctionTimer.h \
  ../../foundation/include/CommandLineArgs.h \
@@ -236,31 +243,45 @@ auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  ../../foundation/include/FieldValParser.h \
  ../../foundation/include/BidIdSource.h ../../foundation/include/Bid.h \
  ../../foundation/include/AuctionFileParser.h \
- ../../foundation/include/Auction.h \
+ ../../foundation/include/Auction.h ../../foundation/include/Constants.h \
+ /usr/local/include/ipap/IpAp_template_container.h \
+ /usr/local/include/ipap/IpAp_template.h \
+ /usr/local/include/ipap/IpAp_field.h /usr/local/include/ipap/IpAp_def.h \
+ /usr/local/include/ipap/IpAp_value_field.h \
+ /usr/local/include/ipap/IpAp_exception.h \
+ /usr/local/include/ipap/IpAp_message.h /usr/local/include/ipap/Logger.h \
+ /usr/local/include/ipap/IpAp_field_container.h \
+ /usr/local/include/ipap/IpAp_data_record.h \
+ /usr/local/include/ipap/IpAp_field_key.h \
+ /usr/local/include/ipap/IpAp_t.h \
+ /usr/local/include/ipap/IpAp_template_container.h \
  ../../foundation/include/AuctionIdSource.h \
- ../../foundation/include/AuctionManagerInfo.h ../../lib/httpd/httpd.h \
- /usr/include/syslog.h /usr/include/x86_64-linux-gnu/sys/syslog.h \
- /usr/include/x86_64-linux-gnu/bits/syslog-path.h /usr/include/grp.h \
- /usr/include/x86_64-linux-gnu/sys/signal.h \
- /usr/include/x86_64-linux-gnu/sys/utsname.h \
- /usr/include/x86_64-linux-gnu/bits/utsname.h /usr/include/netinet/tcp.h \
+ ../../foundation/include/AuctionManagerInfo.h \
+ ../../foundation/include/Threads.h \
  ../../foundation/include/AuctionManagerInfo.h \
  ../../auctioner/include/PageRepository.h \
- ../../foundation/include/AuctionManager.h \
- ../../foundation/include/MAPIAuctionParser.h \
+ ../../auctioner/include/EventAuctioner.h \
+ ../../auctioner/include/ProcModule.h \
+ ../../foundation/include/ProcModuleInterface.h \
+ ../../auctioner/include/Module.h \
+ ../../foundation/include/ConfigManager.h \
+ ../../auctioner/include/EventSchedulerAuctioner.h \
  ../../foundation/include/EventScheduler.h \
- ../../foundation/include/Timeval.h ../../foundation/include/Bid.h \
+ ../../foundation/include/Timeval.h \
+ ../../foundation/include/BidFileParser.h \
+ ../../foundation/include/AuctionFileParser.h \
+ ../../foundation/include/Auction.h ../../foundation/include/Event.h \
+ ../../foundation/include/AuctionManager.h \
+ ../../foundation/include/EventScheduler.h ../../foundation/include/Bid.h \
  ../../foundation/include/Constants.h
 
 /usr/include/stdc-predef.h:
 
-../../foundation/include/Error.h:
-
-../../foundation/include/stdincpp.h:
-
-../../foundation/include/stdinc.h:
+../../foundation/include/ParserFcts.h:
 
 ../../config.h:
+
+/usr/local/include/ipap/stdinc.h:
 
 /usr/include/stdio.h:
 
@@ -509,6 +530,10 @@ auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 /usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
 
 /usr/include/asm-generic/posix_types.h:
+
+/usr/local/include/ipap/stdincpp.h:
+
+/usr/local/include/ipap/stdinc.h:
 
 /usr/include/c++/4.8/iostream:
 
@@ -798,25 +823,39 @@ auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 
 /usr/include/c++/4.8/iomanip:
 
-../../foundation/include/Logger.h:
+/usr/include/c++/4.8/stdexcept:
 
-../../foundation/include/ProcError.h:
+../../lib/httpd/httpd.h:
 
-../../foundation/include/Error.h:
+/usr/include/syslog.h:
 
-../../foundation/include/Threads.h:
+/usr/include/x86_64-linux-gnu/sys/syslog.h:
 
-../../foundation/include/Constants.h:
+/usr/include/x86_64-linux-gnu/bits/syslog-path.h:
 
-../../foundation/include/ConstantsAum.h:
+/usr/include/grp.h:
+
+/usr/include/x86_64-linux-gnu/sys/signal.h:
+
+/usr/include/x86_64-linux-gnu/sys/utsname.h:
+
+/usr/include/x86_64-linux-gnu/bits/utsname.h:
+
+/usr/include/netinet/tcp.h:
+
+/usr/local/include/ipap/Error.h:
+
+/usr/local/include/ipap/stdincpp.h:
+
+/usr/local/include/ipap/Logger.h:
+
+/usr/local/include/ipap/Error.h:
+
+/usr/local/include/ipap/ConstantsIpAp.h:
 
 ../../foundation/include/AuctionTimer.h:
 
-../../foundation/include/Logger.h:
-
 ../../auctioner/include/CtrlComm.h:
-
-../../foundation/include/stdincpp.h:
 
 ../../foundation/include/AuctionManagerComponent.h:
 
@@ -900,39 +939,71 @@ auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 
 ../../foundation/include/Auction.h:
 
+../../foundation/include/Constants.h:
+
+/usr/local/include/ipap/IpAp_template_container.h:
+
+/usr/local/include/ipap/IpAp_template.h:
+
+/usr/local/include/ipap/IpAp_field.h:
+
+/usr/local/include/ipap/IpAp_def.h:
+
+/usr/local/include/ipap/IpAp_value_field.h:
+
+/usr/local/include/ipap/IpAp_exception.h:
+
+/usr/local/include/ipap/IpAp_message.h:
+
+/usr/local/include/ipap/Logger.h:
+
+/usr/local/include/ipap/IpAp_field_container.h:
+
+/usr/local/include/ipap/IpAp_data_record.h:
+
+/usr/local/include/ipap/IpAp_field_key.h:
+
+/usr/local/include/ipap/IpAp_t.h:
+
+/usr/local/include/ipap/IpAp_template_container.h:
+
 ../../foundation/include/AuctionIdSource.h:
 
 ../../foundation/include/AuctionManagerInfo.h:
 
-../../lib/httpd/httpd.h:
-
-/usr/include/syslog.h:
-
-/usr/include/x86_64-linux-gnu/sys/syslog.h:
-
-/usr/include/x86_64-linux-gnu/bits/syslog-path.h:
-
-/usr/include/grp.h:
-
-/usr/include/x86_64-linux-gnu/sys/signal.h:
-
-/usr/include/x86_64-linux-gnu/sys/utsname.h:
-
-/usr/include/x86_64-linux-gnu/bits/utsname.h:
-
-/usr/include/netinet/tcp.h:
+../../foundation/include/Threads.h:
 
 ../../foundation/include/AuctionManagerInfo.h:
 
 ../../auctioner/include/PageRepository.h:
 
-../../foundation/include/AuctionManager.h:
+../../auctioner/include/EventAuctioner.h:
 
-../../foundation/include/MAPIAuctionParser.h:
+../../auctioner/include/ProcModule.h:
+
+../../foundation/include/ProcModuleInterface.h:
+
+../../auctioner/include/Module.h:
+
+../../foundation/include/ConfigManager.h:
+
+../../auctioner/include/EventSchedulerAuctioner.h:
 
 ../../foundation/include/EventScheduler.h:
 
 ../../foundation/include/Timeval.h:
+
+../../foundation/include/BidFileParser.h:
+
+../../foundation/include/AuctionFileParser.h:
+
+../../foundation/include/Auction.h:
+
+../../foundation/include/Event.h:
+
+../../foundation/include/AuctionManager.h:
+
+../../foundation/include/EventScheduler.h:
 
 ../../foundation/include/Bid.h:
 
