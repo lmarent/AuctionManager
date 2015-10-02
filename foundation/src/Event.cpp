@@ -27,6 +27,7 @@
 
 */
 
+#include "ParserFcts.h"
 #include "Error.h"
 #include "Event.h"
 #include "Timeval.h"

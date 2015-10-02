@@ -73,7 +73,8 @@ public:
         \returns a new object instance.
     */
 	Allocation( string aset, string aname, string bset, string bname, 
-				fieldList_t &f, allocationIntervalList_t &alloc_inter );
+				string allset, string allname, fieldList_t &f, 
+				allocationIntervalList_t &alloc_inter );
 
 	~Allocation();
 
@@ -136,8 +137,27 @@ public:
     {
         return bidName;
     }
+	
+	void setAllocationSet(string _allocationSet)
+	{
+		allocationSet = _allocationSet;
+	}
+	
+	string getAllocationSet()
+	{
+		return allocationSet;
+	}
 
+	void setAllocationName(string _allocationName)
+	{
+		allocationName = _allocationName;
+	}
 
+	string getAllocationName()
+	{
+		return allocationName;
+	}
+	
 	string getInfo();
 		
 
@@ -174,6 +194,12 @@ protected:
 
 	//! Bid name associated to this allocation
 	string bidName;     
+
+	//! Allocation Set 
+	string allocationSet;
+	
+	//! Allocation Name
+	string allocationName;
 
 	//! Allocation fields, two typical fields are quantity and price.
 	fieldList_t fields; 

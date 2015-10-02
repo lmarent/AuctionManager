@@ -22,33 +22,17 @@
     $Id: MAPIAuctionParser.cpp 2015-07-24 15:14:00 amarentes $
 */
 
+#include "ParserFcts.h"
 #include "MAPIAuctionParser.h"
 
 using namespace std;
 using namespace auction;
 
-MAPIAuctionParser::MAPIAuctionParser()
+MAPIAuctionParser::MAPIAuctionParser():
+	MAPIIpApMessageParser()
 {
     log = Logger::getInstance();
     ch = log->createChannel("MAPIAuctionParser");
-}
-
-ipap_template * MAPIAuctionParser::readTemplate(ipap_message * message,  
-												ipap_templ_type_t type)
-{
-	std::list<int> tempList = message->get_template_list();
-	std::list<int>::iterator tempIter;
-	
-	for (tempIter = tempList.begin(); tempIter != tempList.end(); ++tempIter)
-	{
-		ipap_template *templ = message->get_template_object(*tempIter);
-		if (templ->get_type() == type){
-			return templ;
-		}
-	}
-	
-	return NULL;
-	
 }
 
 void MAPIAuctionParser::getTemplateFields(ipap_template *templ, 
@@ -89,45 +73,6 @@ void MAPIAuctionParser::getTemplateFields(ipap_template *templ,
 	}
 }
 
-dataRecordList_t MAPIAuctionParser::readDataRecords(ipap_message * message, 
-													uint16_t templId)
-{
-	
-	dataRecordList_t dListReturn;
-	dateRecordListConstIter_t dataIter;
-	for(dataIter = message->begin(); dataIter != message->end(); ++dataIter)
-	{
-		ipap_data_record dRecord = *dataIter;
-		if (dRecord.get_template_id() == templId){
-			dListReturn.push_back(dRecord);
-		}
-	}
-	
-	return dListReturn;
-}
-
-void MAPIAuctionParser::parseAuctionName(string aName, 
-										 string &resource, string &id)
-{
-    int n;
-
-    if (aName.empty()) {
-        throw Error("malformed auction identifier %s, "
-                    "use <identifier> or <source>.<identifier> ",
-                    aName.c_str());
-    }
-
-    if ((n = aName.find(".")) > 0) {
-        resource = aName.substr(0,n);
-        id = aName.substr(n+1, aName.length()-n);
-    } else {
-        // no dot so everything is recognized as id
-        id = aName;
-    }
-
-}
-
-
 miscList_t MAPIAuctionParser::readAuctionData( ipap_template *templ, 
 											   fieldDefList_t *fieldDefs,
 											   ipap_data_record &record,
@@ -166,34 +111,8 @@ miscList_t MAPIAuctionParser::readAuctionData( ipap_template *templ,
 	}
 	
 	return miscs;
-	
 }
 
-fieldDefItem_t MAPIAuctionParser::findField(fieldDefList_t *fieldDefs, int eno, int ftype)
-{
-	fieldDefItem_t val_return;
-	
-	fieldDefListIter_t iter;
-	for (iter=fieldDefs->begin(); iter!=fieldDefs->end(); ++iter)
-	{
-		if (((iter->second).eno == eno) && ((iter->second).ftype == ftype)){
-			val_return = iter->second;
-			break;
-		}
-	}
-	return val_return;
-}
-
-fieldDefItem_t MAPIAuctionParser::findField(fieldDefList_t *fieldDefs, string fname)
-{
-	fieldDefItem_t val_return;
-	fieldDefListIter_t iter = fieldDefs->find(fname);
-	if (iter != fieldDefs->end()){
-		val_return = iter->second;
-	}
-	
-	return val_return;
-}
 
 configItemList_t MAPIAuctionParser::readMiscAuctionData(ipap_template *templ, 
 											  fieldDefList_t *fieldDefs,
@@ -281,7 +200,7 @@ void MAPIAuctionParser::parse( fieldDefList_t *fieldDefs,
 				throw Error("Auction Message Parser: a data template was not given"); 
 			} else {
 				miscs = readAuctionData( templAuct, fieldDefs, dRecordList[0], auctionName);
-				parseAuctionName(auctionName, resource, aname);
+				parseName(auctionName, resource, aname);
 			}
 		} else{
 			throw Error("Auction Message Parser: missing data template data"); 

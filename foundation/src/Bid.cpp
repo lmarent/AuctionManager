@@ -34,6 +34,37 @@
 
 using namespace auction;
 
+bool 
+bid_auction_t::operator==(const bid_auction_t &rhs)
+{
+	if (auctionSet.compare(rhs.auctionSet) != 0)
+		return false;
+		
+	if (auctionName.compare(rhs.auctionName) != 0)
+		return false;
+
+	if (interval != rhs.interval)
+		return false;
+
+	if (align != rhs.align)
+		return false;
+
+	if (start != rhs.start)
+		return false;
+
+	if (stop != rhs.stop)
+		return false;
+
+	return true;
+}
+
+bool 
+bid_auction_t::operator!=(const bid_auction_t &param)
+{
+	return !(operator==(param));
+}
+
+
 /* ------------------------- Bid ------------------------- */
 
 Bid::Bid( string sname, string rname, elementList_t &elements,
@@ -65,11 +96,11 @@ Bid::Bid( const Bid &rhs )
 	// Copy elements part of the bid.
 	elementListConstIter_t iter;
 	for (iter = (rhs.elementList).begin(); iter != (rhs.elementList).end(); ++iter ){
-		element_t elem;
-		elem.name = (*iter).name;
+		fieldList_t fieldList;
 		fieldListconstIter_t fielditer;
-		for ( fielditer = ((*iter).fields).begin(); 
-				fielditer != ((*iter).fields).end(); ++fielditer ){
+		
+		for ( fielditer = (iter->second).begin(); 
+				fielditer != (iter->second).end(); ++fielditer ){
 			field_t field;
 			field.name = (*fielditer).name;
 			field.type = (*fielditer).type;
@@ -88,9 +119,9 @@ Bid::Bid( const Bid &rhs )
 			for (int i=0 ; i< MAX_FIELD_SET_SIZE; ++i) {
 				field.value[i] = FieldValue((*fielditer).value[i]);
 			}
-			elem.fields.push_back(field);
+			fieldList.push_back(field);
 		}
-		elementList.push_back(elem);
+		elementList[iter->first] = fieldList;
 	}
 	
 	// Copy auctions part of the bid
@@ -98,38 +129,14 @@ Bid::Bid( const Bid &rhs )
 	for (iter_act = (rhs.auctionList).begin(); iter_act != (rhs.auctionList).end(); ++iter_act )
 	{
 		bid_auction_t auction;
-		auction.auctionSet = iter_act->auctionSet;
-		auction.auctionName = iter_act->auctionName;
-		auction.start = iter_act->start;
-		auction.stop = iter_act->stop;
-
-		bidIntervalListConstIter_t inter_iter;
-		for ( inter_iter = iter_act->intervals.begin(); 
-					inter_iter != iter_act->intervals.end(); ++inter_iter){
-
-			interval_t ientry;
-           	ientry.interval = inter_iter->interval;
-           	ientry.align = inter_iter->align;
-			auction.intervals.push_back(ientry);
-		}
-				
-		
-		// Copy Misc items.
-		miscListConstIter_t misc_iter;
-		for ( misc_iter = iter_act->miscList.begin(); 
-					misc_iter != iter_act->miscList.end(); ++misc_iter){
-			configItem_t item;
-			item.group = (misc_iter->second).group;
-			item.module = (misc_iter->second).module;
-			item.name = (misc_iter->second).name;
-			item.value = (misc_iter->second).value;
-			item.type = (misc_iter->second).type;
-			
-			auction.miscList[misc_iter->first] = item;
-		}
-		
-		
-		auctionList.push_back(auction);
+		auction.auctionSet = (iter_act->second).auctionSet;
+		auction.auctionName = (iter_act->second).auctionName;
+		auction.start = (iter_act->second).start;
+		auction.stop = (iter_act->second).stop;
+		auction.interval = (iter_act->second).interval;
+		auction.align = (iter_act->second).align;
+		string actId = auction.getId();
+		auctionList[actId] = auction;
 	}
 	
 }
@@ -142,26 +149,18 @@ Bid::~Bid()
 
 }
 
-string Bid::toString(element_t &elem)
+void Bid::deleteAuction(string aset, string aName)
 {
-	std::stringstream output;
-	
-	fieldListIter_t iter;
-	
-	output << "Element Name:" << elem.name << std::endl;
-	output << " Field number:" << elem.fields.size() << std::endl;
-	for (iter = elem.fields.begin(); iter != elem.fields.end(); ++iter)
-	{
-		output << "field name:" << (*iter).name 
-			   << " type:" << (*iter).type
-			   << " len:" << (*iter).len
-			   << " Value:" << ((*iter).value[0]).getValue()
-			   << std::endl;
+	bidAuctionListIter_t auctListIter;
+	for (auctListIter = auctionList.begin(); 
+			auctListIter != auctionList.end(); ++auctListIter){
+		if ((strcmp(aset.c_str(), ((auctListIter->second).auctionSet).c_str()) == 0) &&
+			(strcmp(aName.c_str(), ((auctListIter->second).auctionName).c_str()) == 0)){
+			auctionList.erase(auctListIter);
+			break;
+		}
 	}
-	
-	return output.str();
-
-}	
+}
 
 string Bid::getInfo()
 {
@@ -175,36 +174,120 @@ string Bid::getInfo()
 	
 	elementListIter_t iter;
 	for (iter = elementList.begin(); iter != elementList.end(); ++iter ){
-		output << toString(*iter) << std::endl;
+
+		output << "Element Name:" << iter->first << std::endl;
+
+		fieldListIter_t fieldIter;
+		
+		output << " Field number:" << iter->second.size() << std::endl;
+		for (fieldIter = (iter->second).begin(); fieldIter != iter->second.end(); ++fieldIter)
+		{
+			output << "field name:" << fieldIter->name 
+				   << " type:" << fieldIter->type
+				   << " len:" << fieldIter->len
+				   << " Value:" << ((fieldIter->value)[0]).getValue()
+				   << std::endl;
+		}
+
 	}
 	
 	output  << "Nbr Auctions:" << auctionList.size();
 	bidAuctionListIter_t ait;
 	for (ait = auctionList.begin(); ait != auctionList.end(); ++ait ){
-		output << " AuctionSet:" << ait->auctionSet
-			   << " AuctionName:" << ait->auctionName 
-			   << " Start: " << Timeval::toString(ait->start) 
-			   << " Stop:" << Timeval::toString(ait->stop) << std::endl;
-
-		bidIntervalListIter_t inter_iter;
-		for ( inter_iter = ait->intervals.begin(); 
-				inter_iter != ait->intervals.end(); ++inter_iter){
-			output << "Interval:" << inter_iter->interval 
-				   << "Align:" << inter_iter->align 
-				   << endl;
-		}
-			   		
-		miscListIter_t misc_iter;
-		for ( misc_iter = ait->miscList.begin(); misc_iter != ait->miscList.end(); ++misc_iter){
-			output << "miscItem:" << misc_iter->first 
-				   << "Value:" << (misc_iter->second).value
-				   << endl;
-		}
-		 
+		output << " AuctionSet:" << (ait->second).auctionSet
+			   << " AuctionName:" << (ait->second).auctionName 
+			   << " Start: " << Timeval::toString((ait->second).start) 
+			   << " Stop:" << Timeval::toString((ait->second).stop) 
+			   << " Interval: " <<  ((ait->second).interval)
+			   << " Align: " <<  ((ait->second).align)
+			   << std::endl;		 
 	}
 	
 	
 	return output.str();
 }
 
+bool Bid::operator==(const Bid &rhs)
+{
 
+#ifdef DEBUG
+    log->dlog(ch, "Starting operator == ");
+#endif  
+
+	if (setName.compare(rhs.setName) != 0 )
+		return false;
+		
+	if (bidName.compare(rhs.bidName) != 0 )
+		return false;
+
+
+#ifdef DEBUG
+    log->dlog(ch, "operator == equal bid general info");
+#endif  
+
+	if (elementList.size() != rhs.elementList.size())
+		return false;
+		
+	elementListIter_t iter;
+	for (iter = elementList.begin(); iter != elementList.end(); ++iter ){
+		// Look for the same element in the rhs object
+		elementListConstIter_t elementConstIter = rhs.elementList.find(iter->first);
+		if (elementConstIter == rhs.elementList.end()){			
+			return false;
+		} else {
+			
+			try{
+				for (size_t i = 0; i < (iter->second).size(); ++i ){
+					// Look for the field in the rhs with the name.
+					
+					field_t ls = (iter->second)[i];
+					field_t rs;
+					for (size_t j = 0; j < (elementConstIter->second).size(); ++j){
+						if (ls.name == (elementConstIter->second)[j].name){
+							rs = (elementConstIter->second)[j];
+							break;
+						}
+					}
+					
+					if ( ls != rs){
+						return false;
+					}
+				}		
+			} catch (out_of_range &e){
+				return false;
+			}
+		}
+	}
+	
+#ifdef DEBUG
+    log->dlog(ch, "operator == equal elements info");
+#endif
+
+	if (auctionList.size() != rhs.auctionList.size())
+		return false;
+		
+	bidAuctionListIter_t bidActionIter;
+	for (bidActionIter = auctionList.begin(); bidActionIter != auctionList.end(); ++bidActionIter ){
+		string actId = bidActionIter->first;
+		bidAuctionListConstIter_t rhsActIter = rhs.auctionList.find(actId);
+		if (rhsActIter == rhs.auctionList.end()){
+			return false;
+		} else {
+			if (bidActionIter->second != rhsActIter->second){
+				return false;
+			}
+		}
+	}
+	
+#ifdef DEBUG
+    log->dlog(ch, "operator == equal auction info");
+#endif
+	
+	return true;
+}
+
+bool 
+Bid::operator!=(const Bid &param)
+{
+	return !(operator==(param));
+}

@@ -27,6 +27,7 @@
 
 */
 
+#include "ParserFcts.h"
 #include "AuctionManager.h"
 // #include "CtrlComm.h"
 #include "Constants.h"
@@ -234,7 +235,7 @@ auctionDB_t *AuctionManager::parseAuctions(string fname)
 
 /* -------------------- parseBidsBuffer -------------------- */
 
-auctionDB_t *AuctionManager::parseAuctionsBuffer(char *buf, int len, int mapi)
+auctionDB_t *AuctionManager::parseAuctionsBuffer(char *buf, int len)
 {
     auctionDB_t *new_auctions = new auctionDB_t();
 
@@ -246,6 +247,33 @@ auctionDB_t *AuctionManager::parseAuctionsBuffer(char *buf, int len, int mapi)
         AuctionFileParser afp = AuctionFileParser(buf, len);
         
         afp.parse(&fieldDefs, new_auctions, &idSource, message);
+
+        return new_auctions;
+	
+    } catch (Error &e) {
+
+        for(auctionDBIter_t i=new_auctions->begin(); i != new_auctions->end(); i++) {
+            saveDelete(*i);
+        }
+        saveDelete(new_auctions);
+        throw e;
+    }
+}
+
+
+auctionDB_t *
+AuctionManager::parseAuctionsMessage(ipap_message *messageIn, ipap_message *messageOut)
+{
+    auctionDB_t *new_auctions = new auctionDB_t();
+
+    try {
+
+        // load the field def list
+        loadFieldDefs(fieldDefFileName);
+			
+        MAPIAuctionParser map = MAPIAuctionParser();
+        
+        map.parse(&fieldDefs, messageIn, new_auctions, &idSource, messageOut);
 
         return new_auctions;
 	

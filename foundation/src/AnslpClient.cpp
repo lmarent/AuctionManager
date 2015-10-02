@@ -1,0 +1,298 @@
+/// ----------------------------------------*- mode: C++; -*--
+/// @file AnslpClient.cpp
+/// The interface with the a-nslp application
+/// ----------------------------------------------------------
+/// $Id: AnslpClient.cpp 4118 2015-09-23 14:12:00 amarentes $
+/// $HeadURL: https://./src/AnslpClient.cpp $
+// ===========================================================
+//                      
+// Copyright (C) 2014-2015, all rights reserved by
+// - Universidad de los Andes
+//
+// More information and contact:
+// https://www.uniandes.edu.co
+//                      
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; version 2 of the License
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+//
+// ===========================================================
+#include <unistd.h>
+
+#include "logfile.h"
+#include "AnslpClient.h"
+
+
+namespace ntlp {
+// configuration class
+gistconf gconf;
+}
+
+using namespace protlib;
+using namespace protlib::log;
+using namespace ntlp;
+using namespace anslp;
+using namespace auction;
+
+
+
+AnslpClient::AnslpClient(string config_filename, const hostaddress &source_addr, 
+						  const hostaddress &destination_addr,
+						  uint16_t source_port, uint16_t dest_port, 
+						  uint8_t protocol, uint32_t session_lifetime):
+sender_addr(source_addr), receiver_addr(destination_addr), sender_port(source_port),
+receiver_port(dest_port), protocol(protocol), lifetime(session_lifetime)
+{
+	using namespace std;
+
+    log = Logger::getInstance();
+    ch = log->createChannel("AnslClient");
+
+#ifdef DEBUG
+    log->dlog(ch,"Starting AnslpClient");
+#endif
+
+
+	hostaddress source;
+	
+	init_framework();
+	try {
+
+		auto_ptr<anslp_config> _conf(new anslp_config()); 	
+		conf = _conf;
+		
+		// create the global configuration parameter repository 
+		conf->repository_init();
+
+		// register all A-NSLP configuration parameters at the registry
+		conf->setRepository();
+
+		// register all GIST configuration parameters at the registry
+		ntlp::gconf.setRepository();
+
+#ifdef DEBUG
+		log->dlog(ch,"Parameters registered \n %s", ntlp::gconf.to_string().c_str());
+#endif	
+
+		// read all config values from config file
+		configfile cfgfile(configpar_repository::instance());
+		conf->getparref<string>(anslpconf_conffilename) = config_filename;
+
+#ifdef DEBUG
+    log->dlog(ch,"anslp configuration object created %s", 
+			(conf->getparref<string>(anslpconf_conffilename)).c_str());
+#endif	
+
+		cfgfile.load(conf->getparref<string>(anslpconf_conffilename));
+
+		
+	}
+	catch(configParException& cfgerr)
+	{
+		log->elog(ch,"Error occurred while reading the configuration file %s", cfgerr.what());
+	}
+
+	/*
+	 * Start the A-NSLP daemon thread. It will in turn start the other
+	 * threads it requires.
+	 */
+	anslp_daemon_param param("anslp", *conf);
+	starter = new protlib::ThreadStarter<anslp_daemon, anslp_daemon_param>(1, param);
+	
+	// returns after all threads have been started
+	starter->start_processing();
+
+	// initialize the global session_id, the only one we store
+	uint128 raw_id(0, 0, 0, 0);
+	sid = session_id(raw_id);
+
+	log->log(ch,"config file:%s", config_filename.c_str());
+
+#ifdef DEBUG
+    log->dlog(ch,"ending constructor AnslpClient");
+#endif
+	
+}
+
+AnslpClient::~AnslpClient()
+{
+	
+#ifdef DEBUG
+    log->dlog(ch,"Starting destructor AnslpClient");
+#endif
+
+	// shutdown mnslp thread
+	starter->stop_processing();
+	starter->wait_until_stopped();
+	
+	cleanup_framework();
+	
+	saveDelete(starter);
+
+
+#ifdef DEBUG
+    log->dlog(ch,"Ending destructor AnslpClient");
+#endif
+
+}
+
+//vector<ipap_message *> 
+void
+AnslpClient::tg_create( const hostaddress &source_addr, 
+						const hostaddress &destination_addr,
+					   uint16_t source_port, uint16_t dest_port, 
+						uint8_t protocol, uint32_t session_lifetime )
+{
+#ifdef DEBUG
+    log->dlog(ch,"Starting tg_create");
+#endif
+	
+
+    // Build an ipap_message for a create session, which only has 
+    // auction template options.
+	// Build the request message 
+	anslp_ipap_message *mess = new anslp_ipap_message();    
+         
+    FastQueue ret;
+	    
+    // Build the vector of objects to be configured.
+    vector<msg::anslp_mspec_object *> mspec_objects;
+    mspec_objects.push_back(mess->copy());
+
+    // Create a new event for launching the configure event.
+    event *e = new api_create_event(source_addr,destination_addr,source_port, 
+   				       dest_port, protocol, mspec_objects, 
+				       session_lifetime, 
+				       selection_auctioning_entities::sme_any, 
+				       &ret);
+
+    anslp_event_msg *msg = new anslp_event_msg(session_id(), e);
+
+	anslp_daemon *anslpd = starter->get_thread_object();
+
+    anslpd->get_fqueue()->enqueue(msg);
+	
+    message *ret_msg = ret.dequeue_timedwait(10000);
+
+    anslp_event_msg *r = dynamic_cast<anslp_event_msg *>(ret_msg);
+	
+    sid = r->get_session_id();
+    
+    delete r;
+    
+    saveDelete(mess);
+
+#ifdef DEBUG
+    log->dlog(ch,"Ending tg_create -Session configured");
+#endif        
+    
+    // TODO AM: To take the values returned in the message and return them. 
+
+}
+
+void 
+AnslpClient::tg_teardown(session_id id) 
+{
+
+#ifdef DEBUG
+    log->dlog(ch,"Starting tg_teardown ");
+#endif        
+
+	event *e = new api_teardown_event(new session_id(id));
+
+	anslp_event_msg *msg = new anslp_event_msg(session_id(), e);
+	
+	anslp_daemon *anslpd = starter->get_thread_object();
+	
+	anslpd->get_fqueue()->enqueue(msg);
+	
+#ifdef DEBUG
+    log->dlog(ch,"Ending tg_teardown ");
+#endif        
+
+}
+
+void 
+AnslpClient::tg_bidding(const hostaddress &source_addr, 
+						const hostaddress &destination_addr,
+					   uint16_t source_port, uint16_t dest_port, 
+						uint8_t protocol, uint32_t session_lifetime)
+{
+
+#ifdef DEBUG
+    log->dlog(ch,"Starting tg_bidding ");
+#endif        
+
+    // Build an ipap_message for a create session, which only has 
+    // auction template options.
+	// Build the request message 
+	anslp_ipap_message *mess = new anslp_ipap_message();    
+             
+    saveDelete(mess);
+        
+#ifdef DEBUG
+    log->dlog(ch,"Ending tg_bidding ");
+#endif        
+    
+    // TODO AM: To take the values returned in the message and return them. 
+
+}
+
+
+
+/* ------------------------ set_sender_address -----------------------*/
+void 
+AnslpClient::set_sender_address(hostaddress _sender_address)
+{
+	sender_addr = _sender_address;
+}
+
+/* ----------------------- set_receiver_address ----------------------*/
+void
+AnslpClient::set_receiver_address(hostaddress _receiver_address)
+{
+	receiver_addr = _receiver_address;
+}
+
+/* ------------------------ set_source_address -----------------------*/
+void
+AnslpClient::set_source_address(hostaddress _source_address)
+{
+	source = _source_address;
+}
+
+/* ------------------------- set_sender_port -------------------------*/
+void
+AnslpClient::set_sender_port(uint16_t _sender_port)
+{
+	sender_port = _sender_port;
+}
+/* ------------------------ set_receiver_port ------------------------*/
+void
+AnslpClient::set_receiver_port(uint16_t _receiver_port)
+{
+	receiver_port = _receiver_port;
+}
+
+/* -------------------------- set_protocol ---------------------------*/
+void
+AnslpClient::set_protocol(uint8_t _protocol)
+{
+	protocol = _protocol;
+}
+
+/* ------------------------ Set sender address -----------------------*/
+void
+AnslpClient::set_lifetime(uint32_t _lifetime)
+{
+	lifetime = _lifetime;
+}

@@ -54,7 +54,7 @@ typedef map<string, int>::iterator  		bidIndexIter_t;
 typedef map<string, bidIndex_t>             bidSetIndex_t;
 typedef map<string, bidIndex_t>::iterator   bidSetIndexIter_t;
 
-//! list of done rules
+//! list of done Bids
 typedef list<Bid*>            bidDone_t;
 typedef list<Bid*>::iterator  bidDoneIter_t;
 
@@ -62,6 +62,10 @@ typedef list<Bid*>::iterator  bidDoneIter_t;
 typedef map<time_t, bidDB_t>            bidTimeIndex_t;
 typedef map<time_t, bidDB_t>::iterator  bidTimeIndexIter_t;
 
+typedef map<string, vector<int> >					auctionBidIndex_t;
+typedef map<string, vector<int> >::iterator			auctionBidIndexIter_t;
+typedef map<string, auctionBidIndex_t>				auctionSetBidIndex_t;
+typedef map<string, auctionBidIndex_t>::iterator	auctionSetBidIndexIter_t;
 
 /*! \short   manage adding/deleting of complete bid descriptions
   
@@ -84,6 +88,9 @@ class BidManager
 
     //! index to bids via setID and name
     bidSetIndex_t bidSetIndex;
+
+	//! index bids via AuctionSetId and Auction name.
+	auctionSetBidIndex_t bidAuctionSetIndex;
 
     //! stores all bids indexed by setID, bidID
     bidDB_t  bidDB;
@@ -154,16 +161,23 @@ class BidManager
     //! get all bids in bidset with name sname 
     bidIndex_t *getBids(string sname);
 
-    //! get all rules
+	//! get bids by auction set and auction name
+	vector<int> getBids(string aset, string aname);
+
+    //! get all bids
     bidDB_t getBids();
 
-    //! parse XML rules from file 
+    //! parse XML bids from file 
     bidDB_t *parseBids(string fname); // Ok
 
     //! parse XML or Auction API bids from buffer
-    bidDB_t *parseBidsBuffer(char *buf, int len, int mapi);
+    bidDB_t *parseBidsBuffer(char *buf, int len);
+
+    //! parse bids from ipap_message 
+    bidDB_t *parseBidsMessage(ipap_message *messageIn, ipap_message *messageOut);
+
    
-    /*! \short   add a filter rule description 
+    /*! \short   add a bid list
 
         adding new bids to the Auction system will parse and syntax
         check the given bid specifications, lookup the bid database for
@@ -207,6 +221,21 @@ class BidManager
     string getInfo(Bid *r);
     string getInfo(string sname, string rname);
     string getInfo(string sname);
+
+    /*! \short   delete a relationship between a bid and an auction by id.
+     * 			 if the bid does not have any other relationship with another
+     * 			 auction, then the manager triggers the bid remove.
+
+    */
+	void delBidAuction(string auctionSet, string auctionName, int uid, EventScheduler *e);
+
+    /*! \short   delete a relationship between a bid and an auction by set and name
+     * 			 if the bid does not have any other relationship with another
+     * 			 auction, then the manager triggers the bid remove.
+
+    */
+	void delBidAuction(string auctionSet, string auctionName, 
+					   string bset, string bname, EventScheduler *e);
 
     //! dump a BidManager object
     void dump( ostream &os );

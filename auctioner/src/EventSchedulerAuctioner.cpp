@@ -25,6 +25,8 @@
     $Id: EventSchedulerAuctioner.cpp 748 2015-08-24 19:13:00 amarentes $
 */
 
+
+#include "ParserFcts.h"
 #include "EventSchedulerAuctioner.h"
 #include "Auctioner.h"
 

@@ -32,415 +32,516 @@
 
 using namespace auction;
 
-MAPIBidParser::MAPIBidParser(string filename)
-    : fileName(filename)
+MAPIBidParser::MAPIBidParser()
+    : MAPIIpApMessageParser()
 {
     log = Logger::getInstance();
     ch = log->createChannel("MAPIBidParser" );
-}
-
-
-MAPIBidParser::MAPIBidParser(char *b, int l)
-    : buf(b), len(l)
-{
-    log = Logger::getInstance();
-    ch = log->createChannel("MAPIBidParser" );
-}
-
-
-string MAPIBidParser::lookup(fieldValList_t *fieldVals, string fvalue, field_t *f)
-{
-    fieldValListIter_t iter2 = fieldVals->find(fvalue);
-    if ((iter2 != fieldVals->end()) && (iter2->second.type == f->type)) {
-        // substitute field value
-        fvalue = iter2->second.svalue;
-    }
-
-    return fvalue;
-}
-
-
-void MAPIBidParser::parseFieldValue(fieldValList_t *fieldVals, string value, field_t *f)
-{
-    int n;
-
-    if (value == "*") {
-        f->mtype = FT_WILD;
-        f->cnt = 1;
-    } else if ((n = value.find("-")) > 0) {
-        f->mtype = FT_RANGE;
-        f->value[0] = FieldValue(f->type, lookup(fieldVals, value.substr(0,n),f));
-        f->value[1] = FieldValue(f->type, lookup(fieldVals, value.substr(n+1, value.length()-n+1),f));
-        f->cnt = 2;
-    } else if ((n = value.find(",")) > 0) {
-        int lastn = 0;
-        int c = 0;
-
-        n = -1;
-        f->mtype = FT_SET;
-        while (((n = value.find(",", lastn)) > 0) && (c<(MAX_FIELD_SET_SIZE-1))) {
-            f->value[c] = FieldValue(f->type, lookup(fieldVals, value.substr(lastn, n-lastn),f));
-            c++;
-            lastn = n+1;
-        }
-        f->value[c] = FieldValue(f->type, lookup(fieldVals, value.substr(lastn, n-lastn),f));
-        f->cnt = c+1;
-        if ((n > 0) && (f->cnt == MAX_FIELD_SET_SIZE)) {
-            throw Error("more than %d field specified in set", MAX_FIELD_SET_SIZE);
-        }
-    } else {
-        f->mtype = FT_EXACT;
-        f->value[0] = FieldValue(f->type, lookup(fieldVals, value,f));
-        f->cnt = 1;
-    }
-}
-
-/* functions for accessing the templates */
-string MAPIBidParser::getMiscVal(miscList_t *_miscList, string name)
-{
-    miscListIter_t iter;
-
-    iter = _miscList->find(name);
-    if (iter != _miscList->end()) {
-        return iter->second.value;
-    } else {
-        return "";
-    }
-}
-
-
-/* ------------------------- parseTime ------------------------- */
-time_t MAPIBidParser::parseTime(string timestr)
-{
-    struct tm  t;
-  
-    if (timestr[0] == '+') {
-        // relative time in secs to start
-        try {
-	    struct tm tm;
-            int secs = ParserFcts::parseInt(timestr.substr(1,timestr.length()));
-            time_t start = time(NULL) + secs;
-            return mktime(localtime_r(&start,&tm));
-        } catch (Error &e) {
-            throw Error("Incorrect relative time value '%s'", timestr.c_str());
-        }
-    } else {
-        // absolute time
-        if (timestr.empty() || (strptime(timestr.c_str(), TIME_FORMAT.c_str(), &t) == NULL)) {
-            return 0;
-        }
-    }
-    return mktime(&t);
-}
-
-
-void MAPIBidParser::calculateIntervals(time_t now, bid_auction_t *auction)
-{
-
-    unsigned long duration;
-        
-    /* time stuff */
-    auction->start = now;
-        
-    // stop = 0 indicates infinite running time
-    auction->stop = 0;
     
-    // duration = 0 indicates no duration set
-    duration = 0;
-		
-	string sstart = getMiscVal(&(auction->miscList), "Start");
-	string sstop = getMiscVal(&(auction->miscList), "Stop");
-	string sduration = getMiscVal(&(auction->miscList), "Duration");		
-	string sinterval = getMiscVal(&(auction->miscList), "Interval");
-	string salign = getMiscVal(&(auction->miscList), "Align");
-
-    if (!sstart.empty() && !sstop.empty() && !sduration.empty()) {
-        throw Error(409, "illegal to specify: start+stop+duration time");
-    }
-	
-    if (!sstart.empty()) {
-        auction->start = parseTime(sstart);
-        if(auction->start == 0) {
-            throw Error(410, "invalid start time %s", sstart.c_str());
-        }
-    }
-
-    if (!sstop.empty()) {
-        auction->stop = parseTime(sstop);
-        if(auction->stop == 0) {
-            throw Error(411, "invalid stop time %s", sstop.c_str());
-        }
-    }
-	
-    if (!sduration.empty()) {
-        duration = ParserFcts::parseULong(sduration);
-    }
-
-    if ( duration > 0) {
-        if (auction->stop) {
-            // stop + duration specified
-            auction->start = auction->stop - duration;
-        } else {
-            // stop [+ start] specified
-            auction->stop = auction->start + duration;
-        }
-    }
-	
-    // now start has a defined value, while stop may still be zero 
-    // indicating an infinite rule
-	    
-    // do we have a stop time defined that is in the past ?
-    if ((auction->stop != 0) && (auction->stop <= now)) {
-        throw Error(300, "task running time is already over");
-    }
-	
-    if (auction->start < now) {
-        // start late tasks immediately
-        auction->start = now;
-    }
-		
-    // get export module params
-        
-    int _interval = 0;
-		
-	if (!sinterval.empty()){
-		_interval = ParserFcts::parseInt(sinterval);
-    }
-    int _align = (!salign.empty()) ? 1 : 0;
-				
-	if (_interval > 0) {
-		interval_t ientry;
-        ientry.interval = _interval;
-        ientry.align = _align;
-			
 #ifdef DEBUG
-    log->dlog(ch, "Interval: %d - Align:%d", _interval, _align);
+    log->dlog(ch, "Constructor MAPIBidParser");
 #endif    
-		auction->intervals.push_back(ientry); 
-    }				
+}
+
+
+uint16_t 
+MAPIBidParser::addElementFieldsTemplate(fieldDefList_t *fieldDefs, 
+									  Bid *bidPtr, ipap_message *mes)
+{
+	
+#ifdef DEBUG
+    log->dlog(ch, "Starting addElementFieldsTemplate");
+#endif
+	
+	int nfields = 0;
+	uint16_t bidTemplateId;
+	map<string,fieldDefItem_t> fields;
+	
+	// Loop through the elements in order to put them in a data record
+	elementListIter_t elemListIter;
+	for (elemListIter = bidPtr->getElements()->begin(); 
+			elemListIter != bidPtr->getElements()->end(); ++elemListIter){
+		
+		fieldListIter_t fieldIter;
+		
+		for (fieldIter = (elemListIter->second).begin(); 
+				fieldIter != (elemListIter->second).end(); ++fieldIter){
+			fieldDefItem_t fItem = findField(fieldDefs, fieldIter->name);
+			if ((fItem.name).empty()){
+				ostringstream s;
+				s << "Bid Message Parser: Field name:" << fieldIter->name
+				  << "is not parametrized";
+				throw Error(s.str()); 
+			}
+			else{
+				fields[fieldIter->name] = fItem;
+			}
+		}
+	}
+
+	// Loop through the fields in order to include them in the template
+	nfields = fields.size() + 2; // we include additionally IDBID and IDRECORD.
+	bidTemplateId = mes->new_data_template( nfields, IPAP_SETID_BID_TEMPLATE );
+	//put the BID name
+	mes->add_field(bidTemplateId, 0, IPAP_FT_IDBID);
+	// put the RECORD ID.
+	mes->add_field(bidTemplateId, 0, IPAP_FT_IDRECORD);
+	
+	// Loop thought the fields to include and include them.
+	map<string,fieldDefItem_t>::iterator fieldIter;
+	for (fieldIter = fields.begin(); fieldIter != fields.end(); ++fieldIter){
+		mes->add_field(bidTemplateId, fieldIter->second.eno, fieldIter->second.ftype);
+	}	
+
+#ifdef DEBUG
+    log->dlog(ch, "Ending addElementFieldsTemplate");
+#endif	
+
+	return bidTemplateId;
+}
+
+//! Add required field for the bid's option template 									 
+uint16_t MAPIBidParser::addFieldsOptionTemplate(fieldDefList_t *fieldDefs, 
+												Bid *bidPtr, 
+												ipap_message *mes)
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting addFieldsOptionTemplate");
+#endif
+
+	uint16_t bidOptionTemplateId;
+	
+	// Add the option bid template
+	int nfields = 6;
+	bidOptionTemplateId = mes->new_data_template( nfields, IPAP_OPTNS_BID_TEMPLATE );
+	//put the name
+	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_IDBID);
+	// put the starttime
+	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_STARTSECONDS);
+	// put the endtime
+	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_ENDSECONDS);
+	// put the interval.
+	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_INTERVALSECONDS);
+	// put the auction id.
+	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_IDAUCTION);
+	// put the record id.
+	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_IDRECORD);
+
+#ifdef DEBUG
+    log->dlog(ch, "Ending addFieldsOptionTemplate");
+#endif
+
+	return bidOptionTemplateId;
+}
+												
+
+void MAPIBidParser::addElementRecord(string bidId,
+									 string elementId, 
+									 fieldList_t *fieldList,
+									 fieldDefList_t *fieldDefs,
+									 uint16_t bidTemplateId, 
+									 ipap_message *mes )
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting addElementRecord");
+#endif	
+	
+	ipap_data_record dataElement(bidTemplateId);
+	ipap_field idBidF = mes->get_field_definition( 0, IPAP_FT_IDBID );
+	ipap_value_field fvalue1 = idBidF.get_ipap_value_field( 
+									strdup(bidId.c_str()), bidId.size() );
+	dataElement.insert_field(0, IPAP_FT_IDBID, fvalue1);
+
+	// Add the Record Id
+	ostringstream ss;
+	ss << elementId;
+	string recordId = ss.str();
+	ipap_field idRecordF = mes->get_field_definition( 0, IPAP_FT_IDRECORD );
+	ipap_value_field fvalue2 = idRecordF.get_ipap_value_field( 
+									strdup(recordId.c_str()), recordId.size() );
+	dataElement.insert_field(0, IPAP_FT_IDRECORD, fvalue2);
+	
+	// Add the rest of the field within the element.
+	fieldListIter_t fieldListIter;
+	for (fieldListIter = fieldList->begin(); fieldListIter != fieldList->end(); ++fieldListIter)
+	{
+		// Search the field in the list of fields, previously it was verified its existance.
+		fieldDefItem_t fItem = findField(fieldDefs, fieldListIter->name);
+
+#ifdef DEBUG
+		log->dlog(ch, "get_ipap_message - it is going to add %s eno:%d ftype:%d", 
+					fieldListIter->name.c_str(), fItem.eno, fItem.ftype);
+#endif
+		ipap_field fieldAct = mes->get_field_definition(fItem.eno, fItem.ftype);
+		
+		//TODO AM: we have to fix to manage more than one value.
+		ipap_value_field actFvalue = fieldAct.parse((fieldListIter->value[0]).getValue());
+		dataElement.insert_field(fItem.eno, fItem.ftype, actFvalue);		
+	}
+	
+	mes->include_data(bidTemplateId, dataElement);
+
+#ifdef DEBUG
+    log->dlog(ch, "Ending addElementRecord");
+#endif
 
 }
 
 
-void MAPIBidParser::parse(fieldDefList_t *fieldDefs, 
-						  fieldValList_t *fieldVals, 
-						  bidDB_t *bids,
-						  BidIdSource *idSource )
+void MAPIBidParser::addOptionRecord(string bidId,
+									int recordId,
+									bid_auction_t bAuct, 
+									uint16_t bidTemplateId, 
+									ipap_message *mes )
 {
-    string sname, rname;
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting addOptionRecord");
+#endif
+	
+	ipap_data_record dataOption(bidTemplateId);
+	ipap_field idBidF = mes->get_field_definition( 0, IPAP_FT_IDBID );
+	ipap_value_field fvalue1 = idBidF.get_ipap_value_field( 
+									strdup(bidId.c_str()), bidId.size() );
+	dataOption.insert_field(0, IPAP_FT_IDBID, fvalue1);
+
+	// Add the Record Id
+	ostringstream ss;
+	ss << recordId;
+	string srecordId = ss.str();
+	ipap_field idRecordIdF = mes->get_field_definition( 0, IPAP_FT_IDRECORD );
+	ipap_value_field fvalue2 = idRecordIdF.get_ipap_value_field( 
+									strdup(srecordId.c_str()), srecordId.size() );
+	dataOption.insert_field(0, IPAP_FT_IDRECORD, fvalue2);
+	
+	// Add the auction Id
+	string idAuctionS = bAuct.auctionSet + "." + bAuct.auctionName;
+	ipap_field idAuctionF = mes->get_field_definition( 0, IPAP_FT_IDAUCTION );
+	ipap_value_field fvalue3 = idAuctionF.get_ipap_value_field( 
+								strdup(idAuctionS.c_str()), idAuctionS.size() );
+	dataOption.insert_field(0, IPAP_FT_IDAUCTION, fvalue3);
+	
+	// Add the start datetime
+	assert (sizeof(uint64_t) >= sizeof(time_t));
+	time_t time = bAuct.start;	
+	uint64_t timeUint64 = *reinterpret_cast<uint64_t*>(&time);
+	ipap_field idStartF = mes->get_field_definition( 0, IPAP_FT_STARTSECONDS );
+	ipap_value_field fvalue4 = idStartF.get_ipap_value_field( timeUint64 );
+	dataOption.insert_field(0, IPAP_FT_STARTSECONDS, fvalue4);
+	
+	// Add the endtime
+	ipap_field idStopF = mes->get_field_definition( 0, IPAP_FT_ENDSECONDS );
+	time = bAuct.stop;	
+	timeUint64 = *reinterpret_cast<uint64_t*>(&time);
+	ipap_value_field fvalue5 = idStopF.get_ipap_value_field( timeUint64 );
+	dataOption.insert_field(0, IPAP_FT_ENDSECONDS, fvalue5);
+	
+	// Add the interval.
+	assert (sizeof(uint64_t) >= sizeof(unsigned long));
+	uint64_t uinter = static_cast<uint64_t>(bAuct.interval);
+	ipap_field idIntervalF = mes->get_field_definition( 0, IPAP_FT_INTERVALSECONDS );
+	ipap_value_field fvalue6 = idIntervalF.get_ipap_value_field( uinter );
+	dataOption.insert_field(0, IPAP_FT_INTERVALSECONDS, fvalue6);
+		
+	mes->include_data(bidTemplateId, dataOption);
+
+#ifdef DEBUG
+    log->dlog(ch, "Ending addOptionRecord");
+#endif
+
+}
+
+
+
+
+
+auction::fieldList_t MAPIBidParser::readBidData( ipap_template *templ, 
+									  fieldDefList_t *fieldDefs,
+									  fieldValList_t *fieldVals,
+									  ipap_data_record &record,
+									  string &bidSet,
+									  string &bidName,
+									  string &elementName )
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting readBidData");
+#endif
+
+	string recordName, bidId;
+	fieldList_t fields;
+	fieldDataListIter_t fieldIter;
+	for (fieldIter=record.begin(); fieldIter!=record.end(); ++fieldIter){
+		ipap_field_key kField = fieldIter->first;
+		ipap_value_field dFieldValue = fieldIter->second;
+		
+		fieldDefItem_t fItem = findField(fieldDefs, kField.get_eno() , kField.get_ftype());
+		if ((fItem.name).empty()){
+			ostringstream s;
+			s << "Bid Message Parser: Field eno:" << kField.get_eno();
+			s << "fType:" << kField.get_ftype() << "is not parametrized";
+			throw Error(s.str()); 
+		}
+		else{
+			ipap_field field = templ->get_field( kField.get_eno(), kField.get_ftype() );
+
+			// Search the record name field.
+			if ((kField.get_eno() == 0) && 
+				  (kField.get_ftype()== IPAP_FT_IDBID)){
+				// Parse the bid name if has not done yet.
+				if (bidName.empty()){
+					bidId = field.writeValue(dFieldValue);
+					parseName(bidId, bidSet, bidName);
+				}
+			}
+			else if ((kField.get_eno() == 0) && 
+				  (kField.get_ftype()== IPAP_FT_IDRECORD)){
+				elementName = field.writeValue(dFieldValue);
+			}
+			else {
+				field_t item;
+				item.name = fItem.name;
+				item.type = fItem.type;
+				item.len = fItem.len;				
+				string value = field.writeValue(dFieldValue);
+				parseFieldValue(fieldVals, value, &item);
+				fields.push_back(item);
+			}
+		}
+	}
+	
+#ifdef DEBUG
+    log->dlog(ch, "Ending readBidData");
+#endif
+	
+	return fields;
+}
+
+bid_auction_t MAPIBidParser::readBidOptionData(ipap_template *templ, 
+											   fieldDefList_t *fieldDefs,
+											   ipap_data_record &record)
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting readBidOptionData");
+#endif
+
+	bid_auction_t auction;
+	string auctionName, bidName;
+	fieldDataListIter_t fieldIter;
+	for (fieldIter=record.begin(); fieldIter!=record.end(); ++fieldIter){
+		ipap_field_key kField = fieldIter->first;
+		ipap_value_field dFieldValue = fieldIter->second;
+		
+		fieldDefItem_t fItem = findField(fieldDefs, kField.get_eno() , kField.get_ftype());
+		if ((fItem.name).empty()){
+			ostringstream s;
+			s << "Auction Message Parser: Field eno:" << kField.get_eno();
+			s << "fType:" << kField.get_ftype() << "is not parametrized";
+			throw Error(s.str()); 
+		}
+		else{
+			ipap_field field = templ->get_field( kField.get_eno(), kField.get_ftype() );
+
+			// Search the auction name field.
+			if ((kField.get_eno() == 0) && 
+				  (kField.get_ftype()== IPAP_FT_IDBID)){
+				continue;
+			}
+			else if ((kField.get_eno() == 0) && 
+				  (kField.get_ftype()== IPAP_FT_IDRECORD)){
+				continue;
+			}
+			else if ((kField.get_eno() == 0) && 
+				  (kField.get_ftype()== IPAP_FT_IDAUCTION)){
+				auctionName = field.writeValue(dFieldValue);
+				parseName(auctionName, auction.auctionSet, auction.auctionName);
+			}
+			else if ((kField.get_eno() == 0) && 
+				  (kField.get_ftype()== IPAP_FT_STARTSECONDS)){
+				
+				auction.start = (time_t) dFieldValue.get_value_int64();
+			}
+			else if ((kField.get_eno() == 0) && 
+				  (kField.get_ftype()== IPAP_FT_ENDSECONDS)){
+				auction.stop = (time_t) dFieldValue.get_value_int64();
+			}
+			else if ((kField.get_eno() == 0) && 
+				  (kField.get_ftype()== IPAP_FT_INTERVALSECONDS)){
+				auction.interval = (int) dFieldValue.get_value_int32();
+			}
+			else {
+				ostringstream s;
+				s << "Bid Message Parser: Field eno:" << kField.get_eno();
+				s << "fType:" << kField.get_ftype();
+				s << " was not expected to be included ";
+				throw Error(s.str()); 
+			}
+		}
+	}
+
+#ifdef DEBUG
+    log->dlog(ch, "Ending readBidOptionData");
+#endif
+	
+	return auction;
+}
+
+
+void MAPIBidParser::parse(fieldDefList_t *fields, 
+						  fieldValList_t *fieldVals,
+						  ipap_message *message,
+						  bidDB_t *bids,
+						  BidIdSource *idSource,
+						  ipap_message *messageOut )
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting parse");
+#endif
+
+    string bidSet, bidName;
     elementList_t elements;
     bidAuctionList_t auctions;
-    istringstream in(buf);
-    string args[128];
-    int argc = 0;
-    int ind = 0;
-    string tmp;
-    int n = 0, n2 = 0;
-    string line;
-    time_t now = time(NULL);
 
-    // each line contains 1 bid
-    while (getline(in, line)) {    
-        // tokenize rule string
-
-#ifdef DEBUG
-            log->dlog(ch, "Line given: %s", line.c_str());
-#endif
+    try {
+		// Read the template bid
+		ipap_template *templBid = readTemplate(message, IPAP_SETID_BID_TEMPLATE);
+		
+		// Read the option bid template
+		ipap_template *templOptBid = readTemplate(message, IPAP_OPTNS_BID_TEMPLATE); 
+			
+		// Read the record data associated with the data bid template.
+		if (templBid != NULL){
+			dataRecordList_t dRecordList = readDataRecords(message, templBid->get_template_id());
+			
+			if (dRecordList.size() == 0){
+				throw Error("Bid Message Parser: a data bid template was not given"); 
+			} else {
+				dateRecordListIter_t dataIter;
+				for (dataIter = dRecordList.begin(); dataIter != dRecordList.end(); ++dataIter)
+				{
+					string elementName;
+					fieldList_t elemtFields = readBidData(templBid, fields, fieldVals, *dataIter, bidSet, bidName, elementName );
+					elements[elementName] = elemtFields;
+				}
+			}
+		} else {
+			throw Error("Bid Message Parser: missing data bid template data"); 
+		}
 		
 		
-        // skip initial white ws
-        n = line.find_first_not_of(" \t", 0);
-        while ((n2 = line.find_first_of(" \t", n)) > 0) {
-            if (argc >= (int) (sizeof(args)-1)) {
-                throw Error("too many arguments");
-            }
-            args[argc] = line.substr(n,n2-n);
-#ifdef DEBUG
-            log->dlog(ch, "arg[%i]: %s", argc, args[argc].c_str());
-#endif
-            // skip additional ws
-            n = line.find_first_not_of(" \t", n2);
-            argc++;
-        }
- 
-        // get last argument
-        if ((n > 0) && (n < (int) line.length())) {
-            if (argc >= (int) (sizeof(args)-1)) {
-                throw Error("too many arguments");
-            }
-            args[argc] = line.substr(n,line.length()-n);
-#ifdef DEBUG
-            log->dlog(ch, "arg[%i]: %s", argc, args[argc].c_str());
-#endif
-            argc++;
-        }
-
-        if (argc == 0 ) {
-            throw Error("parse error");
-        }
-
-        // parse the first argument which must be bidname and bidsetname
-        n = args[0].find(".");
-        if (n > 0) {
-            sname = args[0].substr(0, n);
-            // use lower case internally
-            transform(sname.begin(), sname.end(), sname.begin(), ToLower());
-            
-            rname = args[0].substr(n+1, tmp.length()-n);
-            // use lower case internally
-            transform(rname.begin(), rname.end(), rname.begin(), ToLower());
-            
-        } else {
-            sname = "0";
-            rname = args[0];
-            // use lower case internally
-            transform(rname.begin(), rname.end(), rname.begin(), ToLower());
-        }
-
-        // parse the rest of the args
-        ind = 1;
-        while (ind < argc) {
-            if ((ind < argc) && (args[ind][0] == '-')) {
-                switch (args[ind++][1] ) {
-                case 'w':
-                    // -wait is not supported
-                    break;
-                case 'e':
-                  {
-                      if (ind < argc) {
-                          // only one action per -a parameter
-                          element_t elem;
-                          
-                          // element: <name> [<field>=<value> , ...]
-                          elem.name = args[ind++];
-                          
-                          // bid field of the element
-                          while ((ind<argc) && (args[ind][0] != '-')) {
-                              field_t f;
-                              fieldDefListIter_t iter;
-                              
-                              // parse param
-                              tmp = args[ind];
-                              n = tmp.find("=");
-                              if ((n > 0) && (n < (int)tmp.length()-1)) {
-                                  f.name = tmp.substr(0,n);
-                                  // use lower case internally
-								  transform(f.name.begin(), f.name.end(), 
-												f.name.begin(), ToLower());	
-								  
-								  // lookup in field definitions list
-								  iter = fieldDefs->find(f.name);
-								  if (iter != fieldDefs->end()) {
-									  // set according to definition
-									  f.len = iter->second.len;
-									  f.type = iter->second.type;
-                                  
-									  string fvalue = tmp.substr(n+1, tmp.length()-n);
-									  if (fvalue.empty()) {
-										  throw Error("Bid Parser Error: missing value at line");
-									  }
-									  // parse and set value
-									  try {
-										  parseFieldValue(fieldVals, fvalue, &f);
-									  } catch(Error &e) {
-											throw Error("Bid Parser Error: field value parse error at line %s", 
-													e.getError().c_str());
-									  }
-									  
-									  elem.fields.push_back(f);
-								  } else {
-									// else invalid parameter  
-									throw Error("field parameter parse error %s", f.name.c_str());
-								  }
-							  }
-                              ind++;
-                          }
-                          
-                          elements.push_back(elem);
-                      }
-                      
-                  }
-                  break;
-                case 'a':
-                  {
-                      if (ind < argc) 
-                      {
-                          // only one auction per -a parameter
-                          bid_auction_t auction;
-                          string name = args[ind++];
-                          n = name.find(".");
-                          
-                          // auction: <set.name> [<param>=<value> , ...]
-                          auction.auctionSet  = name.substr(0,n);
-                          // use lower case internally
-						  transform(auction.auctionSet.begin(), 
-							        auction.auctionSet.end(), 
-							        auction.auctionSet.begin(), ToLower());
-            
-                          auction.auctionName = tmp.substr(n+1, name.length()-n);
-                          // use lower case internally
-						  transform(auction.auctionName.begin(), 
-							        auction.auctionName.end(), 
-							        auction.auctionName.begin(), ToLower());
-                          
-                          
-                          // bid field of the element
-                          while ((ind<argc) && (args[ind][0] != '-')) {
-                              configItem_t item;
-                              
-                              // parse param
-							  tmp = args[ind];
-							  if (tmp != ",") {
-								  n = tmp.find("=");
-								  if ((n > 0) && (n < (int)tmp.length()-1)) {
-									  item.name = tmp.substr(0,n);
-									  item.value = tmp.substr(n+1, tmp.length()-n);
-									  item.type = "String";
-									  if (item.name == "start") {
-										 item.name = "Start";
-									  } else if (item.name == "stop") {
-										 item.name = "Stop";
-									  } else if (item.name == "duration") {
-										 item.name = "Duration";
-									  } else if (item.name == "interval") {
-										 item.name = "Interval";
-									  } else {
-										 throw Error("unknown option %s", item.name.c_str());
-									  }
-									  auction.miscList[item.name] = item;
-
-								  } else {
-									  // else invalid parameter  
-									  throw Error("bid-auction parameter parse error");
-								  }
-							  }  
-                              ind++;
-                          }        
-                          calculateIntervals(now, &auction);
-                          auctions.push_back(auction);
-                      }
-                      
-                  }
-                  break;
-                default:
-                    throw Error(403, "add_bid: unknown option %s", args[ind].c_str() );
-                }
-            }	
-        }
-      
-        // add bid
-        try {
-            Bid *b = new Bid(sname, rname, elements, auctions);
-            bids->push_back(b);
+		// Read the option data record associated with the option data bid template.
+		if (templOptBid != NULL){
+			
+			dataRecordList_t dOptRecordList = readDataRecords(message, templOptBid->get_template_id());
+			if (dOptRecordList.size() == 0){
+				throw Error("Bid Message Parser: an option data template was not given"); 
+			} else {
+				dateRecordListIter_t dataIter;
+				for (dataIter = dOptRecordList.begin(); dataIter != dOptRecordList.end(); ++dataIter)
+				{
+					bid_auction_t bidAuction = readBidOptionData(templOptBid, fields, *dataIter);
+					auctions[bidAuction.getId()] = bidAuction;
+				}
+			}		
+		} else{
+			throw Error("Bid Message Parser: missing option data template data"); 
+		}
+    
+     
+        Bid *b = new Bid(bidSet, bidName, elements, auctions);
+        bids->push_back(b);
 
 #ifdef DEBUG
-			// debug info
-			log->dlog(ch, "bid %s.%s - %s", sname.c_str(), rname.c_str(), (b->getInfo()).c_str());
+		// debug info
+		log->dlog(ch, "bid %s.%s - %s", bidName.c_str(), bidName.c_str(), (b->getInfo()).c_str());
 #endif
             
-        } catch (Error &e) {
-            log->elog(ch, e);
-            throw e;
-        }
+    } catch (Error &e) {
+       log->elog(ch, e);
+       throw e;
     }
+}
+
+
+/* ------------------------- getMessage ------------------------- */
+ipap_message * MAPIBidParser::get_ipap_message(Bid *bidPtr, 
+											   fieldDefList_t *fieldDefs)
+{
+#ifdef DEBUG
+    log->dlog(ch, "Starting get_ipap_message");
+#endif	
+
+	// We assume that both templates were already sent to the other part.
+	
+	uint16_t bidOptionTemplateId, bidTemplateId;
+	ipap_message *mes = new ipap_message();
+	
+	bidOptionTemplateId = addFieldsOptionTemplate(fieldDefs, bidPtr, mes);
+	
+#ifdef DEBUG
+    log->dlog(ch, "Starting get_ipap_message 1");
+#endif
+	
+	// Loop through the fields in order to put them in a bid Template record
+	bidTemplateId = addElementFieldsTemplate(fieldDefs, bidPtr, mes);
+	
+	// Build the Id of the bid.
+	string bidId = bidPtr->getSetName() + "." + bidPtr->getBidName();
+		
+	// Loop through the elements in order to put them in a data record
+	elementListIter_t elemIter;
+	for (elemIter = bidPtr->getElements()->begin(); 
+			elemIter != bidPtr->getElements()->end(); ++elemIter)
+	{
+		addElementRecord(bidId, elemIter->first, &(elemIter->second), fieldDefs, bidTemplateId, mes );
+	}
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting get_ipap_message 2");
+#endif
+	
+	// Loop through the related auctions to include them in a option record.
+	bidAuctionListIter_t auctionListIter;
+	int recordId = 1;
+	for (auctionListIter = bidPtr->getAuctions()->begin(); 
+			auctionListIter != bidPtr->getAuctions()->end(); ++auctionListIter)
+	{
+		addOptionRecord(bidId, recordId, auctionListIter->second, bidOptionTemplateId, mes);
+		recordId = recordId + 1;
+	}
+	
+#ifdef DEBUG
+    log->dlog(ch, "Ending get_ipap_message");
+#endif	
+	
+	return mes;
+}											
+
+vector<ipap_message *> 
+MAPIBidParser::get_ipap_messages(fieldDefList_t *fieldDefs, 
+									  bidDB_t *bids)
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting get_ipap_messages");
+#endif	
+	
+	vector<ipap_message *> vct_return;
+	bidDBIter_t bidIter;
+	for (bidIter=bids->begin(); bidIter!=bids->end(); ++bidIter){
+		Bid *b = *bidIter;
+		ipap_message *mes =get_ipap_message(b, fieldDefs);
+		vct_return.push_back(mes);
+	}
+
+#ifdef DEBUG
+    log->dlog(ch, "Ending get_ipap_messages");
+#endif
+	
+	return vct_return;
+		
 }

@@ -1,131 +1,216 @@
-Aug 27 09:29:05  INFO  [Agent]  Initializing Agent system
-Aug 27 09:29:05  INFO  [Agent]  Program executable = /home/luis/AuctionManager/user_agent/src/.libs/lt-netagent
-Aug 27 09:29:05  INFO  [Agent]  Started at Thu Aug 27 09:29:05 2015
-Aug 27 09:29:05  INFO  [Agent]  ConfigFile = /home/luis/AuctionManager/etc/netagnt.conf.xml
-Aug 27 09:29:05  DEBUG  [ConfigManager]  Starting
-Aug 27 09:29:05  DEBUG  [XMLParser]  DTD file /home/luis/AuctionManager/etc/netagnt.conf.dtd, XML file /home/luis/AuctionManager/etc/netagnt.conf.xml, root CONFIG
-Aug 27 09:29:05  DEBUG  [ConfigParser]  MAIN.VerboseLevel = 4
-Aug 27 09:29:05  DEBUG  [ConfigParser]  MAIN.LogFile = /home/luis/AuctionManager/etc/log/netagent.log
-Aug 27 09:29:05  DEBUG  [ConfigParser]  MAIN.PidFile = /tmp/netagent.pid
-Aug 27 09:29:05  DEBUG  [ConfigParser]  MAIN.FilterDefFile = /home/luis/AuctionManager/etc/fielddef.xml
-Aug 27 09:29:05  DEBUG  [ConfigParser]  MAIN.FilterConstFile = /home/luis/AuctionManager/etc/fieldval.xml
-Aug 27 09:29:05  DEBUG  [ConfigParser]  MAIN.AuctionFile = /home/luis/AuctionManager/etc/example_auctions2.xml
-Aug 27 09:29:05  DEBUG  [ConfigParser]  CONTROL.Enable = yes
-Aug 27 09:29:05  DEBUG  [ConfigParser]  CONTROL.ControlPort = 12248
-Aug 27 09:29:05  DEBUG  [ConfigParser]  CONTROL.UseSSL = no
-Aug 27 09:29:05  DEBUG  [ConfigParser]  CONTROL.UseIPv6 = no
-Aug 27 09:29:05  DEBUG  [ConfigParser]  CONTROL.LogOnConnect = yes
-Aug 27 09:29:05  DEBUG  [ConfigParser]  CONTROL.LogCommand = yes
-Aug 27 09:29:05  DEBUG  [ConfigParser]  CONTROL.ACCESS ALLOW Host All
-Aug 27 09:29:05  DEBUG  [ConfigParser]  CONTROL.ACCESS ALLOW User admin:admin
-Aug 27 09:29:05  DEBUG  [ConfigParser]  CONTROL.ACCESS DENY Host All
-Aug 27 09:29:05  INFO  [Logger]  setting log level to 4
-Aug 27 09:29:05  INFO  [Logger]  active logs: INFO CRITICAL ERROR WARN DEBUG 
-Aug 27 09:29:05  INFO  [Agent]  configfilename used is: '/home/luis/AuctionManager/etc/netagnt.conf.xml'
-Aug 27 09:29:05  DEBUG  [Agent]  ------- startup -------
-Aug 27 09:29:05  DEBUG  [AuctionTimer]  Starting
-Aug 27 09:29:05  DEBUG  [AuctionTimer]  system clock speed is 2370.828 MHz
-Aug 27 09:29:05  DEBUG  [AuctionTimer]  two successive readTSC take 0 ticks
-Aug 27 09:29:05  DEBUG  [BidManager]  Starting
-Aug 27 09:29:05  DEBUG  [AuctionManager]  Starting
-Aug 27 09:29:05  DEBUG  [EventScheduler]  Starting
-Aug 27 09:29:05  DEBUG  [AGENT_PROCESSOR]  Starting
-Aug 27 09:29:05  DEBUG  [AGENT_PROCESSOR]  filename /home/luis/AuctionManager/etc/fielddef.xml
-Aug 27 09:29:05  DEBUG  [XMLParser]  DTD file /home/luis/AuctionManager/etc/fielddef.dtd, XML file /home/luis/AuctionManager/etc/fielddef.xml, root FIELDDEF
-Aug 27 09:29:05  DEBUG  [FieldDefParser]  quantity = |8
-Aug 27 09:29:05  DEBUG  [FieldDefParser]  unitprice = |8
-Aug 27 09:29:05  DEBUG  [FieldDefParser]  budget = |8
-Aug 27 09:29:05  DEBUG  [FieldDefParser]  maxvalue = |8
-Aug 27 09:29:05  DEBUG  [EventScheduler]  new event Add-Auctions - time: 2015-08-27 09:29:05.613631Z
-Aug 27 09:29:05  DEBUG  [CtrlComm]  Starting
-Aug 27 09:29:05  INFO  [CtrlComm]  listening on port number 12248.
-Aug 27 09:29:05  DEBUG  [Agent]  ------- end Agent constructor -------
-Aug 27 09:29:05  DEBUG  [EventScheduler]  new event Ctrlcomm-timer - time: 2015-08-27 09:29:10.619573Z
-Aug 27 09:29:05  DEBUG  [Agent]  ------- Agent Manager is running -------
-Aug 27 09:29:05  DEBUG  [EventScheduler]  expired event Add-Auctions
-Aug 27 09:29:05  DEBUG  [Agent]  In check FD events
-Aug 27 09:29:05  DEBUG  [EventScheduler]  get Next Event Add-Auctions
-Aug 27 09:29:05  DEBUG  [Agent]  Next Event Add-Auctions
-Aug 27 09:29:05  DEBUG  [Agent]  processing event adding auctions
-Aug 27 09:29:05  DEBUG  [AuctionManager]  ParseAuctions
-Aug 27 09:29:05  DEBUG  [XMLParser]  DTD file /home/luis/AuctionManager/etc/auctionfile.dtd, XML file /home/luis/AuctionManager/etc/example_auctions2.xml, root AUCTIONSET
-Aug 27 09:29:05  DEBUG  [AuctionFileParser]  Auction set general
-Aug 27 09:29:05  DEBUG  [AuctionFileParser]  C Duration = 100000
-Aug 27 09:29:05  DEBUG  [AuctionFileParser]  C Interval = 10
-Aug 27 09:29:05  DEBUG  [AuctionFileParser]  auction general.1
-Aug 27 09:29:05  DEBUG  [AuctionFileParser]   A bas
-Aug 27 09:29:05  DEBUG  [AuctionFileParser]    C Bandwidth = 8
-Aug 27 09:29:05  DEBUG  [AuctionFileParser]    C ReservePrice = 0.012
-Aug 27 09:29:05  DEBUG  [AuctionFileParser]   C Duration = 100000
-Aug 27 09:29:05  DEBUG  [AuctionFileParser]   C Interval = 10
-Aug 27 09:29:05  DEBUG  [Auction]  Auction constructor
-Aug 27 09:29:05  DEBUG  [Auction]  Interval: 10 - Align:0
-Aug 27 09:29:05  DEBUG  [AuctionManager]  Auctions parsed
-Aug 27 09:29:05  DEBUG  [Agent]  Auctions sucessfully parsed 
-Aug 27 09:29:05  DEBUG  [AuctionManager]  adding new auction with set = general, name = '1'
-Aug 27 09:29:05  DEBUG  [AuctionManager]  Auction set not found
-Aug 27 09:29:05  DEBUG  [AuctionManager]  Auction Id = #0 
-Aug 27 09:29:05  DEBUG  [AuctionManager]  finish adding new auction with name = '1'
-Aug 27 09:29:05  DEBUG  [AuctionManager]  Start all auctions - it is going to activate them
-Aug 27 09:29:05  DEBUG  [EventScheduler]  new event Activate-Auctions - time: 2015-08-27 09:29:05.621591Z
-Aug 27 09:29:05  DEBUG  [EventScheduler]  new event Remove-Auctions - time: 2015-08-28 13:15:45.621617Z
-Aug 27 09:29:05  DEBUG  [AuctionManager]  Finished adding auctions
-Aug 27 09:29:05  DEBUG  [Agent]  Auctions sucessfully added 
-Aug 27 09:29:05  DEBUG  [EventScheduler]  starting requeue event Add-Auctions
-Aug 27 09:29:05  DEBUG  [EventScheduler]  remove event Add-Auctions
-Aug 27 09:29:05  DEBUG  [EventScheduler]  expired event Activate-Auctions
-Aug 27 09:29:05  DEBUG  [Agent]  In check FD events
-Aug 27 09:29:05  DEBUG  [EventScheduler]  get Next Event Activate-Auctions
-Aug 27 09:29:05  DEBUG  [Agent]  Next Event Activate-Auctions
-Aug 27 09:29:05  DEBUG  [Agent]  processing event activate auctions
-Aug 27 09:29:05  DEBUG  [AGENT_PROCESSOR]  Start addAuctions
-Aug 27 09:29:05  DEBUG  [AGENT_PROCESSOR]  Start addAuction
-Aug 27 09:29:05  DEBUG  [AGENT_PROCESSOR]  Adding auction #0 - set:general, name:1
-Aug 27 09:29:05  DEBUG  [AGENT_PROCESSOR]  End addAuction
-Aug 27 09:29:05  DEBUG  [AGENT_PROCESSOR]  End addAuctions
-Aug 27 09:29:05  DEBUG  [EventScheduler]  starting requeue event Activate-Auctions
-Aug 27 09:29:05  DEBUG  [EventScheduler]  remove event Activate-Auctions
-Aug 27 09:29:10  DEBUG  [EventScheduler]  expired event Ctrlcomm-timer
-Aug 27 09:29:10  DEBUG  [Agent]  In check FD events
-Aug 27 09:29:10  DEBUG  [EventScheduler]  get Next Event Ctrlcomm-timer
-Aug 27 09:29:10  DEBUG  [Agent]  Next Event Ctrlcomm-timer
-Aug 27 09:29:10  DEBUG  [EventScheduler]  starting requeue event Ctrlcomm-timer
-Aug 27 09:29:10  DEBUG  [EventScheduler]  requeue event Ctrlcomm-timer
-Aug 27 09:29:15  DEBUG  [EventScheduler]  expired event Ctrlcomm-timer
-Aug 27 09:29:15  DEBUG  [Agent]  In check FD events
-Aug 27 09:29:15  DEBUG  [EventScheduler]  get Next Event Ctrlcomm-timer
-Aug 27 09:29:15  DEBUG  [Agent]  Next Event Ctrlcomm-timer
-Aug 27 09:29:15  DEBUG  [EventScheduler]  starting requeue event Ctrlcomm-timer
-Aug 27 09:29:15  DEBUG  [EventScheduler]  requeue event Ctrlcomm-timer
-Aug 27 09:29:20  DEBUG  [EventScheduler]  expired event Ctrlcomm-timer
-Aug 27 09:29:20  DEBUG  [Agent]  In check FD events
-Aug 27 09:29:20  DEBUG  [EventScheduler]  get Next Event Ctrlcomm-timer
-Aug 27 09:29:20  DEBUG  [Agent]  Next Event Ctrlcomm-timer
-Aug 27 09:29:20  DEBUG  [EventScheduler]  starting requeue event Ctrlcomm-timer
-Aug 27 09:29:20  DEBUG  [EventScheduler]  requeue event Ctrlcomm-timer
-Aug 27 09:29:25  DEBUG  [EventScheduler]  expired event Ctrlcomm-timer
-Aug 27 09:29:25  DEBUG  [Agent]  In check FD events
-Aug 27 09:29:25  DEBUG  [EventScheduler]  get Next Event Ctrlcomm-timer
-Aug 27 09:29:25  DEBUG  [Agent]  Next Event Ctrlcomm-timer
-Aug 27 09:29:25  DEBUG  [EventScheduler]  starting requeue event Ctrlcomm-timer
-Aug 27 09:29:25  DEBUG  [EventScheduler]  requeue event Ctrlcomm-timer
-Aug 27 09:29:30  DEBUG  [EventScheduler]  expired event Ctrlcomm-timer
-Aug 27 09:29:30  DEBUG  [Agent]  In check FD events
-Aug 27 09:29:30  DEBUG  [EventScheduler]  get Next Event Ctrlcomm-timer
-Aug 27 09:29:30  DEBUG  [Agent]  Next Event Ctrlcomm-timer
-Aug 27 09:29:30  DEBUG  [EventScheduler]  starting requeue event Ctrlcomm-timer
-Aug 27 09:29:30  DEBUG  [EventScheduler]  requeue event Ctrlcomm-timer
-Aug 27 09:29:35  DEBUG  [Agent]  In check FD events
-Aug 27 09:29:35  INFO  [Agent]  NetAgent going down on Ctrl-C
-Aug 27 09:29:35  DEBUG  [Agent]  ------- shutdown -------
-Aug 27 09:29:35  DEBUG  [Agent]  ------- end shutdown -------
-Aug 27 09:29:35  DEBUG  [CtrlComm]  Shutdown
-Aug 27 09:29:35  DEBUG  [AGENT_PROCESSOR]  Shutdown
-Aug 27 09:29:35  DEBUG  [EventScheduler]  Shuting down Event Scheduler
-Aug 27 09:29:35  DEBUG  [EventScheduler]  Shutdown Event Scheduler
-Aug 27 09:29:35  DEBUG  [AuctionManager]  Shutdown
-Aug 27 09:29:35  DEBUG  [Auction]  Auction destructor Id: 0
-Aug 27 09:29:35  DEBUG  [AuctionManager]  Finish shutdown
-Aug 27 09:29:35  DEBUG  [BidManager]  Shutdown
-Aug 27 09:29:35  DEBUG  [ConfigManager]  Shutdown
-Aug 27 09:29:35  DEBUG  [AuctionTimer]  Shutdown
+Sep 24 20:11:24.000  INFO  [Agent]  Initializing Agent system
+Sep 24 20:11:24.000  INFO  [Agent]  Program executable = /home/luis/AuctionManager/user_agent/src/.libs/lt-netagent
+Sep 24 20:11:24.000  INFO  [Agent]  Started at Thu Sep 24 20:11:24 2015
+Sep 24 20:11:24.000  INFO  [Agent]  ConfigFile = /home/luis/AuctionManager/etc/netagnt.conf.xml
+Sep 24 20:11:24.000  DEBUG  [ConfigManager]  Starting
+Sep 24 20:11:24.000  DEBUG  [XMLParser]  DTD file /home/luis/AuctionManager/etc/netagnt.conf.dtd, XML file /home/luis/AuctionManager/etc/netagnt.conf.xml, root CONFIG
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  MAIN.VerboseLevel = 4
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  MAIN.LogFile = /home/luis/AuctionManager/etc/log/netagent.log
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  MAIN.PidFile = /tmp/netagent.pid
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  MAIN.AnslpConfFile = /home/luis/AuctionManager/etc/nsis-ka_agent.conf
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  MAIN.FilterDefFile = /home/luis/AuctionManager/etc/fielddef.xml
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  MAIN.FilterConstFile = /home/luis/AuctionManager/etc/fieldval.xml
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  MAIN.AuctionFile = /home/luis/AuctionManager/etc/example_auctions2.xml
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  CONTROL.Enable = yes
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  CONTROL.ControlPort = 12248
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  CONTROL.UseSSL = no
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  CONTROL.UseIPv6 = no
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  CONTROL.LogOnConnect = yes
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  CONTROL.LogCommand = yes
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  CONTROL.ACCESS ALLOW Host All
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  CONTROL.ACCESS ALLOW User admin:admin
+Sep 24 20:11:24.000  DEBUG  [ConfigParser]  CONTROL.ACCESS DENY Host All
+Sep 24 20:11:24.000  DEBUG  [ConfigManager]  MAIN. = 80
+Sep 24 20:11:24.000  DEBUG  [ConfigManager]  MAIN.ConfigFile = /home/luis/AuctionManager/etc/netagnt.conf.xml
+Sep 24 20:11:24.000  DEBUG  [ConfigManager]  MAIN.destinAddress = 157.253.237.92
+Sep 24 20:11:24.000  DEBUG  [ConfigManager]  MAIN.protocol = 17
+Sep 24 20:11:24.000  DEBUG  [ConfigManager]  MAIN.sourceAddress = 10.0.2.15
+Sep 24 20:11:24.000  DEBUG  [ConfigManager]  MAIN.lifetime = 40
+Sep 24 20:11:24.000  DEBUG  [ConfigManager]  MAIN. = 15000
+Sep 24 20:11:24.000  INFO  [Logger]  setting log level to 4
+Sep 24 20:11:24.000  INFO  [Logger]  active logs: INFO CRITICAL ERROR WARN DEBUG 
+Sep 24 20:11:24.000  INFO  [Agent]  configfilename used is: '/home/luis/AuctionManager/etc/netagnt.conf.xml'
+Sep 24 20:11:24.000  INFO  [Agent]  source address: '10.0.2.15'
+Sep 24 20:11:24.000  INFO  [Agent]  source port: '15000'
+Sep 24 20:11:24.000  INFO  [Agent]  destination address: '157.253.237.92'
+Sep 24 20:11:24.000  INFO  [Agent]  destination port: '80'
+Sep 24 20:11:24.000  INFO  [Agent]  protocol: '17'
+Sep 24 20:11:24.000  INFO  [Agent]  lifetime: '40'
+Sep 24 20:11:24.000  DEBUG  [Agent]  ------- startup -------
+Sep 24 20:11:24.000  DEBUG  [AuctionTimer]  Starting
+Sep 24 20:11:24.000  DEBUG  [AuctionTimer]  system clock speed is 2372.814 MHz
+Sep 24 20:11:24.000  DEBUG  [AuctionTimer]  two successive readTSC take 0 ticks
+Sep 24 20:11:24.000  DEBUG  [BidManager]  Starting
+Sep 24 20:11:24.000  DEBUG  [AuctionManager]  Starting
+Sep 24 20:11:24.000  DEBUG  [IPAP_MESSAGE]  Starting ipap message constructor
+Sep 24 20:11:24.000  DEBUG  [IPAP_MESSAGE]  Starting method init
+Sep 24 20:11:24.000  DEBUG  [IPAP_MESSAGE]  Ending method init
+Sep 24 20:11:24.000  DEBUG  [IPAP_MESSAGE]  Ending ipap message constructor
+Sep 24 20:11:24.000  DEBUG  [EventScheduler]  Starting
+Sep 24 20:11:24.000  DEBUG  [Agent]  ------- eventSchedulerAgent loaded-------
+Sep 24 20:11:24.000  DEBUG  [Agent]  Anslp client conf file:/home/luis/AuctionManager/etc/nsis-ka_agent.conf
+Sep 24 20:11:24.000  DEBUG  [AnslClient]  Starting AnslpClient
+Sep 24 20:11:24.000  DEBUG  [IPAP_MESSAGE]  ipap message constructor
+Sep 24 20:11:24.000  DEBUG  [IPAP_MESSAGE]  Starting method init
+Sep 24 20:11:24.000  DEBUG  [IPAP_MESSAGE]  Ending method init
+Sep 24 20:11:24.000  DEBUG  [ANSLP_IPAP_MESSAGE]  in anslp_ipap_message constructor without parameters
+Sep 24 20:11:24.000  DEBUG  [AnslClient]  Parameters registered 
+ config		: nsis-ka.conf
+peerid		: 8a65ed5c26e2af43b870b92d3b098868 (.e.\&..C.p.-;..h)
+udp-port	: 270
+tcp-port	: 270
+tls-port	: 271
+sctp-port	: 270
+localaddr-v4	: 
+localaddr-v6	: 
+home-netprefix	: ::/0
+home-address	: ::
+coa-interfaces	: 
+homeagent-address	: ::
+homeagent-address-alt	: ::
+retry-limit	: 64000 ms
+retry-period	: 500 ms
+retry-factor	: 0.75
+state-lifetime	: 60000 ms
+refresh-limit	: 120000 ms
+ma-hold-time	: 180000 ms
+secrets-refreshtime	: 300 s
+secrets-count	: 2
+secrets-length	: 256 bit
+cookie-digest	: SHA1
+delayed-state-installation	: yes
+confirm-required	: yes
+send-data-in-query	: yes
+req-hello-echo	: no
+advertise-sctp	: yes
+verbose-errors	: yes
+send-rao	: yes
+intercept-requires-rao	: no
+intercept-cmd	: ./intercept
+debug-tp	: no
+tls-cert	: client_cert.pem
+tls-privkey	: client_privkey.pem
+tls-cacert	: root_cert.pem
+
+Sep 24 20:11:24.000  DEBUG  [AnslClient]  anslp configuration object created /home/luis/AuctionManager/etc/nsis-ka_agent.conf
+Sep 24 20:11:26.000  INFO  [AnslClient]  config file:/home/luis/AuctionManager/etc/nsis-ka_agent.conf
+Sep 24 20:11:26.000  DEBUG  [AnslClient]  ending constructor AnslpClient
+Sep 24 20:11:26.000  DEBUG  [Agent]  ------- anslp client loaded-------
+Sep 24 20:11:26.000  DEBUG  [AGENT_PROCESSOR]  Starting
+Sep 24 20:11:26.000  DEBUG  [AGENT_PROCESSOR]  filename /home/luis/AuctionManager/etc/fielddef.xml
+Sep 24 20:11:26.000  DEBUG  [XMLParser]  DTD file /home/luis/AuctionManager/etc/fielddef.dtd, XML file /home/luis/AuctionManager/etc/fielddef.xml, root FIELDDEF
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  quantity = |8
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  unitprice = |8
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  unitbudget = |8
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  maxvalue = |8
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  duration = |4
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  bandwidth = |8
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  reserveprice = |8
+Sep 24 20:11:26.000  DEBUG  [EventScheduler]  new event Add-Auctions - time: 2015-09-24 20:11:26.067087Z
+Sep 24 20:11:26.000  DEBUG  [CtrlComm]  Starting
+Sep 24 20:11:26.000  INFO  [CtrlComm]  listening on port number 12248.
+Sep 24 20:11:26.000  DEBUG  [Agent]  ------- end Agent constructor -------
+Sep 24 20:11:26.000  DEBUG  [EventScheduler]  new event Ctrlcomm-timer - time: 2015-09-24 20:11:31.075619Z
+Sep 24 20:11:26.000  DEBUG  [Agent]  ------- Agent Manager is running -------
+Sep 24 20:11:26.000  DEBUG  [EventScheduler]  expired event Add-Auctions
+Sep 24 20:11:26.000  DEBUG  [Agent]  In check FD events
+Sep 24 20:11:26.000  DEBUG  [EventScheduler]  get Next Event Add-Auctions
+Sep 24 20:11:26.000  DEBUG  [Agent]  Next Event Add-Auctions
+Sep 24 20:11:26.000  DEBUG  [Agent]  processing event adding auctions
+Sep 24 20:11:26.000  DEBUG  [AuctionManager]  ParseAuctions
+Sep 24 20:11:26.000  DEBUG  [AuctionManager]  filename /home/luis/AuctionManager/etc/fielddef.xml
+Sep 24 20:11:26.000  DEBUG  [XMLParser]  DTD file /home/luis/AuctionManager/etc/fielddef.dtd, XML file /home/luis/AuctionManager/etc/fielddef.xml, root FIELDDEF
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  quantity = |8
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  unitprice = |8
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  unitbudget = |8
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  maxvalue = |8
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  duration = |4
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  bandwidth = |8
+Sep 24 20:11:26.000  DEBUG  [FieldDefParser]  reserveprice = |8
+Sep 24 20:11:26.000  DEBUG  [XMLParser]  DTD file /home/luis/AuctionManager/etc/auctionfile.dtd, XML file /home/luis/AuctionManager/etc/example_auctions2.xml, root AUCTIONSET
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Auction set general
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  C duration = 100000
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  C interval = 10
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Starting parseField
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Name:quantity sBid: 1 sOptBid:0 sAlloc:1
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Ending parseField
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Starting parseField
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Name:unitbudget sBid: 1 sOptBid:0 sAlloc:0
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Ending parseField
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Starting parseField
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Name:unitprice sBid: 1 sOptBid:0 sAlloc:1
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Ending parseField
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Starting parseField
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Name:duration sBid: 0 sOptBid:1 sAlloc:0
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  Ending parseField
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]  auction general.1
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]   A bas
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]    C bandwidth = 8
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]    C reserveprice = 0.012
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]   C duration = 100000
+Sep 24 20:11:26.000  DEBUG  [AuctionFileParser]   C interval = 10
+Sep 24 20:11:26.000  DEBUG  [Auction]  Auction constructor
+Sep 24 20:11:26.000  DEBUG  [Auction]  bid template fields: 3 - opt bid template fields:1 					- allocation template fields:2
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method new_data_template
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method new_template
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method add_field
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method add_field
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method add_field
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method get_template
+Sep 24 20:11:26.000  DEBUG  [Auction]  template Bid Id 256
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method new_data_template
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method new_template
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method add_field
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method get_template
+Sep 24 20:11:26.000  DEBUG  [Auction]  template Option Bid Id 257 NumFields:1
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method new_data_template
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method new_template
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method add_field
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method add_field
+Sep 24 20:11:26.000  DEBUG  [Auction]  template Allocation Id 258
+Sep 24 20:11:26.000  DEBUG  [IPAP_MESSAGE]  Starting method get_template
+Sep 24 20:11:26.000  DEBUG  [Auction]  Ending Constructor Auction
+Sep 24 20:11:26.000  DEBUG  [AuctionManager]  Auctions parsed
+Sep 24 20:11:26.000  DEBUG  [Agent]  Auctions sucessfully parsed 
+Sep 24 20:11:26.000  DEBUG  [AuctionManager]  adding new auction with set = general, name = '1'
+Sep 24 20:11:26.000  DEBUG  [AuctionManager]  Auction set not found
+Sep 24 20:11:26.000  DEBUG  [AuctionManager]  Auction Id = #0 
+Sep 24 20:11:26.000  DEBUG  [AuctionManager]  finish adding new auction with name = '1'
+Sep 24 20:11:26.000  DEBUG  [AuctionManager]  Start all auctions - it is going to activate them
+Sep 24 20:11:26.000  DEBUG  [EventScheduler]  new event Activate-Auctions - time: 2015-09-24 20:11:26.081873Z
+Sep 24 20:11:26.000  DEBUG  [AuctionManager]  Finished adding auctions
+Sep 24 20:11:26.000  DEBUG  [Agent]  Auctions sucessfully added 
+Sep 24 20:11:26.000  DEBUG  [EventScheduler]  starting requeue event Add-Auctions
+Sep 24 20:11:26.000  DEBUG  [EventScheduler]  remove event Add-Auctions
+Sep 24 20:11:26.000  DEBUG  [EventScheduler]  expired event Activate-Auctions
+Sep 24 20:11:26.000  DEBUG  [Agent]  In check FD events
+Sep 24 20:11:26.000  DEBUG  [EventScheduler]  get Next Event Activate-Auctions
+Sep 24 20:11:26.000  DEBUG  [Agent]  Next Event Activate-Auctions
+Sep 24 20:11:26.000  DEBUG  [Agent]  processing event activate auctions
+Sep 24 20:11:26.000  DEBUG  [AGENT_PROCESSOR]  Start addAuctions
+Sep 24 20:11:26.000  DEBUG  [AGENT_PROCESSOR]  Start addAuction
+Sep 24 20:11:26.000  DEBUG  [AGENT_PROCESSOR]  Adding auction #0 - set:general, name:1
+Sep 24 20:11:26.000  DEBUG  [AGENT_PROCESSOR]  End addAuction
+Sep 24 20:11:26.000  DEBUG  [AGENT_PROCESSOR]  End addAuctions
+Sep 24 20:11:26.000  DEBUG  [EventScheduler]  starting requeue event Activate-Auctions
+Sep 24 20:11:26.000  DEBUG  [EventScheduler]  remove event Activate-Auctions
+Sep 24 20:11:30.000  DEBUG  [Agent]  In check FD events
+Sep 24 20:11:30.000  INFO  [Agent]  NetAgent going down on Ctrl-C
+Sep 24 20:11:30.000  DEBUG  [Agent]  ------- shutdown -------
+Sep 24 20:11:30.000  DEBUG  [Agent]  ------- end shutdown -------
+Sep 24 20:11:30.000  DEBUG  [CtrlComm]  Shutdown
+Sep 24 20:11:30.000  DEBUG  [AGENT_PROCESSOR]  Shutdown
+Sep 24 20:11:30.000  DEBUG  [AnslClient]  Starting destructor AnslpClient
+Sep 24 20:11:31.000  DEBUG  [IPAP_MESSAGE]  destroying ipap_message
+Sep 24 20:11:31.000  DEBUG  [IPAP_MESSAGE]  Starting method close
+Sep 24 20:11:40.000  DEBUG  [AnslClient]  Ending destructor AnslpClient
+Sep 24 20:11:40.000  DEBUG  [EventScheduler]  Shuting down Event Scheduler
+Sep 24 20:11:40.000  DEBUG  [EventScheduler]  Shutdown Event Scheduler
+Sep 24 20:11:40.000  DEBUG  [AuctionManager]  Shutdown
+Sep 24 20:11:40.000  DEBUG  [Auction]  Auction destructor Id: 0
+Sep 24 20:11:40.000  DEBUG  [IPAP_MESSAGE]  destroying ipap_message
+Sep 24 20:11:40.000  DEBUG  [IPAP_MESSAGE]  Starting method close
+Sep 24 20:11:40.000  DEBUG  [AuctionManager]  Finish shutdown
+Sep 24 20:11:40.000  DEBUG  [BidManager]  Shutdown
+Sep 24 20:11:40.000  DEBUG  [ConfigManager]  Shutdown
+Sep 24 20:11:40.000  DEBUG  [AuctionTimer]  Shutdown

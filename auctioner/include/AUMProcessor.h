@@ -38,6 +38,7 @@
 #include "Error.h"
 #include "Logger.h"
 #include "EventScheduler.h"
+#include "MAPIIpApMessageParser.h"
 
 namespace auction
 {
@@ -69,7 +70,7 @@ typedef map<int, auctionProcess_t>::iterator  auctionProcessListIter_t;
     the AuctionProcessor class allows auctioning between bids 
 */
 
-class AUMProcessor : public AuctionManagerComponent
+class AUMProcessor : public AuctionManagerComponent, public MAPIIpApMessageParser
 {
   private:
 
@@ -92,6 +93,13 @@ class AUMProcessor : public AuctionManagerComponent
     //! add timer events to scheduler
     void addTimerEvents( int auctionID, int actID, ppaction_t &act, EventScheduler &es );
 
+	miscList_t readMiscData( ipap_template *templ, ipap_data_record &record);
+	
+	bool intersects( time_t startDttmAuc, time_t stopDttmAuc, 
+							time_t startDttmReq, time_t stopDttmReq );
+	
+	bool forResource(string resourceAuc, string resourceIdReq);
+	
   public:
 
     /*! \short   construct and initialize a PacketProcessor object
@@ -148,7 +156,12 @@ class AUMProcessor : public AuctionManagerComponent
         \returns 0 - on success, <0 - else
     */
     int delAuction( Auction *a );
-
+	
+    /*! \short   get the auctions applicable given the options within the message.
+        \arg \message a  pointer to a message with the options to filter.
+        \returns 0 - list of application auctions.
+    */
+	auctionDB_t * getApplicableAuctions(ipap_message *message);
 
     //! handle file descriptor event
     virtual int handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds);

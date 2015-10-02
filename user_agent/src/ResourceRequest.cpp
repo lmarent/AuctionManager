@@ -74,7 +74,7 @@ string ResourceRequest::getInfo()
 	return output.str();
 }
 
-fieldList_t *ResourceRequest::getFields()
+auction::fieldList_t *ResourceRequest::getFields()
 {
 	return &fields;
 }
@@ -82,4 +82,45 @@ fieldList_t *ResourceRequest::getFields()
 resourceReqIntervalList_t * ResourceRequest::getIntervals()
 {
 	return &intervals;
+}
+
+resourceReq_interval_t ResourceRequest::getIntervalByStart(time_t start)
+{
+	
+	resourceReq_interval_t inter_return;
+	inter_return.start = 0;
+	inter_return.stop = 0;
+	inter_return.interval = 0;
+	inter_return.align = 0;
+	
+	resourceReqIntervalListIter_t inter_iter;
+	for (inter_iter = intervals.begin(); inter_iter != intervals.end(); ++inter_iter)
+	{
+		if (inter_iter->start == start) {
+			inter_return = *inter_iter;
+		}
+	}	
+	
+	return inter_return;
+}
+
+
+resourceReq_interval_t ResourceRequest::getIntervalByEnd(time_t stop)
+{
+	
+	resourceReq_interval_t inter_return;
+	inter_return.start = 0;
+	inter_return.stop = 0;
+	inter_return.interval = 0;
+	inter_return.align = 0;
+	
+	resourceReqIntervalListIter_t inter_iter;
+	for (inter_iter = intervals.begin(); inter_iter != intervals.end(); ++inter_iter)
+	{
+		if (inter_iter->stop == stop) {
+			inter_return = *inter_iter;
+		}
+	}	
+	
+	return inter_return;
 }

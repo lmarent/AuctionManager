@@ -130,13 +130,17 @@ public:
 	void parseFieldValue(string val);
 	
 	string getInfo(void);
+	
+	bool operator==(const field_t &param);
+
+	bool operator!=(const field_t &param);
 		
 };
 
 //! field list (only push_back & sequential access)
-typedef std::list<field_t>            fieldList_t;
-typedef std::list<field_t>::iterator  fieldListIter_t;
-typedef std::list<field_t>::const_iterator  fieldListconstIter_t;
+typedef vector<field_t>            			fieldList_t;
+typedef vector<field_t>::iterator  			fieldListIter_t;
+typedef vector<field_t>::const_iterator  	fieldListconstIter_t;
 
 
 }; // namespace auction.

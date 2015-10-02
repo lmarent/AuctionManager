@@ -73,10 +73,10 @@ void BidFileParser_Test::setUp()
 
 void BidFileParser_Test::tearDown() 
 {
-	delete(ptrBidFileParser);
-	delete(idSource);
-    delete(ptrFieldParsers);
-    delete(ptrFieldValParser);
+	saveDelete(ptrBidFileParser);
+	saveDelete(idSource);
+    saveDelete(ptrFieldParsers);
+    saveDelete(ptrFieldValParser);
 	
 }
 
@@ -93,6 +93,8 @@ void BidFileParser_Test::testParser()
 							idSource );
 		
 		CPPUNIT_ASSERT( new_bids->size() == 1 );
+		
+		saveDelete(new_bids);
 		
 	}
 	catch (Error &e){

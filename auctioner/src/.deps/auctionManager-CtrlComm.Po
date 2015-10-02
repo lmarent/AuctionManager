@@ -272,7 +272,10 @@ auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  ../../foundation/include/AuctionFileParser.h \
  ../../foundation/include/Auction.h ../../foundation/include/Event.h \
  ../../foundation/include/AuctionManager.h \
- ../../foundation/include/EventScheduler.h ../../foundation/include/Bid.h \
+ ../../foundation/include/EventScheduler.h \
+ ../../foundation/include/MAPIAuctionParser.h \
+ ../../foundation/include/MAPIIpApMessageParser.h \
+ ../../foundation/include/ParserFcts.h ../../foundation/include/Bid.h \
  ../../foundation/include/Constants.h
 
 /usr/include/stdc-predef.h:
@@ -1004,6 +1007,12 @@ auctionManager-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 ../../foundation/include/AuctionManager.h:
 
 ../../foundation/include/EventScheduler.h:
+
+../../foundation/include/MAPIAuctionParser.h:
+
+../../foundation/include/MAPIIpApMessageParser.h:
+
+../../foundation/include/ParserFcts.h:
 
 ../../foundation/include/Bid.h:
 

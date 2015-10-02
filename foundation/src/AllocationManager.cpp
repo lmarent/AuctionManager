@@ -114,7 +114,7 @@ void AllocationManager::loadFieldDefs(string fname)
     
 }
 
-/* -------------------------- getAllcoation ----------------------------- */
+/* -------------------------- getAllocation ----------------------------- */
 
 Allocation *AllocationManager::getAllocation(int uid)
 {
@@ -129,38 +129,37 @@ Allocation *AllocationManager::getAllocation(int uid)
 
 /* -------------------- getAllocation -------------------- */
 
-Allocation *AllocationManager::getAllocation(string aset, string aname, 
-											string bset, string bname)
+Allocation *AllocationManager::getAllocation(string aset, string aname)
 {
     allocationSetIndexIter_t iter;
     allocationIndexIter_t iter2;
 
-    iter = bidSetIndex.find(bset);
-    if (iter != bidSetIndex.end()) {		
-        iter2 = iter->second.find(bname);
+    iter = allocationSetIndex.find(aset);
+    if (iter != allocationSetIndex.end()) 
+    {        
+        
+        iter2 = iter->second.find(aname);
         if (iter2 != iter->second.end())
         {
-			// Search in all bids referenced by the one with auction set and name 
-			// given as parameter.
 			allocationUIDIndexIter_t list_inter;
 			for (list_inter = iter2->second.begin(); list_inter != iter2->second.end(); ++list_inter)
 			{
 				Allocation * allocation = getAllocation(list_inter->first);
-				if ( ( aset.compare(allocation->getAuctionSet() ) == 0 ) &&
-				    ( aname.compare(allocation->getAuctionName() ) == 0 ) )
+				if ( ( aset.compare(allocation->getAllocationSet() ) == 0 ) &&
+				    ( aname.compare(allocation->getAllocationName() ) == 0 ) )
 				{
 				    return  allocation;
 				}  
 			}
 #ifdef DEBUG
-			log->dlog(ch,"Auction not found %s.%s", aset.c_str(), aname.c_str());
+			log->dlog(ch,"Allocation not found %s.%s", aset.c_str(), aname.c_str());
 #endif			
 		}
 		else
 		{
 		
 #ifdef DEBUG
-    log->dlog(ch,"Bid Name not found %s.%s", bset.c_str(), bname.c_str());
+    log->dlog(ch,"Allocation Name not found %s.%s", aset.c_str(), aname.c_str());
 #endif		
 			
 		}
@@ -168,7 +167,7 @@ Allocation *AllocationManager::getAllocation(string aset, string aname,
     else
     {
 #ifdef DEBUG
-    log->dlog(ch,"Bidset not found %s", bset.c_str());
+    log->dlog(ch,"AllocationSet not found %s", aset.c_str());
 #endif		
 	}
 
@@ -244,7 +243,7 @@ void AllocationManager::addAllocations(allocationDB_t * _allocations, EventSched
  					  (alloc->getAuctionSet()).c_str(), 
 				      (alloc->getAuctionName()).c_str());
 #endif 					
-			// TODO AM: Create an Allocation Event.
+			// TODO AM: Create an Activation Allocation Event.
 			//e->addEvent(new InsertAllocationEvent(iter2->first-now, alloc);
 		}
     }
@@ -275,21 +274,17 @@ void AllocationManager::addAllocation(Allocation *a)
 {
   
 #ifdef DEBUG    
-    log->dlog(ch, "adding new allocation with name = %s.%s.%s.%s",
-              a->getAuctionSet().c_str(), 
-              a->getAuctionName().c_str(),
-              a->getBidSet().c_str(),
-              a->getBidName().c_str());
+    log->dlog(ch, "adding new allocation with name = %s.%s",
+              a->getAllocationSet().c_str(), 
+              a->getAllocationName().c_str());
 #endif  
 				  
 			  
     // test for presence of allocationSource/allocationName combination
     // in allocation database in particular set
-    if (getAllocation(a->getAuctionSet(), a->getAuctionName(), 
-					    a->getBidSet(), a->getBidName() )) {
-        log->elog(ch, "Allocation %s.%s.%s.%s already installed",
-                  a->getAuctionSet().c_str(), a->getAuctionName().c_str(),
-                  a->getBidSet().c_str(), a->getBidName().c_str() );
+    if (getAllocation(a->getAllocationSet(), a->getAllocationName())) {
+        log->elog(ch, "Allocation %s.%s already installed",
+                  a->getAllocationSet().c_str(), a->getAllocationName().c_str() );
         throw Error(408, "Allocation with this name is already installed");
     }
 
@@ -314,6 +309,9 @@ void AllocationManager::addAllocation(Allocation *a)
         // insert allocation
         allocationDB[a->getUId()] = a; 	
 
+        // add new entry in allocation index
+        allocationSetIndex[a->getAllocationSet()][a->getAllocationName()][a->getUId()] = a->getUId() ;
+
         // add new entry in auction index
         auctionSetIndex[a->getAuctionSet()][a->getAuctionName()][a->getUId()] = a->getUId() ;
 	
@@ -322,18 +320,35 @@ void AllocationManager::addAllocation(Allocation *a)
 		
         allocations++;
 
+
+#ifdef DEBUG 
+    // Loop through allocations to print them.
+    allocationSetIndexIter_t iter34;
+    for (iter34 = allocationSetIndex.begin(); iter34 != allocationSetIndex.end(); ++iter34 ){
+		log->dlog(ch, "Allocation set:%s", iter34->first.c_str());
+        // Loop through allocations to print them.
+        allocationIndexIter_t iter24;
+        for (iter24 = (iter34->second).begin(); iter24 != (iter34->second).end(); ++iter24 ){
+			log->dlog(ch, "Allocation name:%s", iter24->first.c_str());
+			allocationUIDIndexIter_t iter54;
+			for (iter54 = (iter24->second).begin(); iter54 != (iter24->second).end(); ++iter54){
+				log->dlog(ch, "Allocation Id:%d", iter54->first);
+			}
+		}
+	}
+#endif
+
+
 #ifdef DEBUG    
-    log->dlog(ch, "finish adding new allocation with name = %s.%s.%s.%s",
-              a->getAuctionSet().c_str(), a->getAuctionName().c_str(),
-                  a->getBidSet().c_str(), a->getBidName().c_str() );
+    log->dlog(ch, "finish adding new allocation with name = %s.%s",
+              a->getAllocationSet().c_str(), a->getAllocationName().c_str() );
 #endif  
 
     } catch (Error &e) { 
 
         // adding new allocation failed in some component
         // something failed -> remove allocation from database
-        delAllocation(a->getAuctionSet(), a->getAuctionName(),
-						a->getBidSet(), a->getBidName(), NULL);
+        delAllocation(a->getAllocationSet(), a->getAllocationName(), NULL);
 	
         throw e;
     }
@@ -349,9 +364,8 @@ void AllocationManager::activateAllocations(allocationDB_t *allocations, EventSc
     allocationDBIter_t             iter;
     for (iter = allocations->begin(); iter != allocations->end(); iter++) {
         Allocation *a = (*iter);
-        log->dlog(ch, "activate allocation with name = %s.%s.%s.%s", a->getAuctionSet().c_str(), 
-					a->getAuctionName().c_str(), a->getBidSet().c_str(), 
-					a->getBidName().c_str());
+        log->dlog(ch, "activate allocation with name = %s.%s", a->getAllocationSet().c_str(), 
+					a->getAllocationName().c_str());
         a->setState(AL_ACTIVE);
 	 
         /* TODO AM: Create code to activate sessions */
@@ -374,8 +388,8 @@ string AllocationManager::getInfo(Allocation *a)
 #ifdef DEBUG
     log->dlog(ch, "looking up Allocation with uid = %d", a->getUId());
 #endif
-
-    s << a->getInfo();
+	Allocation *result = getAllocation(a->getUId());
+    s << result->getInfo();
     
     return s.str();
 }
@@ -383,29 +397,27 @@ string AllocationManager::getInfo(Allocation *a)
 
 /* ------------------------- getInfo ------------------------- */
 
-string AllocationManager::getInfo(string aset, string aname, string bset, string bname)
+string AllocationManager::getInfo(string aset, string aname)
 {
     ostringstream s;
     string info;
     Allocation *a;
   
-    a = getAllocation(aset, aname, bset, bname);
+    a = getAllocation(aset, aname);
 
     if (a == NULL) {
         // check done tasks
         for (allocationDoneIter_t i = allocationDone.begin(); i != allocationDone.end(); i++) {
-            if (((*i)->getAuctionSet() == aset) && ((*i)->getAuctionName() == aname) 
-                 && ((*i)->getBidSet() == bset) && ((*i)->getBidName() == bname) ) {
+            if (((*i)->getAllocationSet() == aset) && ((*i)->getAllocationName() == aname) ) {
                 info = (*i)->getInfo();
             }
         }
         
         if (info.empty()) {
-            throw Error("no allocation with name %s.%s.%s.%s", aset.c_str(), 
-						 aname.c_str(), bset.c_str(), bname.c_str());
+            throw Error("no allocation with name %s.%s", aset.c_str(), aname.c_str());
         }
     } else {
-        // rule with given identification is in database
+        // allocation with given identification is in database
         info = a->getInfo();
     }
     
@@ -431,14 +443,13 @@ string AllocationManager::getInfo()
 
 /* ------------------------- delAllocation ------------------------- */
 
-void AllocationManager::delAllocation(string aset, string aname, 
-						string bset, string bname, EventScheduler *e)
+void AllocationManager::delAllocation(string aset, string aname, EventScheduler *e)
 {
     Allocation *a;
 
 #ifdef DEBUG    
-    log->dlog(ch, "Deleting allocation auctionset= %s auctionname = %s bidset = %s bidname = %s",
-              aset.c_str(), aname.c_str(), bset.c_str(), bname.c_str());
+    log->dlog(ch, "Deleting allocation allocationset= %s allocationname = %s",
+              aset.c_str(), aname.c_str());
 #endif  
 
 
@@ -446,17 +457,13 @@ void AllocationManager::delAllocation(string aset, string aname,
         throw Error("incomplete allocation auction set or name specified");
     }
     
-    if (bset.empty() && bname.empty()) {
-        throw Error("incomplete allocation bid set or name specified");
-    }
-
-    a = getAllocation(aset, aname, bset, bname);
+    a = getAllocation(aset, aname);
 
     if (a != NULL) {
         delAllocation(a, e);
     } else {
-        throw Error("Allocation %s.%s.%s.%s does not exist", aset.c_str(), 
-						aname.c_str(), bset.c_str(), bname.c_str() );
+        throw Error("Allocation %s.%s does not exist", aset.c_str(), 
+						aname.c_str() );
     }
 }
 
@@ -477,75 +484,6 @@ void AllocationManager::delAllocation(int uid, EventScheduler *e)
 }
 
 
-/* ------------------------- delAuctionAllocation ------------------------- */
-void AllocationManager::delAuctionAllocation(string aset, string aname, int uid, EventScheduler *e)
-{
-
-#ifdef DEBUG
-    log->dlog(ch,"starting delAuctionAllocation %s.%s.%d", aset.c_str(), aname.c_str(), uid);
-#endif		
-
-	
-    if (auctionSetIndex.find(aset) != auctionSetIndex.end()) 
-    {
-		allocationSetIndexIter_t iter = auctionSetIndex.find(aset);
-		allocationIndex_t * allocSetIndex = &iter->second;
-		
-		if (allocSetIndex->find(aname) != allocSetIndex->end())
-		{
-			allocationIndexIter_t allocIndex = allocSetIndex->find(aname);
-			allocationUIDIndex_t *uidsVector = &(allocIndex->second);
-			allocationUIDIndexIter_t uidVectorIter;
-									
-			if (uidsVector->find(uid) != uidsVector->end()){
-				uidVectorIter =  uidsVector->find(uid);
-				uidsVector->erase(uidVectorIter);
-			}
-			
-		}
-    }
-
-#ifdef DEBUG
-    log->dlog(ch,"ending delAuctionAllocation %s.%s.%d", aset.c_str(), aname.c_str(), uid);
-#endif		
-
-}
-
-
-/* ------------------------- delBidAllocation ------------------------- */
-
-void AllocationManager::delBidAllocation(string bset, string bname, int uid, EventScheduler *e)
-{
-
-#ifdef DEBUG
-    log->dlog(ch,"starting delBidAllocation %s.%s.%d", bset.c_str(), bname.c_str(), uid);
-#endif		
-    
-    if (bidSetIndex.find(bset) != bidSetIndex.end()) 
-    {
-		allocationSetIndexIter_t iter = bidSetIndex.find(bset);
-		allocationIndex_t *allocSetIndex = &iter->second;
-		
-		if (allocSetIndex->find(bname) != allocSetIndex->end())
-		{
-			allocationIndexIter_t allocIndex = allocSetIndex->find(bname);
-			allocationUIDIndex_t *uidsVector = &(allocIndex->second);
-			allocationUIDIndexIter_t uidVectorIter; 
-
-			if (uidsVector->find(uid) != uidsVector->end()){
-				uidVectorIter =  uidsVector->find(uid);
-				uidsVector->erase(uidVectorIter);				
-			}
-		}
-    }
-
-#ifdef DEBUG
-    log->dlog(ch,"ending delBidAllocation %s.%s.%d", bset.c_str(), bname.c_str(), uid);
-#endif	
-
-}
-
-
 
 /* ------------------------- delBidAllocations ------------------------- */
 
@@ -555,6 +493,7 @@ void AllocationManager::delBidAllocations(string bset, string bname, EventSchedu
 #ifdef DEBUG
     log->dlog(ch,"Starting delBidAllocations %s.%s", bset.c_str(), bname.c_str());
 #endif
+    
     
     if (bidSetIndex.find(bset) != bidSetIndex.end()) 
     {
@@ -567,17 +506,13 @@ void AllocationManager::delBidAllocations(string bset, string bname, EventSchedu
 			allocationUIDIndex_t uidsVector = allocIndex->second;
 			allocationUIDIndexIter_t uidVectorIter; 
 			for (uidVectorIter = uidsVector.begin(); uidVectorIter != uidsVector.end(); uidVectorIter++) 
-			{
-				Allocation * alloc = getAllocation(uidVectorIter->first);
-				delAuctionAllocation(alloc->getAuctionSet(),
-									 alloc->getAuctionName(),
-									 alloc->getUId(), 
-									 e);
-									 
-				delAllocation(uidVectorIter->first,e);
+			{				 
+				Allocation *alloc = getAllocation(uidVectorIter->first);
+				delAllocation(alloc,e);
 			}
 		}
     }
+
 
 #ifdef DEBUG
     log->dlog(ch,"Ending delBidAllocations %s.%s", bset.c_str(), bname.c_str());
@@ -605,13 +540,6 @@ void AllocationManager::delAuctionAllocations(string aset, string aname, EventSc
 			
 			for (uidVectorIter = uidsVector.begin(); uidVectorIter != uidsVector.end(); uidVectorIter++) 
 			{
-				Allocation * alloc = getAllocation(uidVectorIter->first);
-				
-				delBidAllocation(alloc->getBidSet(),
-									 alloc->getBidName(),
-									 alloc->getUId(), 
-									 e);
-
 				delAllocation(uidVectorIter->first,e);
 			}
 		}
@@ -630,27 +558,36 @@ void AllocationManager::delAuctionAllocations(string aset, string aname, EventSc
 void AllocationManager::delAllocation(Allocation *a, EventScheduler *e)
 {
 #ifdef DEBUG    
-    log->dlog(ch, "removing allocation with name = %s.%s.%s.%s", a->getAuctionSet().c_str(), 
-					a->getAuctionName().c_str(), a->getBidSet().c_str(), 
-					a->getBidName().c_str());
+    log->dlog(ch, "removing allocation with name = %s.%s", a->getAllocationSet().c_str(), 
+					a->getAllocationName().c_str());
 #endif
 
     // remove allocation from database
     storeAllocationAsDone(a);
     allocationDB[a->getUId()] = NULL;
         
+        
     // remove allocation from auction index
     if (auctionSetIndex.find(a->getAuctionSet()) != auctionSetIndex.end()) 
     {
-		allocationSetIndexIter_t iterAuc = auctionSetIndex.find(a->getAuctionSet());
-		allocationIndex_t allocSetIndexAuc = iterAuc->second;
-		if (allocSetIndexAuc.find(a->getAuctionName()) != allocSetIndexAuc.end()){
+		allocationSetIndexIter_t iterAucSet = auctionSetIndex.find(a->getAuctionSet());
+		allocationIndex_t allocSetIndexAuc = iterAucSet->second;
+		
+		if (allocSetIndexAuc.find(a->getAuctionName()) != allocSetIndexAuc.end())
+		{
 			allocationIndexIter_t allocIndexAuc = allocSetIndexAuc.find(a->getAuctionName());
 			allocationUIDIndex_t uidsVectorAuc = allocIndexAuc->second;
-			if (uidsVectorAuc.find(a->getUId()) != uidsVectorAuc.end()){
-				allocationUIDIndexIter_t uidVectorIterAuc = uidsVectorAuc.find(a->getUId()); 
-				uidsVectorAuc.erase(uidVectorIterAuc);
+			
+			if (uidsVectorAuc.find(a->getUId()) != uidsVectorAuc.end())
+			{
+				(auctionSetIndex[a->getAuctionSet()][a->getAuctionName()]).erase(a->getUId());
 			}
+		}
+		
+		// Delete auction name, if the list went to empty.
+		allocationIndexIter_t allocIndexAuc = allocSetIndexAuc.find(a->getAuctionName());
+		if ((allocIndexAuc->second).empty()){
+			(auctionSetIndex[a->getAuctionSet()]).erase(a->getAuctionName());
 		}
     }
         
@@ -664,24 +601,59 @@ void AllocationManager::delAllocation(Allocation *a, EventScheduler *e)
 			allocationIndexIter_t allocIndex = allocSetIndex.find(a->getBidName());
 			
 			allocationUIDIndex_t uidsVector = allocIndex->second;
-			if (uidsVector.find(a->getUId()) != uidsVector.end()){
-				allocationUIDIndexIter_t uidVectorIter = uidsVector.find(a->getUId()); 
-				uidsVector.erase(uidVectorIter);
+			if (uidsVector.find(a->getUId()) != uidsVector.end())
+			{	
+				(bidSetIndex[a->getBidSet()][a->getBidName()]).erase(a->getUId());
 			}			
 		}
+		
+		// Delete bid name, if the list went to empty
+		allocationIndexIter_t allocIndex = allocSetIndex.find(a->getBidName());
+		if ((allocIndex->second).empty()){
+			(bidSetIndex[a->getBidSet()]).erase(a->getBidName());
+		}
+		
     }
-       
-   
+    
+    // remove allocation from the allocation index 
+    if (allocationSetIndex.find(a->getAllocationSet()) != allocationSetIndex.end()) 
+    {
+		allocationSetIndexIter_t iter = allocationSetIndex.find(a->getAllocationSet());
+		allocationIndex_t allocSetIndex = iter->second;
+		
+		if (allocSetIndex.find(a->getAllocationName()) != allocSetIndex.end())
+		{
+			allocationIndexIter_t allocIndex = allocSetIndex.find(a->getAllocationName());	
+			allocationUIDIndex_t uidsVector = allocIndex->second;
+			if (uidsVector.find(a->getUId()) != uidsVector.end()){
+				(allocationSetIndex[a->getAllocationSet()][a->getAllocationName()]).erase(a->getUId());
+			}			
+		}
+		
+		// Delete allocation name, if the list went to empty
+		allocationIndexIter_t allocIndex = allocSetIndex.find(a->getAllocationName());
+		if ((allocIndex->second).empty())
+		{
+			(allocationSetIndex[a->getAllocationSet()]).erase(a->getAllocationName());
+		}
+
+    }
+      
     // delete bid set if empty
     if (bidSetIndex[a->getBidSet()].empty()) {
-        bidSetIndex.erase(a->getBidName());
+        bidSetIndex.erase(a->getBidSet());
     }
     
     // delete auction set if empty
     if (auctionSetIndex[a->getAuctionSet()].empty()) {
-        auctionSetIndex.erase(a->getAuctionName());
+        auctionSetIndex.erase(a->getAuctionSet());
     }
-    
+
+    // delete allocation set if empty
+    if (allocationSetIndex[a->getAllocationSet()].empty()) {
+        auctionSetIndex.erase(a->getAllocationSet());
+    }
+      
     if (e != NULL) {
         // TODO AM: Create the eliminate Allocation events
         //e->delAllocationEvents(a->getUId());
@@ -703,8 +675,7 @@ void AllocationManager::delAllocations(allocationDB_t *allocations, EventSchedul
     allocationDBIter_t iter;
 
     for (iter = allocations->begin(); iter != allocations->end(); iter++) {
-        delAllocation( (*iter)->getAuctionSet(), (*iter)->getAuctionName(), 
-					   (*iter)->getBidSet(), (*iter)->getBidName(), e);
+        delAllocation( (*iter)->getAllocationSet(), (*iter)->getAllocationName(), e);
     }
 
 #ifdef DEBUG    

@@ -264,7 +264,8 @@ auctionManager-AUMProcessor.o: AUMProcessor.cpp \
  /usr/include/x86_64-linux-gnu/sys/signal.h \
  /usr/include/x86_64-linux-gnu/sys/utsname.h \
  /usr/include/x86_64-linux-gnu/bits/utsname.h /usr/include/netinet/tcp.h \
- ../../auctioner/include/Module.h
+ ../../foundation/include/MAPIIpApMessageParser.h \
+ ../../foundation/include/ParserFcts.h ../../auctioner/include/Module.h
 
 /usr/include/stdc-predef.h:
 
@@ -985,5 +986,9 @@ auctionManager-AUMProcessor.o: AUMProcessor.cpp \
 /usr/include/x86_64-linux-gnu/bits/utsname.h:
 
 /usr/include/netinet/tcp.h:
+
+../../foundation/include/MAPIIpApMessageParser.h:
+
+../../foundation/include/ParserFcts.h:
 
 ../../auctioner/include/Module.h:

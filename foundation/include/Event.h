@@ -52,7 +52,8 @@ typedef enum
       ACTIVATE_AUCTIONS,
       ADD_RESOURCEREQUESTS,
       REMOVE_RESOURCEREQUESTS,
-      ACTIVATE_RESOURCEREQUESTS,
+      ACTIVATE_RESOURCE_REQUEST_INTERVAL,
+      REMOVE_RESOURCE_REQUEST_INTERVAL,
       PUSH_EXECUTION,
       GET_INFO,
       GET_MODINFO,
@@ -62,7 +63,8 @@ typedef enum
       REMOVE_AUCTIONS_CTRLCOMM,
       ADD_AUCTIONS_CNTRLCOMM,
       PROC_MODULE_TIMER,
-      CTRLCOMM_TIMER,      
+      CTRLCOMM_TIMER,  
+      CREATE_SESSION    
 } event_t;
 
 //! event names for dump method
@@ -530,25 +532,17 @@ class AddBidsCtrlEvent : public CtrlCommEvent
 
   public:
 
-    AddBidsCtrlEvent(char *b, int l, int mapi=0)
+    AddBidsCtrlEvent(char *b, int l)
       : CtrlCommEvent(ADD_BIDS_CTRLCOMM), type(0), len(l) 
     {
         buf = new char[len+1];
         memcpy(buf, b, len+1);
           
-        if (mapi) {
-            type |= ADD_BIDS_MAPI;
-        }
     }
 
     ~AddBidsCtrlEvent()
     {
         saveDeleteArr(buf);
-    }
-
-    int isMAPI()
-    {
-        return (type & ADD_BIDS_MAPI);
     }
 
     char *getBuf()

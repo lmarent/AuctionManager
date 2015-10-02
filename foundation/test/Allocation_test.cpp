@@ -84,6 +84,12 @@ void Allocation_Test::testAllocations()
 	try
 	{
 
+		string allSet1 = "general";
+		string allName1 = "1";
+
+		string allSet2 = "general";
+		string allName2 = "2";
+		
 		string aSet = "general";
 		string aName = "1";
 
@@ -127,7 +133,7 @@ void Allocation_Test::testAllocations()
 		interval2.stop = time(NULL);
 		intervals.push_back(interval2);
 		
-		ptrAllocation1 = new Allocation(aSet, aName, bSet1, bName1, fields, intervals);
+		ptrAllocation1 = new Allocation(aSet, aName, bSet1, bName1, allSet1, allName1, fields, intervals);
 						
 		CPPUNIT_ASSERT( aSet.compare(ptrAllocation1->getAuctionSet()) == 0 );
 		CPPUNIT_ASSERT( aName.compare(ptrAllocation1->getAuctionName()) == 0 );
@@ -135,7 +141,7 @@ void Allocation_Test::testAllocations()
 		fieldList_t fields2;
 		allocationIntervalList_t intervals2;
 		
-		ptrAllocation2 = new Allocation(aSet, aName, bSet2, bName2, fields2, intervals2);
+		ptrAllocation2 = new Allocation(aSet, aName, bSet2, bName2, allSet2, allName2, fields2, intervals2);
 
 		CPPUNIT_ASSERT( bSet2.compare(ptrAllocation2->getBidSet()) == 0 );
 		CPPUNIT_ASSERT( bName2.compare(ptrAllocation2->getBidName()) == 0 );

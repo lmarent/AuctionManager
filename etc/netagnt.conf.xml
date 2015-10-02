@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE CONFIG SYSTEM "config.dtd"> 
+<!DOCTYPE CONFIG SYSTEM "netagnt.conf.dtd"> 
 <CONFIG>
   <MAIN>
     <!-- verbose level for logging -->
@@ -8,12 +8,14 @@
     <PREF NAME="LogFile">/home/luis/AuctionManager/etc/log/netagent.log</PREF>
     <!-- pid file location -->
     <PREF NAME="PidFile">/tmp/netagent.pid</PREF>
+    <!-- ansl-client configuration file -->    
+    <PREF NAME="AnslpConfFile">/home/luis/AuctionManager/etc/nsis-ka_agent.conf</PREF>
     <!-- filter attribute definition file -->    
     <PREF NAME="FilterDefFile">/home/luis/AuctionManager/etc/fielddef.xml</PREF>
     <!-- filter constant file -->
     <PREF NAME="FilterConstFile">/home/luis/AuctionManager/etc/fieldval.xml</PREF>     
     <!-- auction file to load at start -->
-    <PREF NAME="AuctionFile">/home/luis/AuctionManager/etc/example_auctions2.xml</PREF>
+    <PREF NAME="ResourceRequestFile">/home/luis/AuctionManager/etc/example_resource_request1.xml</PREF>
   </MAIN>
   <CONTROL>
     <!-- enable remote control interface -->

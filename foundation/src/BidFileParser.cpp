@@ -39,6 +39,11 @@ BidFileParser::BidFileParser(string filename)
 {
     log = Logger::getInstance();
     ch = log->createChannel("BidFileParser" );
+
+#ifdef DEBUG
+    log->dlog(ch, "BidFileParser Constructor with filename");
+#endif
+
 }
 
 
@@ -47,6 +52,11 @@ BidFileParser::BidFileParser(char *buf, int len)
 {
     log = Logger::getInstance();
     ch = log->createChannel("BidFileParser" );
+
+#ifdef DEBUG
+    log->dlog(ch, "BidFileParser Constructor with buffer");
+#endif
+
 }
 
 
@@ -176,7 +186,7 @@ time_t BidFileParser::parseTime(string timestr)
 }
 
 
-void BidFileParser::calculateIntervals(time_t now, bid_auction_t *auction)
+void BidFileParser::calculateIntervals(time_t now, bid_auction_t *auction, miscList_t &list)
 {
 
     unsigned long duration;
@@ -190,11 +200,11 @@ void BidFileParser::calculateIntervals(time_t now, bid_auction_t *auction)
     // duration = 0 indicates no duration set
     duration = 0;
 		
-	string sstart = getMiscVal(&(auction->miscList), "Start");
-	string sstop = getMiscVal(&(auction->miscList), "Stop");
-	string sduration = getMiscVal(&(auction->miscList), "Duration");		
-	string sinterval = getMiscVal(&(auction->miscList), "Interval");
-	string salign = getMiscVal(&(auction->miscList), "Align");
+	string sstart = getMiscVal(&list, "Start");
+	string sstop = getMiscVal(&list, "Stop");
+	string sduration = getMiscVal(&list, "Duration");		
+	string sinterval = getMiscVal(&list, "Interval");
+	string salign = getMiscVal(&list, "Align");
 
     if (!sstart.empty() && !sstop.empty() && !sduration.empty()) {
         throw Error(409, "illegal to specify: start+stop+duration time");
@@ -258,7 +268,7 @@ void BidFileParser::calculateIntervals(time_t now, bid_auction_t *auction)
 #ifdef DEBUG
     log->dlog(ch, "Interval: %d - Align:%d", _interval, _align);
 #endif    
-		auction->intervals.push_back(ientry); 
+		auction->interval = _interval; 
     }				
 
 }
@@ -273,6 +283,11 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
     string sname;
     cur = xmlDocGetRootElement(XMLDoc);
     time_t now = time(NULL);    
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting parse");
+#endif
+
 
     sname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
 	// use lower case internally
@@ -303,15 +318,14 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 
                 // get ELEMENT
                 if ((!xmlStrcmp(cur2->name, (const xmlChar *)"ELEMENT")) && (cur2->ns == ns)) {
-                    element_t elem;
+					fieldList_t elemFields;
+                    string elemtName = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"ID"));
 
-                    elem.name = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"ID"));
-
-                    if (elem.name.empty()) {
+                    if (elemtName.empty()) {
                         throw Error("Bid Parser Error: missing name at line %d", XML_GET_LINE(cur2));
                     }
                     // use lower case internally
-                    transform(elem.name.begin(), elem.name.end(), elem.name.begin(), 
+                    transform(elemtName.begin(), elemtName.end(), elemtName.begin(), 
                               ToLower());
 
                     cur3 = cur2->xmlChildrenNode;
@@ -351,7 +365,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 												XML_GET_LINE(cur3), e.getError().c_str());
 								}
 
-								elem.fields.push_back(f);
+								elemFields.push_back(f);
 							} else {
 									throw Error("Bid Parser Error: no field definition found at line %d: %s", 
 												XML_GET_LINE(cur3), f.name.c_str());
@@ -360,22 +374,26 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
                         cur3 = cur3->next;
                     }
 					
-					elements.push_back(elem);
+					elements[elemtName] = elemFields;
                 }
 
 
                 // get AUCTION.
                 if ((!xmlStrcmp(cur2->name, (const xmlChar *)"AUCTION")) && (cur2->ns == ns)) {
                     bid_auction_t auction;
+                    miscList_t miscList;
 
                     string id = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"ID"));
                     if (id.find(".") == std::string::npos){
 						auction.auctionSet = DEFAULT_SETNAME;
 						auction.auctionName = id;
-					} else
-						auction.auctionSet = id.substr(0,id.find("."));
-						auction.auctionName = id.substr(id.find("."),id.size());
-
+					} 
+					else{
+						size_t found =  id.find(".");
+						auction.auctionSet = id.substr(0 , found);
+						auction.auctionName = id.substr(found + 1, id.size() - found);
+					}
+					
                     if (auction.auctionSet.empty() ) {
                         throw Error("Bid Parser Error: missing auction set at line %d", XML_GET_LINE(cur2));
                     }
@@ -400,7 +418,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 							// parse
 							configItem_t item = parsePref(cur3); 	
 							// add
-							auction.miscList[item.name] = item;
+							miscList[item.name] = item;
 #ifdef DEBUG
 							log->dlog(ch, "C %s = %s", item.name.c_str(), item.value.c_str());
 #endif
@@ -409,8 +427,10 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
                         // get action specific PREFs
                         cur3 = cur3->next;
                     }
-					calculateIntervals(now, &auction);
-					auctions.push_back(auction);
+					calculateIntervals(now, &auction, miscList);
+					string actId = auction.getId();
+					
+					auctions[actId] = auction;
                 }
                 cur2 = cur2->next;
             }
@@ -434,4 +454,5 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
         
         cur = cur->next;
     }
+    
 }

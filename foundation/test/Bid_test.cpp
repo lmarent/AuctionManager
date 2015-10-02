@@ -85,6 +85,8 @@ void Bid_Test::setUp()
 		ptrBid2 = new Bid(*((*new_bids)[0]));
 				
 		CPPUNIT_ASSERT( (ptrBid1->getInfo()).compare(((*new_bids)[0])->getInfo()) == 0 );
+		
+		CPPUNIT_ASSERT(	*ptrBid1 == *ptrBid2);
 				
 		for (int i = 0; i < new_bids->size() ; i++)
 		{

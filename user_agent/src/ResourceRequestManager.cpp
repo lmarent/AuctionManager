@@ -29,6 +29,7 @@
 
 #include "ResourceRequestManager.h"
 #include "Constants.h"
+#include "EventAgent.h"
 
 using namespace auction;
 
@@ -266,24 +267,38 @@ void ResourceRequestManager::addResourceRequests(resourceRequestDB_t * requests,
     resourceRequestTimeIndex_t     stop;
     resourceRequestTimeIndexIter_t iter2;
     time_t              now = time(NULL);
-    
+        
     // add bids
     for (iter = requests->begin(); iter != requests->end(); iter++) {
-        ResourceRequest *b = (*iter);
+        ResourceRequest *r = (*iter);
         
         try {
 
-            addResourceRequest(b);
-
+            addResourceRequest(r);
+			
+			// Loop though intervals to include the resource request 
+			// in the start and stop iterators
+			resourceReqIntervalList_t * intervals = r->getIntervals();
+			resourceReqIntervalListIter_t intervals_iter;
+			
+			for (intervals_iter = intervals->begin(); 
+					intervals_iter != intervals->end(); ++intervals_iter){
+				
+				resourceReq_interval_t interv_tmp = *intervals_iter;
+				start[interv_tmp.start].push_back(r);
+			
+				if (interv_tmp.stop){
+					stop[interv_tmp.stop].push_back(r);
+				}
+			}
         } catch (Error &e ) {
-            saveDelete(b);
+            saveDelete(r);
             // if only one rule return error
             if (requests->size() == 1) {
                 throw e;
             }
             // FIXME else return number of successively installed Resource Request
         }
-      
     }
     
 #ifdef DEBUG    
@@ -291,28 +306,14 @@ void ResourceRequestManager::addResourceRequests(resourceRequestDB_t * requests,
 #endif      
 
     // group resource requests with same start time
-    for (iter2 = start.begin(); iter2 != start.end(); iter2++) {
-		resourceRequestDBIter_t requests_iter;
-		// Iterates over the bids starting.
-		for (requests_iter = (iter2->second).begin(); 
-				requests_iter != (iter2->second).end(); requests_iter++) { 
-			ResourceRequest *request = (*requests_iter);
-			
-			// Iterates over the auctions to determine which of them is needed.
-			// TODO AM: Finish this code.
-		}
+    for (iter2 = start.begin(); iter2 != start.end(); iter2++) 
+    {
+		e->addEvent(new ActivateResourceRequestIntervalEvent(iter2->first-now, iter2->second, iter2->first));
     }
     
-    // group rules with same stop time
+    // group resource request with same stop time
     for (iter2 = stop.begin(); iter2 != stop.end(); iter2++) {
-		resourceRequestDBIter_t requests_iter;
-		// Iterates over the bids starting.
-		for (requests_iter = (iter2->second).begin(); 
-				requests_iter != (iter2->second).end(); requests_iter++) {
-			ResourceRequest *request = (*requests_iter); 
-			// Iterates over the auctions to determine which of them is needed.
-			// TODO AM: Finish this code.
-		}
+		e->addEvent(new RemoveResourceRequestIntervalEvent(iter2->first-now, iter2->second, iter2->first));
     }
 
 #ifdef DEBUG    

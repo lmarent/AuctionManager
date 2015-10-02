@@ -245,8 +245,12 @@ netagent-ResourceRequestManager.o: ResourceRequestManager.cpp \
  ../../foundation/include/ConfigParser.h \
  ../../user_agent/include/ResourceRequestIdSource.h \
  ../../user_agent/include/ResourceRequest.h \
+ ../../foundation/include/AuctionFileParser.h \
  ../../user_agent/include/MAPIResourceRequestParser.h \
- ../../foundation/include/Constants.h
+ ../../foundation/include/Constants.h \
+ ../../user_agent/include/EventAgent.h \
+ ../../user_agent/include/AgentManagerInfo.h \
+ ../../foundation/include/Auction.h ../../foundation/include/Event.h
 
 /usr/include/stdc-predef.h:
 
@@ -906,6 +910,16 @@ netagent-ResourceRequestManager.o: ResourceRequestManager.cpp \
 
 ../../user_agent/include/ResourceRequest.h:
 
+../../foundation/include/AuctionFileParser.h:
+
 ../../user_agent/include/MAPIResourceRequestParser.h:
 
 ../../foundation/include/Constants.h:
+
+../../user_agent/include/EventAgent.h:
+
+../../user_agent/include/AgentManagerInfo.h:
+
+../../foundation/include/Auction.h:
+
+../../foundation/include/Event.h:

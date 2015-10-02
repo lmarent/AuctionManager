@@ -33,6 +33,7 @@
 #include "Logger.h"
 #include "ConfigParser.h"
 #include "ProcModuleInterface.h"
+#include "AuctionFileParser.h"
 
 namespace auction
 {
@@ -135,6 +136,12 @@ public:
         \returns a pointer (link) to a list that contains the intervals configured for this allocation
     */
     resourceReqIntervalList_t * getIntervals();
+    
+    resourceReq_interval_t getIntervalByStart(time_t start);
+
+    resourceReq_interval_t getIntervalByEnd(time_t stop);
+    
+    auctionDB_t * askForAuctions(time_t start);
 			
 protected:
 	

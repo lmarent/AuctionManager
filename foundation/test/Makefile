@@ -106,6 +106,7 @@ am_test_runner_OBJECTS =  \
 	../../foundation/src/FieldValue.$(OBJEXT) \
 	../../foundation/src/FieldDefParser.$(OBJEXT) \
 	../../foundation/src/FieldValParser.$(OBJEXT) \
+	../../foundation/src/MAPIIpApMessageParser.$(OBJEXT) \
 	../../foundation/src/BidIdSource.$(OBJEXT) \
 	../../foundation/src/AuctionIdSource.$(OBJEXT) \
 	../../foundation/src/Auction.$(OBJEXT) \
@@ -125,6 +126,7 @@ am_test_runner_OBJECTS =  \
 	../../foundation/src/Allocation.$(OBJEXT) \
 	../../foundation/src/AuctionManager.$(OBJEXT) \
 	../../foundation/src/AllocationIdSource.$(OBJEXT) \
+	../../foundation/src/MAPIAllocationParser.$(OBJEXT) \
 	../../foundation/src/AllocationManager.$(OBJEXT) \
 	../../foundation/test/Timeval_test.$(OBJEXT) \
 	../../foundation/test/FieldValue_test.$(OBJEXT) \
@@ -132,12 +134,14 @@ am_test_runner_OBJECTS =  \
 	../../foundation/test/FieldValParser_test.$(OBJEXT) \
 	../../foundation/test/AuctionIdSource_test.$(OBJEXT) \
 	../../foundation/test/BidFileParser_test.$(OBJEXT) \
+	../../foundation/test/MAPIBidParser_test.$(OBJEXT) \
 	../../foundation/test/Bid_test.$(OBJEXT) \
 	../../foundation/test/Allocation_test.$(OBJEXT) \
 	../../foundation/test/AuctionFileParser_test.$(OBJEXT) \
 	../../foundation/test/MAPIAuctionParser_test.$(OBJEXT) \
 	../../foundation/test/AuctionTimer_test.$(OBJEXT) \
 	../../foundation/test/Bid_Manager_test.$(OBJEXT) \
+	../../foundation/test/MAPIAllocationParser_test.$(OBJEXT) \
 	../../foundation/test/Allocation_Manager_test.$(OBJEXT) \
 	../../foundation/test/AuctionManager_test.$(OBJEXT) \
 	../../foundation/test/test_runner.$(OBJEXT)
@@ -464,9 +468,19 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 IPTABLES_VERSION = 
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS =  -L/lib -L/usr/local/lib -L/usr/lib  -ltermcap -lxml2
+LIBANSLP_CFLAGS = -I/usr/local/include/a-nslp  
+LIBANSLP_LIBS = -L/usr/local/lib/a-nslp -lanslp  
+LIBANSLP_MSG_CFLAGS = -I/usr/local/include/a-nslp/msg  
+LIBANSLP_MSG_LIBS = -L/usr/local/lib/a-nslp -lanslp_msg  
+LIBFASTQUEUE_CFLAGS = -I/usr/local/include  
+LIBFASTQUEUE_LIBS = -L/usr/local/lib -lfastqueue  
+LIBGIST_CFLAGS = -I/usr/local/include  
+LIBGIST_LIBS = -L/usr/local/lib -lgist  
 LIBIPAP_CFLAGS = -I/usr/local/include/ipap  
 LIBIPAP_LIBS = -L/usr/local/lib/ipap -lipap  
 LIBOBJS = 
+LIBPROT_CFLAGS = -I/usr/local/include  
+LIBPROT_LIBS = -L/usr/local/lib -lprot  
 LIBS = -ldl 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
@@ -580,6 +594,7 @@ test_runner_SOURCES = ../../foundation/src/Constants.cpp \
 						../../foundation/src/FieldValue.cpp \
 						../../foundation/src/FieldDefParser.cpp \
 						../../foundation/src/FieldValParser.cpp \
+						../../foundation/src/MAPIIpApMessageParser.cpp \
 						../../foundation/src/BidIdSource.cpp \
 						../../foundation/src/AuctionIdSource.cpp \
 						../../foundation/src/Auction.cpp \
@@ -599,6 +614,7 @@ test_runner_SOURCES = ../../foundation/src/Constants.cpp \
 						../../foundation/src/Allocation.cpp \
 						../../foundation/src/AuctionManager.cpp \
 						../../foundation/src/AllocationIdSource.cpp \
+						../../foundation/src/MAPIAllocationParser.cpp \
 						../../foundation/src/AllocationManager.cpp \
 						../../foundation/test/Timeval_test.cpp \
 						../../foundation/test/FieldValue_test.cpp \
@@ -606,12 +622,14 @@ test_runner_SOURCES = ../../foundation/src/Constants.cpp \
 						../../foundation/test/FieldValParser_test.cpp \
 						../../foundation/test/AuctionIdSource_test.cpp \
 						../../foundation/test/BidFileParser_test.cpp \
+						../../foundation/test/MAPIBidParser_test.cpp \
 						../../foundation/test/Bid_test.cpp \
 						../../foundation/test/Allocation_test.cpp \
 						../../foundation/test/AuctionFileParser_test.cpp \
 						../../foundation/test/MAPIAuctionParser_test.cpp \
 						../../foundation/test/AuctionTimer_test.cpp \
 						../../foundation/test/Bid_Manager_test.cpp \
+						../../foundation/test/MAPIAllocationParser_test.cpp \
 						../../foundation/test/Allocation_Manager_test.cpp \
 						../../foundation/test/AuctionManager_test.cpp \
 						../../foundation/test/test_runner.cpp
@@ -710,6 +728,9 @@ clean-checkPROGRAMS:
 ../../foundation/src/FieldValParser.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/MAPIIpApMessageParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
 ../../foundation/src/BidIdSource.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
@@ -767,6 +788,9 @@ clean-checkPROGRAMS:
 ../../foundation/src/AllocationIdSource.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/MAPIAllocationParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
 ../../foundation/src/AllocationManager.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
@@ -794,6 +818,9 @@ clean-checkPROGRAMS:
 ../../foundation/test/BidFileParser_test.$(OBJEXT):  \
 	../../foundation/test/$(am__dirstamp) \
 	../../foundation/test/$(DEPDIR)/$(am__dirstamp)
+../../foundation/test/MAPIBidParser_test.$(OBJEXT):  \
+	../../foundation/test/$(am__dirstamp) \
+	../../foundation/test/$(DEPDIR)/$(am__dirstamp)
 ../../foundation/test/Bid_test.$(OBJEXT):  \
 	../../foundation/test/$(am__dirstamp) \
 	../../foundation/test/$(DEPDIR)/$(am__dirstamp)
@@ -810,6 +837,9 @@ clean-checkPROGRAMS:
 	../../foundation/test/$(am__dirstamp) \
 	../../foundation/test/$(DEPDIR)/$(am__dirstamp)
 ../../foundation/test/Bid_Manager_test.$(OBJEXT):  \
+	../../foundation/test/$(am__dirstamp) \
+	../../foundation/test/$(DEPDIR)/$(am__dirstamp)
+../../foundation/test/MAPIAllocationParser_test.$(OBJEXT):  \
 	../../foundation/test/$(am__dirstamp) \
 	../../foundation/test/$(DEPDIR)/$(am__dirstamp)
 ../../foundation/test/Allocation_Manager_test.$(OBJEXT):  \
@@ -859,8 +889,10 @@ include ../../foundation/src/$(DEPDIR)/Field.Po
 include ../../foundation/src/$(DEPDIR)/FieldDefParser.Po
 include ../../foundation/src/$(DEPDIR)/FieldValParser.Po
 include ../../foundation/src/$(DEPDIR)/FieldValue.Po
+include ../../foundation/src/$(DEPDIR)/MAPIAllocationParser.Po
 include ../../foundation/src/$(DEPDIR)/MAPIAuctionParser.Po
 include ../../foundation/src/$(DEPDIR)/MAPIBidParser.Po
+include ../../foundation/src/$(DEPDIR)/MAPIIpApMessageParser.Po
 include ../../foundation/src/$(DEPDIR)/ParserFcts.Po
 include ../../foundation/src/$(DEPDIR)/Timeval.Po
 include ../../foundation/src/$(DEPDIR)/XMLParser.Po
@@ -876,7 +908,9 @@ include ../../foundation/test/$(DEPDIR)/Bid_test.Po
 include ../../foundation/test/$(DEPDIR)/FieldDefParser_test.Po
 include ../../foundation/test/$(DEPDIR)/FieldValParser_test.Po
 include ../../foundation/test/$(DEPDIR)/FieldValue_test.Po
+include ../../foundation/test/$(DEPDIR)/MAPIAllocationParser_test.Po
 include ../../foundation/test/$(DEPDIR)/MAPIAuctionParser_test.Po
+include ../../foundation/test/$(DEPDIR)/MAPIBidParser_test.Po
 include ../../foundation/test/$(DEPDIR)/Timeval_test.Po
 include ../../foundation/test/$(DEPDIR)/test_runner.Po
 

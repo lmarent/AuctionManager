@@ -42,6 +42,8 @@
 #include "Constants.h"
 #include "AuctionManagerComponent.h"
 #include "AgentProcessor.h"
+#include "AnslpClient.h"
+#include "ResourceRequestManager.h"
 
 namespace auction
 {
@@ -73,13 +75,16 @@ class Agent
     auto_ptr<CommandLineArgs> 			args;
     auto_ptr<AuctionTimer>      		auct;
     auto_ptr<ConfigManager>   			conf;
+    auto_ptr<ResourceRequestManager>    rreqm;
     auto_ptr<BidManager>     			bidm;
     auto_ptr<AuctionManager>   			aucm;
     auto_ptr<EventSchedulerAgent>  		evnt;
+    auto_ptr<AnslpClient>				anslpc;
 
     auto_ptr<AgentProcessor> 			proc;    
     auto_ptr<CtrlComm>        			comm;
 
+    
     //! logging channel number used by objects of this class
     int ch;
 
@@ -111,6 +116,41 @@ class Agent
 
     //! execution information and version.
     string getAgentManagerInfo(agentInfoList_t *i);
+    
+    void handleGetInfo(Event *e, fd_sets_t *fds);
+    
+    //! handle the addition of bids.
+    void handleAddBids(Event *e, fd_sets_t *fds);
+
+    //! handle the addition of a bid to an auction.
+    void handleAddBidsAuction(Event *e);
+
+    //! handle the delete of bids
+    void handleRemoveBids(Event *e);
+    
+    //! handle the delete of a bid from an auction.
+    void handleRemoveBidFromAuction(Event *e);
+    
+    //! Execute the bid process.
+    void handlePushExecution(Event *e, fd_sets_t *fds);
+    
+    //! handle the addition of auctions.
+    void handleAddAuctions(Event *e, fd_sets_t *fds);
+
+    //! handle the activation of auctions.
+    void handleActivateAuctions(Event *e);
+    
+    //! handle the remove auctions.
+    void handleRemoveAuctions(Event *e);
+
+    //! handle the addition of resource requests.
+    void handleAddResourceRequests(Event *e, fd_sets_t *fds);
+
+    //! handle the activation of resource request intervals.
+    void handleActivateResourceRequestInterval(Event *e);
+
+    //! handle the remove of resource request intervals.
+    void handleRemoveResourceRequestInterval(Event *e);
         
   public:
 

@@ -45,6 +45,33 @@ namespace auction
 
 /* --------------------------------- events ------------------------------ */
 
+class CreateSessionEvent : public Event
+{
+  private:
+	string sessionId;
+	ipap_message message;
+    
+  public:
+
+    CreateSessionEvent(struct timeval time, string _sessionId, ipap_message &a, unsigned long ival=0, int align=0) 
+      : Event(CREATE_SESSION, time, ival, align), sessionId(_sessionId), message(a) {  }
+
+    CreateSessionEvent(time_t offs_sec, string _sessionId, ipap_message &a, unsigned long ival=0, int align=0) 
+      : Event(CREATE_SESSION, offs_sec, 0, ival, align), sessionId(_sessionId), message(a) { }
+
+    CreateSessionEvent(string _sessionId, ipap_message &a, unsigned long ival=0, int align=0) 
+      : Event(CREATE_SESSION, ival, align), sessionId(_sessionId), message(a) { }  
+  
+	ipap_message  *getMessage()
+	{
+		return &message;
+	}
+	
+	string getSessionId()
+	{
+		return sessionId;
+	}
+};
 
 class PushExecutionEvent : public Event
 {

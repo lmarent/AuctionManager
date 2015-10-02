@@ -30,52 +30,75 @@
 
 
 #include "stdincpp.h"
+#include "Logger.h"
+#include "Bid.h"
+#include "IpAp_message.h"
 #include "BidFileParser.h"
+#include "MAPIIpApMessageParser.h"
 
 namespace auction
 {
 
 //! parser for API text Bid syntax
 
-class MAPIBidParser
+class MAPIBidParser : public MAPIIpApMessageParser
 {
 
   private:
 
     Logger *log;
     int ch;
-    char *buf;
-    int len;
-    string fileName;
 
-    //! FIXME document!
-    void parseFieldValue(fieldValList_t *fieldVals, string value, field_t *f);
-    
-    string lookup(fieldValList_t *fieldVals, string fvalue, field_t *f);
+	//! Add the field of all elements into message's template 
+	uint16_t addElementFieldsTemplate(fieldDefList_t *fieldDefs, 
+									  Bid *bidPtr, ipap_message *mes);
 
-	//! Calculates intervals associated to auction.
-	void calculateIntervals(time_t now, bid_auction_t *auction);
+	//! Add required field for the bid's option template 									 
+	uint16_t addFieldsOptionTemplate(fieldDefList_t *fieldDefs, 
+									 Bid *bidPtr, 
+									 ipap_message *mes);
 
-    //! parse time string
-    time_t parseTime(string timestr);
+	//! Add the field of all auction relationship into option message's template
+	void addOptionRecord(string bidId, int recordId, bid_auction_t bAuct, 
+						 uint16_t bidTemplateId, ipap_message *mes );
+									  
+	
+	//! Add all fields of an element to a new record data.
+	void addElementRecord(string bidId, 
+						  string elementId, 
+						  fieldList_t *elemFields, 
+						  fieldDefList_t *fieldDefs, 
+						  uint16_t bidTemplateId, 
+						  ipap_message *mes );
+	
 
-    //! get a value by name from the misc rule attriutes
-    string getMiscVal(miscList_t *miscList, string name);    
+	auction::fieldList_t readBidData( ipap_template *templ, fieldDefList_t *fieldDefs,
+						   fieldValList_t *fieldVals, ipap_data_record &record, 
+						   string &bidSet, string &bidName, string &elementName );
 
-
+	bid_auction_t readBidOptionData(ipap_template *templ, 
+					  			    fieldDefList_t *fieldDefs,
+									ipap_data_record &record);
+		   				  
+	ipap_message * get_ipap_message(Bid *bidPtr, fieldDefList_t *fieldDefs);
+	
   public:
 
-    MAPIBidParser(string fname);
+    MAPIBidParser();
 
-    MAPIBidParser(char *b, int l);
-
-    virtual ~MAPIBidParser() {}
+    ~MAPIBidParser() {}
 
     //! parse given bids and add parsed bids to bids
-    virtual void parse(fieldDefList_t *filters, 
-					   fieldValList_t *filterVals, 
+    void parse(fieldDefList_t *filters, 
+					   fieldValList_t *filterVals,
+					   ipap_message *message,
 					   bidDB_t *bids,
-					   BidIdSource *idSource );
+					   BidIdSource *idSource,
+					   ipap_message *messageOut );
+					   
+	//! get the ipap_message that represents the set of bids.
+	vector<ipap_message *> get_ipap_messages(fieldDefList_t *fieldDefs, 
+											 bidDB_t *auctions);
 
 };
 

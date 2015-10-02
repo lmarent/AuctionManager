@@ -92,12 +92,12 @@ class FieldValue
     /** Equal operator. verifies if the field given as parameter is equal
 		*  @param  the field value to compare
 		*/
-	bool operator== (const FieldValue& rhs);
+	bool equal (const FieldValue& rhs, string type);
     
     /** Diferent operator. verifies if the field given as parameter is not equal
 		*  @param  the field value to compare
 		*/
-	inline bool operator!= (const FieldValue& rhs);
+	bool notEqual (const FieldValue& rhs, string type);
 
     /** 
      * This function is designed to be used in modules linked dynamically.

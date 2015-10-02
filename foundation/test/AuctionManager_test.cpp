@@ -7,6 +7,7 @@
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "ParserFcts.h"
 #include "AuctionManager.h"
 
 using namespace auction;

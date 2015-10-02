@@ -663,8 +663,18 @@ BUILD_NARSH_FALSE
 BUILD_NARSH_TRUE
 BUILD_NAGTRSH_FALSE
 BUILD_NAGTRSH_TRUE
+LIBANSLP_LIBS
+LIBANSLP_CFLAGS
+LIBANSLP_MSG_LIBS
+LIBANSLP_MSG_CFLAGS
 LIBIPAP_LIBS
 LIBIPAP_CFLAGS
+LIBGIST_LIBS
+LIBGIST_CFLAGS
+LIBFASTQUEUE_LIBS
+LIBFASTQUEUE_CFLAGS
+LIBPROT_LIBS
+LIBPROT_CFLAGS
 CURL_FALSE
 CURL_TRUE
 CURL_LIBS
@@ -850,8 +860,18 @@ NL_ROUTE_3_CFLAGS
 NL_ROUTE_3_LIBS
 CURL_CFLAGS
 CURL_LIBS
+LIBPROT_CFLAGS
+LIBPROT_LIBS
+LIBFASTQUEUE_CFLAGS
+LIBFASTQUEUE_LIBS
+LIBGIST_CFLAGS
+LIBGIST_LIBS
 LIBIPAP_CFLAGS
-LIBIPAP_LIBS'
+LIBIPAP_LIBS
+LIBANSLP_MSG_CFLAGS
+LIBANSLP_MSG_LIBS
+LIBANSLP_CFLAGS
+LIBANSLP_LIBS'
 
 
 # Initialize some variables set by options.
@@ -1526,10 +1546,30 @@ Some influential environment variables:
               linker flags for NL_ROUTE_3, overriding pkg-config
   CURL_CFLAGS C compiler flags for CURL, overriding pkg-config
   CURL_LIBS   linker flags for CURL, overriding pkg-config
+  LIBPROT_CFLAGS
+              C compiler flags for LIBPROT, overriding pkg-config
+  LIBPROT_LIBS
+              linker flags for LIBPROT, overriding pkg-config
+  LIBFASTQUEUE_CFLAGS
+              C compiler flags for LIBFASTQUEUE, overriding pkg-config
+  LIBFASTQUEUE_LIBS
+              linker flags for LIBFASTQUEUE, overriding pkg-config
+  LIBGIST_CFLAGS
+              C compiler flags for LIBGIST, overriding pkg-config
+  LIBGIST_LIBS
+              linker flags for LIBGIST, overriding pkg-config
   LIBIPAP_CFLAGS
               C compiler flags for LIBIPAP, overriding pkg-config
   LIBIPAP_LIBS
               linker flags for LIBIPAP, overriding pkg-config
+  LIBANSLP_MSG_CFLAGS
+              C compiler flags for LIBANSLP_MSG, overriding pkg-config
+  LIBANSLP_MSG_LIBS
+              linker flags for LIBANSLP_MSG, overriding pkg-config
+  LIBANSLP_CFLAGS
+              C compiler flags for LIBANSLP, overriding pkg-config
+  LIBANSLP_LIBS
+              linker flags for LIBANSLP, overriding pkg-config
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -18332,6 +18372,288 @@ fi
 
 
 pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBPROT" >&5
+$as_echo_n "checking for LIBPROT... " >&6; }
+
+if test -n "$LIBPROT_CFLAGS"; then
+    pkg_cv_LIBPROT_CFLAGS="$LIBPROT_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libprot-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libprot-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBPROT_CFLAGS=`$PKG_CONFIG --cflags "libprot-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBPROT_LIBS"; then
+    pkg_cv_LIBPROT_LIBS="$LIBPROT_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libprot-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libprot-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBPROT_LIBS=`$PKG_CONFIG --libs "libprot-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        LIBPROT_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libprot-0.0" 2>&1`
+        else
+	        LIBPROT_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libprot-0.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$LIBPROT_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (libprot-0.0) were not met:
+
+$LIBPROT_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables LIBPROT_CFLAGS
+and LIBPROT_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables LIBPROT_CFLAGS
+and LIBPROT_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	LIBPROT_CFLAGS=$pkg_cv_LIBPROT_CFLAGS
+	LIBPROT_LIBS=$pkg_cv_LIBPROT_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+
+
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBFASTQUEUE" >&5
+$as_echo_n "checking for LIBFASTQUEUE... " >&6; }
+
+if test -n "$LIBFASTQUEUE_CFLAGS"; then
+    pkg_cv_LIBFASTQUEUE_CFLAGS="$LIBFASTQUEUE_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libfastqueue-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libfastqueue-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBFASTQUEUE_CFLAGS=`$PKG_CONFIG --cflags "libfastqueue-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBFASTQUEUE_LIBS"; then
+    pkg_cv_LIBFASTQUEUE_LIBS="$LIBFASTQUEUE_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libfastqueue-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libfastqueue-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBFASTQUEUE_LIBS=`$PKG_CONFIG --libs "libfastqueue-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        LIBFASTQUEUE_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libfastqueue-0.0" 2>&1`
+        else
+	        LIBFASTQUEUE_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libfastqueue-0.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$LIBFASTQUEUE_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (libfastqueue-0.0) were not met:
+
+$LIBFASTQUEUE_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables LIBFASTQUEUE_CFLAGS
+and LIBFASTQUEUE_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables LIBFASTQUEUE_CFLAGS
+and LIBFASTQUEUE_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	LIBFASTQUEUE_CFLAGS=$pkg_cv_LIBFASTQUEUE_CFLAGS
+	LIBFASTQUEUE_LIBS=$pkg_cv_LIBFASTQUEUE_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+
+
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBGIST" >&5
+$as_echo_n "checking for LIBGIST... " >&6; }
+
+if test -n "$LIBGIST_CFLAGS"; then
+    pkg_cv_LIBGIST_CFLAGS="$LIBGIST_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libgist-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libgist-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBGIST_CFLAGS=`$PKG_CONFIG --cflags "libgist-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBGIST_LIBS"; then
+    pkg_cv_LIBGIST_LIBS="$LIBGIST_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libgist-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libgist-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBGIST_LIBS=`$PKG_CONFIG --libs "libgist-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        LIBGIST_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libgist-0.0" 2>&1`
+        else
+	        LIBGIST_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libgist-0.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$LIBGIST_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (libgist-0.0) were not met:
+
+$LIBGIST_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables LIBGIST_CFLAGS
+and LIBGIST_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables LIBGIST_CFLAGS
+and LIBGIST_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	LIBGIST_CFLAGS=$pkg_cv_LIBGIST_CFLAGS
+	LIBGIST_LIBS=$pkg_cv_LIBGIST_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+
+
+
+
+pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBIPAP" >&5
 $as_echo_n "checking for LIBIPAP... " >&6; }
 
@@ -18417,6 +18739,194 @@ See \`config.log' for more details" "$LINENO" 5; }
 else
 	LIBIPAP_CFLAGS=$pkg_cv_LIBIPAP_CFLAGS
 	LIBIPAP_LIBS=$pkg_cv_LIBIPAP_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+
+
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBANSLP_MSG" >&5
+$as_echo_n "checking for LIBANSLP_MSG... " >&6; }
+
+if test -n "$LIBANSLP_MSG_CFLAGS"; then
+    pkg_cv_LIBANSLP_MSG_CFLAGS="$LIBANSLP_MSG_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libanslp_msg-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libanslp_msg-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBANSLP_MSG_CFLAGS=`$PKG_CONFIG --cflags "libanslp_msg-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBANSLP_MSG_LIBS"; then
+    pkg_cv_LIBANSLP_MSG_LIBS="$LIBANSLP_MSG_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libanslp_msg-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libanslp_msg-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBANSLP_MSG_LIBS=`$PKG_CONFIG --libs "libanslp_msg-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        LIBANSLP_MSG_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libanslp_msg-0.0" 2>&1`
+        else
+	        LIBANSLP_MSG_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libanslp_msg-0.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$LIBANSLP_MSG_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (libanslp_msg-0.0) were not met:
+
+$LIBANSLP_MSG_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables LIBANSLP_MSG_CFLAGS
+and LIBANSLP_MSG_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables LIBANSLP_MSG_CFLAGS
+and LIBANSLP_MSG_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	LIBANSLP_MSG_CFLAGS=$pkg_cv_LIBANSLP_MSG_CFLAGS
+	LIBANSLP_MSG_LIBS=$pkg_cv_LIBANSLP_MSG_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+
+
+
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LIBANSLP" >&5
+$as_echo_n "checking for LIBANSLP... " >&6; }
+
+if test -n "$LIBANSLP_CFLAGS"; then
+    pkg_cv_LIBANSLP_CFLAGS="$LIBANSLP_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libanslp-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libanslp-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBANSLP_CFLAGS=`$PKG_CONFIG --cflags "libanslp-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$LIBANSLP_LIBS"; then
+    pkg_cv_LIBANSLP_LIBS="$LIBANSLP_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libanslp-0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libanslp-0.0") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_LIBANSLP_LIBS=`$PKG_CONFIG --libs "libanslp-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+
+
+if test $pkg_failed = yes; then
+   	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        LIBANSLP_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libanslp-0.0" 2>&1`
+        else
+	        LIBANSLP_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libanslp-0.0" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$LIBANSLP_PKG_ERRORS" >&5
+
+	as_fn_error $? "Package requirements (libanslp-0.0) were not met:
+
+$LIBANSLP_PKG_ERRORS
+
+Consider adjusting the PKG_CONFIG_PATH environment variable if you
+installed software in a non-standard prefix.
+
+Alternatively, you may set the environment variables LIBANSLP_CFLAGS
+and LIBANSLP_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details." "$LINENO" 5
+elif test $pkg_failed = untried; then
+     	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	{ { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "The pkg-config script could not be found or is too old.  Make sure it
+is in your PATH or set the PKG_CONFIG environment variable to the full
+path to pkg-config.
+
+Alternatively, you may set the environment variables LIBANSLP_CFLAGS
+and LIBANSLP_LIBS to avoid the need to call pkg-config.
+See the pkg-config man page for more details.
+
+To get pkg-config, see <http://pkg-config.freedesktop.org/>.
+See \`config.log' for more details" "$LINENO" 5; }
+else
+	LIBANSLP_CFLAGS=$pkg_cv_LIBANSLP_CFLAGS
+	LIBANSLP_LIBS=$pkg_cv_LIBANSLP_LIBS
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 

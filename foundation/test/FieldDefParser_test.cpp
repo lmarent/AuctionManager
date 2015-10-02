@@ -60,7 +60,7 @@ void FieldDefParser_Test::testParser()
 	
 	ptrFieldParsers->parse(list);
 		
-	CPPUNIT_ASSERT( list->size() == 7 );
+	CPPUNIT_ASSERT( list->size() == 14 );
 	
 	delete(list);
 }

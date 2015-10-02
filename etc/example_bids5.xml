@@ -2,13 +2,13 @@
 <!DOCTYPE AGENT SYSTEM "bidfile.dtd"> 
 <AGENT ID="Agent4">
   <BID ID="1">    
-    <ELEMENT NAME="element1">
+    <ELEMENT ID="element1">
 		<FIELD NAME="quantity">2</FIELD>
 		<FIELD NAME="unitprice">0.14</FIELD>		
-		<FIELD NAME="budget">0.30</FIELD>		
+		<FIELD NAME="unitbudget">0.30</FIELD>		
     </ELEMENT>
     <!-- This part defines the bid belonging to auction with key: General.1 -->
-    <AUCTION SET="General" NAME="1">
+    <AUCTION ID="General2.1">
 		<PREF NAME="Duration">100</PREF>
     </AUCTION>
   </BID>  

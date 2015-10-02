@@ -76,6 +76,7 @@ class Auctioner
     auto_ptr<BidManager>     			bidm;
     auto_ptr<AuctionManager>   			aucm;
     auto_ptr<EventSchedulerAuctioner>  	evnt;
+    auto_ptr<MAPIAuctionParser>			mpap;
 
     auto_ptr<AUMProcessor> 				proc;    
     auto_ptr<CtrlComm>        			comm;
@@ -114,6 +115,32 @@ class Auctioner
     
     //! activate/execute auctions
     void activateAuctions(auctionDB_t *auctions, EventScheduler *e);    
+
+
+	void handleGetInfo(Event *e, fd_sets_t *fds);
+    
+	void handleGetModInfo(Event *e, fd_sets_t *fds);
+    
+	void handleAddBids(Event *e, fd_sets_t *fds);      
+
+    void handleAddAuctions(Event *e, fd_sets_t *fds);
+
+	void handleAddBidsCntrlComm(Event *e, fd_sets_t *fds);
+
+	void handleAddBidsAuction(Event *e, fd_sets_t *fds);
+
+	void handleActivateAuction(Event *e, fd_sets_t *fds);
+
+    void handleRemoveBids(Event *e, fd_sets_t *fds);
+    
+    void handleRemoveBidsAuction(Event *e, fd_sets_t *fds);
+
+	void handleRemoveBidsCntrlComm(Event *e, fd_sets_t *fds);
+
+	void handleProcModeleTimer(Event *e, fd_sets_t *fds);
+
+	void handlePushExecution(Event *e, fd_sets_t *fds);
+
     
   public:
 

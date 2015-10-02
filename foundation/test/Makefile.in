@@ -106,6 +106,7 @@ am_test_runner_OBJECTS =  \
 	@top_srcdir@/foundation/src/FieldValue.$(OBJEXT) \
 	@top_srcdir@/foundation/src/FieldDefParser.$(OBJEXT) \
 	@top_srcdir@/foundation/src/FieldValParser.$(OBJEXT) \
+	@top_srcdir@/foundation/src/MAPIIpApMessageParser.$(OBJEXT) \
 	@top_srcdir@/foundation/src/BidIdSource.$(OBJEXT) \
 	@top_srcdir@/foundation/src/AuctionIdSource.$(OBJEXT) \
 	@top_srcdir@/foundation/src/Auction.$(OBJEXT) \
@@ -125,6 +126,7 @@ am_test_runner_OBJECTS =  \
 	@top_srcdir@/foundation/src/Allocation.$(OBJEXT) \
 	@top_srcdir@/foundation/src/AuctionManager.$(OBJEXT) \
 	@top_srcdir@/foundation/src/AllocationIdSource.$(OBJEXT) \
+	@top_srcdir@/foundation/src/MAPIAllocationParser.$(OBJEXT) \
 	@top_srcdir@/foundation/src/AllocationManager.$(OBJEXT) \
 	@top_srcdir@/foundation/test/Timeval_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/FieldValue_test.$(OBJEXT) \
@@ -132,12 +134,14 @@ am_test_runner_OBJECTS =  \
 	@top_srcdir@/foundation/test/FieldValParser_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/AuctionIdSource_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/BidFileParser_test.$(OBJEXT) \
+	@top_srcdir@/foundation/test/MAPIBidParser_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/Bid_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/Allocation_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/AuctionFileParser_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/MAPIAuctionParser_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/AuctionTimer_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/Bid_Manager_test.$(OBJEXT) \
+	@top_srcdir@/foundation/test/MAPIAllocationParser_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/Allocation_Manager_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/AuctionManager_test.$(OBJEXT) \
 	@top_srcdir@/foundation/test/test_runner.$(OBJEXT)
@@ -464,9 +468,19 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 IPTABLES_VERSION = @IPTABLES_VERSION@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBANSLP_CFLAGS = @LIBANSLP_CFLAGS@
+LIBANSLP_LIBS = @LIBANSLP_LIBS@
+LIBANSLP_MSG_CFLAGS = @LIBANSLP_MSG_CFLAGS@
+LIBANSLP_MSG_LIBS = @LIBANSLP_MSG_LIBS@
+LIBFASTQUEUE_CFLAGS = @LIBFASTQUEUE_CFLAGS@
+LIBFASTQUEUE_LIBS = @LIBFASTQUEUE_LIBS@
+LIBGIST_CFLAGS = @LIBGIST_CFLAGS@
+LIBGIST_LIBS = @LIBGIST_LIBS@
 LIBIPAP_CFLAGS = @LIBIPAP_CFLAGS@
 LIBIPAP_LIBS = @LIBIPAP_LIBS@
 LIBOBJS = @LIBOBJS@
+LIBPROT_CFLAGS = @LIBPROT_CFLAGS@
+LIBPROT_LIBS = @LIBPROT_LIBS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
@@ -580,6 +594,7 @@ test_runner_SOURCES = @top_srcdir@/foundation/src/Constants.cpp \
 						@top_srcdir@/foundation/src/FieldValue.cpp \
 						@top_srcdir@/foundation/src/FieldDefParser.cpp \
 						@top_srcdir@/foundation/src/FieldValParser.cpp \
+						@top_srcdir@/foundation/src/MAPIIpApMessageParser.cpp \
 						@top_srcdir@/foundation/src/BidIdSource.cpp \
 						@top_srcdir@/foundation/src/AuctionIdSource.cpp \
 						@top_srcdir@/foundation/src/Auction.cpp \
@@ -599,6 +614,7 @@ test_runner_SOURCES = @top_srcdir@/foundation/src/Constants.cpp \
 						@top_srcdir@/foundation/src/Allocation.cpp \
 						@top_srcdir@/foundation/src/AuctionManager.cpp \
 						@top_srcdir@/foundation/src/AllocationIdSource.cpp \
+						@top_srcdir@/foundation/src/MAPIAllocationParser.cpp \
 						@top_srcdir@/foundation/src/AllocationManager.cpp \
 						@top_srcdir@/foundation/test/Timeval_test.cpp \
 						@top_srcdir@/foundation/test/FieldValue_test.cpp \
@@ -606,12 +622,14 @@ test_runner_SOURCES = @top_srcdir@/foundation/src/Constants.cpp \
 						@top_srcdir@/foundation/test/FieldValParser_test.cpp \
 						@top_srcdir@/foundation/test/AuctionIdSource_test.cpp \
 						@top_srcdir@/foundation/test/BidFileParser_test.cpp \
+						@top_srcdir@/foundation/test/MAPIBidParser_test.cpp \
 						@top_srcdir@/foundation/test/Bid_test.cpp \
 						@top_srcdir@/foundation/test/Allocation_test.cpp \
 						@top_srcdir@/foundation/test/AuctionFileParser_test.cpp \
 						@top_srcdir@/foundation/test/MAPIAuctionParser_test.cpp \
 						@top_srcdir@/foundation/test/AuctionTimer_test.cpp \
 						@top_srcdir@/foundation/test/Bid_Manager_test.cpp \
+						@top_srcdir@/foundation/test/MAPIAllocationParser_test.cpp \
 						@top_srcdir@/foundation/test/Allocation_Manager_test.cpp \
 						@top_srcdir@/foundation/test/AuctionManager_test.cpp \
 						@top_srcdir@/foundation/test/test_runner.cpp
@@ -710,6 +728,9 @@ clean-checkPROGRAMS:
 @top_srcdir@/foundation/src/FieldValParser.$(OBJEXT):  \
 	@top_srcdir@/foundation/src/$(am__dirstamp) \
 	@top_srcdir@/foundation/src/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/foundation/src/MAPIIpApMessageParser.$(OBJEXT):  \
+	@top_srcdir@/foundation/src/$(am__dirstamp) \
+	@top_srcdir@/foundation/src/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/foundation/src/BidIdSource.$(OBJEXT):  \
 	@top_srcdir@/foundation/src/$(am__dirstamp) \
 	@top_srcdir@/foundation/src/$(DEPDIR)/$(am__dirstamp)
@@ -767,6 +788,9 @@ clean-checkPROGRAMS:
 @top_srcdir@/foundation/src/AllocationIdSource.$(OBJEXT):  \
 	@top_srcdir@/foundation/src/$(am__dirstamp) \
 	@top_srcdir@/foundation/src/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/foundation/src/MAPIAllocationParser.$(OBJEXT):  \
+	@top_srcdir@/foundation/src/$(am__dirstamp) \
+	@top_srcdir@/foundation/src/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/foundation/src/AllocationManager.$(OBJEXT):  \
 	@top_srcdir@/foundation/src/$(am__dirstamp) \
 	@top_srcdir@/foundation/src/$(DEPDIR)/$(am__dirstamp)
@@ -794,6 +818,9 @@ clean-checkPROGRAMS:
 @top_srcdir@/foundation/test/BidFileParser_test.$(OBJEXT):  \
 	@top_srcdir@/foundation/test/$(am__dirstamp) \
 	@top_srcdir@/foundation/test/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/foundation/test/MAPIBidParser_test.$(OBJEXT):  \
+	@top_srcdir@/foundation/test/$(am__dirstamp) \
+	@top_srcdir@/foundation/test/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/foundation/test/Bid_test.$(OBJEXT):  \
 	@top_srcdir@/foundation/test/$(am__dirstamp) \
 	@top_srcdir@/foundation/test/$(DEPDIR)/$(am__dirstamp)
@@ -810,6 +837,9 @@ clean-checkPROGRAMS:
 	@top_srcdir@/foundation/test/$(am__dirstamp) \
 	@top_srcdir@/foundation/test/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/foundation/test/Bid_Manager_test.$(OBJEXT):  \
+	@top_srcdir@/foundation/test/$(am__dirstamp) \
+	@top_srcdir@/foundation/test/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/foundation/test/MAPIAllocationParser_test.$(OBJEXT):  \
 	@top_srcdir@/foundation/test/$(am__dirstamp) \
 	@top_srcdir@/foundation/test/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/foundation/test/Allocation_Manager_test.$(OBJEXT):  \
@@ -859,8 +889,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/FieldDefParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/FieldValParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/FieldValue.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/MAPIAllocationParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/MAPIAuctionParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/MAPIBidParser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/MAPIIpApMessageParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/ParserFcts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/Timeval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/XMLParser.Po@am__quote@
@@ -876,7 +908,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/test/$(DEPDIR)/FieldDefParser_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/test/$(DEPDIR)/FieldValParser_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/test/$(DEPDIR)/FieldValue_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/test/$(DEPDIR)/MAPIAllocationParser_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/test/$(DEPDIR)/MAPIAuctionParser_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/test/$(DEPDIR)/MAPIBidParser_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/test/$(DEPDIR)/Timeval_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/test/$(DEPDIR)/test_runner.Po@am__quote@
 

@@ -36,9 +36,11 @@
 using namespace auction;
 
 Allocation::Allocation( string aset, string aname, string bset, string bname, 
-						fieldList_t &f, allocationIntervalList_t &alloc_inter )
+						string allset, string allname, fieldList_t &f, 
+						allocationIntervalList_t &alloc_inter )
 	: uid(0), state(AL_NEW), auctionSet(aset), auctionName(aname), bidSet(bset), 
-    bidName(bname), fields(f), intervals(alloc_inter) 
+      bidName(bname), allocationSet(allset), allocationName(allname),
+      fields(f), intervals(alloc_inter) 
 { 
 
 }
@@ -55,7 +57,9 @@ string Allocation::getInfo()
 	output << "AuctionSet:" << getAuctionSet() 
 		   << " AuctionName:" << getAuctionName()
 		   << " BidSet:" << getBidSet() 
-		   << " BidName:" << getBidName() << endl;
+		   << " BidName:" << getBidName() 
+		   << " AllocationSet:" << getBidSet() 
+		   << " AllocationName:" << getBidName() << endl;
 	
 	allocationIntervalListIter_t inter_iter;
 	int counter = 1;

@@ -26,45 +26,27 @@
 
 #include "stdincpp.h"
 #include "AuctionFileParser.h"
+#include "MAPIIpApMessageParser.h"
+
 
 namespace auction
 {
 
 //! parser for API message Auction syntax
-class MAPIAuctionParser
+class MAPIAuctionParser : public MAPIIpApMessageParser
 {
 
   private:
 
     Logger *log;
     int ch;
-    ipap_message message;
-
-	//! Read a template type from a message.
-	ipap_template * readTemplate(ipap_message * message, ipap_templ_type_t type);
-	
-	//! Read datarecords associated with a template id.
-	vector<ipap_data_record> readDataRecords(ipap_message * message, uint16_t templId);
 	
 	//! Read the auction data.
 	miscList_t readAuctionData(ipap_template *templ, 
 							   fieldDefList_t *fieldDefs,
 							   ipap_data_record &record,
 							   string &auctionName);
-
-    /*! \short   parse identifier format 'sourcename.rulename'
-
-        recognizes dor (.) in task identifier and saves sourcename and 
-        rulename to the new malloced strings source and rname
-    */
-    void parseAuctionName(string aName, string &resource, string &id);
     
-    //! Find a field by eno and ftype within the list of fields.
-    fieldDefItem_t findField(fieldDefList_t *fieldDefs, int eno, int ftype);
-
-	//! Find a field by name within the list of fields.
-	fieldDefItem_t findField(fieldDefList_t *fieldDefs, string name);
-
 	//! Read the action data associated with the auction.
 	configItemList_t readMiscAuctionData(ipap_template *templ, 
 										 fieldDefList_t *fieldDefs,
@@ -74,7 +56,7 @@ class MAPIAuctionParser
 	void getTemplateFields(ipap_template *templ, 
 						   fieldDefList_t *fieldDefs,
 						   auctionTemplateFieldList_t *templList);
-	
+		
 	ipap_message * get_ipap_message(Auction *auctionPtr, fieldDefList_t *fieldDefs);
 	
   public:

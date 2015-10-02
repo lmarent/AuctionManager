@@ -82,6 +82,9 @@ class AllocationManager
     //!< number of allocations in the database
     int allocations;
 
+	//! index to allocation via allocation SET and name.
+	allocationSetIndex_t allocationSetIndex;
+	
     //! index to allocation via bid setID and name
     allocationSetIndex_t bidSetIndex;
 
@@ -110,12 +113,6 @@ class AllocationManager
         \arg \a allocation to store.
     */
     void storeAllocationAsDone(Allocation *r);
-
-    //! delete an allocation from a specific auction.
-    void delAuctionAllocation(string aset, string aname, int uid, EventScheduler *e);
-
-    //! delete an allocation from a specific bid.
-    void delBidAllocation(string bset, string bname, int uid, EventScheduler *e);
 
   public:
 
@@ -148,13 +145,11 @@ class AllocationManager
     */
     Allocation *getAllocation(int uid); //ok
 
-    /*! \short get allocation by auction and bid set and name
-         \arg \c aset - auction set 
-         \arg \c aname - auction name 
-         \arg \c bset - bid set
-         \arg \c bname - bid name
+    /*! \short get allocation by allocation  set and name
+         \arg \c aset - allocation set 
+         \arg \c aname - allocation name 
     */
-    Allocation *getAllocation(string aset, string aname, string bset, string bname); //ok
+    Allocation *getAllocation(string aset, string aname); //ok
 
     /*! \short  get all bids in bidset with name bname 
          \arg \c bset - bid set
@@ -205,7 +200,7 @@ class AllocationManager
     void delAuctionAllocations(string aset, string aname, EventScheduler *e); //ok
 
     //! delete and allocation.
-    void delAllocation(string aset, string aname, string bset, string bname, EventScheduler *e); //ok
+    void delAllocation(string aset, string aname, EventScheduler *e); //ok
 
     //! delete and allocation.
     void delAllocation(Allocation *a, EventScheduler *e); // ok
@@ -220,7 +215,7 @@ class AllocationManager
     */
     string getInfo(void);
     string getInfo(Allocation *r);
-    string getInfo(string aset, string aname, string bset, string bname);
+    string getInfo(string aset, string aname);
 
 
     //! dump a AllocationManager object

@@ -27,6 +27,7 @@
 
 */
 
+#include "ParserFcts.h"
 #include "BidManager.h"
 // #include "CtrlComm.h"
 #include "Constants.h"
@@ -194,6 +195,26 @@ bidIndex_t *BidManager::getBids(string sname)
     return NULL;
 }
 
+/* -------------------- getBids -------------------- */
+vector<int> BidManager::getBids(string aset, string aname)
+{
+
+    auctionSetBidIndexIter_t iter;
+
+    iter = bidAuctionSetIndex.find(aset);
+    if (iter != bidAuctionSetIndex.end()) {
+        auctionBidIndexIter_t auctionBidIndexIter = (iter->second).find(aname);
+        if (auctionBidIndexIter != (iter->second).end()){
+			return auctionBidIndexIter->second;
+		}
+    }
+	
+	vector<int> list_return;
+    return list_return;
+	 
+}
+
+
 bidDB_t BidManager::getBids()
 {
     bidDB_t ret;
@@ -248,7 +269,7 @@ bidDB_t *BidManager::parseBids(string fname)
 
 /* -------------------- parseBidsBuffer -------------------- */
 
-bidDB_t *BidManager::parseBidsBuffer(char *buf, int len, int mapi)
+bidDB_t *BidManager::parseBidsBuffer(char *buf, int len)
 {
     bidDB_t *new_bids = new bidDB_t();
 
@@ -259,13 +280,38 @@ bidDB_t *BidManager::parseBidsBuffer(char *buf, int len, int mapi)
         // load the filter val list
         loadFieldVals("");
 			
-        if (mapi) {
-             MAPIBidParser rfp = MAPIBidParser(buf, len);
-             rfp.parse(&fieldDefs, &fieldVals, new_bids, &idSource);
-        } else {
-            BidFileParser rfp = BidFileParser(buf, len);
-            rfp.parse(&fieldDefs, &fieldVals, new_bids, &idSource);
+        BidFileParser rfp = BidFileParser(buf, len);
+        rfp.parse(&fieldDefs, &fieldVals, new_bids, &idSource);
+
+        return new_bids;
+	
+    } catch (Error &e) {
+
+        for(bidDBIter_t i=new_bids->begin(); i != new_bids->end(); i++) {
+            saveDelete(*i);
         }
+        saveDelete(new_bids);
+        throw e;
+    }
+}
+
+
+/* -------------------- parseBidsMessage -------------------- */
+
+bidDB_t *
+BidManager::parseBidsMessage(ipap_message *messageIn, ipap_message *messageOut)
+{
+    bidDB_t *new_bids = new bidDB_t();
+
+    try {
+        // load the filter def list
+        loadFieldDefs("");
+	
+        // load the filter val list
+        loadFieldVals("");
+			
+        MAPIBidParser rfp = MAPIBidParser();
+        rfp.parse(&fieldDefs, &fieldVals, messageIn, new_bids, &idSource, messageOut);
 
         return new_bids;
 	
@@ -301,10 +347,10 @@ void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
             bidAuctionListIter_t auct_iter;
             for ( auct_iter = (b->getAuctions())->begin(); 
                     auct_iter != (b->getAuctions())->end(); ++auct_iter ){ 
-				start[auct_iter->start].push_back(b);
-				if (auct_iter->stop) 
+				start[(auct_iter->second).start].push_back(b);
+				if ((auct_iter->second).stop) 
 				{
-					stop[auct_iter->stop].push_back(b);
+					stop[(auct_iter->second).stop].push_back(b);
 				}
 			}
         } catch (Error &e ) {
@@ -333,18 +379,18 @@ void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
 			bidAuctionListIter_t auct_iter = (bid->getAuctions())->begin();
 			while ( auct_iter != (bid->getAuctions())->end()){ 
 				// If the starttime for the auction is actually the same.
-				if (auct_iter->start ==  iter2->first)
+				if ((auct_iter->second).start ==  iter2->first)
 				{
 					
 #ifdef DEBUG    
 					log->dlog(ch, "Schedulling new event - set: %s, name:  %s", 
-							  (auct_iter->auctionSet).c_str(), 
-							    (auct_iter->auctionName).c_str());
+							  ((auct_iter->second).auctionSet).c_str(), 
+							    ((auct_iter->second).auctionName).c_str());
 #endif 					
-					e->addEvent(new InsertBidAuctionEvent(iter2->first-now, 
-														  bid, 
-														  auct_iter->auctionSet,
-														  auct_iter->auctionName));
+					e->addEvent(
+						new InsertBidAuctionEvent(iter2->first-now, bid, 
+										  (auct_iter->second).auctionSet,
+										  (auct_iter->second).auctionName));
 				}
 				++auct_iter;
 			}
@@ -362,11 +408,11 @@ void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
 			bidAuctionListIter_t auct_iter = (bid->getAuctions())->begin();		
 			while (auct_iter != (bid->getAuctions())->end()) 
 			{
-				if (auct_iter->stop ==  iter2->first){	  
-					e->addEvent(new RemoveBidAuctionEvent(iter2->first-now, 
-														  bid, 
-														  auct_iter->auctionSet,
-														  auct_iter->auctionName));
+				if ((auct_iter->second).stop ==  iter2->first){	  
+					e->addEvent(
+						new RemoveBidAuctionEvent(iter2->first-now, bid, 
+									(auct_iter->second).auctionSet,
+									(auct_iter->second).auctionName));
 				}
 				++auct_iter;
 			}
@@ -422,7 +468,34 @@ void BidManager::addBid(Bid *b)
 
         // add new entry in index
         bidSetIndex[b->getSetName()][b->getBidName()] = b->getUId();
-	
+
+		// add new entry in the auction index.
+		bidAuctionList_t *auctions = b->getAuctions();
+		bidAuctionListIter_t auct_iter;
+		for (auct_iter = auctions->begin(); auct_iter != auctions->end(); ++auct_iter)
+		{
+			string aSet = (auct_iter->second).auctionSet;
+			string aName = (auct_iter->second).auctionName;
+			auctionSetBidIndexIter_t setIter;
+			setIter = bidAuctionSetIndex.find(aSet);
+			if (setIter != bidAuctionSetIndex.end())
+			{
+				auctionBidIndexIter_t actBidIter = (setIter->second).find(aName);
+				if (actBidIter != (setIter->second).end()){
+					(actBidIter->second).push_back(b->getUId());
+				}
+				else{
+					vector<int> listBids;
+					listBids.push_back(b->getUId());
+					bidAuctionSetIndex[aSet][aName] = listBids;
+				}
+			} else {
+				vector<int> listBids;
+				listBids.push_back(b->getUId());
+				bidAuctionSetIndex[aSet][aName] = listBids;
+			}
+		}
+        
         bids++;
 
 #ifdef DEBUG    
@@ -629,11 +702,46 @@ void BidManager::delBid(Bid *r, EventScheduler *e)
     storeBidAsDone(r);
     bidDB[r->getUId()] = NULL;
     bidSetIndex[r->getSetName()].erase(r->getBidName());
-
+    
+    bidAuctionList_t *auction =  r->getAuctions();
+    bidAuctionListIter_t auc_iter;
+    for (auc_iter = auction->begin(); auc_iter != auction->end(); ++auc_iter)
+    {
+		
+		// Find the corresponding nodes in the auction bid index and deletes
+		vector<int>::iterator actBidIter;
+		auctionSetBidIndexIter_t setNode;  
+		auctionBidIndexIter_t auctionNode; 
+		setNode = bidAuctionSetIndex.find((auc_iter->second).auctionSet);
+		auctionNode = (setNode->second).find((auc_iter->second).auctionName);
+		
+		for (actBidIter = (auctionNode->second).begin(); 
+				actBidIter != (auctionNode->second).end(); ++actBidIter){
+					
+			if (*actBidIter == r->getUId()){
+				(auctionNode->second).erase(actBidIter);
+				break;
+			}
+		}
+		
+		// delete the auction name if empty.
+		auctionNode = (setNode->second).find((auc_iter->second).auctionName);
+		if ((auctionNode->second).empty()){
+			bidAuctionSetIndex[(auc_iter->second).auctionSet].erase(auctionNode);
+		}
+			
+		// delete bid auction set if empty
+		setNode = bidAuctionSetIndex.find((auc_iter->second).auctionSet);
+		if ((setNode->second).empty()) {
+			bidAuctionSetIndex.erase(setNode);
+		}
+	}
+	
     // delete bid set if empty
     if (bidSetIndex[r->getSetName()].empty()) {
         bidSetIndex.erase(r->getSetName());
     }
+    
     
     if (e != NULL) {
         e->delBidEvents(r->getUId());
@@ -670,6 +778,98 @@ void BidManager::storeBidAsDone(Bid *r)
         saveDelete(bidDone.front());
         bidDone.pop_front();
     }
+}
+
+void BidManager::delBidAuction(string auctionSet, 
+							   string auctionName, 
+							   int uid,
+							   EventScheduler *e)
+{
+
+    auctionSetBidIndexIter_t auc_iter;
+    auc_iter = bidAuctionSetIndex.find(auctionSet);
+    if (auc_iter != bidAuctionSetIndex.end())
+    {
+		auctionBidIndexIter_t bidAucIter = (auc_iter->second).find(auctionName);
+		if (bidAucIter != (auc_iter->second).end()){
+			vector<int>::iterator lisBidsIter;
+			for (lisBidsIter = (bidAucIter->second).begin(); 
+					lisBidsIter != (bidAucIter->second).end(); ++lisBidsIter)
+			{
+				// Delete the index to the bid.
+				if (*lisBidsIter == uid){
+					(bidAucIter->second).erase(lisBidsIter);
+					break;
+				}
+			}
+			
+			// Delete the auction if that was the last related bid.
+			if ((bidAucIter->second).empty())
+			{
+				(auc_iter->second).erase(bidAucIter);
+			}	
+		}
+		// Delete the auction set if that was the last related bid for the set.
+		if ((auc_iter->second).empty()){
+			bidAuctionSetIndex.erase(auc_iter);
+		}
+	}
+	
+	// Delete in the bid the auction.
+	Bid * bid = getBid(uid);
+	bid->deleteAuction(auctionSet, auctionName);
+	
+	// remove the bid, if there are no more auctions related to the bid.
+	if (bid->getAuctions()->empty()){
+		 delBid(bid, e);
+	}
+}
+
+
+void BidManager::delBidAuction(string auctionSet, string auctionName, 
+							   string bset, string bname,
+							   EventScheduler *e)
+{
+
+	Bid * bid = getBid(bset, bname);
+	int uid = bid->getUId();
+
+    auctionSetBidIndexIter_t auc_iter;
+    auc_iter = bidAuctionSetIndex.find(auctionSet);
+    if (auc_iter != bidAuctionSetIndex.end())
+    {
+		auctionBidIndexIter_t bidAucIter = (auc_iter->second).find(auctionName);
+		if (bidAucIter != (auc_iter->second).end()){
+			vector<int>::iterator lisBidsIter;
+			for (lisBidsIter = (bidAucIter->second).begin(); 
+					lisBidsIter != (bidAucIter->second).end(); ++lisBidsIter)
+			{
+				// Delete the index to the bid.
+				if (*lisBidsIter == uid){
+					(bidAucIter->second).erase(lisBidsIter);
+					break;
+				}
+			}
+			
+			// Delete the auction if that was the last related bid.
+			if ((bidAucIter->second).empty())
+			{
+				(auc_iter->second).erase(bidAucIter);
+			}	
+		}
+		// Delete the auction set if that was the last related bid for the set.
+		if ((auc_iter->second).empty()){
+			bidAuctionSetIndex.erase(auc_iter);
+		}
+	}
+	
+	// Delete in the bid the auction.
+	bid->deleteAuction(auctionSet, auctionName);
+	
+	// remove the bid, if there are no more auctions related to the bid.
+	if (bid->getAuctions()->empty()){
+		 delBid(bid, e);
+	}
 }
 
 

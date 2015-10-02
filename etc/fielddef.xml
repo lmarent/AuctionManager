@@ -8,6 +8,14 @@
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="1">MaxValue</DEF>
   <DEF LENGTH="4" TYPE="SInt32" ENO="0" FTYPE="5">Duration</DEF>
   <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="38">Bandwidth</DEF>
+  <DEF TYPE="String" ENO="0" FTYPE="24">AuctionID</DEF>
+  <DEF TYPE="String" ENO="0" FTYPE="25">BidID</DEF>
+  <DEF TYPE="String" ENO="0" FTYPE="26">AllocationID</DEF>
+  <DEF TYPE="String" ENO="0" FTYPE="32">RecordID</DEF>
+  <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="27">StartSec</DEF>
+  <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="28">EndSec</DEF>
+  <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="34">DurationSec</DEF>
+  
   <!-- Reserve price -->
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="39">ReservePrice</DEF>
   

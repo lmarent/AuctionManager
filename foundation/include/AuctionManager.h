@@ -37,6 +37,7 @@
 #include "Auction.h"
 #include "AuctionFileParser.h"
 #include "EventScheduler.h"
+#include "MAPIAuctionParser.h"
 
 namespace auction
 {
@@ -171,7 +172,10 @@ class AuctionManager
     auctionDB_t *parseAuctions(string fname);  // Ok
 
     //! parse XML or Auction API bids from buffer
-    auctionDB_t *parseAuctionsBuffer(char *buf, int len, int mapi);
+    auctionDB_t *parseAuctionsBuffer(char *buf, int len);
+   
+    //! parse auctions from ipap_message 
+    auctionDB_t *parseAuctionsMessage(ipap_message *messageIn, ipap_message *messageOut);
    
     /*! \short   add a auction description 
 

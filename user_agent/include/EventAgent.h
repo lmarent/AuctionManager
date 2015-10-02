@@ -34,7 +34,7 @@
 #include "ProcModuleInterface.h"
 #include "ResourceRequestFileParser.h"
 #include "AuctionFileParser.h"
-#include "AuctionManagerInfo.h"
+#include "AgentManagerInfo.h"
 #include "Auction.h"
 #include "Event.h"
 
@@ -105,6 +105,104 @@ class AddResourceRequestsEvent : public Event
         return fileName;
     }
 };
+
+class ActivateResourceRequestIntervalEvent : public Event
+{
+  private:
+    resourceRequestDB_t requests;
+    time_t startTime;
+
+  public:
+
+    ActivateResourceRequestIntervalEvent(struct timeval time, resourceRequestDB_t &r, time_t _startTime) 
+      : Event(REMOVE_RESOURCEREQUESTS, time), requests(r), startTime(_startTime) {}
+
+    ActivateResourceRequestIntervalEvent(time_t offs_sec, resourceRequestDB_t &r, time_t _startTime) 
+      : Event(ACTIVATE_RESOURCE_REQUEST_INTERVAL, offs_sec), requests(r), startTime(_startTime) {}
+
+    ActivateResourceRequestIntervalEvent(resourceRequestDB_t &r,  time_t _startTime) 
+      : Event(REMOVE_RESOURCEREQUESTS), requests(r), startTime(_startTime) {}
+
+     resourceRequestDB_t *getResourceRequests()
+     {
+         return &requests;
+     }
+     
+     time_t getStartTime()
+     {
+		return startTime;
+	 }
+     
+     int deleteResourceRequest(int uid)
+     {
+         int ret = 0;
+         resourceRequestDBIter_t iter;
+           
+         for (iter=requests.begin(); iter != requests.end(); iter++) {
+             if ((*iter)->getUId() == uid) {
+                 requests.erase(iter);
+                 ret++;
+                 break;
+             }   
+         }
+         
+         if (requests.empty()) {
+             return ++ret;
+         }
+         
+         return ret;
+     }
+};
+
+
+class RemoveResourceRequestIntervalEvent : public Event
+{
+  private:
+    resourceRequestDB_t requests;
+    time_t startTime;
+
+  public:
+
+    RemoveResourceRequestIntervalEvent(struct timeval time, resourceRequestDB_t &r, time_t _startTime) 
+      : Event(REMOVE_RESOURCEREQUESTS, time), requests(r), startTime(_startTime) {}
+
+    RemoveResourceRequestIntervalEvent(time_t offs_sec, resourceRequestDB_t &r, time_t _startTime) 
+      : Event(REMOVE_RESOURCE_REQUEST_INTERVAL, offs_sec), requests(r), startTime(_startTime) {}
+
+    RemoveResourceRequestIntervalEvent(resourceRequestDB_t &r, time_t _startTime) 
+      : Event(REMOVE_RESOURCEREQUESTS), requests(r), startTime(_startTime) {}
+
+     resourceRequestDB_t *getResourceRequests()
+     {
+         return &requests;
+     }
+
+     time_t getStartTime()
+     {
+		return startTime;
+	 }
+
+     int deleteResourceRequest(int uid)
+     {
+         int ret = 0;
+         resourceRequestDBIter_t iter;
+           
+         for (iter=requests.begin(); iter != requests.end(); iter++) {
+             if ((*iter)->getUId() == uid) {
+                 requests.erase(iter);
+                 ret++;
+                 break;
+             }   
+         }
+         
+         if (requests.empty()) {
+             return ++ret;
+         }
+         
+         return ret;
+     }
+};
+
 
 
 class RemoveResourceRequestsEvent : public Event

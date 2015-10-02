@@ -36,7 +36,8 @@ using namespace auction;
 /* ------------------------- AUMProcessor ------------------------- */
 
 AUMProcessor::AUMProcessor(ConfigManager *cnf, string fdname, int threaded, string moduleDir ) 
-    : AuctionManagerComponent(cnf, "AUM_PROCESSOR", threaded), fieldDefFileName(fdname)
+    : AuctionManagerComponent(cnf, "AUM_PROCESSOR", threaded), 
+	  MAPIIpApMessageParser(), fieldDefFileName(fdname)
 {
     string txt;
     
@@ -136,6 +137,73 @@ void AUMProcessor::loadFieldDefs(string fname)
     
 }
 
+
+miscList_t 
+AUMProcessor::readMiscData( ipap_template *templ, ipap_data_record &record)
+{
+#ifdef DEBUG
+    log->dlog(ch, "Starting readMiscData");
+#endif
+
+	miscList_t miscs;
+	fieldDataListIter_t fieldIter;
+	
+	for (fieldIter=record.begin(); fieldIter!=record.end(); ++fieldIter)
+	{
+		ipap_field_key kField = fieldIter->first;
+		ipap_value_field dFieldValue = fieldIter->second;
+		
+		fieldDefItem_t fItem = 
+			findField(&fieldDefs, kField.get_eno() , kField.get_ftype());
+			
+		if ((fItem.name).empty()){
+			ostringstream s;
+			s << "AUM Processor: Field eno:" << kField.get_eno();
+			s << "fType:" << kField.get_ftype() << "is not parametrized";
+			throw Error(s.str()); 
+		}
+		else
+		{
+			ipap_field field = templ->get_field( kField.get_eno(), kField.get_ftype() );
+			configItem_t item;
+			item.name = fItem.name;
+			item.type = fItem.type;
+			item.value = field.writeValue(dFieldValue);
+			miscs[item.name] = item;
+		}
+	}
+		
+#ifdef DEBUG
+    log->dlog(ch, "Ending readMiscData");
+#endif
+
+	return miscs;
+
+}
+
+
+bool AUMProcessor::intersects( time_t startDttmAuc, time_t stopDttmAuc, 
+								 time_t startDttmReq, time_t stopDttmReq)
+{
+
+	if (stopDttmReq <= startDttmAuc)
+		return false;
+	
+	if (stopDttmAuc <= startDttmReq)
+		return false;
+	
+	return true;
+
+}
+
+bool AUMProcessor::forResource(string resourceAuc, string resourceIdReq)
+{
+	if (resourceAuc.compare(resourceIdReq) == 0 ){
+		return true;
+	}
+	
+	return false;
+}
 
 // add Auctions
 void AUMProcessor::addAuctions( auctionDB_t *auctions, EventScheduler *e )
@@ -344,8 +412,8 @@ void AUMProcessor::delBids(bidDB_t *bids)
 		for (auction_iter = (bid->getAuctions())->begin(); 
 			 auction_iter!= (bid->getAuctions())->end(); ++auction_iter){
 			 try{
-			     delBidAuction(auction_iter->auctionSet, 
-								  auction_iter->auctionName, bid );
+			     delBidAuction((auction_iter->second).auctionSet, 
+								  (auction_iter->second).auctionName, bid );
 			 } catch(Error &err){
 				  log->elog( ch, err.getError().c_str() );
 			 }
@@ -427,14 +495,86 @@ int AUMProcessor::delAuction( Auction *a )
     return 0;
 }
 
+/* -----------------  getApplicableAuctions --------------------- */
+auctionDB_t * 
+AUMProcessor::getApplicableAuctions(ipap_message *message)
+{
 
-int AUMProcessor::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds)
+#ifdef DEBUG
+    log->dlog(ch, "start getApplicableAuctions");
+#endif
+
+	AUTOLOCK(threaded, &maccess);
+	
+	auctionDB_t *auctions_anw = new auctionDB_t();
+	
+	// Read the option data auction template.
+	ipap_template *templOptAuct = readTemplate(message, IPAP_OPTNS_AUCTION_TEMPLATE);
+
+	// Read the option data record template associated with the option data auction template.
+	if (templOptAuct != NULL){
+		dataRecordList_t dOptRecordList = readDataRecords(message, templOptAuct->get_template_id());
+		if (dOptRecordList.size() == 0){
+			// All auctions must be given.
+			auctionProcessListIter_t aucIter;
+			for (aucIter = auctions.begin(); aucIter != auctions.end(); ++aucIter){
+				auctions_anw->push_back((aucIter->second).auction);
+			}
+		} 
+		else{
+
+			dateRecordListIter_t dataIter;
+			for (dataIter = dOptRecordList.begin(); dataIter != dOptRecordList.end(); ++dataIter)
+			{
+				miscList_t miscs = 
+					readMiscData( templOptAuct, *dataIter);
+				
+				fieldDefItem_t field;
+				ipap_field ipfield; 
+				string sstartDttm = getMiscVal(&miscs, "start"); 
+				field = findField(&fieldDefs, "start");
+				ipfield = templOptAuct->get_field( field.eno, field.ftype );
+				time_t startDttm = (time_t) ipfield.parse(sstartDttm).get_value_int64();
+				
+				string sstopDttm = getMiscVal(&miscs, "stop");
+				field = findField(&fieldDefs, "stop");
+				ipfield = templOptAuct->get_field( field.eno, field.ftype );
+				time_t stopDttm = (time_t) ipfield.parse(sstopDttm).get_value_int64();
+				 
+				string resourceId = getMiscVal(&miscs, "resource"); 
+				
+				auctionProcessListIter_t aucIter;
+				for (aucIter = auctions.begin(); aucIter != auctions.end(); ++aucIter){
+					Auction *auction =  (aucIter->second).auction;
+					if (intersects(auction->getStart(), auction->getStop(), startDttm, stopDttm) 
+						&& ( forResource(auction->getAuctionResource(), resourceId))){
+						auctions_anw->push_back(auction);
+					}
+				}				
+			}
+		}	
+	}
+	else{
+		// All auctions must be given.
+		auctionProcessListIter_t aucIter;
+		for (aucIter = auctions.begin(); aucIter != auctions.end(); ++aucIter){
+			auctions_anw->push_back((aucIter->second).auction);
+		}
+	}
+	
+	return auctions_anw;
+}
+
+
+int 
+AUMProcessor::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds)
 {
 
     return 0;
 }
 
-void AUMProcessor::main()
+void 
+AUMProcessor::main()
 {
 
     // this function will be run as a single thread inside the AUM processor
@@ -445,7 +585,8 @@ void AUMProcessor::main()
     }
 }       
 
-void AUMProcessor::waitUntilDone(void)
+void 
+AUMProcessor::waitUntilDone(void)
 {
 #ifdef ENABLE_THREADS
     AUTOLOCK(threaded, &maccess);
@@ -459,7 +600,8 @@ void AUMProcessor::waitUntilDone(void)
 }
 
 
-string AUMProcessor::getInfo()
+string 
+AUMProcessor::getInfo()
 {
     ostringstream s;
 
@@ -474,7 +616,8 @@ string AUMProcessor::getInfo()
 
 /* -------------------- addTimerEvents -------------------- */
 
-void AUMProcessor::addTimerEvents( int bidID, int actID,
+void 
+AUMProcessor::addTimerEvents( int bidID, int actID,
                                       ppaction_t &act, EventScheduler &es )
 {
     /*

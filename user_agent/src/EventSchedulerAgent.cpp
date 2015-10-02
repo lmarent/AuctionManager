@@ -25,6 +25,7 @@
     $Id: EventSchedulerAgent.cpp 748 2015-08-25 08:32:00 amarentes $
 */
 
+#include "ParserFcts.h"
 #include "EventSchedulerAgent.h"
 #include "Agent.h"
 

@@ -126,3 +126,42 @@ string field_t::getInfo(void)
 	
 	return output.str();
 }
+
+
+bool 
+field_t::operator== (const field_t &param)
+{
+	
+	if (name.compare(param.name) != 0)
+		return false;
+	
+	if (type.compare(param.type) != 0)
+		return false;
+
+	if (mtype != param.mtype)
+		return false;
+
+	if (len != param.len)
+		return false;
+	
+	if (cnt != param.cnt)
+		return false;
+			
+	try{
+		for (int i = 0; i < cnt; ++i){
+			if (value[i].notEqual(param.value[i], type) == true){
+				return false;
+			}
+		}
+	} catch (out_of_range &e){
+		return false;
+	}	
+		
+	return true;
+}
+
+bool 
+field_t::operator!=(const field_t &param)
+{
+	return !(operator==(param));
+}

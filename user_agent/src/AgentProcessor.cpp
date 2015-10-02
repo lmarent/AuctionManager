@@ -197,12 +197,9 @@ int AgentProcessor::addAuction( Auction *a, EventScheduler *evs )
 #endif
    
     auctionProcess_t entry;
-    int errNo;
     string errStr;
-    bool exThrown = false;
 
     int auctionId = a->getUId();
-    action_t *action = a->getAction();
 
 #ifdef DEBUG
     log->dlog(ch, "Adding auction #%d - set:%s, name:%s", 
@@ -233,8 +230,8 @@ void AgentProcessor::delBids(bidDB_t *bids)
 		for (auction_iter = (bid->getAuctions())->begin(); 
 			 auction_iter!= (bid->getAuctions())->end(); ++auction_iter){
 			 try{
-			     delBidAuction(auction_iter->auctionSet, 
-								  auction_iter->auctionName, bid );
+			     delBidAuction((auction_iter->second).auctionSet, 
+							   (auction_iter->second).auctionName, bid );
 			 } catch(Error &err){
 				  log->elog( ch, err.getError().c_str() );
 			 }

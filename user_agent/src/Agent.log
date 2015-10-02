@@ -1,0 +1,227 @@
+[34m2015-09-24 20:11:24.049[30602] >>>>>>>>>>>>>>>>>>>>>>>> *** LOG START *** >>>>>>>>>>>>>>>>>>>>>>>>[0m
+[0m2015-09-24 20:11:24.054-30602-[1m DEBUG [22m/4: [1mANSLP_IEManager[22m [0mStarting register_known_ies[0m
+[0m2015-09-24 20:11:24.054-30602-[1m DEBUG [22m/4: [1mANSLP_IEManager[22m [0mTo create ANSLP_IEManager singleton [0m
+[0m2015-09-24 20:11:24.054-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE anslp_msg for 0x7fff8d1a2768[0m
+[0m2015-09-24 20:11:24.054-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE anslp_msg for 0x7fff8d1a2768[0m
+[0m2015-09-24 20:11:24.054-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE anslp_msg for 0x7fff8d1a2768[0m
+[0m2015-09-24 20:11:24.054-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE anslp_msg for 0x7fff8d1a2768[0m
+[0m2015-09-24 20:11:24.054-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE session_lifetime for 0x7fff8d1a2768[0m
+[0m2015-09-24 20:11:24.054-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE information_code for 0x7fff8d1a2768[0m
+[0m2015-09-24 20:11:24.054-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE message_hop_count for 0x7fff8d1a2768[0m
+[0m2015-09-24 20:11:24.054-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE selection_auctioning_entities for 0x7fff8d1a2768[0m
+[0m2015-09-24 20:11:24.054-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE msg_sequence_number for 0x7fff8d1a2768[0m
+[0m2015-09-24 20:11:24.056-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE anslp_ipap_mspec for 0x7fff8d1a2768[0m
+[0m2015-09-24 20:11:24.056-30602-[1m DEBUG [22m/4: [1mANSLP_IEManager[22m [0mregistered known IEs[0m
+[0m2015-09-24 20:11:24.056-30602-[1m DEBUG [22m/4: [1manslp_config   [22m [0mstart - creating configuration parameter singleton[0m
+[0m2015-09-24 20:11:24.056-30602-[1m DEBUG [22m/4: [1mconfigpar_repository[22m [0minstance() - creating instance[0m
+[0m2015-09-24 20:11:24.056-30602-[1m DEBUG [22m/4: [1manslp_config   [22m [0mregistered anslp realm with realm id 6[0m
+[0m2015-09-24 20:11:24.056-30602-[1m DEBUG [22m/4: [1manslp_config::registerAllPars[22m [0mstarting registering anslp parameters.[0m
+[0m2015-09-24 20:11:24.056-30602-[1m DEBUG [22m/4: [1manslp_config::registerAllPars[22m [0mfinished registering anslp parameters.[0m
+[0m2015-09-24 20:11:24.056-30602-[1m DEBUG [22m/4: [1mgistconf       [22m [0mregistered gist realm with realm id 2[0m
+[0m2015-09-24 20:11:24.056-30602-[1m DEBUG [22m/4: [1mgistconf::registerAllPars[22m [0mstarting registering gist parameters.[0m
+[0m2015-09-24 20:11:24.056-30602-[1m DEBUG [22m/4: [1mgistconf::registerAllPars[22m [0mfinished registering gist parameters.[0m
+[0m2015-09-24 20:11:24.059-30602-[1m INFO  [22m/4: [1manslp_daemon   [22m [0mstarting A-NSLP daemon ...[0m
+[0m2015-09-24 20:11:24.059-30602-[1m DEBUG [22m/4: [1mnop_auction_rule_installer[22m [0mNOP: setup()[0m
+[0m2015-09-24 20:11:24.059-30602-[1m INFO  [22m/4: [1manslp_daemon   [22m [0mstarting it is going to read parameters 1[0m
+[0m2015-09-24 20:11:24.059-30602-[1m INFO  [22m/4: [1manslp_daemon   [22m [0mEStoy aqui 1 [0m
+[0m2015-09-24 20:11:24.059-30602-[1m INFO  [22m/4: [1manslp_daemon   [22m [0mEStoy aqui 2 [0m
+[0m2015-09-24 20:11:24.061-30602-[1m INFO  [22m/4: [1manslp_daemon   [22m [0mstarting it is going to read parameters 1a[0m
+[0m2015-09-24 20:11:24.061-30602-[1m INFO  [22m/4: [1manslp_daemon   [22m [0mstarting it is going to read parameters 2[0m
+[0m2015-09-24 20:11:24.061-30602-[1m INFO  [22m/4: [1manslp_daemon   [22m [0mstarting it is going to read parameters 3[0m
+[0m2015-09-24 20:11:24.061-30602-[1m INFO  [22m/4: [1manslp_daemon   [22m [0mstarting it is going to read parameters 4[0m
+[0m2015-09-24 20:11:24.062-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 GIST Starter thread(s) sucessfully created[0m
+[0m2015-09-24 20:11:24.062-30602-[1m DEBUG [22m/4: [1mQueueManager   [22m [0mJust created QueueManager singleton.[0m
+[0m2015-09-24 20:11:24.062-30602-[1m INFO  [22m/4: [1manslp_daemon   [22m [0mstarting it is going to read parameters 5[0m
+[0m2015-09-24 20:11:24.065-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mStartup phase 1: Creating and registering stencil objects[0m
+[0m2015-09-24 20:11:24.065-30602-[1m DEBUG [22m/4: [1mNTLP_IE        [22m [0mJust created NTLP IEManager singleton.[0m
+[0m2015-09-24 20:11:24.065-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE query for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.065-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE mri_pathcoupled for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.065-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE mri_looseend for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.065-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE mri_explicitsigtarget for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.065-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE nattraversal for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE sessionid for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE nslpdata for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE nli for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE querycookie for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE stack_conf_data for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE stackprop for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE response for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE confirm for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE hello for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE error for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE helloid for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE respcookie for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE data for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mRegistered IE errorobject for 0x7f2ee3938078[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mStartup phase 2: Starting Transport protocols[0m
+[0m2015-09-24 20:11:24.066-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 TPoverTLS_TCP thread(s) sucessfully created[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mTPqueryEncap UDP interceptor/injector[0m
+[0m2015-09-24 20:11:24.066-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mports used: 270 (UDP), 30000 (TCP), 30000 (SCTP), 30001 (TLS over TCP)[0m
+[0m2015-09-24 20:11:24.066-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 TPoverUDP thread(s) sucessfully created[0m
+[0m2015-09-24 20:11:24.066-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 TPoverTCP thread(s) sucessfully created[0m
+[0m2015-09-24 20:11:24.066-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 TPqueryEncap thread(s) sucessfully created[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mStartup phase 3: Initiating local instance data[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST secrets   [22m [0m[34mInitially filling random seed, 2 secrets of length 256bit[0m[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST secrets   [22m [0m[34mFilling secret table entry 0 Generation number 0x42a37898[0m[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST secrets   [22m [0m[34mFilling secret table entry 1 Generation number 0x42a37899[0m[0m
+[0m2015-09-24 20:11:24.067-30602-[1m EVENT [22m/4: [1mGIST Starter   [22m [0mPeer Identity initialized: [35m8a65ed5c26e2af43b870b92d3b098868 (.e.\&..C.p.-;..h)[0m[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mAddress list: [0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0m            10.0.2.15/32[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mNLI initialisation, IP TTL is set to 0 (unspecified)[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mStartup phase 4: Starting Processing Module[0m
+[0m2015-09-24 20:11:24.067-30602-[1m EVENT [22m/4: [1mGIST Processing[22m [0mRAOs to intercept: |0[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mcapability     [22m [0mUsing ports: UDP=270 TCP=30000 TLS/TCP=30001 SCTP=30000[0m
+[0m2015-09-24 20:11:24.067-30602-[1m EVENT [22m/4: [1mGIST Processing[22m [0mAvailable Protocol configurations initialized[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Processing[22m [0mCreated GIST Processing object[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mStartup phase 5: Starting UNIX Domain socket interface[0m
+[0m2015-09-24 20:11:24.067-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 TPoverUDS thread(s) sucessfully created[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mStartup phase 6: Starting Unix Domain Socket API translator[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Sock API  [22m [0mCreated APIWrapper[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mStartup phase 7: Starting Signaling Module[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Signaling [22m [0mCreated SignalingModule object[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mStartup phase 8: Starting Timer Module, Signaling Module, StateManager, API[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mTimer          [22m [0mCreating TimerManager[0m
+[0m2015-09-24 20:11:24.067-30602-[1m DEBUG [22m/4: [1mTimerModule    [22m [0mCreating TimerModule object[0m
+[0m2015-09-24 20:11:24.067-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m2 TimerModule thread(s) sucessfully created[0m
+[0m2015-09-24 20:11:24.067-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 GIST Signaling thread(s) sucessfully created[0m
+[0m2015-09-24 20:11:24.067-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m2 GIST Processing thread(s) sucessfully created[0m
+[0m2015-09-24 20:11:24.067-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 GIST Sock API thread(s) sucessfully created[0m
+[0m2015-09-24 20:11:24.068-30602-[1m DEBUG [22m/4: [1mTPqueryEncap   [22m [0mListening for RAOs: |0[0m
+[0m2015-09-24 20:11:24.068-30602-[1m EVENT [22m/4: [1mTPqueryEncap   [22m [0m[32mIPv6 packet interceptor thread started[0m[0m
+[0m2015-09-24 20:11:24.068-30602-[1m EVENT [22m/4: [1mTPqueryEncap   [22m [0m[32mIPv4 packet interceptor thread started[0m[0m
+[1m[31m2015-09-24 20:11:24.068-30602*[1m*ERROR*[1m*2: [1mTPoverTLS_TCP  [22m [0mUnable to load client certificate: No such file or directory[0m
+[1m[31m2015-09-24 20:11:24.068-30602*[1m*ERROR*[1m*2: [1mTPoverTLS_TCP  [22m [0mUnable to load private Key: system lib[0m
+[1m[31m2015-09-24 20:11:24.068-30602*[1m*ERROR*[1m*2: [1mTPoverTLS_TCP  [22m [0mPrivate Key failed verification against CA[0m
+[0m2015-09-24 20:11:24.068-30602-[1m DEBUG [22m/4: [1mTPoverTLS_TCP  [22m [0mMaster listener thread started[0m
+[0m2015-09-24 20:11:24.068-30602-[1m DEBUG [22m/4: [1mTPoverUDS      [22m [0mMaster listener thread started[0m
+[0m2015-09-24 20:11:24.068-30602-[1m DEBUG [22m/4: [1mTPoverTCP      [22m [0mMaster listener thread started[0m
+[0m2015-09-24 20:11:24.068-30602-[1m INFO  [22m/4: [1mTimerModule    [22m [0mStarting TimerModule thread #1, processing input queue[0m
+[0m2015-09-24 20:11:24.068-30602-[1m INFO  [22m/4: [1mTimerModule    [22m [0mStarting TimerModule thread #2, processing timer callbacks[0m
+[0m2015-09-24 20:11:24.068-30602-[1m DEBUG [22m/4: [1mGIST Signaling [22m [0mStarting thread #1[0m
+[0m2015-09-24 20:11:24.068-30602-[1m INFO  [22m/4: [1mGIST Processing[22m [0mStarting GIST Processing module thread #1, [0m
+[0m2015-09-24 20:11:24.068-30602-[1m INFO  [22m/4: [1mGIST Processing[22m [0mSecrets Refresh Timer activated, refreshing every 300 seconds[0m
+[0m2015-09-24 20:11:24.068-30602-[1m EVENT [22m/8: [1mTimerModule    [22m [0mTimer 1 (300s 0ms) started for Coordination (ext) with mid 2[0m
+[0m2015-09-24 20:11:24.068-30602-[1m INFO  [22m/4: [1mGIST Processing[22m [0mStarting GIST Processing module thread #2, [0m
+[0m2015-09-24 20:11:24.068-30602-[1m DEBUG [22m/4: [1mGIST Sock API  [22m [0mStarting thread #1[0m
+[0m2015-09-24 20:11:24.069-30602-[1m DEBUG [22m/4: [1mGIST Sock API  [22m [0m[31mAttention: Running in backwards-compatible 'InstantEstablish mode' - see manual[0m
+[0m2015-09-24 20:11:24.069-30602-[1m INFO  [22m/4: [1mTPoverUDP      [22m [0m[32mListening at port #270[0m[0m
+[0m2015-09-24 20:11:24.069-30602-[1m DEBUG [22m/4: [1mTPqueryEncap   [22m [0mbinding this socket to queue 0[0m
+[0m2015-09-24 20:11:24.069-30602-[1m DEBUG [22m/4: [1mTPqueryEncap   [22m [0mbinding this socket to queue 1[0m
+[0m2015-09-24 20:11:24.069-30602-[1m INFO  [22m/4: [1mTPoverTLS_TCP  [22m [0m[32mListening at port #30001[0m[0m
+[0m2015-09-24 20:11:24.069-30602-[1m INFO  [22m/4: [1mTPoverUDS      [22m [0m[32mListening at /tmp/gist[0m[0m
+[0m2015-09-24 20:11:24.069-30602-[1m INFO  [22m/4: [1mTPoverTCP      [22m [0m[32mListening at port #30000[0m[0m
+[0m2015-09-24 20:11:25.063-30602-[1m DEBUG [22m/4: [1mNSLPtable      [22m [0mSaving address for NSLP ID 34 at 24[0m
+[0m2015-09-24 20:11:25.063-30602-[1m DEBUG [22m/4: [1mNSLPtable      [22m [0mSuccessfully looked up API caller address for NSLPID 34[0m
+[0m2015-09-24 20:11:25.063-30602-[1m EVENT [22m/4: [1mGIST Processing[22m [0m[34mAPI call received: [0mRegister msg#1 from NSLPID 34 at API interface address 24[0m
+[0m2015-09-24 20:11:25.063-30602-[1m EVENT [22m/4: [1mGIST Processing[22m [0mNSLP registered with NSLPID 34 at address 24[0m
+[0m2015-09-24 20:11:25.063-30602-[1m EVENT [22m/4: [1mGIST Processing[22m [0mRegistered RAO value 0 for this NSLPID[0m
+[0m2015-09-24 20:11:25.063-30602-[1m EVENT [22m/4: [1mGIST Processing[22m [0mNow intercepting the following RAOs: |0[0m
+[0m2015-09-24 20:11:26.063-30602-[1m DEBUG [22m/4: [1manslp_daemon   [22m [0mANSLP daemon startup complete[0m
+[0m2015-09-24 20:11:26.064-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 anslp thread(s) sucessfully created[0m
+[0m2015-09-24 20:11:26.068-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mStartup phase 9: Enabling Packet Interception[0m
+[0m2015-09-24 20:11:26.068-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mNOT enabling packet interception, as requested[0m
+[0m2015-09-24 20:11:26.068-30602-[1m INFO  [22m/4: [1mGIST Starter   [22m [0m[32mStartup completed[0m[0m
+[0m2015-09-24 20:11:26.071-30602-[1m INFO  [22m/4: [1manslp_daemon   [22m [0mdispatcher thread #1 waiting for incoming messages ...[0m
+[0m2015-09-24 20:11:30.227-30602-[1m INFO  [22m/4: [1mThreads        [22m [0mThread(s) anslp asked to stop[0m
+[0m2015-09-24 20:11:30.227-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mWaiting for Thread anslp to stop[0m
+[0m2015-09-24 20:11:31.228-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mThread anslp has stopped[0m
+[0m2015-09-24 20:11:31.229-30602-[1m DEBUG [22m/4: [1mQueueManager   [22m [0mDestroying QueueManager singleton ...[0m
+[35m2015-09-24 20:11:31.229-30602-[1mWARNING[22m/4: [1mQueueManager   [22m [0m~QueueManager(): queue TPoverTCP has not been unregistered[0m
+[35m2015-09-24 20:11:31.229-30602-[1mWARNING[22m/4: [1mQueueManager   [22m [0m~QueueManager(): queue TimerModule has not been unregistered[0m
+[35m2015-09-24 20:11:31.229-30602-[1mWARNING[22m/4: [1mQueueManager   [22m [0m~QueueManager(): queue Coordination (ext) has not been unregistered[0m
+[35m2015-09-24 20:11:31.229-30602-[1mWARNING[22m/4: [1mQueueManager   [22m [0m~QueueManager(): queue GIST Processing has not been unregistered[0m
+[35m2015-09-24 20:11:31.229-30602-[1mWARNING[22m/4: [1mQueueManager   [22m [0m~QueueManager(): queue GIST Signaling has not been unregistered[0m
+[35m2015-09-24 20:11:31.229-30602-[1mWARNING[22m/4: [1mQueueManager   [22m [0m~QueueManager(): queue TPoverTLS_TCP has not been unregistered[0m
+[35m2015-09-24 20:11:31.229-30602-[1mWARNING[22m/4: [1mQueueManager   [22m [0m~QueueManager(): queue TPqueryEncap has not been unregistered[0m
+[35m2015-09-24 20:11:31.229-30602-[1mWARNING[22m/4: [1mQueueManager   [22m [0m~QueueManager(): queue GIST Sock API has not been unregistered[0m
+[35m2015-09-24 20:11:31.229-30602-[1mWARNING[22m/4: [1mQueueManager   [22m [0m~QueueManager(): queue anslp has not been unregistered[0m
+[35m2015-09-24 20:11:31.229-30602-[1mWARNING[22m/4: [1mQueueManager   [22m [0m~QueueManager(): queue TPoverUDS has not been unregistered[0m
+[0m2015-09-24 20:11:31.230-30602-[1m DEBUG [22m/4: [1mQueueManager   [22m [0mThe QueueManager singleton has been destroyed[0m
+[0m2015-09-24 20:11:31.230-30602-[1m DEBUG [22m/4: [1mIEManager      [22m [0mDeleted 10 IEs[0m
+[0m2015-09-24 20:11:31.230-30602-[1m DEBUG [22m/4: [1mANSLP_IEManager[22m [0mdeleted ANSLP_IEManager singleton[0m
+[1m[31m2015-09-24 20:11:31.230-30602*[1m*ERROR*[1m*4: [1manslp_daemon   [22m [0manslp::cleanup_framework() doesn't call tsdb::end()![0m
+[0m2015-09-24 20:11:31.230-30602-[1m DEBUG [22m/4: [1manslp_daemon   [22m [0mANSLP daemon shutting down ...[0m
+[0m2015-09-24 20:11:31.231-30602-[1m DEBUG [22m/4: [1mnop_auction_rule_installer[22m [0mNOP: removing all metering auction rules [0m
+[0m2015-09-24 20:11:31.231-30602-[1m INFO  [22m/4: [1mThreads        [22m [0mThread(s) GIST Starter asked to stop[0m
+[0m2015-09-24 20:11:31.231-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mWaiting for Thread GIST Starter to stop[0m
+[0m2015-09-24 20:11:36.069-30602-[1m INFO  [22m/4: [1mGIST Starter   [22m [0m[32mShutting down ... [0m[0m
+[0m2015-09-24 20:11:36.069-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mShutdown phase 1: Asking Modules to stop.[0m
+[0m2015-09-24 20:11:36.069-30602-[1m INFO  [22m/4: [1mThreads        [22m [0mThread(s) TPoverUDP asked to stop[0m
+[0m2015-09-24 20:11:36.069-30602-[1m INFO  [22m/4: [1mThreads        [22m [0mThread(s) TPoverUDS asked to stop[0m
+[0m2015-09-24 20:11:36.069-30602-[1m INFO  [22m/4: [1mThreads        [22m [0mThread(s) TPoverTCP asked to stop[0m
+[0m2015-09-24 20:11:36.069-30602-[1m INFO  [22m/4: [1mThreads        [22m [0mThread(s) TPoverTLS_TCP asked to stop[0m
+[0m2015-09-24 20:11:36.069-30602-[1m INFO  [22m/4: [1mThreads        [22m [0mThread(s) TPqueryEncap asked to stop[0m
+[0m2015-09-24 20:11:36.069-30602-[1m INFO  [22m/4: [1mThreads        [22m [0mThread(s) GIST Signaling asked to stop[0m
+[0m2015-09-24 20:11:36.069-30602-[1m INFO  [22m/4: [1mThreads        [22m [0mThread(s) GIST Processing asked to stop[0m
+[0m2015-09-24 20:11:36.069-30602-[1m INFO  [22m/4: [1mThreads        [22m [0mThread(s) TimerModule asked to stop[0m
+[0m2015-09-24 20:11:36.069-30602-[1m INFO  [22m/4: [1mThreads        [22m [0mThread(s) GIST Sock API asked to stop[0m
+[0m2015-09-24 20:11:36.069-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mShutdown phase 2: Forcing down leftover Modules[0m
+[0m2015-09-24 20:11:36.069-30602-[1m INFO  [22m/4: [1mTimerModule    [22m [0mThread #2 stopped[0m
+[0m2015-09-24 20:11:36.070-30602-[1m INFO  [22m/4: [1mTimerModule    [22m [0mThread #1 stopped[0m
+[0m2015-09-24 20:11:36.073-30602-[1m INFO  [22m/4: [1mGIST Processing[22m [0mModule thread #2 stopped[0m
+[0m2015-09-24 20:11:36.073-30602-[1m INFO  [22m/4: [1mGIST Processing[22m [0mModule thread #1 stopped[0m
+[0m2015-09-24 20:11:36.095-30602-[1m INFO  [22m/4: [1mTPoverUDS      [22m [0mAsked to abort, stopping all receiver threads[0m
+[0m2015-09-24 20:11:36.095-30602-[1m INFO  [22m/4: [1mTPqueryEncap   [22m [0mAsked to abort, stopping all receiver threads[0m
+[0m2015-09-24 20:11:36.095-30602-[1m INFO  [22m/4: [1mTPoverTCP      [22m [0mAsked to abort, stopping all receiver threads[0m
+[0m2015-09-24 20:11:36.095-30602-[1m INFO  [22m/4: [1mTPoverTLS_TCP  [22m [0mAsked to abort, stopping all receiver threads[0m
+[0m2015-09-24 20:11:39.070-30602-[1m DEBUG [22m/4: [1mGIST Sock API  [22m [0mThread #1 stopped[0m
+[0m2015-09-24 20:11:39.070-30602-[1m DEBUG [22m/4: [1mGIST Signaling [22m [0mThread #1 stopped[0m
+[0m2015-09-24 20:11:40.071-30602-[1m INFO  [22m/4: [1mTPoverUDP      [22m [0mAsked to abort, stopping all receiver threads[0m
+[0m2015-09-24 20:11:40.072-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 thread(s) TPoverUDP have terminated[0m
+[0m2015-09-24 20:11:40.072-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 thread(s) TPoverUDS have terminated[0m
+[0m2015-09-24 20:11:40.072-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 thread(s) TPoverTCP have terminated[0m
+[0m2015-09-24 20:11:40.072-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 thread(s) TPoverTLS_TCP have terminated[0m
+[0m2015-09-24 20:11:40.072-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 thread(s) TPqueryEncap have terminated[0m
+[0m2015-09-24 20:11:40.072-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 thread(s) GIST Signaling have terminated[0m
+[0m2015-09-24 20:11:40.072-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m2 thread(s) GIST Processing have terminated[0m
+[0m2015-09-24 20:11:40.073-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m2 thread(s) TimerModule have terminated[0m
+[0m2015-09-24 20:11:40.073-30602-[1m INFO  [22m/4: [1mThreads        [22m [0m1 thread(s) GIST Sock API have terminated[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mShutdown phase 3: Waiting for threads to stop[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mWaiting for Thread TPoverUDP to stop[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mThread TPoverUDP has stopped[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mWaiting for Thread TPoverUDS to stop[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mThread TPoverUDS has stopped[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mWaiting for Thread TPoverTCP to stop[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mThread TPoverTCP has stopped[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mWaiting for Thread TPoverTLS_TCP to stop[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mThread TPoverTLS_TCP has stopped[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mWaiting for Thread TPqueryEncap to stop[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mThread TPqueryEncap has stopped[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mWaiting for Thread GIST Signaling to stop[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mThread GIST Signaling has stopped[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mWaiting for Thread GIST Processing to stop[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mThread GIST Processing has stopped[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mWaiting for Thread TimerModule to stop[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mThread TimerModule has stopped[0m
+[0m2015-09-24 20:11:40.073-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mWaiting for Thread GIST Sock API to stop[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mThread GIST Sock API has stopped[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mShutdown phase 4: Destroying Protocolmap[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mShutdown phase 5: Cleaning Up[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/8: [1mTimerModule    [22m [0mstopped all timers, num 1[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mTimerModule    [22m [0mDestroying TimerModule object[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mQueueManager   [22m [0mJust created QueueManager singleton.[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mTimer          [22m [0mDestroying TimerManager with 0 timers[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue TimerModule[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mGIST Signaling [22m [0mDestroying SignalingModule object[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue GIST Signaling[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mGIST Sock API  [22m [0mDestroying APIWrapper[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue GIST Sock API[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mTPoverUDS      [22m [0mDestructor called[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue TPoverUDS[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mGIST Processing[22m [0mDestroying GIST Processing object[0m
+[0m2015-09-24 20:11:40.074-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue Coordination (ext)[0m
+[0m2015-09-24 20:11:40.075-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue GIST Processing[0m
+[0m2015-09-24 20:11:40.075-30602-[1m DEBUG [22m/4: [1mTPqueryEncap   [22m [0mDestructor called[0m
+[0m2015-09-24 20:11:40.075-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue TPqueryEncap[0m
+[0m2015-09-24 20:11:40.075-30602-[1m DEBUG [22m/4: [1mTPoverUDP      [22m [0mDestructor called[0m
+[0m2015-09-24 20:11:40.075-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue TPoverUDP[0m
+[0m2015-09-24 20:11:40.075-30602-[1m DEBUG [22m/4: [1mTPoverTLS_TCP  [22m [0mDestructor called[0m
+[0m2015-09-24 20:11:40.075-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue TPoverTLS_TCP[0m
+[0m2015-09-24 20:11:40.075-30602-[1m DEBUG [22m/4: [1mTPoverTCP      [22m [0mDestructor called[0m
+[0m2015-09-24 20:11:40.075-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue TPoverTCP[0m
+[0m2015-09-24 20:11:40.237-30602-[1m DEBUG [22m/4: [1mThreads        [22m [0mThread GIST Starter has stopped[0m
+[0m2015-09-24 20:11:40.238-30602-[1m DEBUG [22m/4: [1mGIST Starter   [22m [0mDestroying NTLPStarter object[0m
+[0m2015-09-24 20:11:40.238-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue GIST Starter[0m
+[0m2015-09-24 20:11:40.238-30602-[1m INFO  [22m/4: [1manslp_daemon   [22m [0mANSLP deamon shutdown complete[0m
+[0m2015-09-24 20:11:40.266-30602-[1m DEBUG [22m/4: [1mFastQueue      [22m [0m~FastQueue() - done for queue anslp[0m
+[34m2015-09-24 20:11:40.268[30602] <<<<<<<<<<<<<<<<<<<<<<<< *** LOG  STOP *** <<<<<<<<<<<<<<<<<<<<<<<<[0m

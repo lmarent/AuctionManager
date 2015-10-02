@@ -53,7 +53,13 @@ void Allocation_Manager_Test::createAllocations()
 	{
 
 		// Build two allocations.
-		
+
+		string allSet1 = "general";
+		string allName1 = "1";
+
+		string allSet2 = "general";
+		string allName2 = "2";
+				
 		string aSet = "general";
 		string aName = "1";
 
@@ -96,12 +102,12 @@ void Allocation_Manager_Test::createAllocations()
 		interval2.stop = time(NULL);
 		intervals.push_back(interval2);
 
-		ptrAllocation1 = new Allocation(aSet, aName, bSet1, bName1, fields, intervals);		
+		ptrAllocation1 = new Allocation(aSet, aName, bSet1, bName1, allSet1, allName1, fields, intervals);		
 		
 		auction::fieldList_t fields2;
 		allocationIntervalList_t intervals2;
 		
-		ptrAllocation2 = new Allocation(aSet, aName, bSet2, bName2, fields2, intervals2);
+		ptrAllocation2 = new Allocation(aSet, aName, bSet2, bName2, allSet2, allName2,fields2, intervals2);
 
 
 	}
@@ -156,19 +162,17 @@ void Allocation_Manager_Test::testAllocationManager()
 		CPPUNIT_ASSERT( ptrAllocation1->getInfo() == manager->getInfo(0) );
 		
 		CPPUNIT_ASSERT( manager->getAllocation(1) != NULL );
-		
-		manager->delAllocation(1, evnt.get() );
+				
+		manager->delAllocation(0, evnt.get() );
 
 		CPPUNIT_ASSERT( manager->getNumAllocations() == 1 );
-		
-		manager->delAllocation("general", "1", "Agent1", "1", evnt.get() );
+				
+		manager->delAllocation("general", "2", evnt.get() );
 
 		CPPUNIT_ASSERT( manager->getNumAllocations() == 0 );
 				
 		// Release all allocations.
 		saveDelete(manager);
-				
-		cout << "Finish part 1" << endl;
 				
 		manager = new AllocationManager(fieldname);
 		
@@ -196,8 +200,8 @@ void Allocation_Manager_Test::testAllocationManager()
 
 		manager->addAllocation(ptrAllocation1);
 		manager->addAllocation(ptrAllocation2);
-		
-		Allocation *tmpAllocation2 = manager->getAllocation("general", "1", "Agent1", "1");
+				
+		Allocation *tmpAllocation2 = manager->getAllocation("general", "1");
 		
 		CPPUNIT_ASSERT( tmpAllocation2->getNumFields() == 2 );
 
@@ -224,6 +228,7 @@ void Allocation_Manager_Test::testAllocationManager()
 			
 	} catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 	

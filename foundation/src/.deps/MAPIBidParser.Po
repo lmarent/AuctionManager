@@ -201,7 +201,9 @@
  /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/stdexcept \
  ../../foundation/include/Constants.h \
  ../../foundation/include/MAPIBidParser.h \
- ../../foundation/include/BidFileParser.h \
+ /usr/local/include/ipap/Logger.h /usr/local/include/ipap/stdincpp.h \
+ /usr/local/include/ipap/Error.h /usr/local/include/ipap/ConstantsIpAp.h \
+ ../../foundation/include/Bid.h ../../foundation/include/ConfigParser.h \
  /usr/include/libxml2/libxml/parser.h \
  /usr/include/libxml2/libxml/xmlversion.h \
  /usr/include/libxml2/libxml/xmlexports.h \
@@ -219,20 +221,28 @@
  /usr/include/libxml2/libxml/globals.h /usr/include/libxml2/libxml/SAX.h \
  /usr/include/libxml2/libxml/xlink.h /usr/include/libxml2/libxml/SAX2.h \
  /usr/include/libxml2/libxml/xmlmemory.h \
- /usr/include/libxml2/libxml/threads.h /usr/local/include/ipap/Logger.h \
- /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/Error.h \
- /usr/local/include/ipap/ConstantsIpAp.h \
- ../../foundation/include/XMLParser.h \
+ /usr/include/libxml2/libxml/threads.h \
+ ../../foundation/include/XMLParser.h ../../foundation/include/Field.h \
+ /usr/local/include/ipap/Error.h ../../foundation/include/FieldValue.h \
+ ../../foundation/include/AuctionTimer.h \
+ /usr/local/include/ipap/IpAp_message.h /usr/local/include/ipap/Logger.h \
+ /usr/local/include/ipap/IpAp_def.h /usr/local/include/ipap/IpAp_field.h \
+ /usr/local/include/ipap/IpAp_value_field.h \
+ /usr/local/include/ipap/IpAp_exception.h \
+ /usr/local/include/ipap/IpAp_field_container.h \
+ /usr/local/include/ipap/IpAp_data_record.h \
+ /usr/local/include/ipap/IpAp_field_key.h \
+ /usr/local/include/ipap/IpAp_template.h /usr/local/include/ipap/IpAp_t.h \
+ /usr/local/include/ipap/IpAp_template_container.h \
+ ../../foundation/include/BidFileParser.h \
  ../../foundation/include/ProcModuleInterface.h \
  ../../foundation/include/metadata.h \
  ../../foundation/include/FieldDefParser.h \
- ../../foundation/include/Field.h /usr/local/include/ipap/Error.h \
- ../../foundation/include/FieldValue.h \
- ../../foundation/include/ConfigParser.h \
  ../../foundation/include/FieldValParser.h \
- ../../foundation/include/BidIdSource.h ../../foundation/include/Bid.h \
- ../../foundation/include/AuctionTimer.h \
- ../../foundation/include/Timeval.h
+ ../../foundation/include/BidIdSource.h \
+ ../../foundation/include/MAPIIpApMessageParser.h \
+ ../../foundation/include/ParserFcts.h \
+ ../../foundation/include/Constants.h ../../foundation/include/Timeval.h
 
 /usr/include/stdc-predef.h:
 
@@ -788,7 +798,17 @@
 
 ../../foundation/include/MAPIBidParser.h:
 
-../../foundation/include/BidFileParser.h:
+/usr/local/include/ipap/Logger.h:
+
+/usr/local/include/ipap/stdincpp.h:
+
+/usr/local/include/ipap/Error.h:
+
+/usr/local/include/ipap/ConstantsIpAp.h:
+
+../../foundation/include/Bid.h:
+
+../../foundation/include/ConfigParser.h:
 
 /usr/include/libxml2/libxml/parser.h:
 
@@ -834,21 +854,7 @@
 
 /usr/include/libxml2/libxml/threads.h:
 
-/usr/local/include/ipap/Logger.h:
-
-/usr/local/include/ipap/stdincpp.h:
-
-/usr/local/include/ipap/Error.h:
-
-/usr/local/include/ipap/ConstantsIpAp.h:
-
 ../../foundation/include/XMLParser.h:
-
-../../foundation/include/ProcModuleInterface.h:
-
-../../foundation/include/metadata.h:
-
-../../foundation/include/FieldDefParser.h:
 
 ../../foundation/include/Field.h:
 
@@ -856,14 +862,48 @@
 
 ../../foundation/include/FieldValue.h:
 
-../../foundation/include/ConfigParser.h:
+../../foundation/include/AuctionTimer.h:
+
+/usr/local/include/ipap/IpAp_message.h:
+
+/usr/local/include/ipap/Logger.h:
+
+/usr/local/include/ipap/IpAp_def.h:
+
+/usr/local/include/ipap/IpAp_field.h:
+
+/usr/local/include/ipap/IpAp_value_field.h:
+
+/usr/local/include/ipap/IpAp_exception.h:
+
+/usr/local/include/ipap/IpAp_field_container.h:
+
+/usr/local/include/ipap/IpAp_data_record.h:
+
+/usr/local/include/ipap/IpAp_field_key.h:
+
+/usr/local/include/ipap/IpAp_template.h:
+
+/usr/local/include/ipap/IpAp_t.h:
+
+/usr/local/include/ipap/IpAp_template_container.h:
+
+../../foundation/include/BidFileParser.h:
+
+../../foundation/include/ProcModuleInterface.h:
+
+../../foundation/include/metadata.h:
+
+../../foundation/include/FieldDefParser.h:
 
 ../../foundation/include/FieldValParser.h:
 
 ../../foundation/include/BidIdSource.h:
 
-../../foundation/include/Bid.h:
+../../foundation/include/MAPIIpApMessageParser.h:
 
-../../foundation/include/AuctionTimer.h:
+../../foundation/include/ParserFcts.h:
+
+../../foundation/include/Constants.h:
 
 ../../foundation/include/Timeval.h:

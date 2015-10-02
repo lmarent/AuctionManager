@@ -129,19 +129,26 @@ am_libfoundation_la_OBJECTS = libfoundation_la-AuctionTimer.lo \
 	libfoundation_la-Constants.lo libfoundation_la-ConstantsAum.lo \
 	libfoundation_la-FieldValue.lo libfoundation_la-Field.lo \
 	libfoundation_la-ParserFcts.lo libfoundation_la-Timeval.lo \
-	libfoundation_la-XMLParser.lo libfoundation_la-Allocation.lo \
+	libfoundation_la-XMLParser.lo \
 	libfoundation_la-FieldDefParser.lo \
-	libfoundation_la-FieldValParser.lo libfoundation_la-Bid.lo \
+	libfoundation_la-FieldValParser.lo \
+	libfoundation_la-MAPIIpApMessageParser.lo \
+	libfoundation_la-AllocationIdSource.lo \
+	libfoundation_la-Allocation.lo \
+	libfoundation_la-MAPIAllocationParser.lo \
+	libfoundation_la-AllocationManager.lo \
+	libfoundation_la-BidIdSource.lo libfoundation_la-Bid.lo \
 	libfoundation_la-BidFileParser.lo \
 	libfoundation_la-MAPIBidParser.lo \
+	libfoundation_la-BidManager.lo \
 	libfoundation_la-AuctionIdSource.lo \
 	libfoundation_la-Auction.lo libfoundation_la-AuctionManager.lo \
 	libfoundation_la-AuctionFileParser.lo \
 	libfoundation_la-MAPIAuctionParser.lo \
-	libfoundation_la-BidIdSource.lo libfoundation_la-BidManager.lo \
 	libfoundation_la-AuctionManagerInfo.lo \
 	libfoundation_la-AuctionManagerComponent.lo \
-	libfoundation_la-Event.lo libfoundation_la-EventScheduler.lo
+	libfoundation_la-Event.lo libfoundation_la-EventScheduler.lo \
+	libfoundation_la-AnslpClient.lo
 libfoundation_la_OBJECTS = $(am_libfoundation_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
@@ -262,9 +269,19 @@ INSTALL_STRIP_PROGRAM = $(install_sh) -c -s
 IPTABLES_VERSION = 
 LD = /usr/bin/ld -m elf_x86_64
 LDFLAGS =  -L/lib -L/usr/local/lib -L/usr/lib  -ltermcap -lxml2
+LIBANSLP_CFLAGS = -I/usr/local/include/a-nslp  
+LIBANSLP_LIBS = -L/usr/local/lib/a-nslp -lanslp  
+LIBANSLP_MSG_CFLAGS = -I/usr/local/include/a-nslp/msg  
+LIBANSLP_MSG_LIBS = -L/usr/local/lib/a-nslp -lanslp_msg  
+LIBFASTQUEUE_CFLAGS = -I/usr/local/include  
+LIBFASTQUEUE_LIBS = -L/usr/local/lib -lfastqueue  
+LIBGIST_CFLAGS = -I/usr/local/include  
+LIBGIST_LIBS = -L/usr/local/lib -lgist  
 LIBIPAP_CFLAGS = -I/usr/local/include/ipap  
 LIBIPAP_LIBS = -L/usr/local/lib/ipap -lipap  
 LIBOBJS = 
+LIBPROT_CFLAGS = -I/usr/local/include  
+LIBPROT_LIBS = -L/usr/local/lib -lprot  
 LIBS = -ldl 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LIPO = 
@@ -371,15 +388,17 @@ ACLOCAL_AMFLAGS = -I m4
 lib_LTLIBRARIES = libfoundation.la
 #AM_CXXFLAGS = -I$(top_srcdir)/lib/getopt_long \
 #				-I$(top_srcdir)/lib/httpd \
-#				-O2  -fPIC 
+#				-O2 
 
 AM_CXXFLAGS = -I$(top_srcdir)/lib/getopt_long \
 				-I$(top_srcdir)/lib/httpd \
-				-g  -fPIC -fno-inline -DDEBUG -D_GLIBCXX_DEBUG
+				-g  -fno-inline -DDEBUG -D_GLIBCXX_DEBUG
 
 libfoundation_la_CPPFLAGS = -I$(top_srcdir) \
 							-I$(top_srcdir)/foundation/include \
-							$(LIBIPAP_CFLAGS)
+							$(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) $(LIBFASTQUEUE_CFLAGS) \
+							$(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) \
+							$(LIBANSLP_CFLAGS)
 
 libfoundation_la_SOURCES = AuctionTimer.cpp \
                           ConfigParser.cpp \
@@ -392,25 +411,30 @@ libfoundation_la_SOURCES = AuctionTimer.cpp \
 						  ParserFcts.cpp \
 						  Timeval.cpp \
 						  XMLParser.cpp \
-						  Allocation.cpp \
 						  FieldDefParser.cpp \
 						  FieldValParser.cpp \
+						  MAPIIpApMessageParser.cpp \
+						  AllocationIdSource.cpp \
+						  Allocation.cpp \
+						  MAPIAllocationParser.cpp \
+						  AllocationManager.cpp \
+						  BidIdSource.cpp \
 						  Bid.cpp \
 						  BidFileParser.cpp \
 						  MAPIBidParser.cpp \
+						  BidManager.cpp \
 						  AuctionIdSource.cpp \
 						  Auction.cpp \
 						  AuctionManager.cpp \
 						  AuctionFileParser.cpp \
 						  MAPIAuctionParser.cpp \
-						  BidIdSource.cpp \
-						  BidManager.cpp \
 						  AuctionManagerInfo.cpp \
 						  AuctionManagerComponent.cpp \
 						  Event.cpp \
-						  EventScheduler.cpp					  
+						  EventScheduler.cpp \
+						  AnslpClient.cpp					  
 
-libfoundation_la_LDFLAGS = -export-dynamic -module -shared -fPIC
+libfoundation_la_LDFLAGS = -export-dynamic
 all: all-am
 
 .SUFFIXES:
@@ -491,6 +515,9 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/libfoundation_la-Allocation.Plo
+include ./$(DEPDIR)/libfoundation_la-AllocationIdSource.Plo
+include ./$(DEPDIR)/libfoundation_la-AllocationManager.Plo
+include ./$(DEPDIR)/libfoundation_la-AnslpClient.Plo
 include ./$(DEPDIR)/libfoundation_la-Auction.Plo
 include ./$(DEPDIR)/libfoundation_la-AuctionFileParser.Plo
 include ./$(DEPDIR)/libfoundation_la-AuctionIdSource.Plo
@@ -513,8 +540,10 @@ include ./$(DEPDIR)/libfoundation_la-Field.Plo
 include ./$(DEPDIR)/libfoundation_la-FieldDefParser.Plo
 include ./$(DEPDIR)/libfoundation_la-FieldValParser.Plo
 include ./$(DEPDIR)/libfoundation_la-FieldValue.Plo
+include ./$(DEPDIR)/libfoundation_la-MAPIAllocationParser.Plo
 include ./$(DEPDIR)/libfoundation_la-MAPIAuctionParser.Plo
 include ./$(DEPDIR)/libfoundation_la-MAPIBidParser.Plo
+include ./$(DEPDIR)/libfoundation_la-MAPIIpApMessageParser.Plo
 include ./$(DEPDIR)/libfoundation_la-ParserFcts.Plo
 include ./$(DEPDIR)/libfoundation_la-Timeval.Plo
 include ./$(DEPDIR)/libfoundation_la-XMLParser.Plo
@@ -620,13 +649,6 @@ libfoundation_la-XMLParser.lo: XMLParser.cpp
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-XMLParser.lo `test -f 'XMLParser.cpp' || echo '$(srcdir)/'`XMLParser.cpp
 
-libfoundation_la-Allocation.lo: Allocation.cpp
-	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-Allocation.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-Allocation.Tpo -c -o libfoundation_la-Allocation.lo `test -f 'Allocation.cpp' || echo '$(srcdir)/'`Allocation.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-Allocation.Tpo $(DEPDIR)/libfoundation_la-Allocation.Plo
-#	$(AM_V_CXX)source='Allocation.cpp' object='libfoundation_la-Allocation.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-Allocation.lo `test -f 'Allocation.cpp' || echo '$(srcdir)/'`Allocation.cpp
-
 libfoundation_la-FieldDefParser.lo: FieldDefParser.cpp
 	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-FieldDefParser.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-FieldDefParser.Tpo -c -o libfoundation_la-FieldDefParser.lo `test -f 'FieldDefParser.cpp' || echo '$(srcdir)/'`FieldDefParser.cpp
 	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-FieldDefParser.Tpo $(DEPDIR)/libfoundation_la-FieldDefParser.Plo
@@ -640,6 +662,48 @@ libfoundation_la-FieldValParser.lo: FieldValParser.cpp
 #	$(AM_V_CXX)source='FieldValParser.cpp' object='libfoundation_la-FieldValParser.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-FieldValParser.lo `test -f 'FieldValParser.cpp' || echo '$(srcdir)/'`FieldValParser.cpp
+
+libfoundation_la-MAPIIpApMessageParser.lo: MAPIIpApMessageParser.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-MAPIIpApMessageParser.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-MAPIIpApMessageParser.Tpo -c -o libfoundation_la-MAPIIpApMessageParser.lo `test -f 'MAPIIpApMessageParser.cpp' || echo '$(srcdir)/'`MAPIIpApMessageParser.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-MAPIIpApMessageParser.Tpo $(DEPDIR)/libfoundation_la-MAPIIpApMessageParser.Plo
+#	$(AM_V_CXX)source='MAPIIpApMessageParser.cpp' object='libfoundation_la-MAPIIpApMessageParser.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-MAPIIpApMessageParser.lo `test -f 'MAPIIpApMessageParser.cpp' || echo '$(srcdir)/'`MAPIIpApMessageParser.cpp
+
+libfoundation_la-AllocationIdSource.lo: AllocationIdSource.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-AllocationIdSource.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-AllocationIdSource.Tpo -c -o libfoundation_la-AllocationIdSource.lo `test -f 'AllocationIdSource.cpp' || echo '$(srcdir)/'`AllocationIdSource.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-AllocationIdSource.Tpo $(DEPDIR)/libfoundation_la-AllocationIdSource.Plo
+#	$(AM_V_CXX)source='AllocationIdSource.cpp' object='libfoundation_la-AllocationIdSource.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-AllocationIdSource.lo `test -f 'AllocationIdSource.cpp' || echo '$(srcdir)/'`AllocationIdSource.cpp
+
+libfoundation_la-Allocation.lo: Allocation.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-Allocation.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-Allocation.Tpo -c -o libfoundation_la-Allocation.lo `test -f 'Allocation.cpp' || echo '$(srcdir)/'`Allocation.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-Allocation.Tpo $(DEPDIR)/libfoundation_la-Allocation.Plo
+#	$(AM_V_CXX)source='Allocation.cpp' object='libfoundation_la-Allocation.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-Allocation.lo `test -f 'Allocation.cpp' || echo '$(srcdir)/'`Allocation.cpp
+
+libfoundation_la-MAPIAllocationParser.lo: MAPIAllocationParser.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-MAPIAllocationParser.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-MAPIAllocationParser.Tpo -c -o libfoundation_la-MAPIAllocationParser.lo `test -f 'MAPIAllocationParser.cpp' || echo '$(srcdir)/'`MAPIAllocationParser.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-MAPIAllocationParser.Tpo $(DEPDIR)/libfoundation_la-MAPIAllocationParser.Plo
+#	$(AM_V_CXX)source='MAPIAllocationParser.cpp' object='libfoundation_la-MAPIAllocationParser.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-MAPIAllocationParser.lo `test -f 'MAPIAllocationParser.cpp' || echo '$(srcdir)/'`MAPIAllocationParser.cpp
+
+libfoundation_la-AllocationManager.lo: AllocationManager.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-AllocationManager.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-AllocationManager.Tpo -c -o libfoundation_la-AllocationManager.lo `test -f 'AllocationManager.cpp' || echo '$(srcdir)/'`AllocationManager.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-AllocationManager.Tpo $(DEPDIR)/libfoundation_la-AllocationManager.Plo
+#	$(AM_V_CXX)source='AllocationManager.cpp' object='libfoundation_la-AllocationManager.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-AllocationManager.lo `test -f 'AllocationManager.cpp' || echo '$(srcdir)/'`AllocationManager.cpp
+
+libfoundation_la-BidIdSource.lo: BidIdSource.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-BidIdSource.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-BidIdSource.Tpo -c -o libfoundation_la-BidIdSource.lo `test -f 'BidIdSource.cpp' || echo '$(srcdir)/'`BidIdSource.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-BidIdSource.Tpo $(DEPDIR)/libfoundation_la-BidIdSource.Plo
+#	$(AM_V_CXX)source='BidIdSource.cpp' object='libfoundation_la-BidIdSource.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-BidIdSource.lo `test -f 'BidIdSource.cpp' || echo '$(srcdir)/'`BidIdSource.cpp
 
 libfoundation_la-Bid.lo: Bid.cpp
 	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-Bid.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-Bid.Tpo -c -o libfoundation_la-Bid.lo `test -f 'Bid.cpp' || echo '$(srcdir)/'`Bid.cpp
@@ -661,6 +725,13 @@ libfoundation_la-MAPIBidParser.lo: MAPIBidParser.cpp
 #	$(AM_V_CXX)source='MAPIBidParser.cpp' object='libfoundation_la-MAPIBidParser.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-MAPIBidParser.lo `test -f 'MAPIBidParser.cpp' || echo '$(srcdir)/'`MAPIBidParser.cpp
+
+libfoundation_la-BidManager.lo: BidManager.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-BidManager.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-BidManager.Tpo -c -o libfoundation_la-BidManager.lo `test -f 'BidManager.cpp' || echo '$(srcdir)/'`BidManager.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-BidManager.Tpo $(DEPDIR)/libfoundation_la-BidManager.Plo
+#	$(AM_V_CXX)source='BidManager.cpp' object='libfoundation_la-BidManager.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-BidManager.lo `test -f 'BidManager.cpp' || echo '$(srcdir)/'`BidManager.cpp
 
 libfoundation_la-AuctionIdSource.lo: AuctionIdSource.cpp
 	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-AuctionIdSource.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-AuctionIdSource.Tpo -c -o libfoundation_la-AuctionIdSource.lo `test -f 'AuctionIdSource.cpp' || echo '$(srcdir)/'`AuctionIdSource.cpp
@@ -697,20 +768,6 @@ libfoundation_la-MAPIAuctionParser.lo: MAPIAuctionParser.cpp
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-MAPIAuctionParser.lo `test -f 'MAPIAuctionParser.cpp' || echo '$(srcdir)/'`MAPIAuctionParser.cpp
 
-libfoundation_la-BidIdSource.lo: BidIdSource.cpp
-	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-BidIdSource.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-BidIdSource.Tpo -c -o libfoundation_la-BidIdSource.lo `test -f 'BidIdSource.cpp' || echo '$(srcdir)/'`BidIdSource.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-BidIdSource.Tpo $(DEPDIR)/libfoundation_la-BidIdSource.Plo
-#	$(AM_V_CXX)source='BidIdSource.cpp' object='libfoundation_la-BidIdSource.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-BidIdSource.lo `test -f 'BidIdSource.cpp' || echo '$(srcdir)/'`BidIdSource.cpp
-
-libfoundation_la-BidManager.lo: BidManager.cpp
-	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-BidManager.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-BidManager.Tpo -c -o libfoundation_la-BidManager.lo `test -f 'BidManager.cpp' || echo '$(srcdir)/'`BidManager.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-BidManager.Tpo $(DEPDIR)/libfoundation_la-BidManager.Plo
-#	$(AM_V_CXX)source='BidManager.cpp' object='libfoundation_la-BidManager.lo' libtool=yes \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-BidManager.lo `test -f 'BidManager.cpp' || echo '$(srcdir)/'`BidManager.cpp
-
 libfoundation_la-AuctionManagerInfo.lo: AuctionManagerInfo.cpp
 	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-AuctionManagerInfo.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-AuctionManagerInfo.Tpo -c -o libfoundation_la-AuctionManagerInfo.lo `test -f 'AuctionManagerInfo.cpp' || echo '$(srcdir)/'`AuctionManagerInfo.cpp
 	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-AuctionManagerInfo.Tpo $(DEPDIR)/libfoundation_la-AuctionManagerInfo.Plo
@@ -738,6 +795,13 @@ libfoundation_la-EventScheduler.lo: EventScheduler.cpp
 #	$(AM_V_CXX)source='EventScheduler.cpp' object='libfoundation_la-EventScheduler.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-EventScheduler.lo `test -f 'EventScheduler.cpp' || echo '$(srcdir)/'`EventScheduler.cpp
+
+libfoundation_la-AnslpClient.lo: AnslpClient.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-AnslpClient.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-AnslpClient.Tpo -c -o libfoundation_la-AnslpClient.lo `test -f 'AnslpClient.cpp' || echo '$(srcdir)/'`AnslpClient.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-AnslpClient.Tpo $(DEPDIR)/libfoundation_la-AnslpClient.Plo
+#	$(AM_V_CXX)source='AnslpClient.cpp' object='libfoundation_la-AnslpClient.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-AnslpClient.lo `test -f 'AnslpClient.cpp' || echo '$(srcdir)/'`AnslpClient.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo

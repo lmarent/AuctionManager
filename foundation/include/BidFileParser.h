@@ -61,7 +61,7 @@ class BidFileParser : public XMLParser
 	void parseFieldValue(fieldValList_t *fieldVals, string value, field_t *f);   
 		
 	//! Calculates intervals associated to auction.
-	void calculateIntervals(time_t now, bid_auction_t *auction);
+	void calculateIntervals(time_t now, bid_auction_t *auction, miscList_t &list);
 
     //! parse time string
     time_t parseTime(string timestr);

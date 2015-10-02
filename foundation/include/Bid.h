@@ -49,11 +49,6 @@ typedef enum
     BS_ERROR
 } bidState_t;
 
-typedef struct
-{
-    string name;
-    fieldList_t fields;
-} element_t;
 
 //! execution list intervals.
 typedef vector<interval_t>            bidIntervalList_t;
@@ -61,26 +56,37 @@ typedef vector<interval_t>::iterator  bidIntervalListIter_t;
 typedef vector<interval_t>::const_iterator  bidIntervalListConstIter_t;
 
 //! This bid applies to bid in this auction.
-typedef struct
+class bid_auction_t
 {
+  public:
 	string auctionSet;
 	string auctionName;
-	miscList_t miscList;
-	bidIntervalList_t intervals;
-    //! define the bid-auction running time properties
-    time_t start;
-    time_t stop;
+	int interval;
+	int align;
+	//! define the bid-auction running time properties
+	time_t start;
+	time_t stop;
 	
-} bid_auction_t;
+	bid_auction_t(){}
+	
+	~bid_auction_t(){}
+		
+	string getId(){ return auctionSet + "." + auctionName; }
+		
+	bool operator==(const bid_auction_t &rhs);
+		
+	bool operator!=(const bid_auction_t &rhs);
+	
+};
 
-//! element list (only push_back & sequential access)
-typedef list<element_t>            elementList_t;
-typedef list<element_t>::iterator  elementListIter_t;
-typedef list<element_t>::const_iterator  elementListConstIter_t;
+//! element map (elementName, fieldlist)
+typedef map<string, fieldList_t>            		elementList_t;
+typedef map<string, fieldList_t>::iterator  		elementListIter_t;
+typedef map<string, fieldList_t>::const_iterator  	elementListConstIter_t;
 
-typedef list<bid_auction_t>						bidAuctionList_t;
-typedef list<bid_auction_t>::iterator			bidAuctionListIter_t;
-typedef list<bid_auction_t>::const_iterator		bidAuctionListConstIter_t;
+typedef map<string, bid_auction_t>						bidAuctionList_t;
+typedef map<string, bid_auction_t>::iterator			bidAuctionListIter_t;
+typedef map<string, bid_auction_t>::const_iterator		bidAuctionListConstIter_t;
 
 class Bid
 {
@@ -143,9 +149,7 @@ public:
 
 
 	string getInfo();
-	
-	string toString(element_t &elem);
-	
+		
 
     /*! \short   get names and values (parameters) of configured elements
         \returns a pointer (link) to a list that contains the configured elements for this bid
@@ -157,6 +161,12 @@ public:
         \returns a pointer (link) to a list that contains the auctions for this bid
     */
 	inline bidAuctionList_t *getAuctions(){ return &auctionList; }
+	
+	void deleteAuction(string aset, string aName);
+	
+	bool operator==(const Bid &rhs);
+	
+	bool operator!=(const Bid &rhs);
 	
 protected:
 	

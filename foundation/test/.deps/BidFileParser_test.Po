@@ -260,20 +260,22 @@
  ../../foundation/include/FieldDefParser.h \
  ../../foundation/include/FieldValParser.h \
  ../../foundation/include/MAPIBidParser.h \
- ../../foundation/include/EventScheduler.h \
- ../../foundation/include/Event.h \
- ../../foundation/include/AuctionFileParser.h \
- ../../foundation/include/Auction.h ../../foundation/include/Constants.h \
- /usr/local/include/ipap/IpAp_template_container.h \
- /usr/local/include/ipap/IpAp_template.h \
- /usr/local/include/ipap/IpAp_field.h /usr/local/include/ipap/IpAp_def.h \
+ /usr/local/include/ipap/IpAp_message.h /usr/local/include/ipap/Logger.h \
+ /usr/local/include/ipap/IpAp_def.h /usr/local/include/ipap/IpAp_field.h \
  /usr/local/include/ipap/IpAp_value_field.h \
  /usr/local/include/ipap/IpAp_exception.h \
- /usr/local/include/ipap/IpAp_message.h /usr/local/include/ipap/Logger.h \
  /usr/local/include/ipap/IpAp_field_container.h \
  /usr/local/include/ipap/IpAp_data_record.h \
  /usr/local/include/ipap/IpAp_field_key.h \
- /usr/local/include/ipap/IpAp_t.h \
+ /usr/local/include/ipap/IpAp_template.h /usr/local/include/ipap/IpAp_t.h \
+ /usr/local/include/ipap/IpAp_template_container.h \
+ ../../foundation/include/MAPIIpApMessageParser.h \
+ ../../foundation/include/ParserFcts.h \
+ ../../foundation/include/Constants.h \
+ ../../foundation/include/EventScheduler.h \
+ ../../foundation/include/Event.h \
+ ../../foundation/include/AuctionFileParser.h \
+ ../../foundation/include/Auction.h \
  /usr/local/include/ipap/IpAp_template_container.h \
  ../../foundation/include/AuctionIdSource.h \
  ../../foundation/include/AuctionManagerInfo.h \
@@ -983,31 +985,17 @@
 
 ../../foundation/include/MAPIBidParser.h:
 
-../../foundation/include/EventScheduler.h:
+/usr/local/include/ipap/IpAp_message.h:
 
-../../foundation/include/Event.h:
-
-../../foundation/include/AuctionFileParser.h:
-
-../../foundation/include/Auction.h:
-
-../../foundation/include/Constants.h:
-
-/usr/local/include/ipap/IpAp_template_container.h:
-
-/usr/local/include/ipap/IpAp_template.h:
-
-/usr/local/include/ipap/IpAp_field.h:
+/usr/local/include/ipap/Logger.h:
 
 /usr/local/include/ipap/IpAp_def.h:
+
+/usr/local/include/ipap/IpAp_field.h:
 
 /usr/local/include/ipap/IpAp_value_field.h:
 
 /usr/local/include/ipap/IpAp_exception.h:
-
-/usr/local/include/ipap/IpAp_message.h:
-
-/usr/local/include/ipap/Logger.h:
 
 /usr/local/include/ipap/IpAp_field_container.h:
 
@@ -1015,7 +1003,25 @@
 
 /usr/local/include/ipap/IpAp_field_key.h:
 
+/usr/local/include/ipap/IpAp_template.h:
+
 /usr/local/include/ipap/IpAp_t.h:
+
+/usr/local/include/ipap/IpAp_template_container.h:
+
+../../foundation/include/MAPIIpApMessageParser.h:
+
+../../foundation/include/ParserFcts.h:
+
+../../foundation/include/Constants.h:
+
+../../foundation/include/EventScheduler.h:
+
+../../foundation/include/Event.h:
+
+../../foundation/include/AuctionFileParser.h:
+
+../../foundation/include/Auction.h:
 
 /usr/local/include/ipap/IpAp_template_container.h:
 

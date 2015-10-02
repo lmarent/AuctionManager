@@ -555,11 +555,11 @@ char *CtrlComm::processAddBid(parseReq_t *preq)
     }
 
     // FIXME sufficient?
-    if (bid->second.find("!DOCTYPE BIDSET") <= bid->second.length()) {
+    if (bid->second.find("!DOCTYPE AGENT") <= bid->second.length()) {
         // assume xml bid def
         retEvent = new AddBidsCtrlEvent((char *) bid->second.c_str(), bid->second.size());
     } else {
-        retEvent = new AddBidsCtrlEvent((char *) bid->second.c_str(), bid->second.size(), 1);
+         throw Error("add_bid: tag AGENT is missing" );
     }
 
     return NULL;

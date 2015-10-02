@@ -231,6 +231,22 @@ netagent-MAPIResourceRequestParser.o: MAPIResourceRequestParser.cpp \
  ../../foundation/include/ConfigParser.h \
  ../../user_agent/include/ResourceRequestIdSource.h \
  ../../user_agent/include/ResourceRequest.h \
+ ../../foundation/include/AuctionFileParser.h \
+ ../../foundation/include/Auction.h ../../foundation/include/Constants.h \
+ ../../foundation/include/AuctionTimer.h \
+ ../../foundation/include/ConfigParser.h \
+ /usr/local/include/ipap/IpAp_template_container.h \
+ /usr/local/include/ipap/IpAp_template.h \
+ /usr/local/include/ipap/IpAp_field.h /usr/local/include/ipap/IpAp_def.h \
+ /usr/local/include/ipap/IpAp_value_field.h \
+ /usr/local/include/ipap/IpAp_exception.h \
+ /usr/local/include/ipap/IpAp_message.h /usr/local/include/ipap/Logger.h \
+ /usr/local/include/ipap/IpAp_field_container.h \
+ /usr/local/include/ipap/IpAp_data_record.h \
+ /usr/local/include/ipap/IpAp_field_key.h \
+ /usr/local/include/ipap/IpAp_t.h \
+ /usr/local/include/ipap/IpAp_template_container.h \
+ ../../foundation/include/AuctionIdSource.h \
  ../../foundation/include/Timeval.h
 
 /usr/include/stdc-predef.h:
@@ -864,5 +880,43 @@ netagent-MAPIResourceRequestParser.o: MAPIResourceRequestParser.cpp \
 ../../user_agent/include/ResourceRequestIdSource.h:
 
 ../../user_agent/include/ResourceRequest.h:
+
+../../foundation/include/AuctionFileParser.h:
+
+../../foundation/include/Auction.h:
+
+../../foundation/include/Constants.h:
+
+../../foundation/include/AuctionTimer.h:
+
+../../foundation/include/ConfigParser.h:
+
+/usr/local/include/ipap/IpAp_template_container.h:
+
+/usr/local/include/ipap/IpAp_template.h:
+
+/usr/local/include/ipap/IpAp_field.h:
+
+/usr/local/include/ipap/IpAp_def.h:
+
+/usr/local/include/ipap/IpAp_value_field.h:
+
+/usr/local/include/ipap/IpAp_exception.h:
+
+/usr/local/include/ipap/IpAp_message.h:
+
+/usr/local/include/ipap/Logger.h:
+
+/usr/local/include/ipap/IpAp_field_container.h:
+
+/usr/local/include/ipap/IpAp_data_record.h:
+
+/usr/local/include/ipap/IpAp_field_key.h:
+
+/usr/local/include/ipap/IpAp_t.h:
+
+/usr/local/include/ipap/IpAp_template_container.h:
+
+../../foundation/include/AuctionIdSource.h:
 
 ../../foundation/include/Timeval.h:
