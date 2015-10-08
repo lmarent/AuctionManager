@@ -221,7 +221,7 @@ libfoundation_la-ConfigParser.lo: ConfigParser.cpp \
  ../../foundation/include/FieldValue.h /usr/local/include/ipap/stdinc.h \
  /usr/local/include/ipap/Error.h ../../foundation/include/ParserFcts.h \
  ../../foundation/include/Constants.h \
- ../../foundation/include/ConstantsAum.h
+ ../../foundation/include/Constants.h
 
 /usr/include/stdc-predef.h:
 
@@ -835,4 +835,4 @@ libfoundation_la-ConfigParser.lo: ConfigParser.cpp \
 
 ../../foundation/include/Constants.h:
 
-../../foundation/include/ConstantsAum.h:
+../../foundation/include/Constants.h:

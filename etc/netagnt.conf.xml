@@ -10,12 +10,19 @@
     <PREF NAME="PidFile">/tmp/netagent.pid</PREF>
     <!-- ansl-client configuration file -->    
     <PREF NAME="AnslpConfFile">/home/luis/AuctionManager/etc/nsis-ka_agent.conf</PREF>
-    <!-- filter attribute definition file -->    
-    <PREF NAME="FilterDefFile">/home/luis/AuctionManager/etc/fielddef.xml</PREF>
+    <!-- field attribute definition file -->    
+    <PREF NAME="FieldDefFile">/home/luis/AuctionManager/etc/fielddef.xml</PREF>
     <!-- filter constant file -->
-    <PREF NAME="FilterConstFile">/home/luis/AuctionManager/etc/fieldval.xml</PREF>     
+    <PREF NAME="FieldConstFile">/home/luis/AuctionManager/etc/fieldval.xml</PREF>     
     <!-- auction file to load at start -->
     <PREF NAME="ResourceRequestFile">/home/luis/AuctionManager/etc/example_resource_request1.xml</PREF>
+    <!-- Target defaults -->
+    <PREF NAME="DefaultDestinAddr" TYPE="IPAddr">8.8.8.8</PREF>
+    <PREF NAME="DefaultDestinPort" TYPE="UInt16">80</PREF>
+    <!-- Tcp by default -->
+    <PREF NAME="DefaultProtocol" TYPE="UInt8">6</PREF>    
+    <!-- It is normally the same defined to be the control port -->
+    <PREF NAME="DefaultSourcePort" TYPE="UInt16">12248</PREF>    
   </MAIN>
   <CONTROL>
     <!-- enable remote control interface -->
@@ -29,7 +36,7 @@
     <!-- log all incoming control requests -->
     <PREF NAME="LogOnConnect" TYPE="Bool">yes</PREF>
     <!-- log all agent commands -->
-    <PREF NAME="LogCommand" TYPE="Bool">yes</PREF>
+    <PREF NAME="LogCommand" TYPE="Bool">yes</PREF>    
     <!-- access list -->
     <ACCESS>
       <ALLOW TYPE="Host">All</ALLOW>

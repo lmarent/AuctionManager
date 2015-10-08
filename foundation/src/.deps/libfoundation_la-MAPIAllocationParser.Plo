@@ -1,6 +1,7 @@
 libfoundation_la-MAPIAllocationParser.lo: MAPIAllocationParser.cpp \
  /usr/include/stdc-predef.h ../../foundation/include/ParserFcts.h \
- ../../config.h /usr/local/include/ipap/stdinc.h /usr/include/stdio.h \
+ ../../config.h /usr/local/include/ipap/stdincpp.h \
+ /usr/local/include/ipap/stdinc.h /usr/include/stdio.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
@@ -88,9 +89,7 @@ libfoundation_la-MAPIAllocationParser.lo: MAPIAllocationParser.cpp \
  /usr/include/linux/stddef.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
- /usr/include/asm-generic/posix_types.h \
- /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/stdinc.h \
- /usr/include/c++/4.8/iostream \
+ /usr/include/asm-generic/posix_types.h /usr/include/c++/4.8/iostream \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
@@ -199,6 +198,7 @@ libfoundation_la-MAPIAllocationParser.lo: MAPIAllocationParser.cpp \
  /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
  /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/stdexcept \
  ../../foundation/include/Constants.h \
+ ../../foundation/include/Constants.h \
  ../../foundation/include/MAPIAllocationParser.h \
  /usr/local/include/ipap/IpAp_message.h \
  /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/Logger.h \
@@ -235,19 +235,21 @@ libfoundation_la-MAPIAllocationParser.lo: MAPIAllocationParser.cpp \
  /usr/include/libxml2/libxml/threads.h \
  ../../foundation/include/XMLParser.h \
  ../../foundation/include/ProcModuleInterface.h \
- ../../foundation/include/metadata.h \
+ /usr/local/include/ipap/stdinc.h ../../foundation/include/metadata.h \
  ../../foundation/include/FieldDefParser.h \
  ../../foundation/include/Field.h ../../foundation/include/FieldValue.h \
  ../../foundation/include/MAPIIpApMessageParser.h \
  ../../foundation/include/ParserFcts.h \
  ../../foundation/include/FieldValParser.h \
- ../../foundation/include/Constants.h ../../foundation/include/Timeval.h
+ ../../foundation/include/Timeval.h
 
 /usr/include/stdc-predef.h:
 
 ../../foundation/include/ParserFcts.h:
 
 ../../config.h:
+
+/usr/local/include/ipap/stdincpp.h:
 
 /usr/local/include/ipap/stdinc.h:
 
@@ -498,10 +500,6 @@ libfoundation_la-MAPIAllocationParser.lo: MAPIAllocationParser.cpp \
 /usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
 
 /usr/include/asm-generic/posix_types.h:
-
-/usr/local/include/ipap/stdincpp.h:
-
-/usr/local/include/ipap/stdinc.h:
 
 /usr/include/c++/4.8/iostream:
 
@@ -795,6 +793,8 @@ libfoundation_la-MAPIAllocationParser.lo: MAPIAllocationParser.cpp \
 
 ../../foundation/include/Constants.h:
 
+../../foundation/include/Constants.h:
+
 ../../foundation/include/MAPIAllocationParser.h:
 
 /usr/local/include/ipap/IpAp_message.h:
@@ -885,6 +885,8 @@ libfoundation_la-MAPIAllocationParser.lo: MAPIAllocationParser.cpp \
 
 ../../foundation/include/ProcModuleInterface.h:
 
+/usr/local/include/ipap/stdinc.h:
+
 ../../foundation/include/metadata.h:
 
 ../../foundation/include/FieldDefParser.h:
@@ -898,7 +900,5 @@ libfoundation_la-MAPIAllocationParser.lo: MAPIAllocationParser.cpp \
 ../../foundation/include/ParserFcts.h:
 
 ../../foundation/include/FieldValParser.h:
-
-../../foundation/include/Constants.h:
 
 ../../foundation/include/Timeval.h:

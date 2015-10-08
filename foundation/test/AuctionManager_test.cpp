@@ -41,10 +41,12 @@ void AuctionManager_Test::setUp()
 {
 	
 	const string filename = DEF_SYSCONFDIR "/fielddef.xml";		
+	const string fieldValuename = DEF_SYSCONFDIR "/fieldval.xml";
+	
 	
 	try
 	{
-		auctionManagerPtr = new AuctionManager(filename);
+		auctionManagerPtr = new AuctionManager(filename, fieldValuename);
 		auto_ptr<EventScheduler> _evnt(new EventScheduler());
         evnt = _evnt;
 				
@@ -68,9 +70,15 @@ void AuctionManager_Test::test()
 
 	try
 	{
+		ipap_template_container *templates;
+		
 		const string filename = DEF_SYSCONFDIR "/example_auctions1.xml";
 		
-		auctionDB_t * auctions = auctionManagerPtr->parseAuctions(filename);
+		templates = new ipap_template_container();
+		
+		auctionDB_t * auctions = auctionManagerPtr->parseAuctions(filename, templates);
+		
+		saveDelete(templates);
 				
 		auctionManagerPtr->addAuctions(auctions, evnt.get());
 				
@@ -109,7 +117,11 @@ void AuctionManager_Test::test()
 		
 		// Reinsert auctions - Delete by set name( Bidder )
 
-		auctions = auctionManagerPtr->parseAuctions(filename);
+		templates = new ipap_template_container();
+
+		auctions = auctionManagerPtr->parseAuctions(filename, templates);
+		
+		saveDelete(templates);
 				
 		auctionManagerPtr->addAuctions(auctions, evnt.get());
 				
@@ -133,8 +145,12 @@ void AuctionManager_Test::test()
 				
 		// Reinsert auction - Delete by pointer
 		
-		auctions = auctionManagerPtr->parseAuctions(filename);
-				
+		templates = new ipap_template_container();
+
+		auctions = auctionManagerPtr->parseAuctions(filename, templates);
+		
+		saveDelete(templates);
+		
 		auctionManagerPtr->addAuctions(auctions, evnt.get());
 				
 		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
@@ -148,8 +164,12 @@ void AuctionManager_Test::test()
 		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 0 );
 		
 		// Reinsert auctions - Delete by set.
-
-		auctions = auctionManagerPtr->parseAuctions(filename);
+		
+		templates = new ipap_template_container();
+		
+		auctions = auctionManagerPtr->parseAuctions(filename, templates);
+		
+		saveDelete(templates);
 				
 		auctionManagerPtr->addAuctions(auctions, evnt.get());
 				

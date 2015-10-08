@@ -30,8 +30,8 @@
 #define _PARSERFCTS_H_
 
 #include "config.h"
-#include "stdinc.h"
 #include "stdincpp.h"
+#include "Constants.h"
 
 namespace auction
 {
@@ -50,6 +50,10 @@ class ParserFcts
                                           unsigned long long max=ULLONG_MAX);
 
     static int parseInt(string s, int min=LONG_MIN, int max=LONG_MAX);
+
+    static struct in_addr parseIPAddr(string s);
+
+    static struct in6_addr parseIP6Addr(string s);
 
     static int parseBool(string s);
 

@@ -107,6 +107,7 @@ am_test_runner_OBJECTS =  \
 	@top_srcdir@/foundation/src/FieldDefParser.$(OBJEXT) \
 	@top_srcdir@/foundation/src/FieldValParser.$(OBJEXT) \
 	@top_srcdir@/foundation/src/MAPIIpApMessageParser.$(OBJEXT) \
+	@top_srcdir@/foundation/src/TemplateIdSource.$(OBJEXT) \
 	@top_srcdir@/foundation/src/BidIdSource.$(OBJEXT) \
 	@top_srcdir@/foundation/src/AuctionIdSource.$(OBJEXT) \
 	@top_srcdir@/foundation/src/Auction.$(OBJEXT) \
@@ -483,6 +484,8 @@ LIBPROT_CFLAGS = @LIBPROT_CFLAGS@
 LIBPROT_LIBS = @LIBPROT_LIBS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIBUUID_CFLAGS = @LIBUUID_CFLAGS@
+LIBUUID_LIBS = @LIBUUID_LIBS@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -595,6 +598,7 @@ test_runner_SOURCES = @top_srcdir@/foundation/src/Constants.cpp \
 						@top_srcdir@/foundation/src/FieldDefParser.cpp \
 						@top_srcdir@/foundation/src/FieldValParser.cpp \
 						@top_srcdir@/foundation/src/MAPIIpApMessageParser.cpp \
+						@top_srcdir@/foundation/src/TemplateIdSource.cpp \
 						@top_srcdir@/foundation/src/BidIdSource.cpp \
 						@top_srcdir@/foundation/src/AuctionIdSource.cpp \
 						@top_srcdir@/foundation/src/Auction.cpp \
@@ -636,17 +640,20 @@ test_runner_SOURCES = @top_srcdir@/foundation/src/Constants.cpp \
 
 @ENABLE_DEBUG_FALSE@AM_CXXFLAGS = -O2 -I@top_srcdir@/foundation/include $(CPPUNIT_CFLAGS) \
 @ENABLE_DEBUG_FALSE@			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
-@ENABLE_DEBUG_FALSE@			    $(LIBIPAP_CFLAGS)
+@ENABLE_DEBUG_FALSE@			     $(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) $(LIBFASTQUEUE_CFLAGS) \
+@ENABLE_DEBUG_FALSE@				 $(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) $(LIBANSLP_CFLAGS) 
 
 @ENABLE_DEBUG_TRUE@AM_CXXFLAGS = -g -I@top_srcdir@/foundation/include $(CPPUNIT_CFLAGS) \
 @ENABLE_DEBUG_TRUE@			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
 @ENABLE_DEBUG_TRUE@			    -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING -DINTEL \
-@ENABLE_DEBUG_TRUE@			    $(LIBIPAP_CFLAGS)
+@ENABLE_DEBUG_TRUE@			     $(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) $(LIBFASTQUEUE_CFLAGS) \
+@ENABLE_DEBUG_TRUE@				 $(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) $(LIBANSLP_CFLAGS) 
 
 AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 			 $(top_builddir)/lib/httpd/libhttpd.a \
-			 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ \
-			 $(LIBIPAP_LIBS)
+			 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ $(LIBIPAP_LIBS) \
+			 $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) \
+			 $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS)
 
 LDADD = $(LIBIPAP_LIBS)
 all: all-am
@@ -729,6 +736,9 @@ clean-checkPROGRAMS:
 	@top_srcdir@/foundation/src/$(am__dirstamp) \
 	@top_srcdir@/foundation/src/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/foundation/src/MAPIIpApMessageParser.$(OBJEXT):  \
+	@top_srcdir@/foundation/src/$(am__dirstamp) \
+	@top_srcdir@/foundation/src/$(DEPDIR)/$(am__dirstamp)
+@top_srcdir@/foundation/src/TemplateIdSource.$(OBJEXT):  \
 	@top_srcdir@/foundation/src/$(am__dirstamp) \
 	@top_srcdir@/foundation/src/$(DEPDIR)/$(am__dirstamp)
 @top_srcdir@/foundation/src/BidIdSource.$(OBJEXT):  \
@@ -894,6 +904,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/MAPIBidParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/MAPIIpApMessageParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/ParserFcts.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/TemplateIdSource.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/Timeval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/src/$(DEPDIR)/XMLParser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@@top_srcdir@/foundation/test/$(DEPDIR)/Allocation_Manager_test.Po@am__quote@

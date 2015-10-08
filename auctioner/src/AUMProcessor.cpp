@@ -186,11 +186,25 @@ bool AUMProcessor::intersects( time_t startDttmAuc, time_t stopDttmAuc,
 								 time_t startDttmReq, time_t stopDttmReq)
 {
 
-	if (stopDttmReq <= startDttmAuc)
+#ifdef DEBUG
+	struct timeval t1, t2, t3, t4;
+	t1.tv_sec = startDttmAuc;
+	t2.tv_sec = stopDttmAuc;
+	t3.tv_sec = startDttmReq;
+	t4.tv_sec = stopDttmReq;
+    log->dlog(ch,"Start intersects %s - %s - %s -%s",  (Timeval::toString(t1)).c_str(), 
+									 (Timeval::toString(t2)).c_str(),
+									 (Timeval::toString(t3)).c_str(),
+									 (Timeval::toString(t4)).c_str() );
+#endif
+
+	if (stopDttmReq <= startDttmAuc){		
 		return false;
+	}
 	
-	if (stopDttmAuc <= startDttmReq)
+	if (stopDttmAuc <= startDttmReq){
 		return false;
+	}
 	
 	return true;
 
@@ -198,7 +212,16 @@ bool AUMProcessor::intersects( time_t startDttmAuc, time_t stopDttmAuc,
 
 bool AUMProcessor::forResource(string resourceAuc, string resourceIdReq)
 {
+#ifdef DEBUG
+    log->dlog(ch,"Start forResource resourceAuc:%s, resourceReq:%s", 
+					resourceAuc.c_str(), resourceIdReq.c_str());
+#endif
+	
 	if (resourceAuc.compare(resourceIdReq) == 0 ){
+		return true;
+	}
+	
+	if (resourceIdReq.compare("any") == 0){
 		return true;
 	}
 	
@@ -541,7 +564,8 @@ AUMProcessor::getApplicableAuctions(ipap_message *message)
 				ipfield = templOptAuct->get_field( field.eno, field.ftype );
 				time_t stopDttm = (time_t) ipfield.parse(sstopDttm).get_value_int64();
 				 
-				string resourceId = getMiscVal(&miscs, "resource"); 
+				string resourceId = getMiscVal(&miscs, "resourceid"); 
+
 				
 				auctionProcessListIter_t aucIter;
 				for (aucIter = auctions.begin(); aucIter != auctions.end(); ++aucIter){
@@ -551,6 +575,7 @@ AUMProcessor::getApplicableAuctions(ipap_message *message)
 						auctions_anw->push_back(auction);
 					}
 				}				
+				
 			}
 		}	
 	}

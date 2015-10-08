@@ -133,6 +133,7 @@ am_libfoundation_la_OBJECTS = libfoundation_la-AuctionTimer.lo \
 	libfoundation_la-FieldDefParser.lo \
 	libfoundation_la-FieldValParser.lo \
 	libfoundation_la-MAPIIpApMessageParser.lo \
+	libfoundation_la-TemplateIdSource.lo \
 	libfoundation_la-AllocationIdSource.lo \
 	libfoundation_la-Allocation.lo \
 	libfoundation_la-MAPIAllocationParser.lo \
@@ -284,6 +285,8 @@ LIBPROT_CFLAGS = @LIBPROT_CFLAGS@
 LIBPROT_LIBS = @LIBPROT_LIBS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIBUUID_CFLAGS = @LIBUUID_CFLAGS@
+LIBUUID_LIBS = @LIBUUID_LIBS@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -414,6 +417,7 @@ libfoundation_la_SOURCES = AuctionTimer.cpp \
 						  FieldDefParser.cpp \
 						  FieldValParser.cpp \
 						  MAPIIpApMessageParser.cpp \
+						  TemplateIdSource.cpp \
 						  AllocationIdSource.cpp \
 						  Allocation.cpp \
 						  MAPIAllocationParser.cpp \
@@ -545,6 +549,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-MAPIBidParser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-MAPIIpApMessageParser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-ParserFcts.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-TemplateIdSource.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-Timeval.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfoundation_la-XMLParser.Plo@am__quote@
 
@@ -669,6 +674,13 @@ libfoundation_la-MAPIIpApMessageParser.lo: MAPIIpApMessageParser.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='MAPIIpApMessageParser.cpp' object='libfoundation_la-MAPIIpApMessageParser.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-MAPIIpApMessageParser.lo `test -f 'MAPIIpApMessageParser.cpp' || echo '$(srcdir)/'`MAPIIpApMessageParser.cpp
+
+libfoundation_la-TemplateIdSource.lo: TemplateIdSource.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-TemplateIdSource.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-TemplateIdSource.Tpo -c -o libfoundation_la-TemplateIdSource.lo `test -f 'TemplateIdSource.cpp' || echo '$(srcdir)/'`TemplateIdSource.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-TemplateIdSource.Tpo $(DEPDIR)/libfoundation_la-TemplateIdSource.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='TemplateIdSource.cpp' object='libfoundation_la-TemplateIdSource.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-TemplateIdSource.lo `test -f 'TemplateIdSource.cpp' || echo '$(srcdir)/'`TemplateIdSource.cpp
 
 libfoundation_la-AllocationIdSource.lo: AllocationIdSource.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-AllocationIdSource.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-AllocationIdSource.Tpo -c -o libfoundation_la-AllocationIdSource.lo `test -f 'AllocationIdSource.cpp' || echo '$(srcdir)/'`AllocationIdSource.cpp

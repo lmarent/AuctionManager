@@ -42,9 +42,17 @@ BidManager::BidManager( string fdname, string fvname)
 {
     log = Logger::getInstance();
     ch = log->createChannel("BidManager");
+    
 #ifdef DEBUG
     log->dlog(ch,"Starting");
 #endif
+
+    // load the field def list
+    loadFieldDefs(fieldDefFileName);
+	
+    // load the field val list
+    loadFieldVals(fieldValFileName);
+
 
 }
 
@@ -240,12 +248,6 @@ bidDB_t *BidManager::parseBids(string fname)
     bidDB_t *new_bids = new bidDB_t();
 
     try {	
-
-        // load the field def list
-        loadFieldDefs(fieldDefFileName);
-	
-        // load the field val list
-        loadFieldVals(fieldValFileName);
 	
         BidFileParser rfp = BidFileParser(fname);
         rfp.parse(&fieldDefs, &fieldVals, new_bids, &idSource);

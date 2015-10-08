@@ -2849,113 +2849,131 @@ m4trace:configure.ac:309: -1- _AM_SUBST_NOTMAKE([CURL_TRUE])
 m4trace:configure.ac:309: -1- _AM_SUBST_NOTMAKE([CURL_FALSE])
 m4trace:configure.ac:310: -1- m4_pattern_allow([^CURL_CFLAGS$])
 m4trace:configure.ac:311: -1- m4_pattern_allow([^CURL_LIBS$])
-m4trace:configure.ac:313: -1- PKG_CHECK_MODULES([LIBPROT], [libprot-0.0])
-m4trace:configure.ac:313: -1- m4_pattern_allow([^LIBPROT_CFLAGS$])
-m4trace:configure.ac:313: -1- m4_pattern_allow([^LIBPROT_LIBS$])
-m4trace:configure.ac:313: -1- PKG_CHECK_EXISTS([libprot-0.0], [pkg_cv_[]LIBPROT_CFLAGS=`$PKG_CONFIG --[]cflags "libprot-0.0" 2>/dev/null`
+m4trace:configure.ac:313: -1- PKG_CHECK_MODULES([LIBUUID], [libuuid], [LIBUUID_FOUND=yes], [LIBUUID_FOUND=no])
+m4trace:configure.ac:313: -1- m4_pattern_allow([^LIBUUID_CFLAGS$])
+m4trace:configure.ac:313: -1- m4_pattern_allow([^LIBUUID_LIBS$])
+m4trace:configure.ac:313: -1- PKG_CHECK_EXISTS([libuuid], [pkg_cv_[]LIBUUID_CFLAGS=`$PKG_CONFIG --[]cflags "libuuid" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:313: -1- PKG_CHECK_EXISTS([libprot-0.0], [pkg_cv_[]LIBPROT_LIBS=`$PKG_CONFIG --[]libs "libprot-0.0" 2>/dev/null`
+m4trace:configure.ac:313: -1- PKG_CHECK_EXISTS([libuuid], [pkg_cv_[]LIBUUID_LIBS=`$PKG_CONFIG --[]libs "libuuid" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
 m4trace:configure.ac:313: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:314: -1- m4_pattern_allow([^LIBPROT_CFLAGS$])
-m4trace:configure.ac:315: -1- m4_pattern_allow([^LIBPROT_LIBS$])
-m4trace:configure.ac:317: -1- PKG_CHECK_MODULES([LIBFASTQUEUE], [libfastqueue-0.0])
-m4trace:configure.ac:317: -1- m4_pattern_allow([^LIBFASTQUEUE_CFLAGS$])
-m4trace:configure.ac:317: -1- m4_pattern_allow([^LIBFASTQUEUE_LIBS$])
-m4trace:configure.ac:317: -1- PKG_CHECK_EXISTS([libfastqueue-0.0], [pkg_cv_[]LIBFASTQUEUE_CFLAGS=`$PKG_CONFIG --[]cflags "libfastqueue-0.0" 2>/dev/null`
+m4trace:configure.ac:316: -1- PKG_CHECK_MODULES([LIBUUID], [uuid], [LIBUUID_FOUND=yes], [LIBUUID_FOUND=no])
+m4trace:configure.ac:316: -1- m4_pattern_allow([^LIBUUID_CFLAGS$])
+m4trace:configure.ac:316: -1- m4_pattern_allow([^LIBUUID_LIBS$])
+m4trace:configure.ac:316: -1- PKG_CHECK_EXISTS([uuid], [pkg_cv_[]LIBUUID_CFLAGS=`$PKG_CONFIG --[]cflags "uuid" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:317: -1- PKG_CHECK_EXISTS([libfastqueue-0.0], [pkg_cv_[]LIBFASTQUEUE_LIBS=`$PKG_CONFIG --[]libs "libfastqueue-0.0" 2>/dev/null`
+m4trace:configure.ac:316: -1- PKG_CHECK_EXISTS([uuid], [pkg_cv_[]LIBUUID_LIBS=`$PKG_CONFIG --[]libs "uuid" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:317: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:318: -1- m4_pattern_allow([^LIBFASTQUEUE_CFLAGS$])
-m4trace:configure.ac:319: -1- m4_pattern_allow([^LIBFASTQUEUE_LIBS$])
-m4trace:configure.ac:321: -1- PKG_CHECK_MODULES([LIBGIST], [libgist-0.0])
-m4trace:configure.ac:321: -1- m4_pattern_allow([^LIBGIST_CFLAGS$])
-m4trace:configure.ac:321: -1- m4_pattern_allow([^LIBGIST_LIBS$])
-m4trace:configure.ac:321: -1- PKG_CHECK_EXISTS([libgist-0.0], [pkg_cv_[]LIBGIST_CFLAGS=`$PKG_CONFIG --[]cflags "libgist-0.0" 2>/dev/null`
+m4trace:configure.ac:316: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:325: -1- m4_pattern_allow([^LIBUUID_CFLAGS$])
+m4trace:configure.ac:326: -1- m4_pattern_allow([^LIBUUID_LIBS$])
+m4trace:configure.ac:330: -1- PKG_CHECK_MODULES([LIBPROT], [libprot-0.0])
+m4trace:configure.ac:330: -1- m4_pattern_allow([^LIBPROT_CFLAGS$])
+m4trace:configure.ac:330: -1- m4_pattern_allow([^LIBPROT_LIBS$])
+m4trace:configure.ac:330: -1- PKG_CHECK_EXISTS([libprot-0.0], [pkg_cv_[]LIBPROT_CFLAGS=`$PKG_CONFIG --[]cflags "libprot-0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:321: -1- PKG_CHECK_EXISTS([libgist-0.0], [pkg_cv_[]LIBGIST_LIBS=`$PKG_CONFIG --[]libs "libgist-0.0" 2>/dev/null`
+m4trace:configure.ac:330: -1- PKG_CHECK_EXISTS([libprot-0.0], [pkg_cv_[]LIBPROT_LIBS=`$PKG_CONFIG --[]libs "libprot-0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:321: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:322: -1- m4_pattern_allow([^LIBGIST_CFLAGS$])
-m4trace:configure.ac:323: -1- m4_pattern_allow([^LIBGIST_LIBS$])
-m4trace:configure.ac:325: -1- PKG_CHECK_MODULES([LIBIPAP], [libipap-0.0])
-m4trace:configure.ac:325: -1- m4_pattern_allow([^LIBIPAP_CFLAGS$])
-m4trace:configure.ac:325: -1- m4_pattern_allow([^LIBIPAP_LIBS$])
-m4trace:configure.ac:325: -1- PKG_CHECK_EXISTS([libipap-0.0], [pkg_cv_[]LIBIPAP_CFLAGS=`$PKG_CONFIG --[]cflags "libipap-0.0" 2>/dev/null`
+m4trace:configure.ac:330: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:331: -1- m4_pattern_allow([^LIBPROT_CFLAGS$])
+m4trace:configure.ac:332: -1- m4_pattern_allow([^LIBPROT_LIBS$])
+m4trace:configure.ac:334: -1- PKG_CHECK_MODULES([LIBFASTQUEUE], [libfastqueue-0.0])
+m4trace:configure.ac:334: -1- m4_pattern_allow([^LIBFASTQUEUE_CFLAGS$])
+m4trace:configure.ac:334: -1- m4_pattern_allow([^LIBFASTQUEUE_LIBS$])
+m4trace:configure.ac:334: -1- PKG_CHECK_EXISTS([libfastqueue-0.0], [pkg_cv_[]LIBFASTQUEUE_CFLAGS=`$PKG_CONFIG --[]cflags "libfastqueue-0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:325: -1- PKG_CHECK_EXISTS([libipap-0.0], [pkg_cv_[]LIBIPAP_LIBS=`$PKG_CONFIG --[]libs "libipap-0.0" 2>/dev/null`
+m4trace:configure.ac:334: -1- PKG_CHECK_EXISTS([libfastqueue-0.0], [pkg_cv_[]LIBFASTQUEUE_LIBS=`$PKG_CONFIG --[]libs "libfastqueue-0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:325: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:326: -1- m4_pattern_allow([^LIBIPAP_CFLAGS$])
-m4trace:configure.ac:327: -1- m4_pattern_allow([^LIBIPAP_LIBS$])
-m4trace:configure.ac:329: -1- PKG_CHECK_MODULES([LIBANSLP_MSG], [libanslp_msg-0.0])
-m4trace:configure.ac:329: -1- m4_pattern_allow([^LIBANSLP_MSG_CFLAGS$])
-m4trace:configure.ac:329: -1- m4_pattern_allow([^LIBANSLP_MSG_LIBS$])
-m4trace:configure.ac:329: -1- PKG_CHECK_EXISTS([libanslp_msg-0.0], [pkg_cv_[]LIBANSLP_MSG_CFLAGS=`$PKG_CONFIG --[]cflags "libanslp_msg-0.0" 2>/dev/null`
+m4trace:configure.ac:334: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:335: -1- m4_pattern_allow([^LIBFASTQUEUE_CFLAGS$])
+m4trace:configure.ac:336: -1- m4_pattern_allow([^LIBFASTQUEUE_LIBS$])
+m4trace:configure.ac:338: -1- PKG_CHECK_MODULES([LIBGIST], [libgist-0.0])
+m4trace:configure.ac:338: -1- m4_pattern_allow([^LIBGIST_CFLAGS$])
+m4trace:configure.ac:338: -1- m4_pattern_allow([^LIBGIST_LIBS$])
+m4trace:configure.ac:338: -1- PKG_CHECK_EXISTS([libgist-0.0], [pkg_cv_[]LIBGIST_CFLAGS=`$PKG_CONFIG --[]cflags "libgist-0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:329: -1- PKG_CHECK_EXISTS([libanslp_msg-0.0], [pkg_cv_[]LIBANSLP_MSG_LIBS=`$PKG_CONFIG --[]libs "libanslp_msg-0.0" 2>/dev/null`
+m4trace:configure.ac:338: -1- PKG_CHECK_EXISTS([libgist-0.0], [pkg_cv_[]LIBGIST_LIBS=`$PKG_CONFIG --[]libs "libgist-0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:329: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:330: -1- m4_pattern_allow([^LIBANSLP_MSG_CFLAGS$])
-m4trace:configure.ac:331: -1- m4_pattern_allow([^LIBANSLP_MSG_LIBS$])
-m4trace:configure.ac:333: -1- PKG_CHECK_MODULES([LIBANSLP], [libanslp-0.0])
-m4trace:configure.ac:333: -1- m4_pattern_allow([^LIBANSLP_CFLAGS$])
-m4trace:configure.ac:333: -1- m4_pattern_allow([^LIBANSLP_LIBS$])
-m4trace:configure.ac:333: -1- PKG_CHECK_EXISTS([libanslp-0.0], [pkg_cv_[]LIBANSLP_CFLAGS=`$PKG_CONFIG --[]cflags "libanslp-0.0" 2>/dev/null`
+m4trace:configure.ac:338: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:339: -1- m4_pattern_allow([^LIBGIST_CFLAGS$])
+m4trace:configure.ac:340: -1- m4_pattern_allow([^LIBGIST_LIBS$])
+m4trace:configure.ac:342: -1- PKG_CHECK_MODULES([LIBIPAP], [libipap-0.0])
+m4trace:configure.ac:342: -1- m4_pattern_allow([^LIBIPAP_CFLAGS$])
+m4trace:configure.ac:342: -1- m4_pattern_allow([^LIBIPAP_LIBS$])
+m4trace:configure.ac:342: -1- PKG_CHECK_EXISTS([libipap-0.0], [pkg_cv_[]LIBIPAP_CFLAGS=`$PKG_CONFIG --[]cflags "libipap-0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:333: -1- PKG_CHECK_EXISTS([libanslp-0.0], [pkg_cv_[]LIBANSLP_LIBS=`$PKG_CONFIG --[]libs "libanslp-0.0" 2>/dev/null`
+m4trace:configure.ac:342: -1- PKG_CHECK_EXISTS([libipap-0.0], [pkg_cv_[]LIBIPAP_LIBS=`$PKG_CONFIG --[]libs "libipap-0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
-m4trace:configure.ac:333: -1- _PKG_SHORT_ERRORS_SUPPORTED
-m4trace:configure.ac:334: -1- m4_pattern_allow([^LIBANSLP_CFLAGS$])
-m4trace:configure.ac:335: -1- m4_pattern_allow([^LIBANSLP_LIBS$])
-m4trace:configure.ac:339: -1- AM_CONDITIONAL([BUILD_NAGTRSH], [test "$XSLTLIB" && test "$CURL_LIBS"])
-m4trace:configure.ac:339: -1- m4_pattern_allow([^BUILD_NAGTRSH_TRUE$])
-m4trace:configure.ac:339: -1- m4_pattern_allow([^BUILD_NAGTRSH_FALSE$])
-m4trace:configure.ac:339: -1- _AM_SUBST_NOTMAKE([BUILD_NAGTRSH_TRUE])
-m4trace:configure.ac:339: -1- _AM_SUBST_NOTMAKE([BUILD_NAGTRSH_FALSE])
-m4trace:configure.ac:340: -1- AM_CONDITIONAL([BUILD_NARSH], [test "$XSLTLIB" && test "$CURL_LIBS"])
-m4trace:configure.ac:340: -1- m4_pattern_allow([^BUILD_NARSH_TRUE$])
-m4trace:configure.ac:340: -1- m4_pattern_allow([^BUILD_NARSH_FALSE$])
-m4trace:configure.ac:340: -1- _AM_SUBST_NOTMAKE([BUILD_NARSH_TRUE])
-m4trace:configure.ac:340: -1- _AM_SUBST_NOTMAKE([BUILD_NARSH_FALSE])
-m4trace:configure.ac:345: -1- m4_pattern_allow([^DOXY$])
-m4trace:configure.ac:354: -1- m4_pattern_allow([^BUILD_TIME$])
-m4trace:configure.ac:369: -1- m4_pattern_allow([^DEF_SYSCONFDIR$])
-m4trace:configure.ac:372: -1- m4_pattern_allow([^DEF_STATEDIR$])
-m4trace:configure.ac:379: -1- m4_pattern_allow([^DEF_LIBDIR$])
-m4trace:configure.ac:382: -1- m4_pattern_allow([^DEF_BINDIR$])
-m4trace:configure.ac:384: -1- m4_pattern_allow([^VERSION$])
-m4trace:configure.ac:385: -1- m4_pattern_allow([^REL_DATE$])
-m4trace:configure.ac:386: -1- m4_pattern_allow([^OS$])
-m4trace:configure.ac:387: -1- m4_pattern_allow([^ENABLE_NF$])
-m4trace:configure.ac:388: -1- m4_pattern_allow([^ENABLE_TEST$])
-m4trace:configure.ac:389: -1- m4_pattern_allow([^ENABLE_DEBUG$])
-m4trace:configure.ac:390: -1- m4_pattern_allow([^READLINELIB$])
-m4trace:configure.ac:391: -1- m4_pattern_allow([^HISTORYLIB$])
-m4trace:configure.ac:392: -1- m4_pattern_allow([^PTHREADLIB$])
-m4trace:configure.ac:393: -1- m4_pattern_allow([^DLLIB$])
-m4trace:configure.ac:394: -1- m4_pattern_allow([^SSLLIB$])
-m4trace:configure.ac:395: -1- m4_pattern_allow([^ULOGLIB$])
-m4trace:configure.ac:396: -1- m4_pattern_allow([^XMLLIB$])
-m4trace:configure.ac:397: -1- m4_pattern_allow([^XSLTLIB$])
-m4trace:configure.ac:398: -1- m4_pattern_allow([^MATHLIB$])
-m4trace:configure.ac:399: -1- m4_pattern_allow([^USE_SSL$])
-m4trace:configure.ac:400: -1- m4_pattern_allow([^SSL_PASSWD$])
-m4trace:configure.ac:401: -1- m4_pattern_allow([^IPTABLES_VERSION$])
-m4trace:configure.ac:402: -1- m4_pattern_allow([^MPATROLLIB$])
-m4trace:configure.ac:403: -1- m4_pattern_allow([^DEF_SYSCONFDIR$])
-m4trace:configure.ac:404: -1- m4_pattern_allow([^DEF_STATEDIR$])
-m4trace:configure.ac:405: -1- m4_pattern_allow([^DEF_LIBDIR$])
-m4trace:configure.ac:406: -1- m4_pattern_allow([^DEF_BINDIR$])
-m4trace:configure.ac:407: -1- m4_pattern_allow([^DOXY$])
-m4trace:configure.ac:424: -1- m4_pattern_allow([^LIB@&t@OBJS$])
-m4trace:configure.ac:424: -1- m4_pattern_allow([^LTLIBOBJS$])
-m4trace:configure.ac:424: -1- AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])
-m4trace:configure.ac:424: -1- m4_pattern_allow([^am__EXEEXT_TRUE$])
-m4trace:configure.ac:424: -1- m4_pattern_allow([^am__EXEEXT_FALSE$])
-m4trace:configure.ac:424: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_TRUE])
-m4trace:configure.ac:424: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_FALSE])
-m4trace:configure.ac:424: -1- _AC_AM_CONFIG_HEADER_HOOK(["$ac_file"])
-m4trace:configure.ac:424: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS
-m4trace:configure.ac:424: -1- _LT_PROG_LTMAIN
+m4trace:configure.ac:342: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:343: -1- m4_pattern_allow([^LIBIPAP_CFLAGS$])
+m4trace:configure.ac:344: -1- m4_pattern_allow([^LIBIPAP_LIBS$])
+m4trace:configure.ac:346: -1- PKG_CHECK_MODULES([LIBANSLP_MSG], [libanslp_msg-0.0])
+m4trace:configure.ac:346: -1- m4_pattern_allow([^LIBANSLP_MSG_CFLAGS$])
+m4trace:configure.ac:346: -1- m4_pattern_allow([^LIBANSLP_MSG_LIBS$])
+m4trace:configure.ac:346: -1- PKG_CHECK_EXISTS([libanslp_msg-0.0], [pkg_cv_[]LIBANSLP_MSG_CFLAGS=`$PKG_CONFIG --[]cflags "libanslp_msg-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
+m4trace:configure.ac:346: -1- PKG_CHECK_EXISTS([libanslp_msg-0.0], [pkg_cv_[]LIBANSLP_MSG_LIBS=`$PKG_CONFIG --[]libs "libanslp_msg-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
+m4trace:configure.ac:346: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:347: -1- m4_pattern_allow([^LIBANSLP_MSG_CFLAGS$])
+m4trace:configure.ac:348: -1- m4_pattern_allow([^LIBANSLP_MSG_LIBS$])
+m4trace:configure.ac:350: -1- PKG_CHECK_MODULES([LIBANSLP], [libanslp-0.0])
+m4trace:configure.ac:350: -1- m4_pattern_allow([^LIBANSLP_CFLAGS$])
+m4trace:configure.ac:350: -1- m4_pattern_allow([^LIBANSLP_LIBS$])
+m4trace:configure.ac:350: -1- PKG_CHECK_EXISTS([libanslp-0.0], [pkg_cv_[]LIBANSLP_CFLAGS=`$PKG_CONFIG --[]cflags "libanslp-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
+m4trace:configure.ac:350: -1- PKG_CHECK_EXISTS([libanslp-0.0], [pkg_cv_[]LIBANSLP_LIBS=`$PKG_CONFIG --[]libs "libanslp-0.0" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes ], [pkg_failed=yes])
+m4trace:configure.ac:350: -1- _PKG_SHORT_ERRORS_SUPPORTED
+m4trace:configure.ac:351: -1- m4_pattern_allow([^LIBANSLP_CFLAGS$])
+m4trace:configure.ac:352: -1- m4_pattern_allow([^LIBANSLP_LIBS$])
+m4trace:configure.ac:356: -1- AM_CONDITIONAL([BUILD_NAGTRSH], [test "$XSLTLIB" && test "$CURL_LIBS"])
+m4trace:configure.ac:356: -1- m4_pattern_allow([^BUILD_NAGTRSH_TRUE$])
+m4trace:configure.ac:356: -1- m4_pattern_allow([^BUILD_NAGTRSH_FALSE$])
+m4trace:configure.ac:356: -1- _AM_SUBST_NOTMAKE([BUILD_NAGTRSH_TRUE])
+m4trace:configure.ac:356: -1- _AM_SUBST_NOTMAKE([BUILD_NAGTRSH_FALSE])
+m4trace:configure.ac:357: -1- AM_CONDITIONAL([BUILD_NARSH], [test "$XSLTLIB" && test "$CURL_LIBS"])
+m4trace:configure.ac:357: -1- m4_pattern_allow([^BUILD_NARSH_TRUE$])
+m4trace:configure.ac:357: -1- m4_pattern_allow([^BUILD_NARSH_FALSE$])
+m4trace:configure.ac:357: -1- _AM_SUBST_NOTMAKE([BUILD_NARSH_TRUE])
+m4trace:configure.ac:357: -1- _AM_SUBST_NOTMAKE([BUILD_NARSH_FALSE])
+m4trace:configure.ac:362: -1- m4_pattern_allow([^DOXY$])
+m4trace:configure.ac:371: -1- m4_pattern_allow([^BUILD_TIME$])
+m4trace:configure.ac:386: -1- m4_pattern_allow([^DEF_SYSCONFDIR$])
+m4trace:configure.ac:389: -1- m4_pattern_allow([^DEF_STATEDIR$])
+m4trace:configure.ac:396: -1- m4_pattern_allow([^DEF_LIBDIR$])
+m4trace:configure.ac:399: -1- m4_pattern_allow([^DEF_BINDIR$])
+m4trace:configure.ac:401: -1- m4_pattern_allow([^VERSION$])
+m4trace:configure.ac:402: -1- m4_pattern_allow([^REL_DATE$])
+m4trace:configure.ac:403: -1- m4_pattern_allow([^OS$])
+m4trace:configure.ac:404: -1- m4_pattern_allow([^ENABLE_NF$])
+m4trace:configure.ac:405: -1- m4_pattern_allow([^ENABLE_TEST$])
+m4trace:configure.ac:406: -1- m4_pattern_allow([^ENABLE_DEBUG$])
+m4trace:configure.ac:407: -1- m4_pattern_allow([^READLINELIB$])
+m4trace:configure.ac:408: -1- m4_pattern_allow([^HISTORYLIB$])
+m4trace:configure.ac:409: -1- m4_pattern_allow([^PTHREADLIB$])
+m4trace:configure.ac:410: -1- m4_pattern_allow([^DLLIB$])
+m4trace:configure.ac:411: -1- m4_pattern_allow([^SSLLIB$])
+m4trace:configure.ac:412: -1- m4_pattern_allow([^ULOGLIB$])
+m4trace:configure.ac:413: -1- m4_pattern_allow([^XMLLIB$])
+m4trace:configure.ac:414: -1- m4_pattern_allow([^XSLTLIB$])
+m4trace:configure.ac:415: -1- m4_pattern_allow([^MATHLIB$])
+m4trace:configure.ac:416: -1- m4_pattern_allow([^USE_SSL$])
+m4trace:configure.ac:417: -1- m4_pattern_allow([^SSL_PASSWD$])
+m4trace:configure.ac:418: -1- m4_pattern_allow([^IPTABLES_VERSION$])
+m4trace:configure.ac:419: -1- m4_pattern_allow([^MPATROLLIB$])
+m4trace:configure.ac:420: -1- m4_pattern_allow([^DEF_SYSCONFDIR$])
+m4trace:configure.ac:421: -1- m4_pattern_allow([^DEF_STATEDIR$])
+m4trace:configure.ac:422: -1- m4_pattern_allow([^DEF_LIBDIR$])
+m4trace:configure.ac:423: -1- m4_pattern_allow([^DEF_BINDIR$])
+m4trace:configure.ac:424: -1- m4_pattern_allow([^DOXY$])
+m4trace:configure.ac:441: -1- m4_pattern_allow([^LIB@&t@OBJS$])
+m4trace:configure.ac:441: -1- m4_pattern_allow([^LTLIBOBJS$])
+m4trace:configure.ac:441: -1- AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])
+m4trace:configure.ac:441: -1- m4_pattern_allow([^am__EXEEXT_TRUE$])
+m4trace:configure.ac:441: -1- m4_pattern_allow([^am__EXEEXT_FALSE$])
+m4trace:configure.ac:441: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_TRUE])
+m4trace:configure.ac:441: -1- _AM_SUBST_NOTMAKE([am__EXEEXT_FALSE])
+m4trace:configure.ac:441: -1- _AC_AM_CONFIG_HEADER_HOOK(["$ac_file"])
+m4trace:configure.ac:441: -1- _AM_OUTPUT_DEPENDENCY_COMMANDS
+m4trace:configure.ac:441: -1- _LT_PROG_LTMAIN

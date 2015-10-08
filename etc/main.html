@@ -15,31 +15,40 @@ Type =
   <option>all</option>
   <option>version</option>
   <option>uptime</option>
-  <option>bids_stored</option>
   <option>modules_loaded</option>
   <option>configfile</option>
   <option>use_ssl</option>
   <option>hello</option>
-  <option>bidlist</option>
   <option>modlist</option>
-  <option>bid</option>
+  <option>add_session</option>
+  <option>auction_interaction</option>
+  <option>remove_session</option>
 </select>
 <br>
 Param = <input type=text name=IParam><br>
 <input value="get info" type=submit>
 </form><br>
 
-/rm_bid?BidID=&lt;bid_id&gt;: delete bids(s)<br><br>
-<form method=post action=/rm_task>
-BidID = <input type=text name=BidID><br>
-<input value="delete bid(s)" type=submit>
+/add_session?SessionID=&lt;sessionid&gt;Message=&lt;message&gt;: add a new session<br><br>
+<form method=post action=/add_session>
+SessionID = <input type=text name=SessionID><br>	
+Message = <textarea col=400 rows=10 name=Message></textarea><br>
+<input value="add session" type=submit>
 </form><br>
 
-/add_bid?Bid=&lt;bid&gt;: add bid(s)<br><br>
-<form method=post action=/add_bid>
-Bid = <textarea col=80 rows=5 name=Bid></textarea><br>
-<input value="add bid(s)" type=submit>
+/auction_interaction?SessionID=&lt;sessionid&gt;Message=&lt;message&gt;: auction interaction<br><br>
+<form method=post action=/auct_interact>
+SessionID = <input type=text name=SessionID><br>	
+Message = <textarea col=400 rows=10 name=Message></textarea><br>
+<input value="Auction Interaction" type=submit>
 </form><br>
+
+/del_session?SessionID=&lt;sessionid&gt;: delete session<br><br>
+<form method=post action=/del_session>
+SessionID = <input type=text name=SessionID><br>	
+<input value="delete session" type=submit>
+</form><br>
+
 
 /get_modinfo?IName=&lt;mod_name&gt;: get module specific information<br><br>
 <form method=post action=/get_modinfo>

@@ -32,8 +32,11 @@ $Id: CtrlComm.cpp 748 2015-07-31 9:25:00 amarentes $
 #include "CtrlComm.h"
 #include "AuctionManager.h"
 #include "Bid.h"
-#include "Constants.h"
+#include "ConstantsAgent.h"
 #include "EventAgent.h"
+#include "anslp_ipap_xml_message.h"
+#include "anslp_ipap_message.h"
+
 
 using namespace std;
 using namespace auction;
@@ -54,7 +57,7 @@ CtrlComm::CtrlComm(auction::ConfigManager *cnf, int threaded)
     log->dlog(ch, "Starting" );
 #endif
   
-    portnum = auction::DEF_PORT;
+    portnum = auction::AGNT_DEF_PORT;
 	
     // get port number from config manager if available
     string txt = cnf->getValue("ControlPort", "CONTROL");
@@ -107,16 +110,16 @@ CtrlComm::CtrlComm(auction::ConfigManager *cnf, int threaded)
     }
     
     // load html/xsl files
-    pcache.addPageFile("/",             auction::MAIN_PAGE_FILE );
-    pcache.addPageFile("/help",         auction::MAIN_PAGE_FILE );
-    pcache.addPageFile("/xsl/reply.xsl", auction::XSL_PAGE_FILE );
+    pcache.addPageFile("/",             auction::AGNT_MAIN_PAGE_FILE );
+    pcache.addPageFile("/help",         auction::AGNT_MAIN_PAGE_FILE );
+    pcache.addPageFile("/xsl/reply.xsl", auction::AGNT_XSL_PAGE_FILE );
 
     // load reply template
     string line;
     ifstream in(auction::REPLY_TEMPLATE.c_str());
     
     if (!in) {
-        throw Error("cannot access/read file '%s'", auction::REPLY_TEMPLATE.c_str());
+        throw Error("cannot access/read file '%s'", auction::AGNT_REPLY_TEMPLATE.c_str());
     }
 
     while (getline(in, line)) {
@@ -146,8 +149,6 @@ int CtrlComm::accessCheck(char *host, char *user)
 {
     // FIXME ugly structure - both, hosts and users stored in one access list member
     
-    std::cout << "arrive accessCheck" << std::endl;
-
 #ifdef DEBUG
     if (host != NULL) {
         cerr << "checking access permission for host " << host << endl;
@@ -157,7 +158,6 @@ int CtrlComm::accessCheck(char *host, char *user)
 #endif
 
     auction::configADListIter_t iter;
-    std::cout << "entering in check user by host" << std::endl;
     // host check
     if (host != NULL) {
         for (iter = accessList.begin(); iter != accessList.end(); iter++) {
@@ -169,9 +169,7 @@ int CtrlComm::accessCheck(char *host, char *user)
             }
         }
     }
-    
-    std::cout << "entering in check user by user" << std::endl;
-    
+        
     // user check
     // FIXME no encrypted password support yet!
     if (user != NULL) {
@@ -376,17 +374,13 @@ int CtrlComm::handleFDEvent(auction::eventVec_t *e, fd_set *rset, fd_set *wset, 
     // make the pointer global for ctrlcomm
     retEventVec = e;
     retEvent = NULL;
-
-    std::cout << "CntrlComm handleFDEvent" << std::endl;
     
     // check for incoming message
     if (httpd_handle_event(rset, wset, fds) < 0) {
 		cout << "ERROR HANDLING THE EVENT" << endl;
         throw Error("ctrlcomm handle event error");
     }
-	
-	std::cout << "Finish httpd_handle_event" << std::endl;
-	
+		
     // processCmd callback funtion is called in case of new request
 
     // return resulting event (freed by event scheduler)
@@ -492,7 +486,8 @@ int CtrlComm::processCmd(struct REQUEST *req)
 
     preq = parseRequest(req);
 
-    // try lookup in repository of static meter pages
+
+    // try lookup in repository of static auction pages
     string page = pcache.getPage(preq.comm); 
 
 #ifdef DEBUG
@@ -508,17 +503,19 @@ int CtrlComm::processCmd(struct REQUEST *req)
             req->body = strdup(page.c_str());  // FIXME not very performant
             req->mime = get_mime((char *) pcache.getFileName(preq.comm).c_str());
             // generate Expires header
-            req->lifespan = auction::EXPIRY_TIME;
+            req->lifespan = auction::AGNT_EXPIRY_TIME;
             // immediatly send response
             httpd_send_immediate_response(req);
             
             // FIXME  better register those callback funtions onto the command name
         } else if (preq.comm == "/get_info") {
             processGetInfo(&preq);
-        } else if (preq.comm == "/add_bid") {
-            processAddBid(&preq);
-        } else if (preq.comm == "/rm_bid") {
-            processDelBid(&preq);
+        } else if (preq.comm == "/res_add_session") {
+            processResponseSessionCreate(&preq);
+        } else if (preq.comm == "/res_auction_interaction") {
+            processResponseAuctionInteraction(&preq);
+        } else if (preq.comm == "/res_del_session") {
+            processResponseSessionRemove(&preq);
         } else {
             // unknown command will produce a 404 http error
             return -1;
@@ -543,39 +540,71 @@ int CtrlComm::processCmd(struct REQUEST *req)
 }
 
 
-/* ------------------------- processAddBidCmd ------------------------- */
+/* ----------------- processResponseSessionCreate -------------------- */
 
-char *CtrlComm::processAddBid(parseReq_t *preq)
+char *CtrlComm::processResponseSessionCreate(parseReq_t *preq)
 {
-    paramListIter_t bid = preq->params.find("Bid");
 
-    if (bid == preq->params.end()) {
-        throw Error("add_bid: missing parameter 'Bid'" );
+#ifdef DEBUG
+    log->log(ch, "starting processResponseSessionCreate");
+#endif
+	
+    paramListIter_t sessionId = preq->params.find("SessionID");
+
+    if (sessionId == preq->params.end()) {
+        throw Error("res_session: missing parameter 'SessionID'" );
+    }
+    
+    paramListIter_t message = preq->params.find("Message");
+    if (message == preq->params.end()) {
+        throw Error("processResponseSessionCreate: missing parameter 'Message'" );
     }
 
-    // FIXME sufficient?
-    if (bid->second.find("!DOCTYPE AGENT") <= bid->second.length()) {
-        // assume xml bid def
-        retEvent = new auction::AddBidsCtrlEvent((char *) bid->second.c_str(), bid->second.size());
-    } else {
-        throw Error("add_bid: missing TAG 'AGENT'" );
-    }
+    // read the message and process by the auction manager
+    string sMessage = message->second;
+	
+	anslp::msg::anslp_ipap_xml_message mess;
+	anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(sMessage);
+
+    retEvent = new auction::ResponseCreateSessionEvent(sessionId->second, ipap_mes->ip_message);
+
+#ifdef DEBUG
+    log->log(ch, "ending processResponseSessionCreate");
+#endif
 
     return NULL;
+
 }
 
 
-/* ------------------------- processDelBidCmd ------------------------- */
+/* ------------------ processResponseSessionRemove ------------------ */
 
-char *CtrlComm::processDelBid(parseReq_t *preq )
+char *CtrlComm::processResponseSessionRemove(parseReq_t *preq )
 {
-    paramListIter_t id = preq->params.find("BidID");
+    paramListIter_t sessionId = preq->params.find("SessionID");
 
-    if (id == preq->params.end() ) {
-        throw Error("rm_bid: missing parameter 'BidID'" );
+    if (sessionId == preq->params.end() ) {
+        throw Error("processResponseSessionRemove: missing parameter 'SessionID'" );
     }
     
-    retEvent = new auction::RemoveBidsCtrlEvent(id->second);
+    // remove the session from the list of active sessions.
+    //retEvent = new auction::RemoveBidsCtrlEvent(id->second);
+  
+    return NULL;
+}
+
+/* ------------------ processResponseSessionRemove ------------------ */
+
+char *CtrlComm::processResponseAuctionInteraction(parseReq_t *preq )
+{
+    paramListIter_t sessionId = preq->params.find("SessionID");
+
+    if (sessionId == preq->params.end() ) {
+        throw Error("processAuctionInteraction: missing parameter 'SessionID'" );
+    }
+    
+    // Exec the response to the response auction interaction.
+    //retEvent = new auction::RemoveBidsCtrlEvent(id->second);
   
     return NULL;
 }

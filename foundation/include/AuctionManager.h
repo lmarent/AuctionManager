@@ -109,11 +109,14 @@ class AuctionManager
 	//! field definitions
     fieldDefList_t fieldDefs;
 
+    //! field values
+    fieldValList_t fieldVals;
+
 	ipap_message *message;		///< Empty message for creating copies of it.
 
-    // name of filter def and filter vals files
-    string fieldDefFileName;
-	
+    // name of field def and field vals files
+    string fieldDefFileName, fieldValFileName;
+		
     // pool of unique bid ids
     AuctionIdSource idSource;
 
@@ -124,8 +127,11 @@ class AuctionManager
     void storeAuctionAsDone(Auction *a);
 
 
-    //! load filter definitions
+    //! load field definitions
     void loadFieldDefs(string fname);
+
+	//! load field value definitions
+    void loadFieldVals(string fname);
 
 
   public:
@@ -142,7 +148,7 @@ class AuctionManager
 
     /*! \short   construct and initialize a AuctionManager object
      */
-    AuctionManager(string fdname); // Ok
+    AuctionManager( string fdname, string fvname); // Ok
 
     //! destroy a AuctionManager object
     ~AuctionManager(); //Ok
@@ -169,13 +175,13 @@ class AuctionManager
     auctionDB_t getAuctions(); //Ok
 
     //! parse XML auctions from file 
-    auctionDB_t *parseAuctions(string fname);  // Ok
+    auctionDB_t *parseAuctions(string fname, ipap_template_container *templates);  // Ok
 
     //! parse XML or Auction API bids from buffer
-    auctionDB_t *parseAuctionsBuffer(char *buf, int len);
+    auctionDB_t *parseAuctionsBuffer(char *buf, int len, ipap_template_container *templates);
    
     //! parse auctions from ipap_message 
-    auctionDB_t *parseAuctionsMessage(ipap_message *messageIn, ipap_message *messageOut);
+    auctionDB_t *parseAuctionsMessage(ipap_message *messageIn, ipap_template_container *templates);
    
     /*! \short   add a auction description 
 

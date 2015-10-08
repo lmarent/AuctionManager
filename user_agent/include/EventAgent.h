@@ -247,6 +247,32 @@ class RemoveResourceRequestsEvent : public Event
     }
 };
 
+class ResponseCreateSessionEvent : public CtrlCommEvent
+{
+  private:
+    
+    string sessionId; 
+    ipap_message message;
+
+  public:
+
+    ResponseCreateSessionEvent(string _sessionId, ipap_message _message) 
+      : CtrlCommEvent(RESPONSE_CREATE_SESSION), sessionId(_sessionId), message(_message) 
+    {
+        
+    }
+
+    ipap_message * getMessage()
+    {
+        return &message;
+    }
+    
+    string getSession()
+    {
+		return sessionId;
+	}
+};
+
 }; // namespace auction
 
 #endif // _EVENT_AGENT_H_

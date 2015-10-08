@@ -121,6 +121,9 @@ class EventScheduler
     
     virtual void delResourceRequestEvents(int uid) {}
 
+	//! delete the session from all events 
+	virtual void delSessionEvents(int uid);
+
 
 };
 

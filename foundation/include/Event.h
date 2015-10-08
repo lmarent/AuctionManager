@@ -64,7 +64,10 @@ typedef enum
       ADD_AUCTIONS_CNTRLCOMM,
       PROC_MODULE_TIMER,
       CTRLCOMM_TIMER,  
-      CREATE_SESSION    
+      CREATE_SESSION,
+      RESPONSE_CREATE_SESSION,
+      REMOVE_SESSION,
+      AUCTION_INTERACTION    
 } event_t;
 
 //! event names for dump method
@@ -207,6 +210,12 @@ class Event {
     //! delete resource request stored in this event
     virtual int deleteResourceRequest(int uid)
     {
+	return 0;
+	}
+	
+	//! delete a session stored in this event
+	virtual int deleteSession(int uid)
+	{
 	return 0;
 	}
 };

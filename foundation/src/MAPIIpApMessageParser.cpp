@@ -140,7 +140,10 @@ MAPIIpApMessageParser::getMiscVal(miscList_t *_miscList, string name)
 
     iter = _miscList->find(name);
     if (iter != _miscList->end()) {
-        return iter->second.value;
+        string value = iter->second.value;
+        // use lower case internally
+		transform(value.begin(), value.end(), value.begin(), ToLower());
+        return value;
     } else {
         return "";
     }
@@ -152,7 +155,7 @@ fieldDefItem_t
 MAPIIpApMessageParser::findField(fieldDefList_t *fieldDefs, int eno, int ftype)
 {
 	fieldDefItem_t val_return;
-	
+		
 	fieldDefListIter_t iter;
 	for (iter=fieldDefs->begin(); iter!=fieldDefs->end(); ++iter)
 	{

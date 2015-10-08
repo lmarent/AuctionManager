@@ -27,16 +27,18 @@
 
 */
 
+#include "ParserFcts.h"
 #include "ResourceRequestManager.h"
 #include "Constants.h"
 #include "EventAgent.h"
+#include "TextResourceRequestParser.h"
 
 using namespace auction;
 
 /* ------------------------- ResourceRequestManager ------------------------- */
 
-ResourceRequestManager::ResourceRequestManager( string fdname) 
-    : resourceRequests(0), fieldDefFileName(fdname), idSource(1)
+ResourceRequestManager::ResourceRequestManager( string fdname, string fvname) 
+    : resourceRequests(0), fieldDefFileName(fdname), fieldValFileName(fvname), idSource(1)
 {
     log = Logger::getInstance();
     ch = log->createChannel("ResourceRequestManager");
@@ -44,7 +46,10 @@ ResourceRequestManager::ResourceRequestManager( string fdname)
     log->dlog(ch,"Starting");
 #endif
 
-	loadFieldDefs(fdname);
+	loadFieldDefs(fieldDefFileName);
+
+    // load the field val list
+    loadFieldVals(fieldValFileName);	
 
 }
 
@@ -115,6 +120,26 @@ void ResourceRequestManager::loadFieldDefs(string fname)
 #endif    
     }
     
+}
+
+/* -------------------- loadFieldVals -------------------- */
+
+void ResourceRequestManager::loadFieldVals( string fname )
+{
+    if (fieldValFileName.empty()) {
+        if (fname.empty()) {
+            fname = FIELDVAL_FILE;
+        }
+    } else {
+        fname = fieldValFileName;
+    }
+
+    if (isReadableFile(fname)) {
+        if (fieldVals.empty() && !fname.empty()) {
+            FieldValParser f = FieldValParser(fname.c_str());
+            f.parse(&fieldVals);
+        }
+    }
 }
 
 /* --------------------- getResourceRequest ------------------------- */
@@ -238,7 +263,7 @@ resourceRequestDB_t *ResourceRequestManager::parseResourceRequestsBuffer(char *b
         loadFieldDefs(fieldDefFileName);
 				
         if (mapi) {
-             MAPIResourceRequestParser rfp = MAPIResourceRequestParser(buf, len);
+             TextResourceRequestParser rfp = TextResourceRequestParser(buf, len);
              rfp.parse(&fieldDefs, new_requests, &idSource);
         } else {
             ResourceRequestFileParser rfp = ResourceRequestFileParser(buf, len);

@@ -107,6 +107,7 @@ am_test_runner_OBJECTS =  \
 	../../foundation/src/FieldDefParser.$(OBJEXT) \
 	../../foundation/src/FieldValParser.$(OBJEXT) \
 	../../foundation/src/MAPIIpApMessageParser.$(OBJEXT) \
+	../../foundation/src/TemplateIdSource.$(OBJEXT) \
 	../../foundation/src/BidIdSource.$(OBJEXT) \
 	../../foundation/src/AuctionIdSource.$(OBJEXT) \
 	../../foundation/src/Auction.$(OBJEXT) \
@@ -483,6 +484,8 @@ LIBPROT_CFLAGS = -I/usr/local/include
 LIBPROT_LIBS = -L/usr/local/lib -lprot  
 LIBS = -ldl 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
+LIBUUID_CFLAGS = -I/usr/include/uuid   -I/usr/include/uuid 
+LIBUUID_LIBS = -luuid  
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
@@ -595,6 +598,7 @@ test_runner_SOURCES = ../../foundation/src/Constants.cpp \
 						../../foundation/src/FieldDefParser.cpp \
 						../../foundation/src/FieldValParser.cpp \
 						../../foundation/src/MAPIIpApMessageParser.cpp \
+						../../foundation/src/TemplateIdSource.cpp \
 						../../foundation/src/BidIdSource.cpp \
 						../../foundation/src/AuctionIdSource.cpp \
 						../../foundation/src/Auction.cpp \
@@ -636,17 +640,20 @@ test_runner_SOURCES = ../../foundation/src/Constants.cpp \
 
 #AM_CXXFLAGS = -O2 -I../../foundation/include $(CPPUNIT_CFLAGS) \
 #			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
-#			    $(LIBIPAP_CFLAGS)
+#			     $(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) $(LIBFASTQUEUE_CFLAGS) \
+#				 $(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) $(LIBANSLP_CFLAGS) 
 
 AM_CXXFLAGS = -g -I../../foundation/include $(CPPUNIT_CFLAGS) \
 			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
 			    -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING -DINTEL \
-			    $(LIBIPAP_CFLAGS)
+			     $(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) $(LIBFASTQUEUE_CFLAGS) \
+				 $(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) $(LIBANSLP_CFLAGS) 
 
 AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 			 $(top_builddir)/lib/httpd/libhttpd.a \
-			    -lxml2 \
-			 $(LIBIPAP_LIBS)
+			    -lxml2 $(LIBIPAP_LIBS) \
+			 $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) \
+			 $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS)
 
 LDADD = $(LIBIPAP_LIBS)
 all: all-am
@@ -729,6 +736,9 @@ clean-checkPROGRAMS:
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
 ../../foundation/src/MAPIIpApMessageParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/TemplateIdSource.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
 ../../foundation/src/BidIdSource.$(OBJEXT):  \
@@ -894,6 +904,7 @@ include ../../foundation/src/$(DEPDIR)/MAPIAuctionParser.Po
 include ../../foundation/src/$(DEPDIR)/MAPIBidParser.Po
 include ../../foundation/src/$(DEPDIR)/MAPIIpApMessageParser.Po
 include ../../foundation/src/$(DEPDIR)/ParserFcts.Po
+include ../../foundation/src/$(DEPDIR)/TemplateIdSource.Po
 include ../../foundation/src/$(DEPDIR)/Timeval.Po
 include ../../foundation/src/$(DEPDIR)/XMLParser.Po
 include ../../foundation/test/$(DEPDIR)/Allocation_Manager_test.Po

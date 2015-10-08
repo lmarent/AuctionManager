@@ -34,7 +34,7 @@ using namespace auction;
 
 /* ------------------------- ConfigManager ------------------------- */
 
-ConfigManager::ConfigManager(string filename, string binary)
+ConfigManager::ConfigManager(string dtdfilename, string filename, string binary)
 {
     log = Logger::getInstance();
     ch = log->createChannel("ConfigManager");
@@ -43,7 +43,7 @@ ConfigManager::ConfigManager(string filename, string binary)
 #endif
 
     // two separate lines -> support for old g++
-    auto_ptr<ConfigParser> _parser(new ConfigParser(filename, binary));   
+    auto_ptr<ConfigParser> _parser(new ConfigParser(dtdfilename, filename, binary));   
     parser = _parser;
 
     parser->parse(&list, &ad_list);
@@ -62,12 +62,12 @@ ConfigManager::~ConfigManager()
 
 /* ------------------------- reread ------------------------- */
 
-void ConfigManager::reread(const string filename)
+void ConfigManager::reread(const string dtdfilename, const string filename)
 {
     ConfigParser *_cp = parser.release();
     saveDelete(_cp);
     
-    auto_ptr<ConfigParser> cp(new ConfigParser(filename));
+    auto_ptr<ConfigParser> cp(new ConfigParser(dtdfilename, filename));
     parser = cp;
 
     parser->parse(&list, &ad_list);

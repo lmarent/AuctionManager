@@ -30,11 +30,12 @@
 #define _CTRLCOMM_H_
 
 
-#include "stdincpp.h"
 #include "httpd.h"
 #include "AuctionManagerComponent.h"
 #include "AuctionManagerInfo.h"
 #include "PageRepository.h"
+#include "anslp_ipap_xml_message.h"
+
 
 namespace auction
 {
@@ -173,11 +174,14 @@ class CtrlComm : public AuctionManagerComponent
     */
     int processCmd(struct REQUEST *req );
 
-    //! add a measurement task to the currently active tasks
-    char *processAddBid(parseReq_t *preq );
+    //! add a session to the currently active sessions
+    char *processAddSession(parseReq_t *preq );
 
-    //! delete a currently running measurement task
-    char *processDelBid(parseReq_t *preq );
+    //! delete a session from the currently active sessions
+    char *processDelSession(parseReq_t *preq );
+
+    //! execute an auction interaction for a currently active sessions
+    char *processAuctionInteraction(parseReq_t *preq );
 
     //! return auction information (bidlist,status,modlist)
     char *processGetInfo(parseReq_t *preq );

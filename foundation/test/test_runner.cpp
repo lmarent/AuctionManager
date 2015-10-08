@@ -13,8 +13,17 @@
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/BriefTestProgressListener.h>
 #include <cppunit/CompilerOutputter.h>
+#include "logfile.h"
+#include "AnslpClient.h"
+
 
 using namespace CppUnit;
+
+// global timeout flag
+int g_timeout = 0;
+
+protlib::log::logfile commonlog("Auctioneer.log", anslp::anslp_config::USE_COLOURS);
+protlib::log::logfile &protlib::log::DefaultLog(commonlog);
 
 /*
  * Run the test suite, return 0 on success, 1 on error.

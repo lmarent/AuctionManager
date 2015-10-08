@@ -31,7 +31,6 @@
 #include "FieldValue.h"
 #include "ParserFcts.h"
 #include "Constants.h"
-#include "ConstantsAum.h"
 
 using namespace auction;
 
@@ -39,8 +38,8 @@ using namespace auction;
 string ConfigParser::bindir = "";
 
 
-ConfigParser::ConfigParser(string filename, string binary)
-    : XMLParser(AUM_CONFIGFILE_DTD, filename, "CONFIG")
+ConfigParser::ConfigParser(string dtdfilename, string filename, string binary)
+    : XMLParser(dtdfilename, filename, "CONFIG")
 {
     if (bindir.empty()) {
         bindir = dirname((char *)(binary + " ").c_str());

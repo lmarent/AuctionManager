@@ -105,7 +105,7 @@ class ConfigParser : public XMLParser
 	\arg \c filename - filename to read configuration from
         \arg \c binary - location of binary file, i.e. argv[0]
      */
-    ConfigParser(string filename, string binary = "");
+    ConfigParser(string dtdfilename, string filename, string binary = "");
 
     //! destroy a config parser
     virtual ~ConfigParser() {}

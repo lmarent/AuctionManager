@@ -27,13 +27,14 @@
 #include "stdincpp.h"
 #include "AuctionFileParser.h"
 #include "MAPIIpApMessageParser.h"
+#include "anslp_ipap_message_splitter.h"
 
 
 namespace auction
 {
 
 //! parser for API message Auction syntax
-class MAPIAuctionParser : public MAPIIpApMessageParser
+class MAPIAuctionParser : public MAPIIpApMessageParser, public anslp::msg::anslp_ipap_message_splitter
 {
 
   private:
@@ -57,7 +58,36 @@ class MAPIAuctionParser : public MAPIIpApMessageParser
 						   fieldDefList_t *fieldDefs,
 						   auctionTemplateFieldList_t *templList);
 		
-	ipap_message * get_ipap_message(Auction *auctionPtr, fieldDefList_t *fieldDefs);
+	void get_ipap_message(Auction *auctionPtr, fieldDefList_t *fieldDefs, ipap_message *);
+	
+   /**
+    * Verify that templData and templOption are equal to those in the container
+    * if there are not inserted, insert them in the container.
+    * @param templData		- data template to check
+    *        templOption    - option template to check.
+    * 		 templatesOut   - Template container where we are going to look for.
+    * @throws Error templates are not the same. 
+    */
+	void verifyInsertTemplates(ipap_template *templData, ipap_template *templOption, 
+							   ipap_template_container *templatesOut);
+							   
+   /**
+    * Find a template in the template container given as parameter.
+    * @param templData		- if the template id given corresponds to a data template,
+    * 						  then this pointer is updated and returned.
+    *        templOption    - if the template id given corresponds to a option template,
+    * 						  then this pointer is updated and returned.
+    * 		 templatesOut   - Template container where we are going to look
+    * 		 templId	 	- Id of the template searched.
+    * @return pointer to the template object.
+    * @throws Error when the template is not found. 
+    */
+	ipap_template * findTemplate(ipap_template *templData, ipap_template *templOption,
+								 ipap_template_container *templatesOut, 
+								 uint16_t templId);
+	
+	void parseAuctionKey( fieldDefList_t *fieldDefs, const anslp::msg::xml_object_key &key, 
+						  auctionDB_t *auctions, ipap_template_container *templatesOut );
 	
   public:
 
@@ -73,15 +103,13 @@ class MAPIAuctionParser : public MAPIIpApMessageParser
     virtual void parse( fieldDefList_t *fieldDefs,
 						ipap_message *message,
 						auctionDB_t *auctions,
-					    AuctionIdSource *idSource,
-					    ipap_message *messageOut );
+					    ipap_template_container *templatesOut );
 
 	//! get the ipap_message that represents the set of auctions.
-	vector<ipap_message *> get_ipap_messages(fieldDefList_t *fieldDefs, 
-											auctionDB_t *auctions);
+	ipap_message * get_ipap_message(fieldDefList_t *fieldDefs, auctionDB_t *auctions);
 
 };
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _MAPI_AUCTION_PARSER_H_

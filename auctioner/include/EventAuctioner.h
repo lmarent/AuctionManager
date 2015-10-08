@@ -45,7 +45,7 @@ namespace auction
 
 /* --------------------------------- events ------------------------------ */
 
-class CreateSessionEvent : public Event
+class CreateSessionEvent : public CtrlCommEvent
 {
   private:
 	string sessionId;
@@ -53,14 +53,8 @@ class CreateSessionEvent : public Event
     
   public:
 
-    CreateSessionEvent(struct timeval time, string _sessionId, ipap_message &a, unsigned long ival=0, int align=0) 
-      : Event(CREATE_SESSION, time, ival, align), sessionId(_sessionId), message(a) {  }
-
-    CreateSessionEvent(time_t offs_sec, string _sessionId, ipap_message &a, unsigned long ival=0, int align=0) 
-      : Event(CREATE_SESSION, offs_sec, 0, ival, align), sessionId(_sessionId), message(a) { }
-
-    CreateSessionEvent(string _sessionId, ipap_message &a, unsigned long ival=0, int align=0) 
-      : Event(CREATE_SESSION, ival, align), sessionId(_sessionId), message(a) { }  
+    CreateSessionEvent(string _sessionId, ipap_message &a) 
+      : CtrlCommEvent(CREATE_SESSION), sessionId(_sessionId), message(a) {  }
   
 	ipap_message  *getMessage()
 	{
@@ -72,6 +66,46 @@ class CreateSessionEvent : public Event
 		return sessionId;
 	}
 };
+
+class RemoveSessionEvent : public CtrlCommEvent
+{
+  private:
+	string sessionId;
+    
+  public:
+
+    RemoveSessionEvent(string _sessionId) 
+      : CtrlCommEvent(REMOVE_SESSION), sessionId(_sessionId) {  }
+ 	
+	string getSessionId()
+	{
+		return sessionId;
+	}
+};
+
+
+class AuctionInteractionEvent : public CtrlCommEvent
+{
+  private:
+	string sessionId;
+	ipap_message message;
+    
+  public:
+
+    AuctionInteractionEvent(string _sessionId, ipap_message &a) 
+      : CtrlCommEvent(AUCTION_INTERACTION), sessionId(_sessionId), message(a) {  }
+  
+	ipap_message  *getMessage()
+	{
+		return &message;
+	}
+	
+	string getSessionId()
+	{
+		return sessionId;
+	}
+};
+
 
 class PushExecutionEvent : public Event
 {

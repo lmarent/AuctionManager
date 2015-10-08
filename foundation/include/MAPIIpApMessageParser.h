@@ -80,6 +80,6 @@ class MAPIIpApMessageParser
 
 };
 
-};
+}
 
 #endif // _MAPI_IPAP_PARSER_H_

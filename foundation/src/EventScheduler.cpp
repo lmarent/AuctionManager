@@ -217,6 +217,38 @@ void EventScheduler::reschedNextEvent(Event *ev)
 }
 
 
+void EventScheduler::delSessionEvents(int uid)
+{
+    int ret = 0;
+    eventListIter_t iter, tmp;
+
+    // search linearly through list for bid with given ID and delete entries
+    iter = events.begin();
+    while (iter != events.end()) {
+        tmp = iter;
+        iter++;
+        
+        ret = tmp->second->deleteSession(uid);
+        if (ret == 1) {
+            // ret = 1 means session was present in event but other sessions are still in
+            // the event
+#ifdef DEBUG
+            log->dlog(ch,"remove session %d from event %s", uid, 
+                      eventNames[tmp->second->getType()].c_str());
+#endif
+        } else if (ret == 2) {
+            // ret=2 means the event is now empty and therefore can be deleted
+#ifdef DEBUG
+            log->dlog(ch,"remove event %s", eventNames[tmp->second->getType()].c_str());
+#endif
+           
+            saveDelete(tmp->second);
+            events.erase(tmp);
+        } 
+    }
+} 
+
+
 struct timeval EventScheduler::getNextEventTime()
 {
     struct timeval rv = {0, MIN_TIMEOUT};

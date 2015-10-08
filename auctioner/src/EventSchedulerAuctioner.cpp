@@ -64,4 +64,3 @@ struct timeval EventSchedulerAuctioner::getNextEventTime()
     return rv;
 }
 
- 

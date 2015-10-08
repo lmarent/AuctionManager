@@ -28,13 +28,11 @@ $Id: CtrlComm.cpp 748 2015-07-31 9:25:00 amarentes $
 #include "ParserFcts.h"
 #include "httpd.h"
 #include "Error.h"
-#include "Logger.h"
 #include "AuctionTimer.h"
 #include "CtrlComm.h"
 #include "EventAuctioner.h"
-#include "AuctionManager.h"
-#include "Bid.h"
 #include "Constants.h"
+#include "anslp_ipap_exception.h" 
 
 using namespace auction;
 
@@ -50,7 +48,7 @@ CtrlComm::CtrlComm(ConfigManager *cnf, int threaded)
     int ret;
 
 #ifdef DEBUG
-    log->dlog(ch, "Starting" );
+    log->dlog(ch, "Starting CtrlComm" );
 #endif
   
     portnum = DEF_PORT;
@@ -131,7 +129,7 @@ CtrlComm::CtrlComm(ConfigManager *cnf, int threaded)
 CtrlComm::~CtrlComm()
 {
 #ifdef DEBUG
-    log->dlog(ch, "Shutdown" );
+    log->dlog(ch, "Shutdown CtrlComm" );
 #endif
 
     httpd_shutdown();
@@ -145,7 +143,9 @@ int CtrlComm::accessCheck(char *host, char *user)
 {
     // FIXME ugly structure - both, hosts and users stored in one access list member
     
-    std::cout << "arrive accessCheck" << std::endl;
+#ifdef DEBUG
+    log->dlog(ch, "Starting accessCheck" );
+#endif
 
 #ifdef DEBUG
     if (host != NULL) {
@@ -156,7 +156,7 @@ int CtrlComm::accessCheck(char *host, char *user)
 #endif
 
     configADListIter_t iter;
-    std::cout << "entering in check user by host" << std::endl;
+
     // host check
     if (host != NULL) {
         for (iter = accessList.begin(); iter != accessList.end(); iter++) {
@@ -168,8 +168,6 @@ int CtrlComm::accessCheck(char *host, char *user)
             }
         }
     }
-    
-    std::cout << "entering in check user by user" << std::endl;
     
     // user check
     // FIXME no encrypted password support yet!
@@ -186,6 +184,10 @@ int CtrlComm::accessCheck(char *host, char *user)
         }
     }
 
+#ifdef DEBUG
+    log->dlog(ch, "Ending accessCheck" );
+#endif
+
     return -1; // no match found -> DENY
 }
 
@@ -198,7 +200,11 @@ void CtrlComm::checkHosts( configADList_t &list, bool useIPv6 )
     configADItem_t entry;
     configADListIter_t iter;
     struct addrinfo ask, *tmp, *res = NULL;
-    
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting checkHosts" );
+#endif        
+        
     sethostent(1);
     
     memset(&ask,0,sizeof(ask));
@@ -293,14 +299,16 @@ void CtrlComm::checkHosts( configADList_t &list, bool useIPv6 )
             // ignore all 'non-Host && non-User' items in list
         }
     }
+
 #ifdef DEBUG2
     cerr << accessList;
 #endif
+
     endhostent();
 }
 
 
-/* -------------------- sendMsg -------------------- */
+
 
 string CtrlComm::xmlQuote(string s)
 {
@@ -331,16 +339,14 @@ string CtrlComm::xmlQuote(string s)
     return res;
 }
 
-
+/* -------------------- sendMsg -------------------- */
 void CtrlComm::sendMsg(string msg, struct REQUEST *req, fd_sets_t *fds, int quote)
 {
     string rep = rtemplate;
 
     rep.replace(rep.find("@STATUS@"), strlen("@STATUS@"), "OK");
     rep.replace(rep.find("@MESSAGE@"), strlen("@MESSAGE@"), (quote) ? xmlQuote(msg) : msg);
-#ifdef DEBUG2
-    cerr << rep;
-#endif
+    
     req->body = strdup(rep.c_str());
     req->mime = "text/xml";
     httpd_send_response(req, fds);
@@ -353,7 +359,7 @@ void CtrlComm::sendErrMsg(string msg, struct REQUEST *req, fd_sets_t *fds)
 
     rep.replace(rep.find("@STATUS@"), strlen("@STATUS@"), "Error");
     rep.replace(rep.find("@MESSAGE@"), strlen("@MESSAGE@"), xmlQuote(msg));
-#ifdef DEBUG2
+#ifdef DEBUG
     cerr << rep;
 #endif
     req->body = strdup(rep.c_str());
@@ -370,13 +376,16 @@ void CtrlComm::sendErrMsg(string msg, struct REQUEST *req, fd_sets_t *fds)
 
 int CtrlComm::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds)
 {
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting handleFDEvent" );
+#endif	
+	
     assert(e != NULL);
 
     // make the pointer global for ctrlcomm
     retEventVec = e;
     retEvent = NULL;
-
-    std::cout << "CntrlComm handleFDEvent" << std::endl;
     
     // check for incoming message
     if (httpd_handle_event(rset, wset, fds) < 0) {
@@ -384,11 +393,11 @@ int CtrlComm::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t
         throw Error("ctrlcomm handle event error");
     }
 	
-	std::cout << "Finish httpd_handle_event" << std::endl;
-	
-    // processCmd callback funtion is called in case of new request
 
-    // return resulting event (freed by event scheduler)
+#ifdef DEBUG
+    log->dlog(ch, "Ending handleFDEvent" );
+#endif		
+
     return 0;
 }
 
@@ -397,6 +406,11 @@ int CtrlComm::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t
 
 parseReq_t CtrlComm::parseRequest(struct REQUEST *req)
 {
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting parseRequest" );
+#endif	
+	
     parseReq_t preq;
 
     preq.comm = req->path;
@@ -516,10 +530,12 @@ int CtrlComm::processCmd(struct REQUEST *req)
             processGetInfo(&preq);
         } else if (preq.comm == "/get_modinfo") {
             processGetModInfo(&preq);
-        } else if (preq.comm == "/add_task") {
-            processAddBid(&preq);
-        } else if (preq.comm == "/rm_task") {
-            processDelBid(&preq);
+        } else if (preq.comm == "/add_session") {
+            processAddSession(&preq);
+        } else if (preq.comm == "/del_session") {
+            processDelSession(&preq);
+        } else if (preq.comm == "/auct_interact") {
+            processAuctionInteraction(&preq);
         } else {
             // unknown command will produce a 404 http error
             return -1;
@@ -544,48 +560,90 @@ int CtrlComm::processCmd(struct REQUEST *req)
 }
 
 
-/* ------------------------- processAddBidCmd ------------------------- */
+/* ------------------------- processAddSessionCmd ------------------------- */
 
-char *CtrlComm::processAddBid(parseReq_t *preq)
+char *CtrlComm::processAddSession(parseReq_t *preq)
 {
-    paramListIter_t bid = preq->params.find("Bid");
 
-    if (bid == preq->params.end()) {
-        throw Error("add_bid: missing parameter 'Bid'" );
+#ifdef DEBUG
+    log->dlog(ch, "Starting processAddSession" );
+#endif	
+	
+    paramListIter_t sessionId = preq->params.find("SessionID");
+
+    if (sessionId == preq->params.end()) {
+        throw Error("add_Session: missing parameter 'SessionID'" );
     }
 
-    // FIXME sufficient?
-    if (bid->second.find("!DOCTYPE AGENT") <= bid->second.length()) {
-        // assume xml bid def
-        retEvent = new AddBidsCtrlEvent((char *) bid->second.c_str(), bid->second.size());
-    } else {
-         throw Error("add_bid: tag AGENT is missing" );
+    paramListIter_t message = preq->params.find("Message");
+
+    if (message == preq->params.end() ) {
+        throw Error("add_Session: missing parameter 'Message'" );
+    }
+
+    try {
+        // assume xml ipap_message def
+        anslp::msg::anslp_ipap_xml_message mess;
+        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(message->second);
+        retEvent = new CreateSessionEvent(sessionId->second, ipap_mes->ip_message);
+    } catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		log->elog( ch, e.what() );
+        throw Error(e.what());
     }
 
     return NULL;
 }
 
 
-/* ------------------------- processDelBidCmd ------------------------- */
+/* ------------------------- processDelSessionCmd ------------------------- */
 
-char *CtrlComm::processDelBid(parseReq_t *preq )
+char *CtrlComm::processDelSession(parseReq_t *preq )
 {
-    paramListIter_t id = preq->params.find("BidID");
+	
+#ifdef DEBUG
+    log->dlog(ch, "Starting processDelSession" );
+#endif	
+	
+    paramListIter_t sessionid = preq->params.find("SessionID");
 
-    if (id == preq->params.end() ) {
-        throw Error("rm_bid: missing parameter 'BidID'" );
+    if (sessionid == preq->params.end() ) {
+        throw Error("rm_session: missing parameter 'SessionID'" );
     }
     
-    retEvent = new RemoveBidsCtrlEvent(id->second);
+    retEvent = new RemoveSessionEvent(sessionid->second);
   
     return NULL;
 }
 
+/* ---------------------- processAuctionInteractionCmd --------------------- */
+
+char *CtrlComm::processAuctionInteraction(parseReq_t *preq )
+{
+	
+#ifdef DEBUG
+    log->dlog(ch, "Starting processAuctionInteraction" );
+#endif
+	
+    paramListIter_t id = preq->params.find("SessionID");
+
+    if (id == preq->params.end() ) {
+        throw Error("processAuctionInteraction: missing parameter 'SessionID'" );
+    }
+    
+    //retEvent = new AuctionInteractionEvent(id->second);
+  
+    return NULL;
+}
 
 /* ------------------------- processGetInfo ------------------------- */
 
 char *CtrlComm::processGetInfo( parseReq_t *preq )
 {
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting processGetInfo" );
+#endif	
+	
     AuctionManagerInfo infos;
 
     paramListIter_t type = preq->params.find("IType");
@@ -611,6 +669,11 @@ char *CtrlComm::processGetInfo( parseReq_t *preq )
 
 char *CtrlComm::processGetModInfo( parseReq_t *preq )
 {
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting processGetModInfo" );
+#endif	
+	
     paramListIter_t name = preq->params.find("IName");
     
     if (name == preq->params.end()) {
@@ -627,6 +690,10 @@ char *CtrlComm::processGetModInfo( parseReq_t *preq )
 
 int CtrlComm::logAccess(struct REQUEST *req, time_t now )
 {
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting logAccess" );
+#endif	
   
     if (isEnabled(LOG_CONNECT)) {
         if (0 == req->status) {
@@ -654,6 +721,11 @@ int CtrlComm::logAccess(struct REQUEST *req, time_t now )
 
 int CtrlComm::logError(int eno, int loglevel, char *txt, char *peerhost)
 {
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting logError" );
+#endif
+	
     char buf[256];
   
     buf[0] = '\0';

@@ -8,6 +8,8 @@
     <PREF NAME="LogFile">/usr/local/var/log/netaum.log</PREF>
     <!-- pid file location -->
     <PREF NAME="PidFile">/usr/local/var/run/netaum.pid</PREF>
+    <!-- Domain Id that uniquely identifies this auction manager when exchanging ipap_messages -->    
+    <PREF NAME="Domain">5</PREF>
     <!-- filter attribute definition file -->    
     <PREF NAME="FilterDefFile">/home/luis/AuctionManager/etc/fielddef.xml</PREF>
     <!-- filter constant file -->

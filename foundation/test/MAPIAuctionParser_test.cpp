@@ -12,6 +12,7 @@
 #include "AuctionIdSource.h"
 #include "FieldDefParser.h"
 #include "IpAp_message.h"
+#include "anslp_ipap_xml_message.h"
 
 using namespace auction;
 
@@ -32,7 +33,7 @@ class MAPIAuctionParser_Test : public CppUnit::TestFixture {
     
     AuctionFileParser *ptrAuctionFileParser;
     AuctionIdSource *idSource;
-    ipap_message *message;
+    ipap_template_container *templates;
     FieldDefParser *ptrFieldParsers;
     MAPIAuctionParser *ptrMAPIAuctionParser;
     
@@ -56,7 +57,7 @@ void MAPIAuctionParser_Test::setUp()
 				
 		idSource = new AuctionIdSource(1); // Unique.
 		
-		message = new ipap_message();
+		templates = new ipap_template_container();
 
 		// load the filter def list
 		loadFieldDefs(&fieldDefs);
@@ -73,7 +74,7 @@ void MAPIAuctionParser_Test::tearDown()
 	delete(ptrAuctionFileParser);
 	delete(idSource);
     delete(ptrFieldParsers);
-	delete(message);
+	delete(templates);
 	delete(ptrMAPIAuctionParser);
 	
 }
@@ -81,27 +82,48 @@ void MAPIAuctionParser_Test::tearDown()
 void MAPIAuctionParser_Test::testParser() 
 {
 	auctionDB_t *new_auctions = new auctionDB_t();
+	
+	auctionDB_t *new_auctions2 = new auctionDB_t();
 		
 	try
 	{
 		
-		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, idSource, message );
+		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, idSource, templates );
 				
 		cout << (*new_auctions)[0]->getInfo() << endl;
 		
 		// Build the message from auctions in the vector
 		
-		vector<ipap_message *> messages = ptrMAPIAuctionParser->
-						get_ipap_messages(&fieldDefs, new_auctions);
-		
-		vector<ipap_message *>::iterator mesIterator;
-		for (mesIterator = messages.begin(); mesIterator != messages.end(); ++mesIterator){
-			ipap_message *mes = *mesIterator;
-			saveDelete(mes);
-		}
-		
+		ipap_message * messages2 = ptrMAPIAuctionParser->
+						get_ipap_message(&fieldDefs, new_auctions);
+
+		saveDelete(messages2);
+
 		CPPUNIT_ASSERT( new_auctions->size() == 1 );
+
+		saveDelete(new_auctions);
+
+		// Parse a XML with an auction
 		
+		const string resourceRequestFilename = DEF_SYSCONFDIR "/ResponseRequestMessage.xml";
+		
+		std::ifstream in(resourceRequestFilename.c_str());
+		std::stringstream buffer;
+		buffer << in.rdbuf();
+		std::string test = buffer.str();
+		
+		anslp::msg::anslp_ipap_xml_message mess;
+		anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(test);
+		
+		
+		ptrMAPIAuctionParser->parse( &fieldDefs,
+									 &(ipap_mes->ip_message),
+									 new_auctions2,
+									 templates );
+		
+		CPPUNIT_ASSERT( new_auctions2->size() == 1 );
+		
+		saveDelete(new_auctions2);
 	}
 	catch (Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;

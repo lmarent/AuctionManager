@@ -59,7 +59,7 @@ class AuctionFileParser : public XMLParser
 	//! parse field for templates
 	auctionTemplateField_t parseField(xmlNodePtr cur, 
 									  fieldDefList_t *fieldDefs,
-									  ipap_message *message);
+									  ipap_field_container &g_ipap_fields);
 
 
   public:
@@ -75,7 +75,7 @@ class AuctionFileParser : public XMLParser
     virtual void parse( fieldDefList_t *fieldDefs, 
 						auctionDB_t *bids,
 					    AuctionIdSource *idSource,
-					    ipap_message *messageOut );
+					    ipap_template_container *templates );
 };
 
 }; // namespace auction

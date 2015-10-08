@@ -35,7 +35,6 @@
 #include "Error.h"
 #include "EventSchedulerAgent.h"
 #include "ResourceRequestFileParser.h"
-#include "MAPIResourceRequestParser.h"
 
 namespace auction
 {
@@ -86,11 +85,18 @@ class ResourceRequestManager
 	//! filter definitions
     fieldDefList_t fieldDefs;
 
-    // name of filter def and filter vals files
-    string fieldDefFileName;
+    //! field values
+    fieldValList_t fieldVals;
+
+
+    // name of field def and field vals files
+    string fieldDefFileName, fieldValFileName;
 
     //! load filter definitions
     void loadFieldDefs(string fname);
+
+	//! load field value definitions
+    void loadFieldVals(string fname);
 
     // pool of unique resourceRequest ids
     ResourceRequestIdSource idSource;
@@ -117,7 +123,7 @@ class ResourceRequestManager
         \arg \c fdname  field definition file name
         \arg \c fvname  field value definition name
      */
-    ResourceRequestManager(string fdname); //Ok
+    ResourceRequestManager(string fdname, string fvname); //Ok
 
     //! destroy a ResourceRequestManager object
     ~ResourceRequestManager(); // Ok

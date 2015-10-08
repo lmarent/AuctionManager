@@ -84,7 +84,7 @@ class XMLParser
 
 };
 
-}; // namespace auction
+} // namespace auction
 
 
 #endif // _XMLPARSER_H_

@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>Agent Manager Main</title>
+</head>
+<body>
+<h2>Agent Manager Main</h2>
+<h3>Commands:</h3>
+<br>
+/help: displays this help<br><br>
+
+/get_info?IType=&lt;type&gt;[&IParam=&lt;param&gt;]: displays varies information<br><br>
+<form method=post action=/get_info>
+Type = 
+<select name=IType size=1>
+  <option>all</option>
+  <option>version</option>
+  <option>uptime</option>
+  <option>modules_loaded</option>
+  <option>configfile</option>
+  <option>use_ssl</option>
+  <option>hello</option>
+  <option>modlist</option>
+  <option>add_session</option>
+  <option>auction_interaction</option>
+  <option>remove_session</option>
+</select>
+<br>
+Param = <input type=text name=IParam><br>
+<input value="get info" type=submit>
+</form><br>
+
+/res_add_session?SessionID=&lt;sessionid&gt;Message=&lt;message&gt;: response to a new session<br><br>
+<form method=post action=/res_add_session>
+SessionID = <input type=text name=SessionID><br>	
+Message = <textarea col=400 rows=10 name=Message></textarea><br>
+<input value="res session" type=submit>
+</form><br>
+
+/res_auction_interaction?SessionID=&lt;sessionid&gt;Message=&lt;message&gt;: response to auction interaction<br><br>
+<form method=post action=/res_auction_interaction>
+SessionID = <input type=text name=SessionID><br>	
+Message = <textarea col=400 rows=10 name=Message></textarea><br>
+<input value="Response Auction Interaction" type=submit>
+</form><br>
+
+/res_del_session?SessionID=&lt;sessionid&gt;: response delete session<br><br>
+<form method=post action=/res_del_session>
+SessionID = <input type=text name=SessionID><br>	
+<input value="Response delete session" type=submit>
+</form><br>
+
+
+/get_modinfo?IName=&lt;mod_name&gt;: get module specific information<br><br>
+<form method=post action=/get_modinfo>
+Name = <input type=text name=IName><br>
+<input value="get modinfo" type=submit>
+</form>
+
+</ul>
+</form>
+</body>
+</html>

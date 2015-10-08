@@ -1,7 +1,8 @@
 netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  ../../foundation/include/ParserFcts.h ../../config.h \
- /usr/local/include/ipap/stdinc.h /usr/include/stdio.h \
- /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/stdinc.h \
+ /usr/include/stdio.h /usr/include/features.h \
+ /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
@@ -88,9 +89,7 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  /usr/include/linux/stddef.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
- /usr/include/asm-generic/posix_types.h \
- /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/stdinc.h \
- /usr/include/c++/4.8/iostream \
+ /usr/include/asm-generic/posix_types.h /usr/include/c++/4.8/iostream \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
@@ -198,9 +197,9 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
  /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
  /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/stdexcept \
- /usr/local/include/ipap/Error.h /usr/local/include/ipap/stdincpp.h \
- /usr/local/include/ipap/Logger.h /usr/local/include/ipap/Error.h \
- /usr/local/include/ipap/ConstantsIpAp.h \
+ ../../foundation/include/Constants.h /usr/local/include/ipap/Error.h \
+ /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/Logger.h \
+ /usr/local/include/ipap/Error.h /usr/local/include/ipap/ConstantsIpAp.h \
  ../../foundation/include/AuctionTimer.h \
  ../../user_agent/include/CtrlComm.h ../../lib/httpd/httpd.h \
  /usr/include/syslog.h /usr/include/x86_64-linux-gnu/sys/syslog.h \
@@ -234,7 +233,7 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  ../../foundation/include/ConfigParser.h \
  ../../foundation/include/XMLParser.h \
  ../../foundation/include/ProcModuleInterface.h \
- ../../foundation/include/metadata.h \
+ /usr/local/include/ipap/stdinc.h ../../foundation/include/metadata.h \
  ../../foundation/include/FieldDefParser.h \
  ../../foundation/include/Field.h ../../foundation/include/FieldValue.h \
  ../../foundation/include/Event.h \
@@ -242,7 +241,7 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  ../../foundation/include/FieldValParser.h \
  ../../foundation/include/BidIdSource.h ../../foundation/include/Bid.h \
  ../../foundation/include/AuctionFileParser.h \
- ../../foundation/include/Auction.h ../../foundation/include/Constants.h \
+ ../../foundation/include/Auction.h \
  /usr/local/include/ipap/IpAp_template_container.h \
  /usr/local/include/ipap/IpAp_template.h \
  /usr/local/include/ipap/IpAp_field.h /usr/local/include/ipap/IpAp_def.h \
@@ -264,8 +263,21 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  ../../foundation/include/Timeval.h \
  ../../foundation/include/MAPIAuctionParser.h \
  ../../foundation/include/MAPIIpApMessageParser.h \
- ../../foundation/include/ParserFcts.h ../../foundation/include/Bid.h \
- ../../foundation/include/Constants.h \
+ ../../foundation/include/ParserFcts.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_message_splitter.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_message.h \
+ /usr/local/include/a-nslp/msg/anslp_mspec_object.h \
+ /usr/local/include/a-nslp/msg/anslp_object.h /usr/local/include/ie.h \
+ /usr/local/include/protlib_types.h /usr/include/c++/4.8/cassert \
+ /usr/local/include/network_message.h \
+ /usr/local/include/a-nslp/msg/session_lifetime.h \
+ /usr/local/include/a-nslp/msg/information_code.h \
+ /usr/local/include/a-nslp/msg/selection_auctioning_entities.h \
+ /usr/local/include/a-nslp/msg/msg_sequence_number.h \
+ /usr/local/include/a-nslp/msg/message_hop_count.h \
+ /usr/local/include/a-nslp/msg/xml_object_key.h \
+ /usr/local/include/ipap/IpAp_template.h ../../foundation/include/Bid.h \
+ ../../user_agent/include/ConstantsAgent.h \
  ../../user_agent/include/EventAgent.h \
  ../../foundation/include/ProcModuleInterface.h \
  ../../user_agent/include/ResourceRequestFileParser.h \
@@ -275,13 +287,32 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
  ../../user_agent/include/ResourceRequestIdSource.h \
  ../../user_agent/include/ResourceRequest.h \
  ../../foundation/include/AuctionFileParser.h \
- ../../foundation/include/Auction.h ../../foundation/include/Event.h
+ ../../foundation/include/Session.h /usr/local/include/address.h \
+ /usr/local/include/ie.h /usr/local/include/logfile.h \
+ /usr/local/include/threadsafe_db.h \
+ /usr/local/include/a-nslp/session_id.h \
+ /usr/local/include/protlib_types.h \
+ /usr/local/include/a-nslp/msg/anslp_msg.h \
+ /usr/local/include/a-nslp/msg/ie_store.h \
+ /usr/local/include/a-nslp/msg/ie_object_key.h \
+ /usr/local/include/a-nslp/msg/anslp_create.h \
+ /usr/local/include/a-nslp/msg/anslp_msg.h \
+ /usr/local/include/a-nslp/msg/anslp_refresh.h \
+ /usr/local/include/a-nslp/msg/anslp_notify.h /usr/include/uuid/uuid.h \
+ ../../foundation/include/Auction.h ../../foundation/include/Event.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_xml_message.h \
+ /usr/include/libxml2/libxml/xmlwriter.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_message_splitter.h \
+ /usr/local/include/a-nslp/msg/anslp_constants.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_message.h
 
 /usr/include/stdc-predef.h:
 
 ../../foundation/include/ParserFcts.h:
 
 ../../config.h:
+
+/usr/local/include/ipap/stdincpp.h:
 
 /usr/local/include/ipap/stdinc.h:
 
@@ -532,10 +563,6 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 /usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
 
 /usr/include/asm-generic/posix_types.h:
-
-/usr/local/include/ipap/stdincpp.h:
-
-/usr/local/include/ipap/stdinc.h:
 
 /usr/include/c++/4.8/iostream:
 
@@ -827,6 +854,8 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 
 /usr/include/c++/4.8/stdexcept:
 
+../../foundation/include/Constants.h:
+
 /usr/local/include/ipap/Error.h:
 
 /usr/local/include/ipap/stdincpp.h:
@@ -919,6 +948,8 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 
 ../../foundation/include/ProcModuleInterface.h:
 
+/usr/local/include/ipap/stdinc.h:
+
 ../../foundation/include/metadata.h:
 
 ../../foundation/include/FieldDefParser.h:
@@ -940,8 +971,6 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 ../../foundation/include/AuctionFileParser.h:
 
 ../../foundation/include/Auction.h:
-
-../../foundation/include/Constants.h:
 
 /usr/local/include/ipap/IpAp_template_container.h:
 
@@ -991,9 +1020,39 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 
 ../../foundation/include/ParserFcts.h:
 
+/usr/local/include/a-nslp/msg/anslp_ipap_message_splitter.h:
+
+/usr/local/include/a-nslp/msg/anslp_ipap_message.h:
+
+/usr/local/include/a-nslp/msg/anslp_mspec_object.h:
+
+/usr/local/include/a-nslp/msg/anslp_object.h:
+
+/usr/local/include/ie.h:
+
+/usr/local/include/protlib_types.h:
+
+/usr/include/c++/4.8/cassert:
+
+/usr/local/include/network_message.h:
+
+/usr/local/include/a-nslp/msg/session_lifetime.h:
+
+/usr/local/include/a-nslp/msg/information_code.h:
+
+/usr/local/include/a-nslp/msg/selection_auctioning_entities.h:
+
+/usr/local/include/a-nslp/msg/msg_sequence_number.h:
+
+/usr/local/include/a-nslp/msg/message_hop_count.h:
+
+/usr/local/include/a-nslp/msg/xml_object_key.h:
+
+/usr/local/include/ipap/IpAp_template.h:
+
 ../../foundation/include/Bid.h:
 
-../../foundation/include/Constants.h:
+../../user_agent/include/ConstantsAgent.h:
 
 ../../user_agent/include/EventAgent.h:
 
@@ -1013,6 +1072,46 @@ netagent-CtrlComm.o: CtrlComm.cpp /usr/include/stdc-predef.h \
 
 ../../foundation/include/AuctionFileParser.h:
 
+../../foundation/include/Session.h:
+
+/usr/local/include/address.h:
+
+/usr/local/include/ie.h:
+
+/usr/local/include/logfile.h:
+
+/usr/local/include/threadsafe_db.h:
+
+/usr/local/include/a-nslp/session_id.h:
+
+/usr/local/include/protlib_types.h:
+
+/usr/local/include/a-nslp/msg/anslp_msg.h:
+
+/usr/local/include/a-nslp/msg/ie_store.h:
+
+/usr/local/include/a-nslp/msg/ie_object_key.h:
+
+/usr/local/include/a-nslp/msg/anslp_create.h:
+
+/usr/local/include/a-nslp/msg/anslp_msg.h:
+
+/usr/local/include/a-nslp/msg/anslp_refresh.h:
+
+/usr/local/include/a-nslp/msg/anslp_notify.h:
+
+/usr/include/uuid/uuid.h:
+
 ../../foundation/include/Auction.h:
 
 ../../foundation/include/Event.h:
+
+/usr/local/include/a-nslp/msg/anslp_ipap_xml_message.h:
+
+/usr/include/libxml2/libxml/xmlwriter.h:
+
+/usr/local/include/a-nslp/msg/anslp_ipap_message_splitter.h:
+
+/usr/local/include/a-nslp/msg/anslp_constants.h:
+
+/usr/local/include/a-nslp/msg/anslp_ipap_message.h:

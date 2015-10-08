@@ -226,10 +226,10 @@ libfoundation_la-EventScheduler.lo: EventScheduler.cpp \
  /usr/local/include/ipap/IpAp_field.h /usr/local/include/ipap/IpAp_def.h \
  /usr/local/include/ipap/IpAp_value_field.h \
  /usr/local/include/ipap/IpAp_exception.h \
+ /usr/local/include/ipap/IpAp_field_key.h \
  /usr/local/include/ipap/IpAp_message.h /usr/local/include/ipap/Logger.h \
  /usr/local/include/ipap/IpAp_field_container.h \
  /usr/local/include/ipap/IpAp_data_record.h \
- /usr/local/include/ipap/IpAp_field_key.h \
  /usr/local/include/ipap/IpAp_t.h \
  /usr/local/include/ipap/IpAp_template_container.h \
  ../../foundation/include/AuctionIdSource.h \
@@ -856,6 +856,8 @@ libfoundation_la-EventScheduler.lo: EventScheduler.cpp \
 
 /usr/local/include/ipap/IpAp_exception.h:
 
+/usr/local/include/ipap/IpAp_field_key.h:
+
 /usr/local/include/ipap/IpAp_message.h:
 
 /usr/local/include/ipap/Logger.h:
@@ -863,8 +865,6 @@ libfoundation_la-EventScheduler.lo: EventScheduler.cpp \
 /usr/local/include/ipap/IpAp_field_container.h:
 
 /usr/local/include/ipap/IpAp_data_record.h:
-
-/usr/local/include/ipap/IpAp_field_key.h:
 
 /usr/local/include/ipap/IpAp_t.h:
 

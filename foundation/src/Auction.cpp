@@ -34,14 +34,16 @@
 #include "Error.h"
 #include "IpAp_def.h"
 #include "IpAp_message.h"
+#include "TemplateIdSource.h"
 
 using namespace auction;
 
 /* ------------------------- Auction ------------------------- */
 
 Auction::Auction(time_t now, string sname, string aname, action_t &a, 
-				 miscList_t &m, auctionTemplateFieldList_t &templFields,
-				 ipap_message *message )
+				 miscList_t &m, AuctionTemplateMode_t mode, 
+				 auctionTemplateFieldList_t &templFields,
+				 ipap_template_container *templates )
    : state(AS_NEW), auctionName(aname), resource(), setName(sname), action(a), 
 	 miscList(m)
 {
@@ -75,11 +77,11 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
         duration = 0;
 	    
         // get the configured values
-        string sstart = getMiscVal("Start");
-        string sstop = getMiscVal("Stop");
-        string sduration = getMiscVal("Duration");
-        string sinterval = getMiscVal("Interval");
-        string salign = getMiscVal("Align");
+        string sstart = getMiscVal("start");
+        string sstop = getMiscVal("stop");
+        string sduration = getMiscVal("duration");
+        string sinterval = getMiscVal("interval");
+        string salign = getMiscVal("align");
 	    
         if (!sstart.empty() && !sstop.empty() && !sduration.empty()) {
             throw Error(409, "illegal to specify: start+stop+duration time");
@@ -102,6 +104,10 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
         if (!sduration.empty()) {
             duration = ParserFcts::parseULong(sduration);
         }
+
+#ifdef DEBUG
+    log->dlog(ch, "Duration %d", duration);
+#endif 
 
         if (duration) {
             if (stop) {
@@ -147,87 +153,10 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
            	mainInterval = ientry;
 	    }
 	    
-	    // Iterate over the field templates to calculate the number of 
-	    // fields in the template bid and template allocation.
-	    auctionTemplateFieldListIter_t fieldIter;
-	    int numBidFields = 0;
-	    int numAllocFields = 0;
-	    int numOptBidFields = 0;
-	    for (fieldIter = templFields.begin(); fieldIter != templFields.end();  ++fieldIter)
-	    {
-			if ((fieldIter->second).isBidtemplate){ numBidFields++; }
-			if ((fieldIter->second).isOptBidTemplate){ numOptBidFields++; }
-			if ((fieldIter->second).isAllocTemplate){ numAllocFields++; }
-		} 
-
-#ifdef DEBUG
-    log->dlog(ch, "bid template fields: %d - opt bid template fields:%d \
-					- allocation template fields:%d", 
-						numBidFields, numOptBidFields, numAllocFields);
-#endif  
-		
-	    // Create the bid template associated with the auction
-	    uint16_t templId = message->new_data_template(numBidFields, IPAP_SETID_BID_TEMPLATE);
-	    for (fieldIter = templFields.begin(); fieldIter != templFields.end(); ++fieldIter)
-	    {
-			if ((fieldIter->second).isBidtemplate){
-				message->add_field(templId, (fieldIter->second).field.eno,
-											(fieldIter->second).field.ftype);
-			}
-		} 
-
-		// Add a reference to the template.
-		templates.add_template(message->get_template_object(templId));
-
-#ifdef DEBUG
-		log->dlog(ch, "template Bid Id %d", templId);
-#endif  
-
-		// The user can create an auction without option field templates.
-		if (numOptBidFields > 0){
-			// Create the bid options template associated with the auction.
-			uint16_t templOptId = message->new_data_template(numOptBidFields,
-									IPAP_OPTNS_BID_TEMPLATE);
-								
-			for (fieldIter = templFields.begin(); fieldIter != templFields.end(); ++fieldIter)
-			{
-				if ((fieldIter->second).isOptBidTemplate){
-					message->add_field(templOptId, (fieldIter->second).field.eno,
-												   (fieldIter->second).field.ftype);
-				}
-			} 
-			// Add a reference to the template.
-			templates.add_template(message->get_template_object(templOptId));
-
-#ifdef DEBUG
-			log->dlog(ch, "template Option Bid Id %d NumFields:%d", templOptId, numOptBidFields);
-#endif 
+	    if (mode == AS_BUILD_TEMPLATE){
+			buildTemplates(templFields, templates);
 		}
-		else{
-#ifdef DEBUG
-			log->dlog(ch, "Without fields to define the option Bid template");
-#endif 		
-		}	
-		// create the allocation template associated with the auction
-		uint16_t templAllocId = message->new_data_template(numAllocFields, 
-							IPAP_SETID_ALLOCATION_TEMPLATE);
-							
-	    for (fieldIter = templFields.begin(); fieldIter != templFields.end(); ++fieldIter)
-	    {
-			if ((fieldIter->second).isAllocTemplate){
-				message->add_field(templAllocId, (fieldIter->second).field.eno,
-											(fieldIter->second).field.ftype);			
-			}
-		} 
-
-#ifdef DEBUG
-		log->dlog(ch, "template Allocation Id %d", templAllocId);
-#endif  
-
 		
-		// Add a reference to both templates.
-		templates.add_template(message->get_template_object(templAllocId));
-
 #ifdef DEBUG
 		log->dlog(ch, "Ending Constructor Auction");
 #endif 
@@ -299,6 +228,173 @@ Auction::~Auction()
 
 }
 
+void Auction::addTemplateField(ipap_template *templ, 
+							   ipap_field_container g_ipap_fields, 
+							   int eno, int type)
+{
+	// By default network encoding
+	int encodeNetwork = 1;
+	
+	ipap_field field = g_ipap_fields.get_field(eno, type);
+	uint16_t length = (uint16_t) field.get_field_type().length;
+   	templ->add_field(length,KNOWN,encodeNetwork,field);
+
+}
+
+void Auction::addTemplateFieldKeys(ipap_template *templ, 
+								   ipap_field_container g_ipap_fields)
+{
+	ipap_templ_type_t templType = templ->get_type();
+	set<ipap_field_key> keys = ipap_template::getTemplateTypeKeys(templType);
+	
+	set<ipap_field_key>::iterator iter;
+	for (iter = keys.begin(); iter != keys.end(); ++iter){
+		addTemplateField(templ, g_ipap_fields, iter->get_eno(), iter->get_ftype());
+	}
+	
+}
+
+int 
+Auction::calculateNbrFieldTemplateData(ipap_templ_type_t templType, 
+									   auctionTemplateFieldList_t &templFields)
+{
+    
+    
+    set<ipap_field_key> keys = ipap_template::getTemplateTypeKeys(templType);
+    int nbrFields = keys.size();
+    
+    auctionTemplateFieldListIter_t fieldIter;
+    for (fieldIter = templFields.begin(); fieldIter != templFields.end();  ++fieldIter)
+    {
+		bool include = false;
+		
+		if ( (fieldIter->second).isBidtemplate 
+		     &&  ( templType == IPAP_SETID_BID_TEMPLATE) ){
+			include = true;
+		}
+
+		if ( (fieldIter->second).isOptBidTemplate 
+		     &&  ( templType == IPAP_OPTNS_BID_TEMPLATE) ){
+			include = true;
+		}
+
+		if ( (fieldIter->second).isAllocTemplate 
+		     &&  ( templType == IPAP_SETID_ALLOCATION_TEMPLATE) ){
+			include = true;
+		}
+
+		if (include){
+			ipap_field_key key((fieldIter->second).field.eno, 
+							   (fieldIter->second).field.ftype);
+			// Exclude keys from the number of fields.
+			if (keys.find(key) == keys.end()){
+				nbrFields++; 
+			}
+		}
+
+	} 
+
+	return nbrFields;
+}
+
+ipap_template * 
+Auction::createTemplate(auctionTemplateFieldList_t &templFields,
+		  			    ipap_field_container g_ipap_fields,
+						ipap_templ_type_t templType)
+{
+
+	TemplateIdSource *tId = TemplateIdSource::getInstance();
+
+    int numFields = calculateNbrFieldTemplateData(templType, templFields);
+    		
+    // Create the bid template associated with the auction
+    ipap_template *templ = new ipap_template();
+	templ->set_id( tId->newId() );
+	templ->set_maxfields( numFields );
+	templ->set_type(templType);
+    
+    // Put the Bid Key Fields required.
+	addTemplateFieldKeys(templ, g_ipap_fields);
+	
+    auctionTemplateFieldListIter_t fieldIter;
+    for (fieldIter = templFields.begin(); fieldIter != templFields.end(); ++fieldIter)
+    {
+		bool include = false;
+		
+		if (((fieldIter->second).isBidtemplate)	&&  
+			( templType == IPAP_SETID_BID_TEMPLATE) ){
+			include = true;
+		}
+
+		if (((fieldIter->second).isOptBidTemplate) &&  
+			 ( templType == IPAP_OPTNS_BID_TEMPLATE) ){
+			include = true;
+		}
+
+		if (((fieldIter->second).isAllocTemplate) &&  
+			( templType == IPAP_SETID_ALLOCATION_TEMPLATE) ){
+			include = true;
+		}
+		
+		if (include){
+			addTemplateField(templ, g_ipap_fields, 
+							(fieldIter->second).field.eno, 
+							(fieldIter->second).field.ftype);
+		}
+	} 
+
+	return templ;
+}
+void Auction::buildTemplates(auctionTemplateFieldList_t &templFields, 
+							 ipap_template_container *templateContainer)
+{
+
+	
+	
+	ipap_field_container g_ipap_fields;
+	
+    g_ipap_fields.initialize_forward();
+
+    g_ipap_fields.initialize_reverse();
+	
+	ipap_template *bidTemplate = createTemplate(templFields, 
+								g_ipap_fields, IPAP_SETID_BID_TEMPLATE);
+
+	// Add a local reference to the template.
+	templates.add_template(bidTemplate);
+	
+	// Insert the template in the general container.
+	templateContainer->add_template(bidTemplate);
+
+	ipap_template *OptBidTemplate = createTemplate(templFields, 
+								g_ipap_fields, IPAP_OPTNS_BID_TEMPLATE);
+
+	// Add a local reference to the template.
+	templates.add_template(OptBidTemplate);
+	
+	// Insert the template in the general container.
+	templateContainer->add_template(OptBidTemplate);
+
+
+	ipap_template *allocTemplate = createTemplate(templFields, 
+								g_ipap_fields, IPAP_SETID_ALLOCATION_TEMPLATE);
+
+	// Add a local reference to the template.
+	templates.add_template(allocTemplate);
+	
+	// Insert the template in the general container.
+	templateContainer->add_template(allocTemplate);
+	
+#ifdef DEBUG
+	log->dlog(ch, "templates: bidId:%d, optBidId:%d, allocId:%d", 
+					bidTemplate->get_template_id(),
+					OptBidTemplate->get_template_id(),
+					allocTemplate->get_template_id());
+#endif  
+
+
+}
+
 /* functions for accessing the templates */
 string Auction::getMiscVal(string name)
 {
@@ -338,12 +434,16 @@ void Auction::parseAuctionName(string rname)
 
 time_t Auction::parseTime(string timestr)
 {
-    struct tm  t;
+#ifdef DEBUG
+    log->dlog(ch, "Starting parseTime - value given: %s", timestr.c_str());
+#endif 	
+	
+    
   
     if (timestr[0] == '+') {
         // relative time in secs to start
         try {
-	    struct tm tm;
+			struct tm tm;
             int secs = ParserFcts::parseInt(timestr.substr(1,timestr.length()));
             time_t start = time(NULL) + secs;
             return mktime(localtime_r(&start,&tm));
@@ -352,11 +452,20 @@ time_t Auction::parseTime(string timestr)
         }
     } else {
         // absolute time
-        if (timestr.empty() || (strptime(timestr.c_str(), TIME_FORMAT.c_str(), &t) == NULL)) {
-            return 0;
-        }
+        
+        struct tm  t;
+        
+        if (timestr.empty()){
+           return 0;
+        } else if (timestr.find_first_not_of("0123456789") == string::npos){
+			return (time_t) ParserFcts::parseULLong(timestr);
+		} else if (strptime(timestr.c_str(), TIME_FORMAT.c_str(), &t) != NULL){
+			return mktime(&t);
+        } else{
+			return 0;
+		}
     }
-    return mktime(&t);
+    
 }
 
 /* ------------------------- getActions ------------------------- */
@@ -381,13 +490,6 @@ miscList_t *Auction::getMisc()
 ipap_template_container * Auction::getTemplateList()
 {
 	return &templates;
-}
-
-/* --------------- getTemplateAssociations ------------------ */
-
-remoteAssociationTemplateList_t * Auction::getTemplateAssociations()
-{
-	return &templateAssociationList;
 }
 
 

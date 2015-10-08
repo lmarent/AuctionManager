@@ -41,6 +41,7 @@
 namespace auction
 {
 
+
 //! rule states during lifecycle
 typedef enum
 {
@@ -67,6 +68,12 @@ typedef struct
     string procname;
 } procdef_t;
 
+typedef enum
+{
+	AS_BUILD_TEMPLATE = 0,
+	AS_COPY_TEMPLATE
+} AuctionTemplateMode_t;
+
 typedef struct
 {
 	fieldDefItem_t field;
@@ -80,10 +87,6 @@ typedef struct
 typedef list<action_t>            actionList_t;
 typedef list<action_t>::iterator  actionListIter_t;
 typedef list<action_t>::const_iterator  actionListConstIter_t;
-
-typedef map<uint16_t,uint16_t> 	  				remoteAssociationTemplateList_t;
-typedef map<uint16_t,uint16_t>::iterator 		remoteAssociationTemplateListIter_t;
-typedef map<uint16_t,uint16_t>::const_iterator 	remoteAssociationTemplateListConstIter_t;
 
 typedef map<string, auctionTemplateField_t>						auctionTemplateFieldList_t;
 typedef map<string, auctionTemplateField_t>::iterator			auctionTemplateFieldListIter_t;
@@ -141,8 +144,28 @@ class Auction
 	//! Templates asociated with the auction. 
 	ipap_template_container templates;
 
-	//! Relations between the local template and the remote template.
-	remoteAssociationTemplateList_t templateAssociationList;
+	//! Add a field to the template given as parameter.
+	void addTemplateField(ipap_template *templ, 
+		 			      ipap_field_container g_ipap_fields, 
+						  int eno, int type);
+
+	//! Add field keys to the template given as parameter.
+	void addTemplateFieldKeys(ipap_template *templ, 
+		  				      ipap_field_container g_ipap_fields);
+	
+	//! Calculate the number of fields to be included in the template type.
+	int calculateNbrFieldTemplateData(ipap_templ_type_t templType, 
+									  auctionTemplateFieldList_t &templFields);
+	
+	//! Create a template taking as input fields those in templFields.
+	ipap_template * 
+	createTemplate(auctionTemplateFieldList_t &templFields,
+				   ipap_field_container g_ipap_fields,
+				   ipap_templ_type_t templType);
+	
+	//! Build the templates related to the auction and store them in templateContainer
+	void buildTemplates(auctionTemplateFieldList_t &templFields, 
+							 ipap_template_container *templateContainer);
 	
   public:
     
@@ -219,13 +242,14 @@ class Auction
         \arg \c s  			aname  auction name
         \arg \c a  			action
         \arg \c m  			list of misc parameters
+        \arg \c mode 		Mode for creating or using exting templates.
         \arg \c templFields	field list to be used in auction templates
         \arg \c message  	message where we include the new templates. 
         
     */
-    Auction(time_t now, string sname, string aname, action_t &a, 
-			miscList_t &m, auctionTemplateFieldList_t &templFields,
-		    ipap_message *message );
+    Auction(time_t now, string sname, string aname, action_t &a, miscList_t &m, 
+		    AuctionTemplateMode_t mode, auctionTemplateFieldList_t &templFields,
+		    ipap_template_container *templates );
 
 	/*! \short  construct an auction from another auction
 	  	\arg \c rhs auction to copy from
@@ -254,16 +278,6 @@ class Auction
     */	
     ipap_template_container * getTemplateList(void);
     
-
-    /*! \short   get template associations
-
-        \returns a pointer (link) to a template associations that contains  
-                 the id of the local template and the id of the remote 
-                 template.
-    */
-	remoteAssociationTemplateList_t * getTemplateAssociations(void);
-
-
     //! dump a Auction object
     void dump( ostream &os );
 

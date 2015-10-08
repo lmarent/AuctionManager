@@ -35,6 +35,7 @@
 namespace auction
 {
 
+
 // Auction.h
 extern const string DEFAULT_CONFIG_FILE;
 extern const string NETAUM_LOCK_FILE;
@@ -54,7 +55,6 @@ extern const string BIDFILE_DTD;
 
 // AuctionFileParser.cpp
 extern const string AUCTIONFILE_DTD;
-
 
 // Bid.cpp
 extern const string TIME_FORMAT;
@@ -90,6 +90,9 @@ extern const string HELP;      //!< help text in interactive shell
 // certificate file location (SSL)
 extern const string CERT_FILE;
 #endif
+
+// MAPIResourceRequestParser.cpp
+extern const string NO_AUCTION_VALUE; 
 
 };
 

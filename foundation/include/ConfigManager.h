@@ -61,10 +61,11 @@ class ConfigManager
   public:
 
     /*! creates and initializes a ConfigManager
+      \arg \c dtdfilename - dtd filename to validate the config file.
       \arg \c filename - name of config file
       \arg \c binary - location of binary file, i.e. argv[0]
     */
-    ConfigManager(string filename, string binary);
+    ConfigManager(string dtdfilename, string filename, string binary);
 
     //! destroys a ConfigManager object
     ~ConfigManager();
@@ -74,9 +75,10 @@ class ConfigManager
         if used more than once, new items and values will be added
         to those already set. Old items may be overwritten.
 
+        \arg \c dtdfilename - name of dtd file to validate the configuration
         \arg \c fname - name of file to read configuration from
     */
-    void reread(const string fname);
+    void reread(const string dtdfilename, const string fname);
 
 
     /*! \short   get configured item's value

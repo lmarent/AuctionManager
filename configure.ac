@@ -310,6 +310,23 @@ AM_CONDITIONAL(CURL, test -n "$CURL_LIBS")
 AC_SUBST(CURL_CFLAGS)
 AC_SUBST(CURL_LIBS)
 
+PKG_CHECK_MODULES([LIBUUID], [libuuid],
+   [LIBUUID_FOUND=yes], [LIBUUID_FOUND=no])
+   if test "$LIBUUID_FOUND" = "no" ; then
+        PKG_CHECK_MODULES([LIBUUID], [uuid],
+			      [LIBUUID_FOUND=yes], [LIBUUID_FOUND=no])
+	    if test "$LIBUUID_FOUND" = "no" ; then
+	  	  AC_MSG_ERROR([libuuid development files required])
+	    else
+		  LIBUUID_INCLUDEDIR=$(pkg-config --variable=includedir uuid)
+		  LIBUUID_CFLAGS+=" -I$LIBUUID_INCLUDEDIR/uuid "
+	    fi
+   fi
+AC_SUBST([LIBUUID_CFLAGS])
+AC_SUBST([LIBUUID_LIBS])
+
+
+
 PKG_CHECK_MODULES([LIBPROT], [libprot-0.0])
 AC_SUBST([LIBPROT_CFLAGS])
 AC_SUBST([LIBPROT_LIBS])

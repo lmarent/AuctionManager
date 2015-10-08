@@ -5,18 +5,28 @@
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="33">Quantity</DEF>
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="2">UnitPrice</DEF>
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="3">UnitBudget</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="4">TotalBudget</DEF>  
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="1">MaxValue</DEF>
-  <DEF LENGTH="4" TYPE="SInt32" ENO="0" FTYPE="5">Duration</DEF>
+  <DEF LENGTH="4" TYPE="SInt32" ENO="0" FTYPE="5">AuctionDuration</DEF>
   <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="38">Bandwidth</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="24">AuctionID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="25">BidID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="26">AllocationID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="32">RecordID</DEF>
-  <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="27">StartSec</DEF>
-  <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="28">EndSec</DEF>
-  <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="34">DurationSec</DEF>
-  
+  <DEF TYPE="String" ENO="0" FTYPE="40">ResourceID</DEF>
+  <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="27">Start</DEF>
+  <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="28">Stop</DEF>
+  <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="34">Interval</DEF>
+  <DEF LENGTH="4" TYPE="UInt32" ENO="0" FTYPE="43">BidingDuration</DEF>
+  <DEF TYPE="IPAddr" ENO="0" FTYPE="10">SrcIP</DEF>
+  <DEF TYPE="IPAddr" ENO="0" FTYPE="12">DstIP</DEF>  
+  <DEF TYPE="IP6Addr" ENO="0" FTYPE="14">SrcIP6</DEF>
+  <DEF TYPE="IP6Addr" ENO="0" FTYPE="15">DstIP6</DEF>  
+  <DEF TYPE="UInt16" ENO="0" FTYPE="41">SrcPort</DEF>
+  <DEF TYPE="UInt16" ENO="0" FTYPE="42">DstPort</DEF>  
   <!-- Reserve price -->
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="39">ReservePrice</DEF>
+  <!-- Algorithm data -->
+  <DEF TYPE="String" ENO="0" FTYPE="31">AlgorithmName</DEF>
   
 </FIELDDEF>

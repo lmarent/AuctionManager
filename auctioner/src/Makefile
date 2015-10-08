@@ -106,6 +106,7 @@ am_auctionManager_OBJECTS = ../../foundation/src/auctionManager-Constants.$(OBJE
 	../../foundation/src/auctionManager-FieldValue.$(OBJEXT) \
 	../../foundation/src/auctionManager-FieldDefParser.$(OBJEXT) \
 	../../foundation/src/auctionManager-FieldValParser.$(OBJEXT) \
+	../../foundation/src/auctionManager-TemplateIdSource.$(OBJEXT) \
 	../../foundation/src/auctionManager-MAPIIpApMessageParser.$(OBJEXT) \
 	../../foundation/src/auctionManager-BidIdSource.$(OBJEXT) \
 	../../foundation/src/auctionManager-AuctionIdSource.$(OBJEXT) \
@@ -129,6 +130,9 @@ am_auctionManager_OBJECTS = ../../foundation/src/auctionManager-Constants.$(OBJE
 	../../foundation/src/auctionManager-MAPIAllocationParser.$(OBJEXT) \
 	../../foundation/src/auctionManager-AllocationManager.$(OBJEXT) \
 	../../foundation/src/auctionManager-AnslpClient.$(OBJEXT) \
+	../../foundation/src/auctionManager-SessionIdSource.$(OBJEXT) \
+	../../foundation/src/auctionManager-Session.$(OBJEXT) \
+	../../foundation/src/auctionManager-SessionManager.$(OBJEXT) \
 	auctionManager-EventSchedulerAuctioner.$(OBJEXT) \
 	auctionManager-Module.$(OBJEXT) \
 	auctionManager-ModuleLoader.$(OBJEXT) \
@@ -136,9 +140,6 @@ am_auctionManager_OBJECTS = ../../foundation/src/auctionManager-Constants.$(OBJE
 	auctionManager-ProcModule.$(OBJEXT) \
 	auctionManager-CtrlComm.$(OBJEXT) \
 	auctionManager-AUMProcessor.$(OBJEXT) \
-	auctionManager-SessionIdSource.$(OBJEXT) \
-	auctionManager-AUMSession.$(OBJEXT) \
-	auctionManager-SessionManager.$(OBJEXT) \
 	auctionManager-Auctioner.$(OBJEXT) \
 	auctionManager-main.$(OBJEXT)
 auctionManager_OBJECTS = $(am_auctionManager_OBJECTS)
@@ -275,6 +276,8 @@ LIBPROT_CFLAGS = -I/usr/local/include
 LIBPROT_LIBS = -L/usr/local/lib -lprot  
 LIBS = -ldl 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
+LIBUUID_CFLAGS = -I/usr/include/uuid   -I/usr/include/uuid 
+LIBUUID_LIBS = -luuid  
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
@@ -395,6 +398,7 @@ auctionManager_SOURCES = ../../foundation/src/Constants.cpp \
 						  ../../foundation/src/FieldValue.cpp \
 						  ../../foundation/src/FieldDefParser.cpp \
 						  ../../foundation/src/FieldValParser.cpp \
+						  ../../foundation/src/TemplateIdSource.cpp \
 						  ../../foundation/src/MAPIIpApMessageParser.cpp \
 						  ../../foundation/src/BidIdSource.cpp \
 						  ../../foundation/src/AuctionIdSource.cpp \
@@ -418,6 +422,9 @@ auctionManager_SOURCES = ../../foundation/src/Constants.cpp \
 						  ../../foundation/src/MAPIAllocationParser.cpp \
 						  ../../foundation/src/AllocationManager.cpp \
 						  ../../foundation/src/AnslpClient.cpp \
+  						  ../../foundation/src/SessionIdSource.cpp \
+						  ../../foundation/src/Session.cpp \
+						  ../../foundation/src/SessionManager.cpp \
 						  EventSchedulerAuctioner.cpp \
 						  Module.cpp \
 						  ModuleLoader.cpp \
@@ -425,9 +432,6 @@ auctionManager_SOURCES = ../../foundation/src/Constants.cpp \
 						  ProcModule.cpp \
 						  CtrlComm.cpp \
 						  AUMProcessor.cpp \
-						  SessionIdSource.cpp \
-						  AUMSession.cpp \
-						  SessionManager.cpp \
 						  Auctioner.cpp \
 						  main.cpp
 
@@ -570,6 +574,9 @@ clean-binPROGRAMS:
 ../../foundation/src/auctionManager-FieldValParser.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/auctionManager-TemplateIdSource.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
 ../../foundation/src/auctionManager-MAPIIpApMessageParser.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
@@ -639,6 +646,15 @@ clean-binPROGRAMS:
 ../../foundation/src/auctionManager-AnslpClient.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/auctionManager-SessionIdSource.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/auctionManager-Session.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/auctionManager-SessionManager.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
 
 auctionManager$(EXEEXT): $(auctionManager_OBJECTS) $(auctionManager_DEPENDENCIES) $(EXTRA_auctionManager_DEPENDENCIES) 
 	@rm -f auctionManager$(EXEEXT)
@@ -652,7 +668,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/auctionManager-AUMProcessor.Po
-include ./$(DEPDIR)/auctionManager-AUMSession.Po
 include ./$(DEPDIR)/auctionManager-Auctioner.Po
 include ./$(DEPDIR)/auctionManager-CtrlComm.Po
 include ./$(DEPDIR)/auctionManager-EventSchedulerAuctioner.Po
@@ -660,8 +675,6 @@ include ./$(DEPDIR)/auctionManager-Module.Po
 include ./$(DEPDIR)/auctionManager-ModuleLoader.Po
 include ./$(DEPDIR)/auctionManager-PageRepository.Po
 include ./$(DEPDIR)/auctionManager-ProcModule.Po
-include ./$(DEPDIR)/auctionManager-SessionIdSource.Po
-include ./$(DEPDIR)/auctionManager-SessionManager.Po
 include ./$(DEPDIR)/auctionManager-main.Po
 include ../../foundation/src/$(DEPDIR)/auctionManager-Allocation.Po
 include ../../foundation/src/$(DEPDIR)/auctionManager-AllocationIdSource.Po
@@ -694,6 +707,10 @@ include ../../foundation/src/$(DEPDIR)/auctionManager-MAPIAuctionParser.Po
 include ../../foundation/src/$(DEPDIR)/auctionManager-MAPIBidParser.Po
 include ../../foundation/src/$(DEPDIR)/auctionManager-MAPIIpApMessageParser.Po
 include ../../foundation/src/$(DEPDIR)/auctionManager-ParserFcts.Po
+include ../../foundation/src/$(DEPDIR)/auctionManager-Session.Po
+include ../../foundation/src/$(DEPDIR)/auctionManager-SessionIdSource.Po
+include ../../foundation/src/$(DEPDIR)/auctionManager-SessionManager.Po
+include ../../foundation/src/$(DEPDIR)/auctionManager-TemplateIdSource.Po
 include ../../foundation/src/$(DEPDIR)/auctionManager-Timeval.Po
 include ../../foundation/src/$(DEPDIR)/auctionManager-XMLParser.Po
 
@@ -860,6 +877,20 @@ include ../../foundation/src/$(DEPDIR)/auctionManager-XMLParser.Po
 #	$(AM_V_CXX)source='../../foundation/src/FieldValParser.cpp' object='../../foundation/src/auctionManager-FieldValParser.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/auctionManager-FieldValParser.obj `if test -f '../../foundation/src/FieldValParser.cpp'; then $(CYGPATH_W) '../../foundation/src/FieldValParser.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/FieldValParser.cpp'; fi`
+
+../../foundation/src/auctionManager-TemplateIdSource.o: ../../foundation/src/TemplateIdSource.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/auctionManager-TemplateIdSource.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/auctionManager-TemplateIdSource.Tpo -c -o ../../foundation/src/auctionManager-TemplateIdSource.o `test -f '../../foundation/src/TemplateIdSource.cpp' || echo '$(srcdir)/'`../../foundation/src/TemplateIdSource.cpp
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/auctionManager-TemplateIdSource.Tpo ../../foundation/src/$(DEPDIR)/auctionManager-TemplateIdSource.Po
+#	$(AM_V_CXX)source='../../foundation/src/TemplateIdSource.cpp' object='../../foundation/src/auctionManager-TemplateIdSource.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/auctionManager-TemplateIdSource.o `test -f '../../foundation/src/TemplateIdSource.cpp' || echo '$(srcdir)/'`../../foundation/src/TemplateIdSource.cpp
+
+../../foundation/src/auctionManager-TemplateIdSource.obj: ../../foundation/src/TemplateIdSource.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/auctionManager-TemplateIdSource.obj -MD -MP -MF ../../foundation/src/$(DEPDIR)/auctionManager-TemplateIdSource.Tpo -c -o ../../foundation/src/auctionManager-TemplateIdSource.obj `if test -f '../../foundation/src/TemplateIdSource.cpp'; then $(CYGPATH_W) '../../foundation/src/TemplateIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/TemplateIdSource.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/auctionManager-TemplateIdSource.Tpo ../../foundation/src/$(DEPDIR)/auctionManager-TemplateIdSource.Po
+#	$(AM_V_CXX)source='../../foundation/src/TemplateIdSource.cpp' object='../../foundation/src/auctionManager-TemplateIdSource.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/auctionManager-TemplateIdSource.obj `if test -f '../../foundation/src/TemplateIdSource.cpp'; then $(CYGPATH_W) '../../foundation/src/TemplateIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/TemplateIdSource.cpp'; fi`
 
 ../../foundation/src/auctionManager-MAPIIpApMessageParser.o: ../../foundation/src/MAPIIpApMessageParser.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/auctionManager-MAPIIpApMessageParser.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/auctionManager-MAPIIpApMessageParser.Tpo -c -o ../../foundation/src/auctionManager-MAPIIpApMessageParser.o `test -f '../../foundation/src/MAPIIpApMessageParser.cpp' || echo '$(srcdir)/'`../../foundation/src/MAPIIpApMessageParser.cpp
@@ -1183,6 +1214,48 @@ include ../../foundation/src/$(DEPDIR)/auctionManager-XMLParser.Po
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/auctionManager-AnslpClient.obj `if test -f '../../foundation/src/AnslpClient.cpp'; then $(CYGPATH_W) '../../foundation/src/AnslpClient.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/AnslpClient.cpp'; fi`
 
+../../foundation/src/auctionManager-SessionIdSource.o: ../../foundation/src/SessionIdSource.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/auctionManager-SessionIdSource.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/auctionManager-SessionIdSource.Tpo -c -o ../../foundation/src/auctionManager-SessionIdSource.o `test -f '../../foundation/src/SessionIdSource.cpp' || echo '$(srcdir)/'`../../foundation/src/SessionIdSource.cpp
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/auctionManager-SessionIdSource.Tpo ../../foundation/src/$(DEPDIR)/auctionManager-SessionIdSource.Po
+#	$(AM_V_CXX)source='../../foundation/src/SessionIdSource.cpp' object='../../foundation/src/auctionManager-SessionIdSource.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/auctionManager-SessionIdSource.o `test -f '../../foundation/src/SessionIdSource.cpp' || echo '$(srcdir)/'`../../foundation/src/SessionIdSource.cpp
+
+../../foundation/src/auctionManager-SessionIdSource.obj: ../../foundation/src/SessionIdSource.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/auctionManager-SessionIdSource.obj -MD -MP -MF ../../foundation/src/$(DEPDIR)/auctionManager-SessionIdSource.Tpo -c -o ../../foundation/src/auctionManager-SessionIdSource.obj `if test -f '../../foundation/src/SessionIdSource.cpp'; then $(CYGPATH_W) '../../foundation/src/SessionIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/SessionIdSource.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/auctionManager-SessionIdSource.Tpo ../../foundation/src/$(DEPDIR)/auctionManager-SessionIdSource.Po
+#	$(AM_V_CXX)source='../../foundation/src/SessionIdSource.cpp' object='../../foundation/src/auctionManager-SessionIdSource.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/auctionManager-SessionIdSource.obj `if test -f '../../foundation/src/SessionIdSource.cpp'; then $(CYGPATH_W) '../../foundation/src/SessionIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/SessionIdSource.cpp'; fi`
+
+../../foundation/src/auctionManager-Session.o: ../../foundation/src/Session.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/auctionManager-Session.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/auctionManager-Session.Tpo -c -o ../../foundation/src/auctionManager-Session.o `test -f '../../foundation/src/Session.cpp' || echo '$(srcdir)/'`../../foundation/src/Session.cpp
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/auctionManager-Session.Tpo ../../foundation/src/$(DEPDIR)/auctionManager-Session.Po
+#	$(AM_V_CXX)source='../../foundation/src/Session.cpp' object='../../foundation/src/auctionManager-Session.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/auctionManager-Session.o `test -f '../../foundation/src/Session.cpp' || echo '$(srcdir)/'`../../foundation/src/Session.cpp
+
+../../foundation/src/auctionManager-Session.obj: ../../foundation/src/Session.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/auctionManager-Session.obj -MD -MP -MF ../../foundation/src/$(DEPDIR)/auctionManager-Session.Tpo -c -o ../../foundation/src/auctionManager-Session.obj `if test -f '../../foundation/src/Session.cpp'; then $(CYGPATH_W) '../../foundation/src/Session.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/Session.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/auctionManager-Session.Tpo ../../foundation/src/$(DEPDIR)/auctionManager-Session.Po
+#	$(AM_V_CXX)source='../../foundation/src/Session.cpp' object='../../foundation/src/auctionManager-Session.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/auctionManager-Session.obj `if test -f '../../foundation/src/Session.cpp'; then $(CYGPATH_W) '../../foundation/src/Session.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/Session.cpp'; fi`
+
+../../foundation/src/auctionManager-SessionManager.o: ../../foundation/src/SessionManager.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/auctionManager-SessionManager.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/auctionManager-SessionManager.Tpo -c -o ../../foundation/src/auctionManager-SessionManager.o `test -f '../../foundation/src/SessionManager.cpp' || echo '$(srcdir)/'`../../foundation/src/SessionManager.cpp
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/auctionManager-SessionManager.Tpo ../../foundation/src/$(DEPDIR)/auctionManager-SessionManager.Po
+#	$(AM_V_CXX)source='../../foundation/src/SessionManager.cpp' object='../../foundation/src/auctionManager-SessionManager.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/auctionManager-SessionManager.o `test -f '../../foundation/src/SessionManager.cpp' || echo '$(srcdir)/'`../../foundation/src/SessionManager.cpp
+
+../../foundation/src/auctionManager-SessionManager.obj: ../../foundation/src/SessionManager.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/auctionManager-SessionManager.obj -MD -MP -MF ../../foundation/src/$(DEPDIR)/auctionManager-SessionManager.Tpo -c -o ../../foundation/src/auctionManager-SessionManager.obj `if test -f '../../foundation/src/SessionManager.cpp'; then $(CYGPATH_W) '../../foundation/src/SessionManager.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/SessionManager.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/auctionManager-SessionManager.Tpo ../../foundation/src/$(DEPDIR)/auctionManager-SessionManager.Po
+#	$(AM_V_CXX)source='../../foundation/src/SessionManager.cpp' object='../../foundation/src/auctionManager-SessionManager.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/auctionManager-SessionManager.obj `if test -f '../../foundation/src/SessionManager.cpp'; then $(CYGPATH_W) '../../foundation/src/SessionManager.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/SessionManager.cpp'; fi`
+
 auctionManager-EventSchedulerAuctioner.o: EventSchedulerAuctioner.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-EventSchedulerAuctioner.o -MD -MP -MF $(DEPDIR)/auctionManager-EventSchedulerAuctioner.Tpo -c -o auctionManager-EventSchedulerAuctioner.o `test -f 'EventSchedulerAuctioner.cpp' || echo '$(srcdir)/'`EventSchedulerAuctioner.cpp
 	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-EventSchedulerAuctioner.Tpo $(DEPDIR)/auctionManager-EventSchedulerAuctioner.Po
@@ -1280,48 +1353,6 @@ auctionManager-AUMProcessor.obj: AUMProcessor.cpp
 #	$(AM_V_CXX)source='AUMProcessor.cpp' object='auctionManager-AUMProcessor.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AUMProcessor.obj `if test -f 'AUMProcessor.cpp'; then $(CYGPATH_W) 'AUMProcessor.cpp'; else $(CYGPATH_W) '$(srcdir)/AUMProcessor.cpp'; fi`
-
-auctionManager-SessionIdSource.o: SessionIdSource.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-SessionIdSource.o -MD -MP -MF $(DEPDIR)/auctionManager-SessionIdSource.Tpo -c -o auctionManager-SessionIdSource.o `test -f 'SessionIdSource.cpp' || echo '$(srcdir)/'`SessionIdSource.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-SessionIdSource.Tpo $(DEPDIR)/auctionManager-SessionIdSource.Po
-#	$(AM_V_CXX)source='SessionIdSource.cpp' object='auctionManager-SessionIdSource.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-SessionIdSource.o `test -f 'SessionIdSource.cpp' || echo '$(srcdir)/'`SessionIdSource.cpp
-
-auctionManager-SessionIdSource.obj: SessionIdSource.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-SessionIdSource.obj -MD -MP -MF $(DEPDIR)/auctionManager-SessionIdSource.Tpo -c -o auctionManager-SessionIdSource.obj `if test -f 'SessionIdSource.cpp'; then $(CYGPATH_W) 'SessionIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/SessionIdSource.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-SessionIdSource.Tpo $(DEPDIR)/auctionManager-SessionIdSource.Po
-#	$(AM_V_CXX)source='SessionIdSource.cpp' object='auctionManager-SessionIdSource.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-SessionIdSource.obj `if test -f 'SessionIdSource.cpp'; then $(CYGPATH_W) 'SessionIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/SessionIdSource.cpp'; fi`
-
-auctionManager-AUMSession.o: AUMSession.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-AUMSession.o -MD -MP -MF $(DEPDIR)/auctionManager-AUMSession.Tpo -c -o auctionManager-AUMSession.o `test -f 'AUMSession.cpp' || echo '$(srcdir)/'`AUMSession.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-AUMSession.Tpo $(DEPDIR)/auctionManager-AUMSession.Po
-#	$(AM_V_CXX)source='AUMSession.cpp' object='auctionManager-AUMSession.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AUMSession.o `test -f 'AUMSession.cpp' || echo '$(srcdir)/'`AUMSession.cpp
-
-auctionManager-AUMSession.obj: AUMSession.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-AUMSession.obj -MD -MP -MF $(DEPDIR)/auctionManager-AUMSession.Tpo -c -o auctionManager-AUMSession.obj `if test -f 'AUMSession.cpp'; then $(CYGPATH_W) 'AUMSession.cpp'; else $(CYGPATH_W) '$(srcdir)/AUMSession.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-AUMSession.Tpo $(DEPDIR)/auctionManager-AUMSession.Po
-#	$(AM_V_CXX)source='AUMSession.cpp' object='auctionManager-AUMSession.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-AUMSession.obj `if test -f 'AUMSession.cpp'; then $(CYGPATH_W) 'AUMSession.cpp'; else $(CYGPATH_W) '$(srcdir)/AUMSession.cpp'; fi`
-
-auctionManager-SessionManager.o: SessionManager.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-SessionManager.o -MD -MP -MF $(DEPDIR)/auctionManager-SessionManager.Tpo -c -o auctionManager-SessionManager.o `test -f 'SessionManager.cpp' || echo '$(srcdir)/'`SessionManager.cpp
-	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-SessionManager.Tpo $(DEPDIR)/auctionManager-SessionManager.Po
-#	$(AM_V_CXX)source='SessionManager.cpp' object='auctionManager-SessionManager.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-SessionManager.o `test -f 'SessionManager.cpp' || echo '$(srcdir)/'`SessionManager.cpp
-
-auctionManager-SessionManager.obj: SessionManager.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-SessionManager.obj -MD -MP -MF $(DEPDIR)/auctionManager-SessionManager.Tpo -c -o auctionManager-SessionManager.obj `if test -f 'SessionManager.cpp'; then $(CYGPATH_W) 'SessionManager.cpp'; else $(CYGPATH_W) '$(srcdir)/SessionManager.cpp'; fi`
-	$(AM_V_at)$(am__mv) $(DEPDIR)/auctionManager-SessionManager.Tpo $(DEPDIR)/auctionManager-SessionManager.Po
-#	$(AM_V_CXX)source='SessionManager.cpp' object='auctionManager-SessionManager.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o auctionManager-SessionManager.obj `if test -f 'SessionManager.cpp'; then $(CYGPATH_W) 'SessionManager.cpp'; else $(CYGPATH_W) '$(srcdir)/SessionManager.cpp'; fi`
 
 auctionManager-Auctioner.o: Auctioner.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(auctionManager_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT auctionManager-Auctioner.o -MD -MP -MF $(DEPDIR)/auctionManager-Auctioner.Tpo -c -o auctionManager-Auctioner.o `test -f 'Auctioner.cpp' || echo '$(srcdir)/'`Auctioner.cpp

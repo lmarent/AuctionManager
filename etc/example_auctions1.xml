@@ -15,6 +15,6 @@
 	<FIELD BID_TEMPL="yes" BID_OPT_TEMPL="no" ALLOC_TEMPL="yes">quantity</FIELD>
 	<FIELD BID_TEMPL="yes" BID_OPT_TEMPL="no">unitbudget</FIELD>
 	<FIELD BID_TEMPL="yes" BID_OPT_TEMPL="no" ALLOC_TEMPL="yes">unitprice</FIELD>
-	<FIELD BID_TEMPL="no" BID_OPT_TEMPL="yes" ALLOC_TEMPL="no">duration</FIELD>
+	<FIELD BID_TEMPL="no" BID_OPT_TEMPL="yes" ALLOC_TEMPL="no">bidingduration</FIELD>
   </AUCTION>
 </AUCTIONSET>

@@ -26,8 +26,8 @@
     $Id: ResourceRequestFileParser.h 748 2015-08-25 17:05:00 amarentes $
 */
 
-#ifndef _RESOURCEREQUEST_FILEPARSER_H_
-#define _RESOURCEREQUEST_FILEPARSER_H_
+#ifndef _RESOURCE_REQUEST_FILE_PARSER_H_
+#define _RESOURCE_REQUEST_FILE_PARSER_H_
 
 
 #include "stdincpp.h"
@@ -86,4 +86,4 @@ class ResourceRequestFileParser : public XMLParser
 
 }; // namespace auction
 
-#endif // _RESOURCEREQUEST_FILEPARSER_H_
+#endif // _RESOURCE_REQUEST_FILE_PARSER_H_

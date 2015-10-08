@@ -36,13 +36,13 @@ namespace auction
 {
 
 // Agent.h
-extern const string NETAGENT_DEFAULT_CONFIG_FILE;
+extern const string AGNT_DEFAULT_CONFIG_FILE;
 
 // Logger.h
-extern const string AGENT_DEFAULT_LOG_FILE;
+extern const string AGNT_DEFAULT_LOG_FILE;
 
 // ConfigParser.h
-extern const string AUM_CONFIGFILE_DTD;
+extern const string AGNT_CONFIGFILE_DTD;
 
 #ifdef USE_SSL
 // certificate file location (SSL)
@@ -50,10 +50,17 @@ extern const string AUM_CERT_FILE;
 #endif
 
 // Agent.h
-extern const string NETAGENT_LOCK_FILE;
+extern const string AGNT_LOCK_FILE;
 
 // ResourceRequestFileParser.cpp
 extern const string RESOURCE_FILE_DTD;
+
+// CtrlComm.cpp
+extern const string AGNT_REPLY_TEMPLATE; //!< html response template
+extern const string AGNT_MAIN_PAGE_FILE;
+extern const string AGNT_XSL_PAGE_FILE;
+extern const int    AGNT_EXPIRY_TIME;    //!< expiry time for web pages served from cache
+extern const int    AGNT_DEF_PORT;   //!< default TCP port to connect to
 
 }; // namespace auction
 

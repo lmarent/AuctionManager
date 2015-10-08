@@ -37,16 +37,24 @@
 #include "ConfigManager.h"
 #include "BidManager.h"
 #include "AuctionManager.h"
+#include "MAPIAuctionParser.h"
 #include "CtrlComm.h"
-#include "EventSchedulerAgent.h"
-#include "Constants.h"
 #include "AuctionManagerComponent.h"
 #include "AgentProcessor.h"
 #include "AnslpClient.h"
 #include "ResourceRequestManager.h"
+#include "SessionManager.h"
+#include "MAPIResourceRequestParser.h"
+#include "EventSchedulerAgent.h"
 
 namespace auction
 {
+
+
+typedef map<int, auto_ptr<ipap_template_container> >   		  			agentTemplateList_t;
+typedef map<int, auto_ptr<ipap_template_container> >::iterator   		agentTemplateListIter_t;
+typedef map<int, auto_ptr<ipap_template_container> >::const_iterator    agentTemplateListConstIter_t;
+
 
 /*! \short   Agent class description
   
@@ -71,31 +79,46 @@ class Agent
     //! log file name
     string logFileName;
 
-    auto_ptr<Logger>          			log;
-    auto_ptr<CommandLineArgs> 			args;
-    auto_ptr<AuctionTimer>      		auct;
-    auto_ptr<ConfigManager>   			conf;
-    auto_ptr<ResourceRequestManager>    rreqm;
-    auto_ptr<BidManager>     			bidm;
-    auto_ptr<AuctionManager>   			aucm;
-    auto_ptr<EventSchedulerAgent>  		evnt;
-    auto_ptr<AnslpClient>				anslpc;
-
-    auto_ptr<AgentProcessor> 			proc;    
-    auto_ptr<CtrlComm>        			comm;
+    auto_ptr<Logger>          						log;
+    auto_ptr<CommandLineArgs> 						args;
+    auto_ptr<AuctionTimer>      					auct;
+	auto_ptr<ConfigManager>   						conf;
+    auto_ptr<ResourceRequestManager>   				rreqm;
+    auto_ptr<BidManager>     						bidm;
+    auto_ptr<AuctionManager>   						aucm;
+    auto_ptr<SessionManager>   						ssmp;
+    auto_ptr<EventSchedulerAgent>  					evnt;
+    auto_ptr<MAPIResourceRequestParser>				mrrp;
+    auto_ptr<MAPIAuctionParser>						macp;
+    auto_ptr<AnslpClient>							anslpc;
+    
+    auto_ptr<AgentProcessor> 						proc;    
+    auto_ptr<CtrlComm>        						comm;
 
     
     //! logging channel number used by objects of this class
     int ch;
 
-     // FD list (from AuctionManagerComponent.h)
+     //! FD list (from AuctionManagerComponent.h)
     fdList_t fdList;
 
-    // 1 if the procedure for applying executing auctions runs in a separate thread
+    //! 1 if the procedure for applying executing auctions runs in a separate thread
     int pprocThread;
 
-    // 1 if remote control interface is enabled
+    //! 1 if remote control interface is enabled
     static int enableCtrl;
+
+    //! List of templates exchanged with different domains.
+    agentTemplateList_t 							agentTemplates;
+
+
+	// defaults values from the configuration file.
+	string defaultSourceAddr;
+	string defaultDestinAddr;
+	uint16_t defaultDestinPort;
+	uint16_t defaultSourcePort;
+	uint8_t defaultProtocol;
+	uint32_t defaultLifeTime;
 
     // signal handlers
     static void sigint_handler(int i);
@@ -104,6 +127,9 @@ class Agent
 
     // exit function called on exit
     static void exit_fct(void);
+
+	//! Read default data from configuration file.
+	void readDefaultData(void);
 
     //! return 1 if a Agent Manager is already running on the host
     int alreadyRunning();
@@ -149,6 +175,9 @@ class Agent
     //! handle the activation of resource request intervals.
     void handleActivateResourceRequestInterval(Event *e);
 
+	//! handle the response for a session creation previously sent.
+	void handleResponseCreateSession(Event *e, fd_sets_t *fds);
+
     //! handle the remove of resource request intervals.
     void handleRemoveResourceRequestInterval(Event *e);
         
@@ -182,6 +211,6 @@ class Agent
 //! overload for <<, so that a Agent object can be thrown into an ostream
 std::ostream& operator<< ( std::ostream &os, Agent &obj );
 
-};  // namespace auction
+}  // namespace auction
 
 #endif // _AGENT_H_

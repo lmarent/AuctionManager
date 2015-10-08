@@ -174,6 +174,8 @@ class AUMProcessor : public AuctionManagerComponent, public MAPIIpApMessageParse
 
     //! dump a AUMProcessor object
     void dump( ostream &os );
+	
+	fieldDefList_t * getFieldDefinitions() { return &fieldDefs; }
 
     //! get the number of action modules currently in use
     int numModules() 

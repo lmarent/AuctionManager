@@ -1,8 +1,9 @@
 ../../foundation/src/netagent-AuctionManager.o: \
  ../../foundation/src/AuctionManager.cpp /usr/include/stdc-predef.h \
  ../../foundation/include/ParserFcts.h ../../config.h \
- /usr/local/include/ipap/stdinc.h /usr/include/stdio.h \
- /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/stdinc.h \
+ /usr/include/stdio.h /usr/include/features.h \
+ /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
@@ -89,9 +90,7 @@
  /usr/include/linux/stddef.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
- /usr/include/asm-generic/posix_types.h \
- /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/stdinc.h \
- /usr/include/c++/4.8/iostream \
+ /usr/include/asm-generic/posix_types.h /usr/include/c++/4.8/iostream \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
@@ -199,12 +198,13 @@
  /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
  /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
  /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/stdexcept \
+ ../../foundation/include/Constants.h \
  ../../foundation/include/AuctionManager.h \
  /usr/local/include/ipap/Logger.h /usr/local/include/ipap/stdincpp.h \
  /usr/local/include/ipap/Error.h /usr/local/include/ipap/ConstantsIpAp.h \
  /usr/local/include/ipap/Error.h \
  ../../foundation/include/AuctionIdSource.h \
- ../../foundation/include/Auction.h ../../foundation/include/Constants.h \
+ ../../foundation/include/Auction.h \
  ../../foundation/include/AuctionTimer.h \
  ../../foundation/include/ConfigParser.h \
  /usr/include/libxml2/libxml/parser.h \
@@ -238,6 +238,7 @@
  /usr/local/include/ipap/IpAp_t.h \
  /usr/local/include/ipap/IpAp_template_container.h \
  ../../foundation/include/Field.h ../../foundation/include/FieldValue.h \
+ /usr/local/include/ipap/stdinc.h \
  ../../foundation/include/AuctionFileParser.h \
  ../../foundation/include/EventScheduler.h ../../foundation/include/Bid.h \
  ../../foundation/include/Event.h \
@@ -252,6 +253,19 @@
  ../../foundation/include/MAPIAuctionParser.h \
  ../../foundation/include/MAPIIpApMessageParser.h \
  ../../foundation/include/ParserFcts.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_message_splitter.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_message.h \
+ /usr/local/include/a-nslp/msg/anslp_mspec_object.h \
+ /usr/local/include/a-nslp/msg/anslp_object.h /usr/local/include/ie.h \
+ /usr/local/include/protlib_types.h /usr/include/c++/4.8/cassert \
+ /usr/local/include/network_message.h \
+ /usr/local/include/a-nslp/msg/session_lifetime.h \
+ /usr/local/include/a-nslp/msg/information_code.h \
+ /usr/local/include/a-nslp/msg/selection_auctioning_entities.h \
+ /usr/local/include/a-nslp/msg/msg_sequence_number.h \
+ /usr/local/include/a-nslp/msg/message_hop_count.h \
+ /usr/local/include/a-nslp/msg/xml_object_key.h \
+ /usr/local/include/ipap/IpAp_template.h \
  ../../foundation/include/Constants.h
 
 /usr/include/stdc-predef.h:
@@ -259,6 +273,8 @@
 ../../foundation/include/ParserFcts.h:
 
 ../../config.h:
+
+/usr/local/include/ipap/stdincpp.h:
 
 /usr/local/include/ipap/stdinc.h:
 
@@ -509,10 +525,6 @@
 /usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
 
 /usr/include/asm-generic/posix_types.h:
-
-/usr/local/include/ipap/stdincpp.h:
-
-/usr/local/include/ipap/stdinc.h:
 
 /usr/include/c++/4.8/iostream:
 
@@ -804,6 +816,8 @@
 
 /usr/include/c++/4.8/stdexcept:
 
+../../foundation/include/Constants.h:
+
 ../../foundation/include/AuctionManager.h:
 
 /usr/local/include/ipap/Logger.h:
@@ -819,8 +833,6 @@
 ../../foundation/include/AuctionIdSource.h:
 
 ../../foundation/include/Auction.h:
-
-../../foundation/include/Constants.h:
 
 ../../foundation/include/AuctionTimer.h:
 
@@ -902,6 +914,8 @@
 
 ../../foundation/include/FieldValue.h:
 
+/usr/local/include/ipap/stdinc.h:
+
 ../../foundation/include/AuctionFileParser.h:
 
 ../../foundation/include/EventScheduler.h:
@@ -931,5 +945,35 @@
 ../../foundation/include/MAPIIpApMessageParser.h:
 
 ../../foundation/include/ParserFcts.h:
+
+/usr/local/include/a-nslp/msg/anslp_ipap_message_splitter.h:
+
+/usr/local/include/a-nslp/msg/anslp_ipap_message.h:
+
+/usr/local/include/a-nslp/msg/anslp_mspec_object.h:
+
+/usr/local/include/a-nslp/msg/anslp_object.h:
+
+/usr/local/include/ie.h:
+
+/usr/local/include/protlib_types.h:
+
+/usr/include/c++/4.8/cassert:
+
+/usr/local/include/network_message.h:
+
+/usr/local/include/a-nslp/msg/session_lifetime.h:
+
+/usr/local/include/a-nslp/msg/information_code.h:
+
+/usr/local/include/a-nslp/msg/selection_auctioning_entities.h:
+
+/usr/local/include/a-nslp/msg/msg_sequence_number.h:
+
+/usr/local/include/a-nslp/msg/message_hop_count.h:
+
+/usr/local/include/a-nslp/msg/xml_object_key.h:
+
+/usr/local/include/ipap/IpAp_template.h:
 
 ../../foundation/include/Constants.h:

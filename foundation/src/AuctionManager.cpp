@@ -36,8 +36,8 @@ using namespace auction;
 
 /* ------------------------- AuctionManager ------------------------- */
 
-AuctionManager::AuctionManager(string fdname) 
-    : auctions(0), fieldDefFileName(fdname),
+AuctionManager::AuctionManager( string fdname, string fvname) 
+    : auctions(0), fieldDefFileName(fdname), fieldValFileName(fvname),
 	  idSource(1)
 {
     log = Logger::getInstance();
@@ -45,6 +45,13 @@ AuctionManager::AuctionManager(string fdname)
 #ifdef DEBUG
     log->dlog(ch,"Starting");
 #endif
+
+    // load the field def list
+    loadFieldDefs(fieldDefFileName);
+       
+    // load the field val list
+    loadFieldVals(fieldValFileName);
+
 	
 	message = new ipap_message();
 }
@@ -124,6 +131,28 @@ void AuctionManager::loadFieldDefs(string fname)
     
 }
 
+
+/* -------------------- loadFieldVals -------------------- */
+
+void AuctionManager::loadFieldVals( string fname )
+{
+    if (fieldValFileName.empty()) {
+        if (fname.empty()) {
+            fname = FIELDVAL_FILE;
+        }
+    } else {
+        fname = fieldValFileName;
+    }
+
+    if (isReadableFile(fname)) {
+        if (fieldVals.empty() && !fname.empty()) {
+            FieldValParser f = FieldValParser(fname.c_str());
+            f.parse(&fieldVals);
+        }
+    }
+}
+
+
 /* -------------------------- getAuction ----------------------------- */
 
 Auction *AuctionManager::getAuction(int uid)
@@ -198,7 +227,7 @@ auctionDB_t  AuctionManager::getAuctions()
 
 /* ----------------------------- parseAuctions --------------------------- */
 
-auctionDB_t *AuctionManager::parseAuctions(string fname)
+auctionDB_t *AuctionManager::parseAuctions(string fname, ipap_template_container *templates)
 {
 
 #ifdef DEBUG
@@ -208,13 +237,10 @@ auctionDB_t *AuctionManager::parseAuctions(string fname)
     auctionDB_t *new_auctions = new auctionDB_t();
 
     try {	
-
-        // load the field def list
-        loadFieldDefs(fieldDefFileName);
 	
         AuctionFileParser afp = AuctionFileParser(fname);
 
-        afp.parse(&fieldDefs, new_auctions, &idSource, message);
+        afp.parse(&fieldDefs, new_auctions, &idSource, templates);
 
 #ifdef DEBUG
     log->dlog(ch, "Auctions parsed");
@@ -235,18 +261,16 @@ auctionDB_t *AuctionManager::parseAuctions(string fname)
 
 /* -------------------- parseBidsBuffer -------------------- */
 
-auctionDB_t *AuctionManager::parseAuctionsBuffer(char *buf, int len)
+auctionDB_t *AuctionManager::parseAuctionsBuffer(char *buf, int len, 
+												  ipap_template_container *templates)
 {
     auctionDB_t *new_auctions = new auctionDB_t();
 
     try {
-
-        // load the field def list
-        loadFieldDefs(fieldDefFileName);
 			
         AuctionFileParser afp = AuctionFileParser(buf, len);
         
-        afp.parse(&fieldDefs, new_auctions, &idSource, message);
+        afp.parse(&fieldDefs, new_auctions, &idSource, templates);
 
         return new_auctions;
 	
@@ -262,18 +286,16 @@ auctionDB_t *AuctionManager::parseAuctionsBuffer(char *buf, int len)
 
 
 auctionDB_t *
-AuctionManager::parseAuctionsMessage(ipap_message *messageIn, ipap_message *messageOut)
+AuctionManager::parseAuctionsMessage(ipap_message *messageIn, 
+									 ipap_template_container *templates)
 {
     auctionDB_t *new_auctions = new auctionDB_t();
 
     try {
-
-        // load the field def list
-        loadFieldDefs(fieldDefFileName);
 			
         MAPIAuctionParser map = MAPIAuctionParser();
         
-        map.parse(&fieldDefs, messageIn, new_auctions, &idSource, messageOut);
+        map.parse(&fieldDefs, messageIn, new_auctions, templates);
 
         return new_auctions;
 	

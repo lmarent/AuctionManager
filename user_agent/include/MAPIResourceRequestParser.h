@@ -20,64 +20,68 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     Description:
-    parser for API text resource request syntax
+    parser for API ipap_message syntax.
 
-    $Id: MAPIResourceRequestParser.h 748 2015-08-26 08:12:00Z amarentes $
+    $Id: MAPIResourceRequestParser.h 748 2015-07-23 17:30:00Z amarentes $
 */
 
 #ifndef _MAPI_RESOURCE_REQUEST_PARSER_H_
 #define _MAPI_RESOURCE_REQUEST_PARSER_H_
 
 
+
 #include "stdincpp.h"
-#include "ResourceRequestFileParser.h"
+#include "Logger.h"
+#include "ResourceRequest.h"
+#include "IpAp_message.h"
+#include "MAPIIpApMessageParser.h"
 
 namespace auction
 {
 
-//! parser for API text Resource Request syntax
+//! parser for API ipap_message syntax
 
-class MAPIResourceRequestParser
+class MAPIResourceRequestParser : public MAPIIpApMessageParser
 {
 
   private:
 
     Logger *log;
     int ch;
-    char *buf;
-    int len;
-    string fileName;
-
-    //! parse the value given as a value corresponding to the type 
-    //! assigned in field f.
-    void parseFieldValue(string value, field_t *f);
-    
-	//! Calculates intervals associated to resource request.
-	void calculateInterval(time_t now, miscList_t *miscList, 
-							resourceReq_interval_t *resInterval);
-
-    //! parse time string
-    time_t parseTime(string timestr);
-
-    //! get a value by name from the misc attributes
-    string getMiscVal(miscList_t *miscList, string name);    
 
 
+	//! Add required field for the bid's option template 									 
+	uint16_t addFieldsOptionTemplate(fieldDefList_t *fieldDefs, 
+									 ipap_message *mes);
+
+	//! Add the field of all auction relationship into option message's template
+	void addOptionRecord(string recordId,
+						 string resourceId,
+						 resourceReq_interval_t interval, 
+						 uint16_t bidTemplateId, 
+						 ipap_message *mes );
+									  
+		   				  
+	
   public:
 
-    MAPIResourceRequestParser(string fname);
+    MAPIResourceRequestParser();
 
-    MAPIResourceRequestParser(char *b, int l);
-
-    virtual ~MAPIResourceRequestParser() {}
-
-    //! parse given resource requests and add those parsed to requests
-    virtual void parse(fieldDefList_t *filters, 
-					   resourceRequestDB_t *requests,
-					   ResourceRequestIdSource *idSource );
+    ~MAPIResourceRequestParser() {}
+					   
+	//! get the ipap_message that represents an specifc resource request.
+	/*! @param recordId - it identifies the request being processed.
+	 * 		  resourceId - It identifies the resource request, if empty
+	 * 					   means any resource.
+	 */
+	ipap_message * get_ipap_message(fieldDefList_t *fieldDefs, 
+								    string recordId,
+									string resourceId,
+								    resourceReq_interval_t interval);
 
 };
 
-}; // namespace auction
+} // namespace auction
+
 
 #endif // _MAPI_RESOURCE_REQUEST_PARSER_H_

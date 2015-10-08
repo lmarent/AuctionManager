@@ -68,9 +68,14 @@ FieldValue::FieldValue(string type, string _value)
 	} else if (type == "Double") {
 		(double) ParserFcts::parseDouble(_value.c_str());
 		val = _value;
-	}
-    else {
-        throw Error("Unsupported type for field value: %s", type.c_str());
+	} else if (type == "IPAddr") {
+        ParserFcts::parseIPAddr(_value.c_str());
+        val = _value;
+    } else if (type == "IP6Addr") {
+        ParserFcts::parseIP6Addr(_value.c_str());        
+		val = _value;
+    } else {
+        throw Error("FieldValue: Unsupported type for field value: %s", type.c_str());
     }
 }
 
@@ -144,6 +149,15 @@ FieldValue::equal(const FieldValue &param, string type)
 			return false;
 		}
 	}
+	else if (type == "IPAddr") {
+		if (val.compare(param.val.c_str()) != 0)
+			return false;
+	}	
+	else if (type == "parseIP6Addr") {
+		if (val.compare(param.val.c_str()) != 0)
+			return false;
+	}	
+	
 	else {
 		throw Error("Unsupported type for field value: %s", type.c_str());
 	}
@@ -166,6 +180,10 @@ int FieldValue::getTypeLength(string type)
         return 2;
     } else if ((type == "UInt32") || (type == "SInt32")) {
         return 4;
+    } else if (type == "IPAddr") {
+        return 4;
+    } else if (type == "IP6Addr") {
+        return 16;        
     } else if (type == "Float") {
 		return 4;
 	} else if ((type == "Double") || (type == "UInt64")) {

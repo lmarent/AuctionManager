@@ -35,15 +35,22 @@ namespace auction
 {
 
 // Agent.h
-const string NETAGENT_DEFAULT_CONFIG_FILE = DEF_SYSCONFDIR "/netagnt.conf.xml";
-const string NETAGENT_LOCK_FILE   = DEF_SYSCONFDIR "/netagent.pid";
+const string AGNT_DEFAULT_CONFIG_FILE = DEF_SYSCONFDIR "/netagnt.conf.xml";
+const string AGNT_LOCK_FILE			  = DEF_SYSCONFDIR "/netagent.pid";
+
+// CtrlComm.cpp
+const string AGNT_REPLY_TEMPLATE  = DEF_SYSCONFDIR "/reply.xml";   //!< html response template
+const string AGNT_MAIN_PAGE_FILE  = DEF_SYSCONFDIR "/main_agnt.html";
+const string AGNT_XSL_PAGE_FILE   = DEF_SYSCONFDIR "/reply.xsl";
+const int    AGNT_EXPIRY_TIME     = 3600; 		  //!< expiry time for web pages served from cache
+const int    AGNT_DEF_PORT        = 12246;         //!< default TCP port to connect to
 
 // Logger.h
-extern const string AGENT_DEFAULT_LOG_FILE = DEF_SYSCONFDIR "/log/netagent.log";
+extern const string AGNT_DEFAULT_LOG_FILE = DEF_SYSCONFDIR "/log/netagent.log";
 
 
 // ConfigParser.h
-const string AUM_CONFIGFILE_DTD  = DEF_SYSCONFDIR "/netagnt.conf.dtd";
+const string AGNT_CONFIGFILE_DTD  = DEF_SYSCONFDIR "/netagnt.conf.dtd";
 
 #ifdef USE_SSL
 // certificate file location (SSL)

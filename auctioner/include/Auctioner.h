@@ -37,11 +37,13 @@
 #include "ConfigManager.h"
 #include "BidManager.h"
 #include "AuctionManager.h"
+#include "SessionManager.h"
 #include "CtrlComm.h"
 #include "EventSchedulerAuctioner.h"
 #include "Constants.h"
 #include "AuctionManagerComponent.h"
 #include "AUMProcessor.h"
+#include "IpAp_template_container.h"
 
 /*! \short   Auctioner class description
   
@@ -50,6 +52,12 @@
 
 namespace auction
 {
+
+typedef map<int, ipap_template_container>   		  		auctionerTemplateList_t;
+typedef map<int, ipap_template_container>::iterator   		auctionerTemplateListIter_t;
+typedef map<int, ipap_template_container>::const_iterator   auctionerTemplateListConstIter_t;
+
+
 
 class Auctioner
 {
@@ -75,6 +83,7 @@ class Auctioner
     auto_ptr<ConfigManager>   			conf;
     auto_ptr<BidManager>     			bidm;
     auto_ptr<AuctionManager>   			aucm;
+    auto_ptr<SessionManager>			sesm;
     auto_ptr<EventSchedulerAuctioner>  	evnt;
     auto_ptr<MAPIAuctionParser>			mpap;
 
@@ -84,21 +93,27 @@ class Auctioner
     //! logging channel number used by objects of this class
     int ch;
 
-     // FD list (from AuctionManagerComponent.h)
+	//! domain Id for exchanging ipap_messages
+	int domainId;
+
+     //! FD list (from AuctionManagerComponent.h)
     fdList_t fdList;
 
-    // 1 if the procedure for applying executing auctions runs in a separate thread
+    //! 1 if the procedure for applying executing auctions runs in a separate thread
     int pprocThread;
 
-    // 1 if remote control interface is enabled
+    //! 1 if remote control interface is enabled
     static int enableCtrl;
 
-    // signal handlers
+	//! List of templates thta have been created for exchanging with other parties.
+	auctionerTemplateList_t auctionerTemplates;
+
+    //! signal handlers
     static void sigint_handler(int i);
     static void sigusr1_handler(int i);
     static void sigalarm_handler(int i);
 
-    // exit function called on exit
+    //! exit function called on exit
     static void exit_fct(void);
 
     //! return 1 if a Auction Manager is already running on the host
@@ -140,7 +155,8 @@ class Auctioner
 	void handleProcModeleTimer(Event *e, fd_sets_t *fds);
 
 	void handlePushExecution(Event *e, fd_sets_t *fds);
-
+	
+	void handleCreateSession(Event *e, fd_sets_t *fds);
     
   public:
 

@@ -41,16 +41,12 @@ using namespace protlib;
 using namespace protlib::log;
 using namespace ntlp;
 using namespace anslp;
+using namespace anslp::msg;
 using namespace auction;
 
 
 
-AnslpClient::AnslpClient(string config_filename, const hostaddress &source_addr, 
-						  const hostaddress &destination_addr,
-						  uint16_t source_port, uint16_t dest_port, 
-						  uint8_t protocol, uint32_t session_lifetime):
-sender_addr(source_addr), receiver_addr(destination_addr), sender_port(source_port),
-receiver_port(dest_port), protocol(protocol), lifetime(session_lifetime)
+AnslpClient::AnslpClient(string config_filename)
 {
 	using namespace std;
 
@@ -111,10 +107,6 @@ receiver_port(dest_port), protocol(protocol), lifetime(session_lifetime)
 	// returns after all threads have been started
 	starter->start_processing();
 
-	// initialize the global session_id, the only one we store
-	uint128 raw_id(0, 0, 0, 0);
-	sid = session_id(raw_id);
-
 	log->log(ch,"config file:%s", config_filename.c_str());
 
 #ifdef DEBUG
@@ -145,22 +137,19 @@ AnslpClient::~AnslpClient()
 
 }
 
-//vector<ipap_message *> 
-void
+anslp::session_id
 AnslpClient::tg_create( const hostaddress &source_addr, 
 						const hostaddress &destination_addr,
-					   uint16_t source_port, uint16_t dest_port, 
-						uint8_t protocol, uint32_t session_lifetime )
+					    uint16_t source_port, uint16_t dest_port, 
+						uint8_t protocol, uint32_t session_lifetime, 
+						ipap_message *message )
 {
 #ifdef DEBUG
     log->dlog(ch,"Starting tg_create");
 #endif
 	
 
-    // Build an ipap_message for a create session, which only has 
-    // auction template options.
-	// Build the request message 
-	anslp_ipap_message *mess = new anslp_ipap_message();    
+	anslp_ipap_message *mess = new anslp_ipap_message(*message);    
          
     FastQueue ret;
 	    
@@ -169,7 +158,7 @@ AnslpClient::tg_create( const hostaddress &source_addr,
     mspec_objects.push_back(mess->copy());
 
     // Create a new event for launching the configure event.
-    event *e = new api_create_event(source_addr,destination_addr,source_port, 
+    event *e = new api_create_event(source_addr, destination_addr, source_port, 
    				       dest_port, protocol, mspec_objects, 
 				       session_lifetime, 
 				       selection_auctioning_entities::sme_any, 
@@ -181,21 +170,20 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 
     anslpd->get_fqueue()->enqueue(msg);
 	
-    message *ret_msg = ret.dequeue_timedwait(10000);
+    protlib::message *ret_msg = ret.dequeue_timedwait(10000);
 
     anslp_event_msg *r = dynamic_cast<anslp_event_msg *>(ret_msg);
 	
-    sid = r->get_session_id();
-    
-    delete r;
-    
+    anslp::session_id sid = r->get_session_id();
+        
+    saveDelete(r);
     saveDelete(mess);
 
 #ifdef DEBUG
     log->dlog(ch,"Ending tg_create -Session configured");
 #endif        
     
-    // TODO AM: To take the values returned in the message and return them. 
+    return sid;
 
 }
 
@@ -222,10 +210,7 @@ AnslpClient::tg_teardown(session_id id)
 }
 
 void 
-AnslpClient::tg_bidding(const hostaddress &source_addr, 
-						const hostaddress &destination_addr,
-					   uint16_t source_port, uint16_t dest_port, 
-						uint8_t protocol, uint32_t session_lifetime)
+AnslpClient::tg_bidding(anslp::session_id, ipap_message *message)
 {
 
 #ifdef DEBUG
@@ -247,52 +232,36 @@ AnslpClient::tg_bidding(const hostaddress &source_addr,
 
 }
 
-
-
-/* ------------------------ set_sender_address -----------------------*/
-void 
-AnslpClient::set_sender_address(hostaddress _sender_address)
+string AnslpClient::getLocalAddress(void)
 {
-	sender_addr = _sender_address;
+	list<hostaddress>::iterator iter;
+	list<hostaddress> addresses4 = ntlp::gconf.getpar< list<hostaddress> >(gistconf_localaddrv4);
+	
+	for (iter = addresses4.begin(); iter != addresses4.end(); ++iter){
+		string address(iter->get_ip_str());
+		if (!(address.empty()))
+			return address;
+	}
+
+	list<hostaddress> addresses6 = ntlp::gconf.getpar< list<hostaddress> >(gistconf_localaddrv6);
+	for (iter = addresses6.begin(); iter != addresses6.end(); ++iter){
+		string address(iter->get_ip_str());
+		if (!(address.empty()))
+			return address;
+	}
+	
+	return "";
 }
 
-/* ----------------------- set_receiver_address ----------------------*/
-void
-AnslpClient::set_receiver_address(hostaddress _receiver_address)
+uint32_t AnslpClient::getInitiatorLifetime(void)
 {
-	receiver_addr = _receiver_address;
-}
-
-/* ------------------------ set_source_address -----------------------*/
-void
-AnslpClient::set_source_address(hostaddress _source_address)
-{
-	source = _source_address;
-}
-
-/* ------------------------- set_sender_port -------------------------*/
-void
-AnslpClient::set_sender_port(uint16_t _sender_port)
-{
-	sender_port = _sender_port;
-}
-/* ------------------------ set_receiver_port ------------------------*/
-void
-AnslpClient::set_receiver_port(uint16_t _receiver_port)
-{
-	receiver_port = _receiver_port;
-}
-
-/* -------------------------- set_protocol ---------------------------*/
-void
-AnslpClient::set_protocol(uint8_t _protocol)
-{
-	protocol = _protocol;
-}
-
-/* ------------------------ Set sender address -----------------------*/
-void
-AnslpClient::set_lifetime(uint32_t _lifetime)
-{
-	lifetime = _lifetime;
+	if (conf.get()){
+		uint32_t lifetime = conf->get_ni_session_lifetime();
+		return lifetime;
+	}
+	else{
+		throw Error("AnslpClient not configured");
+	}
+	
+	return 0;
 }

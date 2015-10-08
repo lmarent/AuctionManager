@@ -101,4 +101,7 @@ const string HELP =  "" \
 "get_modinfo <mod_name>         get auction module information \n \n" \
 "any other text is sent to the server and the reply from the server is displayed.";
 
+// ResourceRequestFileParser.cpp
+const string NO_AUCTION_VALUE = "ANY"; 
+
 };

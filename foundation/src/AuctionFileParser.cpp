@@ -80,7 +80,7 @@ configItem_t AuctionFileParser::parsePref(xmlNodePtr cur)
 
 auctionTemplateField_t AuctionFileParser::parseField(xmlNodePtr cur, 
 										   fieldDefList_t *fieldDefs,
-										   ipap_message *message)
+										   ipap_field_container &g_ipap_fields)
 {
 
 #ifdef DEBUG
@@ -132,8 +132,7 @@ auctionTemplateField_t AuctionFileParser::parseField(xmlNodePtr cur,
 		iter = fieldDefs->find(name);
 		if (iter != fieldDefs->end()) {
 			// set according to definition
-			ipap_field field = message->get_field_definition(
-								iter->second.eno, iter->second.ftype);
+			ipap_field field = g_ipap_fields.get_field(iter->second.eno, iter->second.ftype);
 				
 			fieldTempl.field = iter->second;
 			fieldTempl.length = field.get_field_type().length;
@@ -166,7 +165,7 @@ auctionTemplateField_t AuctionFileParser::parseField(xmlNodePtr cur,
 void AuctionFileParser::parse( fieldDefList_t *fieldDefs, 
 							   auctionDB_t *auctions,
 							   AuctionIdSource *idSource,
-							   ipap_message *messageOut )
+							   ipap_template_container *templates )
 {
 
     xmlNodePtr cur, cur2, cur3;
@@ -175,6 +174,12 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
     miscList_t globalMiscList;
     time_t now = time(NULL);
     string defaultActGbl;
+
+	// load field definitions for ipap_messages.
+	ipap_field_container g_ipap_fields;	
+    g_ipap_fields.initialize_forward();
+    g_ipap_fields.initialize_reverse();
+
 
     cur = xmlDocGetRootElement(XMLDoc);
 
@@ -279,7 +284,7 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
                 // get FIELD
                 if ((!xmlStrcmp(cur2->name, (const xmlChar *)"FIELD")) && (cur2->ns == ns)) {
                     // parse
-                    auctionTemplateField_t templField = parseField(cur2, fieldDefs, messageOut); 	
+                    auctionTemplateField_t templField = parseField(cur2, fieldDefs, g_ipap_fields); 	
                     // add
                     templFields[templField.field.name] = templField;
                 }
@@ -350,7 +355,8 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
 				}
 				
                 Auction *a = new Auction(now, sname, rname, action, 
-										 miscs, templFields, messageOut );
+										 miscs, AS_BUILD_TEMPLATE, 
+										 templFields, templates );
                 auctions->push_back(a);
             } catch (Error &e) {
                 log->elog(ch, e);

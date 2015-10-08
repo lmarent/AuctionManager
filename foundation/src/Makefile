@@ -133,6 +133,7 @@ am_libfoundation_la_OBJECTS = libfoundation_la-AuctionTimer.lo \
 	libfoundation_la-FieldDefParser.lo \
 	libfoundation_la-FieldValParser.lo \
 	libfoundation_la-MAPIIpApMessageParser.lo \
+	libfoundation_la-TemplateIdSource.lo \
 	libfoundation_la-AllocationIdSource.lo \
 	libfoundation_la-Allocation.lo \
 	libfoundation_la-MAPIAllocationParser.lo \
@@ -284,6 +285,8 @@ LIBPROT_CFLAGS = -I/usr/local/include
 LIBPROT_LIBS = -L/usr/local/lib -lprot  
 LIBS = -ldl 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
+LIBUUID_CFLAGS = -I/usr/include/uuid   -I/usr/include/uuid 
+LIBUUID_LIBS = -luuid  
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
@@ -414,6 +417,7 @@ libfoundation_la_SOURCES = AuctionTimer.cpp \
 						  FieldDefParser.cpp \
 						  FieldValParser.cpp \
 						  MAPIIpApMessageParser.cpp \
+						  TemplateIdSource.cpp \
 						  AllocationIdSource.cpp \
 						  Allocation.cpp \
 						  MAPIAllocationParser.cpp \
@@ -545,6 +549,7 @@ include ./$(DEPDIR)/libfoundation_la-MAPIAuctionParser.Plo
 include ./$(DEPDIR)/libfoundation_la-MAPIBidParser.Plo
 include ./$(DEPDIR)/libfoundation_la-MAPIIpApMessageParser.Plo
 include ./$(DEPDIR)/libfoundation_la-ParserFcts.Plo
+include ./$(DEPDIR)/libfoundation_la-TemplateIdSource.Plo
 include ./$(DEPDIR)/libfoundation_la-Timeval.Plo
 include ./$(DEPDIR)/libfoundation_la-XMLParser.Plo
 
@@ -669,6 +674,13 @@ libfoundation_la-MAPIIpApMessageParser.lo: MAPIIpApMessageParser.cpp
 #	$(AM_V_CXX)source='MAPIIpApMessageParser.cpp' object='libfoundation_la-MAPIIpApMessageParser.lo' libtool=yes \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-MAPIIpApMessageParser.lo `test -f 'MAPIIpApMessageParser.cpp' || echo '$(srcdir)/'`MAPIIpApMessageParser.cpp
+
+libfoundation_la-TemplateIdSource.lo: TemplateIdSource.cpp
+	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-TemplateIdSource.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-TemplateIdSource.Tpo -c -o libfoundation_la-TemplateIdSource.lo `test -f 'TemplateIdSource.cpp' || echo '$(srcdir)/'`TemplateIdSource.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/libfoundation_la-TemplateIdSource.Tpo $(DEPDIR)/libfoundation_la-TemplateIdSource.Plo
+#	$(AM_V_CXX)source='TemplateIdSource.cpp' object='libfoundation_la-TemplateIdSource.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libfoundation_la-TemplateIdSource.lo `test -f 'TemplateIdSource.cpp' || echo '$(srcdir)/'`TemplateIdSource.cpp
 
 libfoundation_la-AllocationIdSource.lo: AllocationIdSource.cpp
 	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libfoundation_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libfoundation_la-AllocationIdSource.lo -MD -MP -MF $(DEPDIR)/libfoundation_la-AllocationIdSource.Tpo -c -o libfoundation_la-AllocationIdSource.lo `test -f 'AllocationIdSource.cpp' || echo '$(srcdir)/'`AllocationIdSource.cpp

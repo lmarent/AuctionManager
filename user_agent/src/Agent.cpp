@@ -63,7 +63,6 @@ Agent::Agent( int argc, char *argv[])
 
     // record start time for later output
   startTime = ::time(NULL);
-  bool bresult;
 
     try {
 
@@ -99,25 +98,11 @@ Agent::Agent( int argc, char *argv[])
                   "MAIN", "fdeffile");
         args->add('C', "FieldConstFile", "<file>", "use alternative file for field constants",
                   "MAIN", "fcontfile");
-        args->add('s', "sourceAddress", "<sourceaddress>", "source address",
-                  "MAIN", "saddress");
-        args->add('d', "destinAddress", "<destinationaddress>", "destination address",
-                  "MAIN", "daddress");
-        args->add('t', "lifetime", "<lifetime>", "lifetime",
-                  "MAIN", "lifetime");
-        args->add('p', "protocol", "<protocolnumber>", "protocol",
-                  "MAIN", "protocol");
-        args->add('x', "", "<portnumber>", "sourcePort",
-                  "MAIN", "sport");
-        args->add('X', "", "<portnumber>", "destinPort",
-                  "MAIN", "dport");
                   
 #ifdef USE_SSL
         args->addFlag('x', "UseSSL", "use SSL for control communication",
                       "CONTROL", "usessl");
 #endif
-        args->add('P', "ControlPort", "<portnumber>", "use alternative control port",
-                  "CONTROL", "cport");
 
         // parse command line args
         if (args->parseArgs(argc, argv)) {
@@ -138,7 +123,7 @@ Agent::Agent( int argc, char *argv[])
         // register exit function
         atexit(exit_fct);
 				
-        auto_ptr<Logger> _log(Logger::getInstance(AGENT_DEFAULT_LOG_FILE)); 	
+        auto_ptr<Logger> _log(Logger::getInstance(AGNT_DEFAULT_LOG_FILE)); 	
         log = _log;
         ch = log->createChannel("Agent");
 
@@ -151,60 +136,17 @@ Agent::Agent( int argc, char *argv[])
         if (configFileName.empty()) { 
             // is no config file is given then use the default
             // file located in a relative location to the binary
-            configFileName = NETAGENT_DEFAULT_CONFIG_FILE;
+            configFileName = AGNT_DEFAULT_CONFIG_FILE;
         }
 
         log->log(ch,"ConfigFile = %s", configFileName.c_str());
 
-        auto_ptr<ConfigManager> _conf(new ConfigManager(configFileName, argv[0]));
+        auto_ptr<ConfigManager> _conf(new 
+			ConfigManager(AGNT_CONFIGFILE_DTD, configFileName, argv[0]));
         conf = _conf;
 
         // merge into config
         conf->mergeArgs(args->getArgList(), args->getArgVals());
-
-		// Read the source address
-		string sSourceAddress = args->getArgValue('s');
-		protlib::hostaddress sender_addr;
-		bresult = sender_addr.set_ip(sSourceAddress.c_str());
-		if (bresult == false){
-			throw Error("Invalid given source address %s", sSourceAddress.c_str());
-		}
-		
-		// Read the source port
-		string sSourcePort = args->getArgValue('x');
-		uint16_t sPort = atoi(sSourcePort.c_str());
-		if (sPort <= 0){
-			throw Error("Invalid source port number %s", sSourcePort.c_str());
-		}
-
-		// Read the destination address
-		string sDestinAddress = args->getArgValue('d');
-		protlib::hostaddress receiver_addr;
-		bresult = receiver_addr.set_ip(sDestinAddress.c_str());
-		if (bresult == false){
-			throw Error("Invalid given destination address %s", sDestinAddress.c_str());
-		}
-
-		// Read the destination port
-		string sDestinationPort = args->getArgValue('X');
-		uint16_t dPort = atoi(sDestinationPort.c_str());
-		if (dPort <= 0){
-			throw Error("Invalid destination port number %s", sDestinationPort.c_str());
-		}
-
-		// Read the protocol
-		string sprotocol = args->getArgValue('p');
-		uint8_t protocol = atoi(sprotocol.c_str());
-		if (protocol <= 0){
-			throw Error("Invalid protocol number %s", sprotocol.c_str());
-		}
-		
-		// Read the lifetime
-		string slifetime = args->getArgValue('t');
-		uint32_t lifetime = atoi(slifetime.c_str());
-		if (lifetime <= 0){
-			throw Error("Invalid lifetime value %s", slifetime.c_str());
-		}
 				
         // dont need this anymore
         CommandLineArgs *a = args.release();
@@ -217,7 +159,7 @@ Agent::Agent( int argc, char *argv[])
         logFileName = conf->getValue("LogFile", "MAIN");
 
         if (logFileName.empty()) {
-            logFileName = AGENT_DEFAULT_LOG_FILE;
+            logFileName = AGNT_DEFAULT_LOG_FILE;
         }
 
         log->setDefaultLogfile(logFileName);
@@ -230,12 +172,6 @@ Agent::Agent( int argc, char *argv[])
         
 #ifdef DEBUG
         log->log(ch,"configfilename used is: '%s'", configFileName.c_str());
-        log->log(ch,"source address: '%s'", sender_addr.get_ip_str());
-        log->log(ch,"source port: '%d'", sPort);
-        log->log(ch,"destination address: '%s'", receiver_addr.get_ip_str());
-        log->log(ch,"destination port: '%d'", dPort);
-        log->log(ch,"protocol: '%d'", protocol);
-        log->log(ch,"lifetime: '%d'", lifetime);
         log->dlog(ch,"------- startup -------" );
 #endif
 
@@ -247,25 +183,39 @@ Agent::Agent( int argc, char *argv[])
                                                     conf->getValue("FieldConstFile", "MAIN")));
         bidm = _bidm;
         
-        auto_ptr<AuctionManager> _aucm(new AuctionManager(conf->getValue("FieldDefFile", "MAIN")));
+        auto_ptr<AuctionManager> _aucm(new AuctionManager(conf->getValue("FieldDefFile", "MAIN"),
+															conf->getValue("FieldConstFile", "MAIN") ));
         aucm = _aucm;
+        
+        auto_ptr<ResourceRequestManager> _rreqm(new ResourceRequestManager(conf->getValue("FieldDefFile", "MAIN"),
+															conf->getValue("FieldConstFile", "MAIN") ));
+        rreqm = _rreqm;
+        
+        
+        auto_ptr<MAPIResourceRequestParser> _mrrp(new MAPIResourceRequestParser());
+        mrrp = _mrrp;
+
+		auto_ptr<MAPIAuctionParser> _macp(new MAPIAuctionParser()); 
+		macp = _macp;
+
+        auto_ptr<SessionManager> _ssmp(new SessionManager());
+        ssmp = _ssmp;
         
         auto_ptr<EventSchedulerAgent> _evnt(new EventSchedulerAgent());
         evnt = _evnt;
+
 
 #ifdef DEBUG
 		log->dlog(ch,"------- eventSchedulerAgent loaded-------" );
 #endif
 		
-		string anslConfFile = conf->getValue("AnslpConfFile", "MAIN");
+		string anslpConfFile = conf->getValue("AnslpConfFile", "MAIN");
 
 #ifdef DEBUG
-		log->dlog(ch,"Anslp client conf file:%s", anslConfFile.c_str() );
+		log->dlog(ch,"Anslp client conf file:%s", anslpConfFile.c_str() );
 #endif
-									 
-		auto_ptr<AnslpClient> _anslpc(new AnslpClient(
-					anslConfFile, sender_addr, receiver_addr, 
-					sPort, dPort, protocol, lifetime ));
+											 
+		auto_ptr<AnslpClient> _anslpc(new AnslpClient(anslpConfFile));
 					
 		anslpc = _anslpc;
 #ifdef DEBUG
@@ -286,13 +236,14 @@ Agent::Agent( int argc, char *argv[])
 									 0));
         pprocThread = 0;
 		
-		
         if (conf->isTrue("Thread", "AGENT_PROCESSOR") ) {
             log->wlog(ch, "Threads enabled in config file but executable is compiled without thread support");
         }
 #endif
         proc = _proc;
         proc->mergeFDs(&fdList);
+
+		readDefaultData();
 		
 		// setup initial resource requests.
 		string rfn = conf->getValue("ResourceRequestFile", "MAIN");
@@ -340,6 +291,93 @@ Agent::~Agent()
 #endif
     
 }
+
+void 
+Agent::readDefaultData(void)
+{
+
+#ifdef DEBUG
+		log->dlog(ch,"Starting readDefaultData" );
+#endif
+
+	bool bresult;
+	
+	if (anslpc.get() != NULL)
+	{
+		string sourceAddr = anslpc->getLocalAddress(); 
+		protlib::hostaddress source_addr;
+		bresult = source_addr.set_ip(sourceAddr.c_str());
+		if (bresult == false){
+			throw Error("Invalid default source address given %s", sourceAddr.c_str());
+		}
+		else{
+			defaultSourceAddr = sourceAddr;
+		}
+		
+		uint32_t lifetime = anslpc->getInitiatorLifetime(); 
+		if (lifetime > 0){
+			defaultLifeTime = lifetime;
+		}
+		else{
+			throw Error("Invalid default lifetime given %d", lifetime);
+		}	
+	}
+	else{
+		throw Error("Anslp Client configuration Manager not initialized");
+	}
+	
+	if (conf.get() != NULL)
+	{
+
+		// Read the source port
+		string sSourcePort = conf->getValue("DefaultSourcePort", "MAIN");
+		uint16_t sPort = atoi(sSourcePort.c_str());
+		if (sPort <= 0){
+			throw Error("Invalid default source port number %s", sSourcePort.c_str());
+		}
+		else{
+			defaultSourcePort = sPort;
+		}
+		
+		string sDestinAddress = conf->getValue("DefaultDestinAddr", "MAIN");
+		protlib::hostaddress receiver_addr;
+		bresult = receiver_addr.set_ip(sDestinAddress.c_str());
+		if (bresult == false){
+			throw Error("Invalid default destination address given %s", sDestinAddress.c_str());
+		}
+		else{
+			defaultDestinAddr = sDestinAddress;
+		}
+
+		// Read the destination port
+		string sDestinationPort = conf->getValue("DefaultDestinPort", "MAIN");
+		uint16_t dPort = atoi(sDestinationPort.c_str());
+		if (dPort <= 0){
+			throw Error("Invalid default destination port number %s", sDestinationPort.c_str());
+		}
+		else{
+			defaultDestinPort = dPort;
+		}
+
+		// Read the protocol
+		string sprotocol = conf->getValue("DefaultProtocol", "MAIN");
+		uint8_t protocol = atoi(sprotocol.c_str());
+		if (protocol <= 0){
+			throw Error("Invalid default protocol number %s", sprotocol.c_str());
+		}
+		else{
+			defaultProtocol = protocol;
+		}
+	}
+	else {
+		throw Error("Configuration Manager not initialized");
+	}
+
+#ifdef DEBUG
+		log->dlog(ch,"Ending readDefaultData" );
+#endif
+
+} 
 
 
 /* -------------------- getHelloMsg -------------------- */
@@ -714,7 +752,7 @@ void Agent::handleAddResourceRequests(Event *e, fd_sets_t *fds)
 		
 		// Activates resource request.
 		/*
-		 * above 'addResourceRequests' produces an 
+		 * The above 'addResourceRequests' produces an 
 		 * ResourceRequestActivation event.
 		 * 
 		 * If Resource request addition shall be performed 
@@ -751,31 +789,82 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 	log->dlog(ch,"Start event activate resource request interval" );
 #endif
 
-    time_t start = ((ActivateResourceRequestIntervalEvent *)e)->getStartTime();
-    resourceRequestDB_t *request = 
-			((ActivateResourceRequestIntervalEvent *)e)->getResourceRequests();
-			
-	resourceRequestDBIter_t iter;
-	for (iter = request->begin(); iter != request->end(); ++iter)
-	{
-		auctionDB_t *new_auctions = NULL;
-		ResourceRequest *req = *iter;
-			  
-		// Get the auctions corresponding with this resource request interval
-		new_auctions = req->askForAuctions(start);
-
-        // Add the auctions to the auction manager for posterior activation
-        aucm->addAuctions(new_auctions, evnt.get());
-			
-		// Delete pointers to auction objects.
-        saveDelete(new_auctions);
-			  
-	}
-
-#ifdef DEBUG
-    log->dlog(ch,"Ending event activate resource request interval" );
-#endif
+	ipap_message *mes = NULL;
+	auction::Session *session = NULL;
 	
+	try{
+
+		time_t start = ((ActivateResourceRequestIntervalEvent *)e)->getStartTime();
+		resourceRequestDB_t *request = 
+				((ActivateResourceRequestIntervalEvent *)e)->getResourceRequests();
+				
+		resourceRequestDBIter_t iter;
+		for (iter = request->begin(); iter != request->end(); ++iter)
+		{
+			ResourceRequest *req = *iter;
+			
+			// Build the recordId as the resourceRequestSet + resourceRequestName
+			string recordId = req->getResourceRequestSet() + "." + req->getResourceRequestName();
+			
+			/* TODO AM: for now we request all resources, 
+			 * 			resource management must be implemented */ 
+			string resourceId = "ANY"; 
+			
+			resourceReq_interval_t interval = req->getIntervalByStart(start);
+				  
+			// Get the auctions corresponding with this resource request interval
+			mes = mrrp->get_ipap_message(proc->getFieldDefinitions(), 
+													   recordId,
+													   resourceId,
+													   interval);
+			
+			// Add to the index of sessions to resource request intervals.
+			
+			
+			session = req->getSession( interval.start, interval.stop, 
+									   defaultSourceAddr, defaultSourceAddr, 
+									   defaultDestinAddr, defaultSourcePort, 
+									   defaultDestinPort, defaultProtocol,
+									   defaultLifeTime  );
+			
+			
+			// Call the anslp client for sending the message.
+			/*
+			anslp::session_id sid = anslpc->tg_create( session->getSenderAddress(), 
+											   session->getReceiverAddress(), 
+											   session->getSenderPort(),
+											   session->getReceiverPort(),
+											   session->getProtocol(),
+											   session->getLifetime(),
+											   mes );
+			session.setAnlspSession(sid);
+			*/	
+			
+			
+			// Store the session as new in the sessionManager
+			ssmp->addSession(session);
+						
+			// free the memory assigned.
+			saveDelete(mes);
+				  
+		}
+
+	#ifdef DEBUG
+		log->dlog(ch,"Ending event activate resource request interval" );
+	#endif
+	
+	} catch(Error &err) {
+        // error in resource request(s)
+        if (mes) {
+            saveDelete(mes);
+		}
+		if (session){
+			ssmp->delSession(session, evnt.get());
+			saveDelete(session);
+		}	
+			
+        throw err;
+    }
 }
 
 void Agent::handleRemoveResourceRequestInterval(Event *e)
@@ -787,25 +876,78 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
     time_t start = ((RemoveResourceRequestIntervalEvent *)e)->getStartTime();
     resourceRequestDB_t *request = ((ActivateResourceRequestIntervalEvent *)e)->getResourceRequests();
 	resourceRequestDBIter_t iter;
+	auctionDB_t *auctions = NULL;
 	for (iter = request->begin(); iter != request->end(); ++iter)
 	{
-		auctionDB_t *auctions = NULL;
-		ResourceRequest *req = *iter;
-		// Get the auctions corresponding with this resource request interval
-		auctions = req->askForAuctions(start);
 		
-		if (auctions != NULL)
+		//ResourceRequest *req = *iter;
+		// Get the auctions corresponding with this resource request interval
+		//auctions = req->askForAuctions(start);
+		
+		//if (auctions != NULL)
 		    // Remove auctions associated  with the resource interval
-			evnt->addEvent(new RemoveAuctionsEvent(*auctions));
+		//	evnt->addEvent(new RemoveAuctionsEvent(*auctions));
 		
 		// Delete pointers to auction objects.
-        saveDelete(auctions);	
+        //saveDelete(auctions);	
 	}
 
 #ifdef DEBUG
 	log->dlog(ch,"Ending event remove resource request interval" );
 #endif
 	
+}
+
+void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
+{
+#ifdef DEBUG
+	log->dlog(ch,"Starting event handleResponseCreateSession" );
+#endif
+
+	ipap_message *message = NULL;
+	auctionDB_t *auctions = new auctionDB_t();
+	int domainId;
+
+	try
+	{
+
+		string sessionId = ((ResponseCreateSessionEvent *)e)->getSession();
+		
+		// Obtains the message 
+		message = ((ResponseCreateSessionEvent *)e)->getMessage();
+
+		// Verifies if the domain is already in the agent template list
+		domainId = message->get_domain();
+		if (domainId > 0){
+		
+			agentTemplateListIter_t tmplIter = agentTemplates.find(domainId);
+			if  (tmplIter == agentTemplates.end())
+				auto_ptr<ipap_template_container> ptrTemplCont(new ipap_template_container());
+				agentTemplates[domainId] = ptrTemplCont;
+			} 
+			
+			agentTemplateListIter_t tmplIter = agentTemplates.find(domainId);
+				
+			macp->parse( proc->getFieldDefinitions(), message, auctions, (tmplIter->second).get());
+			
+			aucm->addAuctions(auctions, evnt.get());
+		
+			saveDelete(auctions);
+			
+			comm->sendMsg("", ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
+		} else
+			throw Error("Agent: Invalid domain id associated with the message");
+		}
+	}
+	catch (Error &err){
+		if (auctions){
+			saveDelete(auctions);
+		}
+		
+		log->dlog( ch, err.getError().c_str() );	
+		comm->sendErrMsg(err.getError(), ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
+	}
+
 }
 
 /* -------------------- handleEvent -------------------- */
@@ -828,21 +970,21 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
 		handleGetInfo(e,fds);
       break;
         
-    case ADD_BIDS:
-		handleAddBids(e,fds);
-      break;
-
     case ADD_AUCTIONS:
 		handleAddAuctions(e,fds);
+      break;
+
+    case ACTIVATE_AUCTIONS:
+		handleActivateAuctions(e);
+      break;
+
+    case ADD_BIDS:
+		handleAddBids(e,fds);
       break;
       
 	case ADD_BID_AUCTION:
 		handleAddBidsAuction(e);
 	  break;
-
-    case ACTIVATE_AUCTIONS:
-		handleActivateAuctions(e);
-      break;
 	
 	case REMOVE_AUCTIONS:
 		handleRemoveAuctions(e);
@@ -871,6 +1013,10 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
     case REMOVE_RESOURCE_REQUEST_INTERVAL:
 		handleRemoveResourceRequestInterval(e);
       break;
+
+	case RESPONSE_CREATE_SESSION:
+		handleResponseCreateSession(e, fds);
+	  break;
 
     default:
 #ifdef DEBUG
@@ -1074,7 +1220,7 @@ void Agent::sigusr1_handler(int i)
 
 void Agent::exit_fct(void)
 {
-    unlink(NETAGENT_LOCK_FILE.c_str());
+    unlink(AGNT_LOCK_FILE.c_str());
 }
 
 void Agent::sigalarm_handler(int i)
@@ -1091,16 +1237,16 @@ int Agent::alreadyRunning()
     struct stat stats;
     int status, oldPid;
 
-	cout << NETAGENT_LOCK_FILE.c_str() << endl;
+	cout << AGNT_LOCK_FILE.c_str() << endl;
 
     // do we have a lock file ?
-    if (stat(NETAGENT_LOCK_FILE.c_str(), &stats ) == 0) { 
+    if (stat(AGNT_LOCK_FILE.c_str(), &stats ) == 0) { 
 			
         // read process ID from lock file
-        file = fopen(NETAGENT_LOCK_FILE.c_str(), "rt" );
+        file = fopen(AGNT_LOCK_FILE.c_str(), "rt" );
         if (file == NULL) {
             throw Error("cannot open old pidfile '%s' for reading: %s\n",
-                        NETAGENT_LOCK_FILE.c_str(), strerror(errno));
+                        AGNT_LOCK_FILE.c_str(), strerror(errno));
         }
         fscanf(file, "%d\n", &oldPid);
         fclose(file);
@@ -1116,20 +1262,20 @@ int Agent::alreadyRunning()
 
         // pid file but no meter process ->meter must have crashed
         // remove (old) pid file and proceed
-        unlink(NETAGENT_LOCK_FILE.c_str());
+        unlink(AGNT_LOCK_FILE.c_str());
     }
 	
-	cout << NETAGENT_LOCK_FILE.c_str() << endl;
+	cout << AGNT_LOCK_FILE.c_str() << endl;
 	
     // no lock file and no running meter process
     // write new lock file and continue
-    file = fopen(NETAGENT_LOCK_FILE.c_str(), "wt" );
+    file = fopen(AGNT_LOCK_FILE.c_str(), "wt" );
     if (file == NULL) {
         throw Error("cannot open pidfile '%s' for writing: %s\n",
-                    NETAGENT_LOCK_FILE.c_str(), strerror(errno));
+                    AGNT_LOCK_FILE.c_str(), strerror(errno));
     }
     
-    cout << NETAGENT_LOCK_FILE.c_str() << endl;
+    cout << AGNT_LOCK_FILE.c_str() << endl;
     
     fprintf(file, "%d\n", getpid());
     fclose(file);

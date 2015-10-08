@@ -98,7 +98,6 @@ PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_netagent_OBJECTS =  \
 	../../foundation/src/netagent-Constants.$(OBJEXT) \
-	../../foundation/src/netagent-ConstantsAum.$(OBJEXT) \
 	../../foundation/src/netagent-ParserFcts.$(OBJEXT) \
 	../../foundation/src/netagent-XMLParser.$(OBJEXT) \
 	../../foundation/src/netagent-Timeval.$(OBJEXT) \
@@ -107,6 +106,7 @@ am_netagent_OBJECTS =  \
 	../../foundation/src/netagent-FieldValue.$(OBJEXT) \
 	../../foundation/src/netagent-FieldDefParser.$(OBJEXT) \
 	../../foundation/src/netagent-FieldValParser.$(OBJEXT) \
+	../../foundation/src/netagent-TemplateIdSource.$(OBJEXT) \
 	../../foundation/src/netagent-MAPIIpApMessageParser.$(OBJEXT) \
 	../../foundation/src/netagent-BidIdSource.$(OBJEXT) \
 	../../foundation/src/netagent-AuctionIdSource.$(OBJEXT) \
@@ -130,10 +130,14 @@ am_netagent_OBJECTS =  \
 	../../foundation/src/netagent-MAPIAllocationParser.$(OBJEXT) \
 	../../foundation/src/netagent-AllocationManager.$(OBJEXT) \
 	../../foundation/src/netagent-AnslpClient.$(OBJEXT) \
+	../../foundation/src/netagent-SessionIdSource.$(OBJEXT) \
+	../../foundation/src/netagent-Session.$(OBJEXT) \
+	../../foundation/src/netagent-SessionManager.$(OBJEXT) \
 	netagent-ResourceRequest.$(OBJEXT) \
 	netagent-ResourceRequestIdSource.$(OBJEXT) \
 	netagent-ResourceRequestFileParser.$(OBJEXT) \
 	netagent-MAPIResourceRequestParser.$(OBJEXT) \
+	netagent-TextResourceRequestParser.$(OBJEXT) \
 	netagent-ResourceRequestManager.$(OBJEXT) \
 	netagent-EventSchedulerAgent.$(OBJEXT) \
 	netagent-PageRepository.$(OBJEXT) netagent-CtrlComm.$(OBJEXT) \
@@ -278,6 +282,8 @@ LIBPROT_CFLAGS = -I/usr/local/include
 LIBPROT_LIBS = -L/usr/local/lib -lprot  
 LIBS = -ldl 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
+LIBUUID_CFLAGS = -I/usr/include/uuid   -I/usr/include/uuid 
+LIBUUID_LIBS = -luuid  
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
@@ -386,7 +392,6 @@ AM_CXXFLAGS = -I$(top_srcdir)/lib/getopt_long \
 				-g -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING
 
 netagent_SOURCES = ../../foundation/src/Constants.cpp \
-					../../foundation/src/ConstantsAum.cpp \
 					../../foundation/src/ParserFcts.cpp \
 					../../foundation/src/XMLParser.cpp \
 					../../foundation/src/Timeval.cpp \
@@ -395,6 +400,7 @@ netagent_SOURCES = ../../foundation/src/Constants.cpp \
 					../../foundation/src/FieldValue.cpp \
 					../../foundation/src/FieldDefParser.cpp \
 					../../foundation/src/FieldValParser.cpp \
+					../../foundation/src/TemplateIdSource.cpp \
 					../../foundation/src/MAPIIpApMessageParser.cpp \
 					../../foundation/src/BidIdSource.cpp \
 					../../foundation/src/AuctionIdSource.cpp \
@@ -418,10 +424,14 @@ netagent_SOURCES = ../../foundation/src/Constants.cpp \
 					../../foundation/src/MAPIAllocationParser.cpp \
 					../../foundation/src/AllocationManager.cpp \
 					../../foundation/src/AnslpClient.cpp \
+					../../foundation/src/SessionIdSource.cpp \
+					../../foundation/src/Session.cpp \
+					../../foundation/src/SessionManager.cpp \
 					ResourceRequest.cpp \
 					ResourceRequestIdSource.cpp \
 					ResourceRequestFileParser.cpp \
 					MAPIResourceRequestParser.cpp \
+					TextResourceRequestParser.cpp \
 					ResourceRequestManager.cpp \
 					EventSchedulerAgent.cpp \
 					PageRepository.cpp \
@@ -432,21 +442,22 @@ netagent_SOURCES = ../../foundation/src/Constants.cpp \
 					Agent.cpp \
 					main.cpp
 
-netagent_CPPFLAGS = -I$(top_srcdir)/user_agent/include \
-					-I$(top_srcdir)/lib/getopt_long \
+netagent_CPPFLAGS = -I$(top_srcdir)/lib/getopt_long \
 					-I$(top_srcdir)/lib/httpd \
 					$(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) $(LIBFASTQUEUE_CFLAGS) \
-					$(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) $(LIBANSLP_CFLAGS) 
+					$(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) $(LIBANSLP_CFLAGS) \
+					-I/usr/include/uuid   -I/usr/include/uuid  -I../../foundation/include \
+					-I$(top_srcdir)/user_agent/include
 
 netagent_LDADD =    -lxml2 $(LIBIPAP_LIBS) \
 				 $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) \
-				 $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS) \
+				 $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS) -luuid   \
 				 $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 				 $(top_builddir)/lib/httpd/libhttpd.a
 
 
 # what flags you want to pass to the C compiler & linker
-AM_CPPFLAGS = -g -I../../foundation/include 
+AM_CPPFLAGS = -g  
 AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit \
 			    -lxml2 $(LIBIPAP_LIBS) \
 			 $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) \
@@ -547,9 +558,6 @@ clean-binPROGRAMS:
 ../../foundation/src/netagent-Constants.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
-../../foundation/src/netagent-ConstantsAum.$(OBJEXT):  \
-	../../foundation/src/$(am__dirstamp) \
-	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
 ../../foundation/src/netagent-ParserFcts.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
@@ -572,6 +580,9 @@ clean-binPROGRAMS:
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
 ../../foundation/src/netagent-FieldValParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/netagent-TemplateIdSource.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
 ../../foundation/src/netagent-MAPIIpApMessageParser.$(OBJEXT):  \
@@ -643,6 +654,15 @@ clean-binPROGRAMS:
 ../../foundation/src/netagent-AnslpClient.$(OBJEXT):  \
 	../../foundation/src/$(am__dirstamp) \
 	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/netagent-SessionIdSource.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/netagent-Session.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/netagent-SessionManager.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
 
 netagent$(EXEEXT): $(netagent_OBJECTS) $(netagent_DEPENDENCIES) $(EXTRA_netagent_DEPENDENCIES) 
 	@rm -f netagent$(EXEEXT)
@@ -667,6 +687,7 @@ include ./$(DEPDIR)/netagent-ResourceRequest.Po
 include ./$(DEPDIR)/netagent-ResourceRequestFileParser.Po
 include ./$(DEPDIR)/netagent-ResourceRequestIdSource.Po
 include ./$(DEPDIR)/netagent-ResourceRequestManager.Po
+include ./$(DEPDIR)/netagent-TextResourceRequestParser.Po
 include ./$(DEPDIR)/netagent-main.Po
 include ../../foundation/src/$(DEPDIR)/netagent-Allocation.Po
 include ../../foundation/src/$(DEPDIR)/netagent-AllocationIdSource.Po
@@ -687,7 +708,6 @@ include ../../foundation/src/$(DEPDIR)/netagent-CommandLineArgs.Po
 include ../../foundation/src/$(DEPDIR)/netagent-ConfigManager.Po
 include ../../foundation/src/$(DEPDIR)/netagent-ConfigParser.Po
 include ../../foundation/src/$(DEPDIR)/netagent-Constants.Po
-include ../../foundation/src/$(DEPDIR)/netagent-ConstantsAum.Po
 include ../../foundation/src/$(DEPDIR)/netagent-Event.Po
 include ../../foundation/src/$(DEPDIR)/netagent-EventScheduler.Po
 include ../../foundation/src/$(DEPDIR)/netagent-Field.Po
@@ -699,6 +719,10 @@ include ../../foundation/src/$(DEPDIR)/netagent-MAPIAuctionParser.Po
 include ../../foundation/src/$(DEPDIR)/netagent-MAPIBidParser.Po
 include ../../foundation/src/$(DEPDIR)/netagent-MAPIIpApMessageParser.Po
 include ../../foundation/src/$(DEPDIR)/netagent-ParserFcts.Po
+include ../../foundation/src/$(DEPDIR)/netagent-Session.Po
+include ../../foundation/src/$(DEPDIR)/netagent-SessionIdSource.Po
+include ../../foundation/src/$(DEPDIR)/netagent-SessionManager.Po
+include ../../foundation/src/$(DEPDIR)/netagent-TemplateIdSource.Po
 include ../../foundation/src/$(DEPDIR)/netagent-Timeval.Po
 include ../../foundation/src/$(DEPDIR)/netagent-XMLParser.Po
 
@@ -739,20 +763,6 @@ include ../../foundation/src/$(DEPDIR)/netagent-XMLParser.Po
 #	$(AM_V_CXX)source='../../foundation/src/Constants.cpp' object='../../foundation/src/netagent-Constants.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-Constants.obj `if test -f '../../foundation/src/Constants.cpp'; then $(CYGPATH_W) '../../foundation/src/Constants.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/Constants.cpp'; fi`
-
-../../foundation/src/netagent-ConstantsAum.o: ../../foundation/src/ConstantsAum.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-ConstantsAum.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-ConstantsAum.Tpo -c -o ../../foundation/src/netagent-ConstantsAum.o `test -f '../../foundation/src/ConstantsAum.cpp' || echo '$(srcdir)/'`../../foundation/src/ConstantsAum.cpp
-	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/netagent-ConstantsAum.Tpo ../../foundation/src/$(DEPDIR)/netagent-ConstantsAum.Po
-#	$(AM_V_CXX)source='../../foundation/src/ConstantsAum.cpp' object='../../foundation/src/netagent-ConstantsAum.o' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-ConstantsAum.o `test -f '../../foundation/src/ConstantsAum.cpp' || echo '$(srcdir)/'`../../foundation/src/ConstantsAum.cpp
-
-../../foundation/src/netagent-ConstantsAum.obj: ../../foundation/src/ConstantsAum.cpp
-	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-ConstantsAum.obj -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-ConstantsAum.Tpo -c -o ../../foundation/src/netagent-ConstantsAum.obj `if test -f '../../foundation/src/ConstantsAum.cpp'; then $(CYGPATH_W) '../../foundation/src/ConstantsAum.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/ConstantsAum.cpp'; fi`
-	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/netagent-ConstantsAum.Tpo ../../foundation/src/$(DEPDIR)/netagent-ConstantsAum.Po
-#	$(AM_V_CXX)source='../../foundation/src/ConstantsAum.cpp' object='../../foundation/src/netagent-ConstantsAum.obj' libtool=no \
-#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
-#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-ConstantsAum.obj `if test -f '../../foundation/src/ConstantsAum.cpp'; then $(CYGPATH_W) '../../foundation/src/ConstantsAum.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/ConstantsAum.cpp'; fi`
 
 ../../foundation/src/netagent-ParserFcts.o: ../../foundation/src/ParserFcts.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-ParserFcts.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-ParserFcts.Tpo -c -o ../../foundation/src/netagent-ParserFcts.o `test -f '../../foundation/src/ParserFcts.cpp' || echo '$(srcdir)/'`../../foundation/src/ParserFcts.cpp
@@ -865,6 +875,20 @@ include ../../foundation/src/$(DEPDIR)/netagent-XMLParser.Po
 #	$(AM_V_CXX)source='../../foundation/src/FieldValParser.cpp' object='../../foundation/src/netagent-FieldValParser.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-FieldValParser.obj `if test -f '../../foundation/src/FieldValParser.cpp'; then $(CYGPATH_W) '../../foundation/src/FieldValParser.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/FieldValParser.cpp'; fi`
+
+../../foundation/src/netagent-TemplateIdSource.o: ../../foundation/src/TemplateIdSource.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-TemplateIdSource.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-TemplateIdSource.Tpo -c -o ../../foundation/src/netagent-TemplateIdSource.o `test -f '../../foundation/src/TemplateIdSource.cpp' || echo '$(srcdir)/'`../../foundation/src/TemplateIdSource.cpp
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/netagent-TemplateIdSource.Tpo ../../foundation/src/$(DEPDIR)/netagent-TemplateIdSource.Po
+#	$(AM_V_CXX)source='../../foundation/src/TemplateIdSource.cpp' object='../../foundation/src/netagent-TemplateIdSource.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-TemplateIdSource.o `test -f '../../foundation/src/TemplateIdSource.cpp' || echo '$(srcdir)/'`../../foundation/src/TemplateIdSource.cpp
+
+../../foundation/src/netagent-TemplateIdSource.obj: ../../foundation/src/TemplateIdSource.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-TemplateIdSource.obj -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-TemplateIdSource.Tpo -c -o ../../foundation/src/netagent-TemplateIdSource.obj `if test -f '../../foundation/src/TemplateIdSource.cpp'; then $(CYGPATH_W) '../../foundation/src/TemplateIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/TemplateIdSource.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/netagent-TemplateIdSource.Tpo ../../foundation/src/$(DEPDIR)/netagent-TemplateIdSource.Po
+#	$(AM_V_CXX)source='../../foundation/src/TemplateIdSource.cpp' object='../../foundation/src/netagent-TemplateIdSource.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-TemplateIdSource.obj `if test -f '../../foundation/src/TemplateIdSource.cpp'; then $(CYGPATH_W) '../../foundation/src/TemplateIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/TemplateIdSource.cpp'; fi`
 
 ../../foundation/src/netagent-MAPIIpApMessageParser.o: ../../foundation/src/MAPIIpApMessageParser.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-MAPIIpApMessageParser.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-MAPIIpApMessageParser.Tpo -c -o ../../foundation/src/netagent-MAPIIpApMessageParser.o `test -f '../../foundation/src/MAPIIpApMessageParser.cpp' || echo '$(srcdir)/'`../../foundation/src/MAPIIpApMessageParser.cpp
@@ -1188,6 +1212,48 @@ include ../../foundation/src/$(DEPDIR)/netagent-XMLParser.Po
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-AnslpClient.obj `if test -f '../../foundation/src/AnslpClient.cpp'; then $(CYGPATH_W) '../../foundation/src/AnslpClient.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/AnslpClient.cpp'; fi`
 
+../../foundation/src/netagent-SessionIdSource.o: ../../foundation/src/SessionIdSource.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-SessionIdSource.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-SessionIdSource.Tpo -c -o ../../foundation/src/netagent-SessionIdSource.o `test -f '../../foundation/src/SessionIdSource.cpp' || echo '$(srcdir)/'`../../foundation/src/SessionIdSource.cpp
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/netagent-SessionIdSource.Tpo ../../foundation/src/$(DEPDIR)/netagent-SessionIdSource.Po
+#	$(AM_V_CXX)source='../../foundation/src/SessionIdSource.cpp' object='../../foundation/src/netagent-SessionIdSource.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-SessionIdSource.o `test -f '../../foundation/src/SessionIdSource.cpp' || echo '$(srcdir)/'`../../foundation/src/SessionIdSource.cpp
+
+../../foundation/src/netagent-SessionIdSource.obj: ../../foundation/src/SessionIdSource.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-SessionIdSource.obj -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-SessionIdSource.Tpo -c -o ../../foundation/src/netagent-SessionIdSource.obj `if test -f '../../foundation/src/SessionIdSource.cpp'; then $(CYGPATH_W) '../../foundation/src/SessionIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/SessionIdSource.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/netagent-SessionIdSource.Tpo ../../foundation/src/$(DEPDIR)/netagent-SessionIdSource.Po
+#	$(AM_V_CXX)source='../../foundation/src/SessionIdSource.cpp' object='../../foundation/src/netagent-SessionIdSource.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-SessionIdSource.obj `if test -f '../../foundation/src/SessionIdSource.cpp'; then $(CYGPATH_W) '../../foundation/src/SessionIdSource.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/SessionIdSource.cpp'; fi`
+
+../../foundation/src/netagent-Session.o: ../../foundation/src/Session.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-Session.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-Session.Tpo -c -o ../../foundation/src/netagent-Session.o `test -f '../../foundation/src/Session.cpp' || echo '$(srcdir)/'`../../foundation/src/Session.cpp
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/netagent-Session.Tpo ../../foundation/src/$(DEPDIR)/netagent-Session.Po
+#	$(AM_V_CXX)source='../../foundation/src/Session.cpp' object='../../foundation/src/netagent-Session.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-Session.o `test -f '../../foundation/src/Session.cpp' || echo '$(srcdir)/'`../../foundation/src/Session.cpp
+
+../../foundation/src/netagent-Session.obj: ../../foundation/src/Session.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-Session.obj -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-Session.Tpo -c -o ../../foundation/src/netagent-Session.obj `if test -f '../../foundation/src/Session.cpp'; then $(CYGPATH_W) '../../foundation/src/Session.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/Session.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/netagent-Session.Tpo ../../foundation/src/$(DEPDIR)/netagent-Session.Po
+#	$(AM_V_CXX)source='../../foundation/src/Session.cpp' object='../../foundation/src/netagent-Session.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-Session.obj `if test -f '../../foundation/src/Session.cpp'; then $(CYGPATH_W) '../../foundation/src/Session.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/Session.cpp'; fi`
+
+../../foundation/src/netagent-SessionManager.o: ../../foundation/src/SessionManager.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-SessionManager.o -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-SessionManager.Tpo -c -o ../../foundation/src/netagent-SessionManager.o `test -f '../../foundation/src/SessionManager.cpp' || echo '$(srcdir)/'`../../foundation/src/SessionManager.cpp
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/netagent-SessionManager.Tpo ../../foundation/src/$(DEPDIR)/netagent-SessionManager.Po
+#	$(AM_V_CXX)source='../../foundation/src/SessionManager.cpp' object='../../foundation/src/netagent-SessionManager.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-SessionManager.o `test -f '../../foundation/src/SessionManager.cpp' || echo '$(srcdir)/'`../../foundation/src/SessionManager.cpp
+
+../../foundation/src/netagent-SessionManager.obj: ../../foundation/src/SessionManager.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../../foundation/src/netagent-SessionManager.obj -MD -MP -MF ../../foundation/src/$(DEPDIR)/netagent-SessionManager.Tpo -c -o ../../foundation/src/netagent-SessionManager.obj `if test -f '../../foundation/src/SessionManager.cpp'; then $(CYGPATH_W) '../../foundation/src/SessionManager.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/SessionManager.cpp'; fi`
+	$(AM_V_at)$(am__mv) ../../foundation/src/$(DEPDIR)/netagent-SessionManager.Tpo ../../foundation/src/$(DEPDIR)/netagent-SessionManager.Po
+#	$(AM_V_CXX)source='../../foundation/src/SessionManager.cpp' object='../../foundation/src/netagent-SessionManager.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../../foundation/src/netagent-SessionManager.obj `if test -f '../../foundation/src/SessionManager.cpp'; then $(CYGPATH_W) '../../foundation/src/SessionManager.cpp'; else $(CYGPATH_W) '$(srcdir)/../../foundation/src/SessionManager.cpp'; fi`
+
 netagent-ResourceRequest.o: ResourceRequest.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netagent-ResourceRequest.o -MD -MP -MF $(DEPDIR)/netagent-ResourceRequest.Tpo -c -o netagent-ResourceRequest.o `test -f 'ResourceRequest.cpp' || echo '$(srcdir)/'`ResourceRequest.cpp
 	$(AM_V_at)$(am__mv) $(DEPDIR)/netagent-ResourceRequest.Tpo $(DEPDIR)/netagent-ResourceRequest.Po
@@ -1243,6 +1309,20 @@ netagent-MAPIResourceRequestParser.obj: MAPIResourceRequestParser.cpp
 #	$(AM_V_CXX)source='MAPIResourceRequestParser.cpp' object='netagent-MAPIResourceRequestParser.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o netagent-MAPIResourceRequestParser.obj `if test -f 'MAPIResourceRequestParser.cpp'; then $(CYGPATH_W) 'MAPIResourceRequestParser.cpp'; else $(CYGPATH_W) '$(srcdir)/MAPIResourceRequestParser.cpp'; fi`
+
+netagent-TextResourceRequestParser.o: TextResourceRequestParser.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netagent-TextResourceRequestParser.o -MD -MP -MF $(DEPDIR)/netagent-TextResourceRequestParser.Tpo -c -o netagent-TextResourceRequestParser.o `test -f 'TextResourceRequestParser.cpp' || echo '$(srcdir)/'`TextResourceRequestParser.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/netagent-TextResourceRequestParser.Tpo $(DEPDIR)/netagent-TextResourceRequestParser.Po
+#	$(AM_V_CXX)source='TextResourceRequestParser.cpp' object='netagent-TextResourceRequestParser.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o netagent-TextResourceRequestParser.o `test -f 'TextResourceRequestParser.cpp' || echo '$(srcdir)/'`TextResourceRequestParser.cpp
+
+netagent-TextResourceRequestParser.obj: TextResourceRequestParser.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netagent-TextResourceRequestParser.obj -MD -MP -MF $(DEPDIR)/netagent-TextResourceRequestParser.Tpo -c -o netagent-TextResourceRequestParser.obj `if test -f 'TextResourceRequestParser.cpp'; then $(CYGPATH_W) 'TextResourceRequestParser.cpp'; else $(CYGPATH_W) '$(srcdir)/TextResourceRequestParser.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/netagent-TextResourceRequestParser.Tpo $(DEPDIR)/netagent-TextResourceRequestParser.Po
+#	$(AM_V_CXX)source='TextResourceRequestParser.cpp' object='netagent-TextResourceRequestParser.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o netagent-TextResourceRequestParser.obj `if test -f 'TextResourceRequestParser.cpp'; then $(CYGPATH_W) 'TextResourceRequestParser.cpp'; else $(CYGPATH_W) '$(srcdir)/TextResourceRequestParser.cpp'; fi`
 
 netagent-ResourceRequestManager.o: ResourceRequestManager.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netagent-ResourceRequestManager.o -MD -MP -MF $(DEPDIR)/netagent-ResourceRequestManager.Tpo -c -o netagent-ResourceRequestManager.o `test -f 'ResourceRequestManager.cpp' || echo '$(srcdir)/'`ResourceRequestManager.cpp

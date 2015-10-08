@@ -34,6 +34,8 @@
 #include "ConfigParser.h"
 #include "ProcModuleInterface.h"
 #include "AuctionFileParser.h"
+#include "Session.h"
+#include <uuid/uuid.h>
 
 namespace auction
 {
@@ -56,6 +58,9 @@ typedef struct
     //! resource request interval stop
     time_t stop;
     
+    //! Session Id to fulfil this interval.
+    string sessionId;
+    
     //! execution interval
     unsigned long interval;
     //! align yes/no
@@ -73,6 +78,8 @@ typedef std::list<resourceReq_interval_t>::const_iterator resourceReqIntervalLis
 
 class ResourceRequest
 {
+
+	
 
 public:
 	
@@ -124,6 +131,8 @@ public:
 		name = _name;
 	}	
 
+	field_t *getField(string name);
+
 	string getInfo();
 		
 
@@ -141,7 +150,11 @@ public:
 
     resourceReq_interval_t getIntervalByEnd(time_t stop);
     
-    auctionDB_t * askForAuctions(time_t start);
+    auction::AgentSession * getSession(time_t start, time_t stop,  
+								  string sourceAddr, string senderAddr, 
+								  string destinAddr, uint16_t senderPort, 
+								  uint16_t destinPort, uint8_t protocol,
+								  uint32_t lifetime);
 			
 protected:
 	
@@ -162,7 +175,7 @@ protected:
 
 	//! Resource request intervals assigned.
 	resourceReqIntervalList_t intervals;
-
+	
 };
 
 }; // namespace auction

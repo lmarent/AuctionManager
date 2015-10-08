@@ -33,7 +33,7 @@ class AuctionFileParser_Test : public CppUnit::TestFixture {
     
     AuctionFileParser *ptrAuctionFileParser;
     AuctionIdSource *idSource;
-    ipap_message *message;
+    ipap_template_container *templates;
     FieldDefParser *ptrFieldParsers;
     
 
@@ -56,7 +56,7 @@ void AuctionFileParser_Test::setUp()
 				
 		idSource = new AuctionIdSource(1); // Unique.
 		
-		message = new ipap_message();
+		templates = new ipap_template_container();
 
 		// load the filter def list
 		loadFieldDefs(&fieldDefs);
@@ -73,7 +73,7 @@ void AuctionFileParser_Test::tearDown()
 	delete(ptrAuctionFileParser);
 	delete(idSource);
     delete(ptrFieldParsers);
-	delete(message);
+	delete(templates);
 	
 }
 
@@ -84,7 +84,7 @@ void AuctionFileParser_Test::testParser()
 	try
 	{
 		
-		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, idSource, message );
+		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, idSource, templates );
 				
 		cout << (*new_auctions)[0]->getInfo() << endl;
 		

@@ -23,6 +23,7 @@ auctionManager_SOURCES =  @top_srcdir@/foundation/src/Constants.cpp \
 						  @top_srcdir@/foundation/src/FieldValue.cpp \
 						  @top_srcdir@/foundation/src/FieldDefParser.cpp \
 						  @top_srcdir@/foundation/src/FieldValParser.cpp \
+						  @top_srcdir@/foundation/src/TemplateIdSource.cpp \
 						  @top_srcdir@/foundation/src/MAPIIpApMessageParser.cpp \
 						  @top_srcdir@/foundation/src/BidIdSource.cpp \
 						  @top_srcdir@/foundation/src/AuctionIdSource.cpp \
@@ -46,6 +47,9 @@ auctionManager_SOURCES =  @top_srcdir@/foundation/src/Constants.cpp \
 						  @top_srcdir@/foundation/src/MAPIAllocationParser.cpp \
 						  @top_srcdir@/foundation/src/AllocationManager.cpp \
 						  @top_srcdir@/foundation/src/AnslpClient.cpp \
+  						  @top_srcdir@/foundation/src/SessionIdSource.cpp \
+						  @top_srcdir@/foundation/src/Session.cpp \
+						  @top_srcdir@/foundation/src/SessionManager.cpp \
 						  EventSchedulerAuctioner.cpp \
 						  Module.cpp \
 						  ModuleLoader.cpp \
@@ -53,9 +57,6 @@ auctionManager_SOURCES =  @top_srcdir@/foundation/src/Constants.cpp \
 						  ProcModule.cpp \
 						  CtrlComm.cpp \
 						  AUMProcessor.cpp \
-						  SessionIdSource.cpp \
-						  AUMSession.cpp \
-						  SessionManager.cpp \
 						  Auctioner.cpp \
 						  main.cpp
 

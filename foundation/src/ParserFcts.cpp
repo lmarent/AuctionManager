@@ -29,6 +29,8 @@
 #include "config.h"
 #include "ParserFcts.h"
 #include "Error.h"
+#include "Constants.h"
+
 
 using namespace auction;
 
@@ -123,6 +125,102 @@ int ParserFcts::parseInt(string s, int min, int max)
     return n;
 }
 
+int isNumericIPv4(string s)
+{
+    return (s.find_first_not_of("0123456789.", 0) >= s.length());  
+}
+
+struct in_addr ParserFcts::parseIPAddr(string s)
+{
+    int rc;
+    struct in_addr a;
+    struct addrinfo ask, *res = NULL;
+   
+    memset(&ask,0,sizeof(ask));
+    ask.ai_socktype = SOCK_STREAM;
+    ask.ai_flags = 0;
+    if (isNumericIPv4(s)) {
+        ask.ai_flags |= AI_NUMERICHOST;
+    }
+    ask.ai_family = PF_INET;
+
+    // set timeout
+    g_timeout = 0;
+    alarm(2);
+
+    rc = getaddrinfo(s.c_str(), NULL, &ask, &res);
+
+    alarm(0);
+
+    try {
+        if (g_timeout) {
+            throw Error("DNS timeout: %s", s.c_str());
+        }
+
+        if (rc == 0) {
+            // take first address only, in case of multiple addresses fill addresses
+            // FIXME set match
+            a = ((struct sockaddr_in *) res->ai_addr)->sin_addr;
+            freeaddrinfo(res);
+        } else {
+            throw Error("Invalid or unresolvable ip address: %s", s.c_str());
+        }
+    } catch (Error &e) {
+        freeaddrinfo(res);
+        throw e;
+    }
+
+    return a;
+}
+
+int isNumericIPv6(string s)
+{
+    return (s.find_first_not_of("0123456789abcdefABCDEF:.", 0) >= s.length());
+}
+
+struct in6_addr ParserFcts::parseIP6Addr(string s)
+{
+    int rc;
+    struct in6_addr a;
+    struct addrinfo ask, *res = NULL;
+   
+    memset(&ask,0,sizeof(ask));
+    ask.ai_socktype = SOCK_STREAM;
+    ask.ai_flags = 0;
+    if (isNumericIPv6(s)) {
+        ask.ai_flags |= AI_NUMERICHOST;
+    }
+    ask.ai_family = PF_INET6;
+
+    // set timeout
+    g_timeout = 0;
+    alarm(2);
+
+    rc = getaddrinfo(s.c_str(), NULL, &ask, &res);
+
+    alarm(0);
+
+    try {
+        if (g_timeout) {
+            throw Error("DNS timeout: %s", s.c_str());
+        }
+
+        if (rc == 0) {  
+            // take first address only, in case of multiple addresses fill addresses
+            // FIXME set match
+            a = ((struct sockaddr_in6 *) res->ai_addr)->sin6_addr;
+            freeaddrinfo(res);
+        } else {
+            throw Error("Invalid or unresolvable ip6 address: %s", s.c_str());
+        }
+    } catch (Error &e) {
+        freeaddrinfo(res);
+        throw e;
+    }
+    
+    return a;
+}
+
 
 int ParserFcts::parseBool(string s)
 {
@@ -182,6 +280,10 @@ void ParserFcts::parseItem(string type, string value)
         ParserFcts::parseLong(value);
     } else if ((type == "UInt32") || (type == "SInt32")) {
         ParserFcts::parseULong(value);
+    } else if (type == "IPAddr") {
+        ParserFcts::parseIPAddr(value);
+    } else if (type == "IP6Addr") {
+        ParserFcts::parseIP6Addr(value);        
     } else if (type == "String") {
         // always ok
     } else if (type == "Bool") {

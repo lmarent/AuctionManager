@@ -41,6 +41,8 @@ FieldDefParser::FieldDefParser(string filename)
 
 fieldDefItem_t FieldDefParser::parseDef(xmlNodePtr cur)
 {
+
+	
     fieldDefItem_t item;
     string mask;
     // get DEF
@@ -53,6 +55,11 @@ fieldDefItem_t FieldDefParser::parseDef(xmlNodePtr cur)
    
     item.type = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"TYPE"));
     item.len = FieldValue::getTypeLength(item.type);
+
+#ifdef DEBUG
+    log->dlog(ch, "item.type %s item.len%d", item.type.c_str(), item.len);
+#endif	
+
     
     try {
 		item.eno = ParserFcts::parseInt(

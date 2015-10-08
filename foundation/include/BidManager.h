@@ -101,10 +101,10 @@ class BidManager
 	//! field definitions
     fieldDefList_t fieldDefs;
 
-    //! filter values
+    //! field values
     fieldValList_t fieldVals;
 
-    // name of filter def and filter vals files
+    // name of field def and field vals files
     string fieldDefFileName, fieldValFileName;
 
     //! load filter definitions

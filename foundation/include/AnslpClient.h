@@ -61,75 +61,28 @@ class AnslpClient
 		//! Pointer to anslp application configuration object.
 		auto_ptr<anslp::anslp_config>			conf;
 
-		anslp::session_id sid;
-	  
-		//! sender host address.
-		protlib::hostaddress sender_addr;
-		
-		//! Receiver host address.
-		protlib::hostaddress receiver_addr;
-
-		//! Source address.
-		protlib::hostaddress source;
-		
-		//! Sender port
-		uint16_t sender_port;
-		
-		//! Receiver port
-		uint16_t receiver_port;
-		
-		//! Protocol
-		uint8_t protocol;
-		
-		//! lifetime by default.
-		uint32_t lifetime;
 
 
 	public:
 		
-		AnslpClient(string config_filename, 
-					const protlib::hostaddress &source_addr, 
-					const protlib::hostaddress &destination_addr,
-					uint16_t source_port, uint16_t dest_port, 
-					uint8_t protocol, uint32_t session_lifetime);
+		AnslpClient(string config_filename);
 		
 		~AnslpClient();
-
-		//void run();
-
-		//vector<ipap_message *> 
-		void tg_create( const protlib::hostaddress &source_addr, 
-					    const protlib::hostaddress &destination_addr,
-					   uint16_t source_port, uint16_t dest_port, 
-					    uint8_t protocol, uint32_t session_lifetime );
+		
+		string getLocalAddress(void);
+		
+		uint32_t getInitiatorLifetime(void);
+		 
+		anslp::session_id tg_create( const protlib::hostaddress &source_addr, 
+									 const protlib::hostaddress &destination_addr,
+									 uint16_t source_port, uint16_t dest_port, 
+									 uint8_t protocol, uint32_t session_lifetime,
+									 ipap_message *message );
 
 		void tg_teardown(anslp::session_id id);
 
-		void tg_bidding(const protlib::hostaddress &source_addr, 
-						const protlib::hostaddress &destination_addr,
-					   uint16_t source_port, uint16_t dest_port, 
-						uint8_t protocol, uint32_t session_lifetime);
+		void tg_bidding(anslp::session_id, ipap_message *message);
 		
-		//! Set sender address 
-		void set_sender_address(protlib::hostaddress _sender_address);
-
-		//! Set receiver address 
-		void set_receiver_address(protlib::hostaddress _receiver_address);
-
-		//! Set source address 
-		void set_source_address(protlib::hostaddress _source_address);
-
-		//! Set sender port
-		void set_sender_port(uint16_t _sender_port);
-
-		//! Set receiver port
-		void set_receiver_port(uint16_t _receiver_port);
-
-		//! Set protocol
-		void set_protocol(uint8_t protocol);
-
-		//! Set lifetime
-		void set_lifetime(uint32_t lifetime);
 
 };
 

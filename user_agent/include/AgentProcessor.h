@@ -145,6 +145,8 @@ class AgentProcessor : public AuctionManagerComponent
     //! dump a AUMProcessor object
     void dump( ostream &os );
 
+	fieldDefList_t * getFieldDefinitions() { return &fieldDefs; }
+
     // handle module timeouts
     void timeout(int rid, int actid, unsigned int tmID);
 

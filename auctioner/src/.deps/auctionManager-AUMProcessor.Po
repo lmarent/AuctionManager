@@ -1,6 +1,7 @@
 auctionManager-AUMProcessor.o: AUMProcessor.cpp \
  /usr/include/stdc-predef.h ../../foundation/include/ParserFcts.h \
- ../../config.h /usr/local/include/ipap/stdinc.h /usr/include/stdio.h \
+ ../../config.h /usr/local/include/ipap/stdincpp.h \
+ /usr/local/include/ipap/stdinc.h /usr/include/stdio.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
@@ -88,9 +89,7 @@ auctionManager-AUMProcessor.o: AUMProcessor.cpp \
  /usr/include/linux/stddef.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types.h \
  /usr/include/x86_64-linux-gnu/asm/posix_types_64.h \
- /usr/include/asm-generic/posix_types.h \
- /usr/local/include/ipap/stdincpp.h /usr/local/include/ipap/stdinc.h \
- /usr/include/c++/4.8/iostream \
+ /usr/include/asm-generic/posix_types.h /usr/include/c++/4.8/iostream \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/os_defines.h \
  /usr/include/x86_64-linux-gnu/c++/4.8/bits/cpu_defines.h \
@@ -198,6 +197,7 @@ auctionManager-AUMProcessor.o: AUMProcessor.cpp \
  /usr/include/c++/4.8/debug/set.h /usr/include/c++/4.8/debug/multiset.h \
  /usr/include/c++/4.8/bitset /usr/include/c++/4.8/debug/bitset \
  /usr/include/c++/4.8/iomanip /usr/include/c++/4.8/stdexcept \
+ ../../foundation/include/Constants.h /usr/local/include/ipap/stdinc.h \
  ../../foundation/include/ProcError.h \
  ../../auctioner/include/AUMProcessor.h \
  ../../auctioner/include/ProcModule.h \
@@ -239,7 +239,7 @@ auctionManager-AUMProcessor.o: AUMProcessor.cpp \
  ../../foundation/include/FieldValParser.h \
  ../../foundation/include/BidIdSource.h \
  ../../foundation/include/AuctionFileParser.h \
- ../../foundation/include/Auction.h ../../foundation/include/Constants.h \
+ ../../foundation/include/Auction.h \
  /usr/local/include/ipap/IpAp_template_container.h \
  /usr/local/include/ipap/IpAp_template.h \
  /usr/local/include/ipap/IpAp_field.h /usr/local/include/ipap/IpAp_def.h \
@@ -272,6 +272,8 @@ auctionManager-AUMProcessor.o: AUMProcessor.cpp \
 ../../foundation/include/ParserFcts.h:
 
 ../../config.h:
+
+/usr/local/include/ipap/stdincpp.h:
 
 /usr/local/include/ipap/stdinc.h:
 
@@ -522,10 +524,6 @@ auctionManager-AUMProcessor.o: AUMProcessor.cpp \
 /usr/include/x86_64-linux-gnu/asm/posix_types_64.h:
 
 /usr/include/asm-generic/posix_types.h:
-
-/usr/local/include/ipap/stdincpp.h:
-
-/usr/local/include/ipap/stdinc.h:
 
 /usr/include/c++/4.8/iostream:
 
@@ -817,6 +815,10 @@ auctionManager-AUMProcessor.o: AUMProcessor.cpp \
 
 /usr/include/c++/4.8/stdexcept:
 
+../../foundation/include/Constants.h:
+
+/usr/local/include/ipap/stdinc.h:
+
 ../../foundation/include/ProcError.h:
 
 ../../auctioner/include/AUMProcessor.h:
@@ -922,8 +924,6 @@ auctionManager-AUMProcessor.o: AUMProcessor.cpp \
 ../../foundation/include/AuctionFileParser.h:
 
 ../../foundation/include/Auction.h:
-
-../../foundation/include/Constants.h:
 
 /usr/local/include/ipap/IpAp_template_container.h:
 

@@ -4,9 +4,10 @@
 
   <RESOURCE_REQUEST ID="1">    
 	<FIELD NAME="quantity">2</FIELD>
-	<FIELD NAME="budget">0.3</FIELD>		
+	<FIELD NAME="totalbudget">0.3</FIELD>		
 	<FIELD NAME="maxvalue">0.16</FIELD>
-	
+	<FIELD NAME="DstIP">8.8.8.8</FIELD>
+	<FIELD NAME="DstPort">80</FIELD>
 	<INTERVAL NAME="interval1">
 		<!-- Duration  -->
 		<PREF NAME="Duration">100</PREF>

@@ -175,11 +175,14 @@ class CtrlComm : public auction::AuctionManagerComponent
     */
     int processCmd(struct REQUEST *req );
 
-    //! add a bid to the currently active bid
-    char *processAddBid(parseReq_t *preq );
+    //! Process the message that arrives as the response to a session creation
+    char *processResponseSessionCreate(parseReq_t *preq );
 
-    //! delete a currently running bid
-    char *processDelBid(parseReq_t *preq );
+    //! process the message that arrives as the response to a session remove
+    char *processResponseSessionRemove(parseReq_t *preq );
+
+	//! execute an auction interaction for a currently active sessions
+    char *processResponseAuctionInteraction(parseReq_t *preq );
 
     //! return agent information (bidlist,status,modlist)
     char *processGetInfo(parseReq_t *preq );

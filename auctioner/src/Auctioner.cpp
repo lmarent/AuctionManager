@@ -32,6 +32,8 @@
 #include "ConstantsAum.h"
 #include "EventAuctioner.h"
 #include "AnslpClient.h"
+#include "anslp_ipap_xml_message.h"
+#include "anslp_ipap_message.h"
 
 using namespace auction;
 
@@ -44,7 +46,6 @@ int Auctioner::enableCtrl = 0;
 
 // global timeout flag
 int g_timeout = 0;
-
 
 
 // remove newline from end of C string
@@ -61,10 +62,10 @@ static inline char *noNewline( char* s )
 /* ------------------------- Auctioner ------------------------- */
 
 Auctioner::Auctioner( int argc, char *argv[])
-    :  pprocThread(0)
+    :  domainId(0), pprocThread(0)
 {
 
-    // record meter start time for later output
+    // record auction manager start time for later output
   startTime = ::time(NULL);
 
     try {
@@ -154,7 +155,8 @@ Auctioner::Auctioner( int argc, char *argv[])
 
         log->log(ch,"ConfigFile = %s", configFileName.c_str());
 
-        auto_ptr<ConfigManager> _conf(new ConfigManager(configFileName, argv[0]));
+        auto_ptr<ConfigManager> _conf(new 
+				ConfigManager(AUM_CONFIGFILE_DTD, configFileName, argv[0]));
         conf = _conf;
 
         // merge into config
@@ -178,6 +180,7 @@ Auctioner::Auctioner( int argc, char *argv[])
 
         // set logging vebosity level if configured
         string verbosity = conf->getValue("VerboseLevel", "MAIN");
+        
         if (!verbosity.empty()) {
             log->setLogLevel( ParserFcts::parseInt( verbosity, -1, 4 ) );
         }
@@ -185,6 +188,14 @@ Auctioner::Auctioner( int argc, char *argv[])
 #ifdef DEBUG
         log->log(ch,"configfilename used is: '%s'", configFileName.c_str());
         log->dlog(ch,"------- startup -------" );
+#endif
+
+        // set the domain id
+        string _domainId = conf->getValue("Domain", "MAIN");
+		domainId = ParserFcts::parseInt( _domainId );
+
+#ifdef DEBUG
+        log->log(ch,"domainId used is: '%d'", domainId);
 #endif
 
         // startup other core classes
@@ -195,13 +206,19 @@ Auctioner::Auctioner( int argc, char *argv[])
                                                     conf->getValue("FieldConstFile", "MAIN")));
         bidm = _bidm;
         
-        auto_ptr<AuctionManager> _aucm(new AuctionManager(conf->getValue("FieldDefFile", "MAIN")));
+        auto_ptr<AuctionManager> _aucm(new AuctionManager(conf->getValue("FieldDefFile", "MAIN"),
+														   conf->getValue("FieldConstFile", "MAIN")));
         aucm = _aucm;
 
+        auto_ptr<SessionManager> _sesm(new SessionManager());
+        sesm = _sesm;
         
         auto_ptr<EventSchedulerAuctioner> _evnt(new EventSchedulerAuctioner());
         evnt = _evnt;
 
+		auto_ptr<MAPIAuctionParser> _mpap(new MAPIAuctionParser());
+		mpap = _mpap;
+	
         // Startup Processing Components
 
 #ifdef ENABLE_THREADS
@@ -811,30 +828,49 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 #endif
 	
 	ipap_message *message = NULL;
+	ipap_message *message_return = NULL;
 	auctionDB_t *auctions = NULL;
-	 vec_return();
+	auction::Session *s = NULL;
 	
 	try{
 
-		string sessionId = auctions = ((CreateSessionEvent *)e)->getSessionId();
-		
+		string sessionId = ((CreateSessionEvent *)e)->getSessionId();
+		s = new auction::Session(sessionId);
+		sesm->addSession(s); 
 		
 		message = ((CreateSessionEvent *)e)->getMessage();
-		auctions = aucm->getApplicableAuctions(message);
+		auctions = proc->getApplicableAuctions(message);
 		
-		auctionDBIter_t aucIter;
-		vector<ipap_message *> vec_return = mpap.get_ipap_messages(&fieldDefs, auctions);
-		// TODO AM: send messages to client requesting the session.
+#ifdef DEBUG
+		log->dlog(ch,"# returned auctions: %d", auctions->size() );
+#endif		
+
+		message_return = mpap->get_ipap_message(proc->getFieldDefinitions(), auctions);
+		anslp::msg::anslp_ipap_xml_message mess;
+		anslp::msg::anslp_ipap_message anlp_mess(*message_return);
+		
+		saveDelete(message_return);
+		string xmlMessage = mess.get_message(anlp_mess);
+		
+		comm->sendMsg(xmlMessage.c_str(), ((CreateSessionEvent *)e)->getReq(), fds);
 
 #ifdef DEBUG
 		log->dlog(ch,"Ending event create session" );
 #endif
 	
 	}  catch (Error &err) {
+		if (message_return){
+			saveDelete(message_return);
+		}
+
 		if (auctions){
 			saveDelete(auctions);
 		}
-		log->dlog( ch, err.getError().c_str() );		
+		if (s){
+			saveDelete(s);
+		}
+		log->dlog( ch, err.getError().c_str() );	
+		comm->sendErrMsg(err.getError(), ((CreateSessionEvent *)e)->getReq(), fds); 	
 	}
 
 }
@@ -1204,9 +1240,9 @@ void Auctioner::activateAuctions(auctionDB_t *auctions, EventScheduler *e)
 #ifdef DEBUG    
     log->dlog(ch, "Activate auctions - Execution interval: %lu", i );
 #endif  
-
-        e->addEvent(new PushExecutionEvent(i, iter2->second, iter2->first.procname,
-                                        i * 1000, iter2->first.interval.align));
+        
+        //e->addEvent(new PushExecutionEvent(i, iter2->second, iter2->first.procname,
+        //                                i * 1000, iter2->first.interval.align));
     }
     
 
