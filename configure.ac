@@ -354,7 +354,7 @@ AC_SUBST([LIBANSLP_LIBS])
 
 dnl # dont try to build nagtrsh if we don't have the libs
 AM_CONDITIONAL(BUILD_NAGTRSH, test "$XSLTLIB" && test "$CURL_LIBS") 
-AM_CONDITIONAL(BUILD_NARSH, test "$XSLTLIB" && test "$CURL_LIBS") 
+AM_CONDITIONAL(BUILD_NAGTRSH, test "$XSLTLIB" && test "$CURL_LIBS") 
 
 
 dnl # checks for programs
