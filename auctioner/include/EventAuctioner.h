@@ -67,6 +67,29 @@ class CreateSessionEvent : public CtrlCommEvent
 	}
 };
 
+class CreateCheckSessionEvent : public CtrlCommEvent
+{
+  private:
+	string sessionId;
+	ipap_message message;
+    
+  public:
+
+    CreateCheckSessionEvent(string _sessionId, ipap_message &a) 
+      : CtrlCommEvent(CREATE_CHECK_SESSION), sessionId(_sessionId), message(a) {  }
+  
+	ipap_message  *getMessage()
+	{
+		return &message;
+	}
+	
+	string getSessionId()
+	{
+		return sessionId;
+	}
+};
+
+
 class RemoveSessionEvent : public CtrlCommEvent
 {
   private:

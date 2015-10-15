@@ -343,6 +343,7 @@ netagent-Agent.o: Agent.cpp /usr/include/stdc-predef.h \
  ../../user_agent/include/ResourceRequestIdSource.h \
  ../../user_agent/include/ResourceRequest.h \
  ../../foundation/include/AuctionFileParser.h \
+ ../../user_agent/include/AgentSession.h \
  ../../foundation/include/Session.h \
  ../../foundation/include/SessionManager.h \
  ../../foundation/include/Session.h \
@@ -351,7 +352,12 @@ netagent-Agent.o: Agent.cpp /usr/include/stdc-predef.h \
  ../../foundation/include/MAPIIpApMessageParser.h \
  ../../user_agent/include/EventAgent.h ../../foundation/include/Auction.h \
  ../../foundation/include/Event.h \
- ../../user_agent/include/ConstantsAgent.h
+ ../../user_agent/include/ConstantsAgent.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_message.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_xml_message.h \
+ /usr/include/libxml2/libxml/xmlwriter.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_message_splitter.h \
+ /usr/local/include/a-nslp/msg/anslp_constants.h
 
 /usr/include/stdc-predef.h:
 
@@ -1273,6 +1279,8 @@ netagent-Agent.o: Agent.cpp /usr/include/stdc-predef.h \
 
 ../../foundation/include/AuctionFileParser.h:
 
+../../user_agent/include/AgentSession.h:
+
 ../../foundation/include/Session.h:
 
 ../../foundation/include/SessionManager.h:
@@ -1292,3 +1300,13 @@ netagent-Agent.o: Agent.cpp /usr/include/stdc-predef.h \
 ../../foundation/include/Event.h:
 
 ../../user_agent/include/ConstantsAgent.h:
+
+/usr/local/include/a-nslp/msg/anslp_ipap_message.h:
+
+/usr/local/include/a-nslp/msg/anslp_ipap_xml_message.h:
+
+/usr/include/libxml2/libxml/xmlwriter.h:
+
+/usr/local/include/a-nslp/msg/anslp_ipap_message_splitter.h:
+
+/usr/local/include/a-nslp/msg/anslp_constants.h:

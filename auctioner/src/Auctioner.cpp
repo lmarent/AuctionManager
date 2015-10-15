@@ -190,12 +190,36 @@ Auctioner::Auctioner( int argc, char *argv[])
         log->dlog(ch,"------- startup -------" );
 #endif
 
+        // Read parameters from configuration file.
+        
         // set the domain id
         string _domainId = conf->getValue("Domain", "MAIN");
 		domainId = ParserFcts::parseInt( _domainId );
+		
+		auctionerTemplates[domainId] = new ipap_template_container();
 
+		// Verifies Addresses.
+		bool useIPV6 = false;
+		string _uIPV6, _sIPV6, _sIPV4;
+		_uIPV6 = conf->getValue("UseIPv6", "CONTROL");
+		if (ParserFcts::parseBool(_uIPV6) == 1){ 
+			useIPV6 = true;
+		}
+		
+		if (useIPV6){
+			_sIPV6 = conf->getValue("LocalAddr-V6", "CONTROL");
+			// Verifies that given address is actually a ipv6 Address;
+			struct in6_addr in6 = ParserFcts::parseIP6Addr(_sIPV6);
+		}
+		else{
+			_sIPV4 = conf->getValue("LocalAddr-V4", "CONTROL");
+			// Verifies that given address is actually a ipv4 Address;
+			struct in_addr in4 = ParserFcts::parseIPAddr(_sIPV4);
+		}
+		 
 #ifdef DEBUG
-        log->log(ch,"domainId used is: '%d'", domainId);
+        log->log(ch,"domainId used is: '%d' UseIpv:%d, IPv6:%s, Ipv4:%s", 
+					domainId, useIPV6, _sIPV6.c_str(), _sIPV4.c_str());
 #endif
 
         // startup other core classes
@@ -215,9 +239,6 @@ Auctioner::Auctioner( int argc, char *argv[])
         
         auto_ptr<EventSchedulerAuctioner> _evnt(new EventSchedulerAuctioner());
         evnt = _evnt;
-
-		auto_ptr<MAPIAuctionParser> _mpap(new MAPIAuctionParser());
-		mpap = _mpap;
 	
         // Startup Processing Components
 
@@ -254,14 +275,11 @@ Auctioner::Auctioner( int argc, char *argv[])
             log->setThreaded(0);
         }
 
-		enableCtrl = conf->isTrue("Enable", "CONTROL");
-
-		if (enableCtrl) {
-			// ctrlcomm can never be a separate thread
-			auto_ptr<CtrlComm> _comm(new CtrlComm(conf.get(), 0));
-			comm = _comm;
-			comm->mergeFDs(&fdList);
-		}
+		// ctrlcomm can never be a separate thread
+		auto_ptr<CtrlComm> _comm(new CtrlComm(conf.get(), 0));
+		comm = _comm;
+		comm->mergeFDs(&fdList);
+		
 
 #ifdef DEBUG
         log->dlog(ch,"------- end Auctioner constructor -------" );
@@ -282,6 +300,11 @@ Auctioner::Auctioner( int argc, char *argv[])
 Auctioner::~Auctioner()
 {
     // objects are destroyed by their auto ptrs
+	
+	auctionerTemplateListIter_t iter;
+	for (iter = auctionerTemplates.begin(); iter != auctionerTemplates.end(); ++iter){
+		delete(iter->second);
+	}
 
 #ifdef DEBUG
 		log->dlog(ch,"------- end shutdown -------" );
@@ -504,11 +527,20 @@ void Auctioner::handleAddAuctions(Event *e, fd_sets_t *fds)
 	auctionDB_t *new_auctions = NULL;
 	try {
 
+        // Search the domain in the template container
+        auctionerTemplateListIter_t iter = auctionerTemplates.find(domainId);
+        
         // support only XML rules from file
-        new_auctions = aucm->parseAuctions(((AddAuctionsEvent *)e)->getFileName());
+        new_auctions = aucm->parseAuctions(((AddAuctionsEvent *)e)->getFileName(), iter->second);
 
 #ifdef DEBUG
-        log->dlog(ch,"Auctions sucessfully parsed " );
+		iter = auctionerTemplates.find(domainId);
+        log->dlog(ch,"Auctions sucessfully parsed Nbr Template: %d", (iter->second)->get_num_templates() );
+        std::list<int> lstTmpId = (iter->second)->get_template_list();
+        std::list<int>::iterator itLst;
+        for (itLst = lstTmpId.begin(); itLst != lstTmpId.end(); ++itLst){
+			log->dlog(ch,"templ Id: %d", *itLst);
+		}
 #endif
              
         // no error so lets add the rules and schedule for activation
@@ -820,6 +852,124 @@ void Auctioner::handlePushExecution(Event *e, fd_sets_t *fds)
 }
 
 
+void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
+{
+
+#ifdef DEBUG
+    log->dlog(ch,"processing event create check session" );
+#endif
+	
+	ipap_message *message = NULL;
+	auctionDB_t *auctions = NULL;
+	auction::Session *s = NULL;
+	
+	try{
+		
+		ostringstream os;
+		message = ((CreateCheckSessionEvent *)e)->getMessage();
+		auctions = proc->getApplicableAuctions(message);
+		
+		// Verify that a session can be created with data provided
+		string sessionId = ((CreateSessionEvent *)e)->getSessionId();
+		auction::Session *s  = new Session(sessionId);
+
+		string sAddress, sPort;
+		
+		sPort = conf->getValue("ControlPort", "CONTROL");
+		int port = atoi(sPort.c_str());
+
+		string _uIPV6, sAddressIPV4, sAddressIPV6;
+		 
+		_uIPV6 = conf->getValue("UseIPv6", "CONTROL");
+		int _useIPV6 = ParserFcts::parseBool(_uIPV6);
+		bool useIPV6;
+
+		if ( _useIPV6 == 1){ 
+			useIPV6 = true;
+			sAddressIPV6 = conf->getValue("LocalAddr-V6", "CONTROL");
+		}
+		else{
+		 	useIPV6 = false; 
+		 	sAddressIPV4 = conf->getValue("LocalAddr-V4", "CONTROL");
+		}
+
+		//! Set sender address, which is my own address.
+		if (useIPV6){
+			s->setSenderAddress(sAddressIPV6);
+		} else {
+			s->setSenderAddress(sAddressIPV4);
+		}		
+			
+		//! Set sender port, which is my own auctioning port
+		s->setSenderPort(port);
+
+		map<ipap_field_key,string> dataSession = proc->getSessionInformation(message);
+		if ( dataSession.size() == (proc->getSetField(AUM_SESSION_FIELD_SET_NAME)).size() )
+		{
+			map<ipap_field_key,string>::iterator dataSessionIter;
+			
+			dataSessionIter = dataSession.find(ipap_field_key(0,IPAP_FT_IPVERSION));
+			string sIpVersion = dataSessionIter->second;
+			string saddress;
+			int ipVersion = atoi(sIpVersion.c_str());
+			if (ipVersion == 4){
+				dataSessionIter = dataSession.find(ipap_field_key(0,IPAP_FT_SOURCEIPV4ADDRESS));
+				saddress = dataSessionIter->second;
+			} else { // We assume ipv6
+				dataSessionIter = dataSession.find(ipap_field_key(0,IPAP_FT_SOURCEIPV6ADDRESS));
+				saddress = dataSessionIter->second;
+			}	
+				
+			//! Set receiver address, which is my the agent requesting the session
+			s->setReceiverAddress(saddress);
+
+			//! Set source address, which is my the agent requesting the session
+			s->setSourceAddress(saddress);
+			
+			dataSessionIter = dataSession.find(ipap_field_key(0,IPAP_FT_SOURCEAUCTIONPORT));
+			string sPort = dataSessionIter->second;
+			
+			//! Set receiver port, which is the agent port
+			s->setReceiverPort(atoi(sPort.c_str()));
+			
+			os << "<CreateCheckSession>\n";
+			os << "<NbrAuctions>\n";
+			os << auctions->size(); 
+			os << "</NbrAuctions>\n";
+			os << "</CreateCheckSession>\n";
+
+		} else {
+			os << "<CreateCheckSession>\n";
+			os << "<NbrAuctions>\n";
+			os << 0; // We can not create the session with data provided.
+			os << "</NbrAuctions>\n";
+			os << "</CreateCheckSession>\n";
+		}
+		
+		saveDelete(s);
+		saveDelete(auctions);
+		
+		comm->sendMsg(os.str().c_str(), ((CreateCheckSessionEvent *)e)->getReq(), fds);
+
+#ifdef DEBUG
+		log->dlog(ch,"Ending event create check session" );
+#endif
+
+	
+	}  catch (Error &err) {
+		if (auctions){
+			saveDelete(auctions);
+		}
+		if (s){
+			saveDelete(s);
+		}
+		log->dlog( ch, err.getError().c_str() );	
+		comm->sendErrMsg(err.getError(), ((CreateCheckSessionEvent *)e)->getReq(), fds); 	
+	}
+}
+
+
+
 void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 {
 
@@ -833,10 +983,6 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 	auction::Session *s = NULL;
 	
 	try{
-
-		string sessionId = ((CreateSessionEvent *)e)->getSessionId();
-		s = new auction::Session(sessionId);
-		sesm->addSession(s); 
 		
 		message = ((CreateSessionEvent *)e)->getMessage();
 		auctions = proc->getApplicableAuctions(message);
@@ -845,24 +991,111 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 		log->dlog(ch,"# returned auctions: %d", auctions->size() );
 #endif		
 
-		message_return = mpap->get_ipap_message(proc->getFieldDefinitions(), auctions);
+		// Read Local Address and port to send 
+		string sAddress, sPort;
+		
+		sPort = conf->getValue("ControlPort", "CONTROL");
+		int port = atoi(sPort.c_str());
+		
+		string _uIPV6, sAddressIPV4, sAddressIPV6;
+		 
+		_uIPV6 = conf->getValue("UseIPv6", "CONTROL");
+		int _useIPV6 = ParserFcts::parseBool(_uIPV6);
+		bool useIPV6;
+		
+		if ( _useIPV6 == 1){ 
+			useIPV6 = true;
+			sAddressIPV6 = conf->getValue("LocalAddr-V6", "CONTROL");
+		}
+		else{
+		 	useIPV6 = false; 
+		 	sAddressIPV4 = conf->getValue("LocalAddr-V4", "CONTROL");
+		}
+
+#ifdef DEBUG
+		log->dlog(ch,"sAddressIPV6:%s", sAddressIPV6.c_str() );
+#endif
+
+        // Search the domain in the template container
+        auctionerTemplateListIter_t iter = auctionerTemplates.find(domainId);
+
+		message_return = aucm->get_ipap_message(auctions, iter->second, domainId, useIPV6, 
+									sAddressIPV4, sAddressIPV6, port);
+
+#ifdef DEBUG
+		log->dlog(ch,"after building the message" );
+#endif			
+									
 		anslp::msg::anslp_ipap_xml_message mess;
 		anslp::msg::anslp_ipap_message anlp_mess(*message_return);
 		
 		saveDelete(message_return);
 		string xmlMessage = mess.get_message(anlp_mess);
 		
+		// Only create the session, if the number of auctions is greater than zero.
+		if (auctions->size() > 0){ 			
+			string sessionId = ((CreateSessionEvent *)e)->getSessionId();
+			s = new auction::Session(sessionId);
+
+			//! Set sender address, which is my own address.
+			if (useIPV6){
+				s->setSenderAddress(sAddressIPV6);
+			} else {
+				s->setSenderAddress(sAddressIPV4);
+			}		
+			
+			//! Set sender port, which is my own auctioning port
+			s->setSenderPort(port);
+
+			map<ipap_field_key,string> dataSession = proc->getSessionInformation(message);
+			if ( dataSession.size() == (proc->getSetField(AUM_SESSION_FIELD_SET_NAME)).size() )
+			{
+				map<ipap_field_key,string>::iterator dataSessionIter;
+				
+				dataSessionIter = dataSession.find(ipap_field_key(0,IPAP_FT_IPVERSION));
+				string sIpVersion = dataSessionIter->second;
+				string saddress;
+				int ipVersion = atoi(sIpVersion.c_str());
+				if (ipVersion == 4){
+					dataSessionIter = dataSession.find(ipap_field_key(0,IPAP_FT_SOURCEIPV4ADDRESS));
+					saddress = dataSessionIter->second;
+				} else { // We assume ipv6
+					dataSessionIter = dataSession.find(ipap_field_key(0,IPAP_FT_SOURCEIPV6ADDRESS));
+					saddress = dataSessionIter->second;
+				}	
+					
+				//! Set receiver address, which is my the agent requesting the session
+				s->setReceiverAddress(saddress);
+
+				//! Set source address, which is my the agent requesting the session
+				s->setSourceAddress(saddress);
+			
+				dataSessionIter = dataSession.find(ipap_field_key(0,IPAP_FT_SOURCEAUCTIONPORT));
+				string sPort = dataSessionIter->second;
+				//! Set receiver port, which is the agent port
+				s->setReceiverPort(atoi(sPort.c_str()));
+				
+			
+			} else {
+				throw("session information was not provided");
+			}
+			
+			sesm->addSession(s); 
+		}
+
+		saveDelete(auctions);
+
 		comm->sendMsg(xmlMessage.c_str(), ((CreateSessionEvent *)e)->getReq(), fds);
 
 #ifdef DEBUG
 		log->dlog(ch,"Ending event create session" );
 #endif
+		
 	
 	}  catch (Error &err) {
 		if (message_return){
 			saveDelete(message_return);
 		}
-
 		if (auctions){
 			saveDelete(auctions);
 		}
@@ -872,21 +1105,25 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 		log->dlog( ch, err.getError().c_str() );	
 		comm->sendErrMsg(err.getError(), ((CreateSessionEvent *)e)->getReq(), fds); 	
 	}
-
 }
+
+
+
 /* -------------------- handleEvent -------------------- */
 
 void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 {
    
+#ifdef DEBUG
+        log->dlog(ch,"Start handleEvent" );
+#endif   
+   
     switch (e->getType()) {
     case TEST:
       {
-
 #ifdef DEBUG
         log->dlog(ch,"processing event test" );
 #endif
-
       }
       break;
     
@@ -941,6 +1178,10 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
     case CREATE_SESSION:
 		handleCreateSession(e,fds);
 		break;
+
+    case CREATE_CHECK_SESSION:
+		handleCreateCheckSession(e,fds);
+		break;
 		
     default:
 #ifdef DEBUG
@@ -979,11 +1220,9 @@ void Auctioner::run()
         fds.max = fdList.begin()->first.fd;
 		
 		// register a timer for ctrlcomm (only online capturing)
-		if (enableCtrl) {
-		  int t = comm->getTimeout();
-		  if (t > 0) {
-				evnt->addEvent(new CtrlCommTimerEvent(t, t * 1000));
-		  }
+		int t = comm->getTimeout();
+		if (t > 0) {
+			evnt->addEvent(new CtrlCommTimerEvent(t, t * 1000));
 		}
 		
 		
@@ -1058,10 +1297,7 @@ void Auctioner::run()
                     }
                 } 
                 else {
-                    if (enableCtrl) {
-                      cout << "enableCtrl" << endl;
-                      comm->handleFDEvent(&retEvents, &rset, &wset, &fds);
-                    }
+                   comm->handleFDEvent(&retEvents, &rset, &wset, &fds);
                 }
 	        }	
 

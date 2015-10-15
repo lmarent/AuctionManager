@@ -78,6 +78,8 @@ void AuctionManager_Test::test()
 		
 		auctionDB_t * auctions = auctionManagerPtr->parseAuctions(filename, templates);
 		
+		cout << "Num templates: " << templates->get_num_templates() << endl;
+		
 		saveDelete(templates);
 				
 		auctionManagerPtr->addAuctions(auctions, evnt.get());

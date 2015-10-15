@@ -36,7 +36,9 @@
     <!-- log all incoming control requests -->
     <PREF NAME="LogOnConnect" TYPE="Bool">yes</PREF>
     <!-- log all agent commands -->
-    <PREF NAME="LogCommand" TYPE="Bool">yes</PREF>    
+    <PREF NAME="LogCommand" TYPE="Bool">yes</PREF>   
+    <PREF NAME="LocalAddr-V4" TYPE="IPAddr">10.0.2.15</PREF>
+    <PREF NAME="LocalAddr-V6" TYPE="IP6Addr">0:0:0:0:0:0:0:0</PREF>     
     <!-- access list -->
     <ACCESS>
       <ALLOW TYPE="Host">All</ALLOW>

@@ -28,6 +28,7 @@
 // ===========================================================
 
 #include "AgentSession.h"
+#include "Timeval.h"
 
 using namespace auction;
 
@@ -65,7 +66,7 @@ string AgentSession::getInfo()
 {
 
 	string str = Session::getInfo();
-	str =  str + "Start:" + TimeVal::toString(start);
-	str =  str + " Stop:" + TimeVal::toString(stop);
+	str =  str + "Start:" + Timeval::toString(start);
+	str =  str + " Stop:" + Timeval::toString(stop);
 	return str;
 }

@@ -229,15 +229,16 @@
  /usr/local/include/ipap/IpAp_field.h /usr/local/include/ipap/IpAp_def.h \
  /usr/local/include/ipap/IpAp_value_field.h \
  /usr/local/include/ipap/IpAp_exception.h \
+ /usr/local/include/ipap/IpAp_field_key.h \
  /usr/local/include/ipap/IpAp_message.h /usr/local/include/ipap/Logger.h \
  /usr/local/include/ipap/IpAp_field_container.h \
  /usr/local/include/ipap/IpAp_data_record.h \
- /usr/local/include/ipap/IpAp_field_key.h \
  /usr/local/include/ipap/IpAp_t.h \
  /usr/local/include/ipap/IpAp_template_container.h \
  ../../foundation/include/Field.h /usr/local/include/ipap/Error.h \
  ../../foundation/include/FieldValue.h /usr/local/include/ipap/stdinc.h \
- /usr/local/include/ipap/IpAp_def.h
+ /usr/local/include/ipap/IpAp_def.h \
+ ../../foundation/include/TemplateIdSource.h
 
 /usr/include/stdc-predef.h:
 
@@ -861,6 +862,8 @@
 
 /usr/local/include/ipap/IpAp_exception.h:
 
+/usr/local/include/ipap/IpAp_field_key.h:
+
 /usr/local/include/ipap/IpAp_message.h:
 
 /usr/local/include/ipap/Logger.h:
@@ -868,8 +871,6 @@
 /usr/local/include/ipap/IpAp_field_container.h:
 
 /usr/local/include/ipap/IpAp_data_record.h:
-
-/usr/local/include/ipap/IpAp_field_key.h:
 
 /usr/local/include/ipap/IpAp_t.h:
 
@@ -884,3 +885,5 @@
 /usr/local/include/ipap/stdinc.h:
 
 /usr/local/include/ipap/IpAp_def.h:
+
+../../foundation/include/TemplateIdSource.h:

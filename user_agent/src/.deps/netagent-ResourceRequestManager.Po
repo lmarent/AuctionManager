@@ -239,10 +239,10 @@ netagent-ResourceRequestManager.o: ResourceRequestManager.cpp \
  /usr/local/include/ipap/IpAp_field.h /usr/local/include/ipap/IpAp_def.h \
  /usr/local/include/ipap/IpAp_value_field.h \
  /usr/local/include/ipap/IpAp_exception.h \
+ /usr/local/include/ipap/IpAp_field_key.h \
  /usr/local/include/ipap/IpAp_message.h /usr/local/include/ipap/Logger.h \
  /usr/local/include/ipap/IpAp_field_container.h \
  /usr/local/include/ipap/IpAp_data_record.h \
- /usr/local/include/ipap/IpAp_field_key.h \
  /usr/local/include/ipap/IpAp_t.h \
  /usr/local/include/ipap/IpAp_template_container.h \
  ../../foundation/include/AuctionIdSource.h \
@@ -256,6 +256,7 @@ netagent-ResourceRequestManager.o: ResourceRequestManager.cpp \
  ../../user_agent/include/ResourceRequestIdSource.h \
  ../../user_agent/include/ResourceRequest.h \
  ../../foundation/include/AuctionFileParser.h \
+ ../../user_agent/include/AgentSession.h \
  ../../foundation/include/Session.h /usr/local/include/address.h \
  /usr/local/include/protlib_types.h /usr/include/c++/4.8/cassert \
  /usr/local/include/ie.h /usr/local/include/network_message.h \
@@ -937,6 +938,8 @@ netagent-ResourceRequestManager.o: ResourceRequestManager.cpp \
 
 /usr/local/include/ipap/IpAp_exception.h:
 
+/usr/local/include/ipap/IpAp_field_key.h:
+
 /usr/local/include/ipap/IpAp_message.h:
 
 /usr/local/include/ipap/Logger.h:
@@ -944,8 +947,6 @@ netagent-ResourceRequestManager.o: ResourceRequestManager.cpp \
 /usr/local/include/ipap/IpAp_field_container.h:
 
 /usr/local/include/ipap/IpAp_data_record.h:
-
-/usr/local/include/ipap/IpAp_field_key.h:
 
 /usr/local/include/ipap/IpAp_t.h:
 
@@ -972,6 +973,8 @@ netagent-ResourceRequestManager.o: ResourceRequestManager.cpp \
 ../../user_agent/include/ResourceRequest.h:
 
 ../../foundation/include/AuctionFileParser.h:
+
+../../user_agent/include/AgentSession.h:
 
 ../../foundation/include/Session.h:
 

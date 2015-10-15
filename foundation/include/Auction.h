@@ -121,6 +121,14 @@ class Auction
 
     //! name of the auction set this auction belongs to
     string setName;
+
+	//! template references
+	uint16_t dataAuctionTemplate;
+	uint16_t optionAuctionTemplate;
+	uint16_t dataBidTemplate;
+	uint16_t optionBidTemplate;
+	uint16_t dataAllocationTemplate;
+	uint16_t optionAllocationTemplate;
 	
 	//! Execution method to be called everytime that the auction is timeout.
 	action_t action;
@@ -141,20 +149,17 @@ class Auction
     //! get a value by name from the misc rule attriutes
     string getMiscVal(string name);
 
-	//! Templates asociated with the auction. 
-	ipap_template_container templates;
-
 	//! Add a field to the template given as parameter.
 	void addTemplateField(ipap_template *templ, 
 		 			      ipap_field_container g_ipap_fields, 
 						  int eno, int type);
 
 	//! Add field keys to the template given as parameter.
-	void addTemplateFieldKeys(ipap_template *templ, 
-		  				      ipap_field_container g_ipap_fields);
+	void addTemplateMandatoryFields(ipap_template *templ, 
+									ipap_field_container g_ipap_fields);
 	
 	//! Calculate the number of fields to be included in the template type.
-	int calculateNbrFieldTemplateData(ipap_templ_type_t templType, 
+	set<ipap_field_key>  calculateTemplateFields(ipap_templ_type_t templType, 
 									  auctionTemplateFieldList_t &templFields);
 	
 	//! Create a template taking as input fields those in templFields.
@@ -162,7 +167,7 @@ class Auction
 	createTemplate(auctionTemplateFieldList_t &templFields,
 				   ipap_field_container g_ipap_fields,
 				   ipap_templ_type_t templType);
-	
+		
 	//! Build the templates related to the auction and store them in templateContainer
 	void buildTemplates(auctionTemplateFieldList_t &templFields, 
 							 ipap_template_container *templateContainer);
@@ -228,13 +233,72 @@ class Auction
     {
         return stop;
     }
-    
-    
+        
     interval_t getInterval()
     {
         return mainInterval;
     }
-     
+    
+	/*! 
+	 * \short Get the data auction template associated with the auction
+	 */ 	
+    uint16_t getDataAuctionTemplate(void);
+    
+	/*! 
+	 * \short Set the data auction template associated with the auction
+        \arg \templId 	System template Id.
+	 */ 	
+    void setDataAuctionTemplate(uint16_t templId);
+    
+	/*! \short Get the option auction template associated with the auction
+	 */ 	
+	uint16_t getOptionAuctionTemplate(void);
+	
+	/*! 
+	 * \short Set the option auction template associated with the auction
+        \arg \templId 	System template Id.
+	 */ 	
+	void setOptionAuctionTemplate(uint16_t templId); 
+	
+	/*! \short Get the data bid template associated with the auction
+	 */ 	
+	uint16_t getDataBidTemplate(void);
+	
+	/*! 
+	 * \short Set the data bid template associated with the auction
+        \arg \templId 	System template Id.
+	 */ 	
+	void setDataBidTemplate(uint16_t templId);
+	
+	/*! \short Get the option bid template associated with the auction
+	 */ 	
+	uint16_t getOptionBidTemplate(void);
+	
+	/*! 
+	 * \short Set the option bid template associated with the auction
+        \arg \templId 	System template Id.
+	 */ 	
+	void setOptionBidTemplate(uint16_t templId);
+	
+	/*! \short Get the data allocation template associated with the auction
+	 */ 	
+	uint16_t getDataAllocationTemplate(void);
+	
+	/*! 
+	 * \short Set the data allocation template associated with the auction
+        \arg \templId 	System template Id.
+	 */ 	
+	void setDataAllocationTemplate(uint16_t templId);
+	
+	/*! \short Get the option allocation template associated with the auction
+	 */ 	
+	uint16_t getOptionAllocationTemplate(void);
+ 
+	/*! 
+	 * \short Set the option allocation template associated with the auction
+        \arg \templId 	System template Id.
+	 */ 	
+	void setOptionAllocationTemplate(uint16_t templId);
             
     /*! \short   construct and initialize a Auction object
         \arg \c now   		current timestamp
@@ -271,12 +335,6 @@ class Auction
     */
     miscList_t *getMisc();
 
-
-    /*! \short   get all templates added.
-
-        \returns a pointer (link) to templates.
-    */	
-    ipap_template_container * getTemplateList(void);
     
     //! dump a Auction object
     void dump( ostream &os );

@@ -112,8 +112,6 @@ class AuctionManager
     //! field values
     fieldValList_t fieldVals;
 
-	ipap_message *message;		///< Empty message for creating copies of it.
-
     // name of field def and field vals files
     string fieldDefFileName, fieldValFileName;
 		
@@ -225,6 +223,16 @@ class AuctionManager
     string getInfo(Auction *a);
     string getInfo(string sname, string rname);
     string getInfo(string sname);
+
+    /*! \short   get the ipap_message that contains all the auctions within
+     * 			  the container. 
+
+        \throws an Error exception if some field required is missing.
+    */	
+	ipap_message * get_ipap_message(auctionDB_t *auctions, 
+									ipap_template_container *templates,
+									int domainId, bool useIPV6, string sAddressIPV4, 
+									string sAddressIPV6, uint16_t port);
 
     //! dump a AuctionManager object
     void dump( ostream &os );

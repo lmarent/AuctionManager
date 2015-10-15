@@ -23,7 +23,10 @@
   <DEF TYPE="IP6Addr" ENO="0" FTYPE="14">SrcIP6</DEF>
   <DEF TYPE="IP6Addr" ENO="0" FTYPE="15">DstIP6</DEF>  
   <DEF TYPE="UInt16" ENO="0" FTYPE="41">SrcPort</DEF>
-  <DEF TYPE="UInt16" ENO="0" FTYPE="42">DstPort</DEF>  
+  <DEF TYPE="UInt16" ENO="0" FTYPE="42">DstPort</DEF> 
+  <DEF TYPE="UInt16" ENO="0" FTYPE="47">SrcAuctionPort</DEF>
+  <DEF TYPE="UInt16" ENO="0" FTYPE="48">DstAuctionPort</DEF> 
+  <DEF TYPE="UInt8" ENO="0" FTYPE="49">IPVersion</DEF> 
   <!-- Reserve price -->
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="39">ReservePrice</DEF>
   <!-- Algorithm data -->

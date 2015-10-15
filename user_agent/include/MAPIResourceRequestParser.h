@@ -58,6 +58,8 @@ class MAPIResourceRequestParser : public MAPIIpApMessageParser
 	void addOptionRecord(string recordId,
 						 string resourceId,
 						 resourceReq_interval_t interval, 
+						 bool useIPV6, string sAddressIPV4, 
+						 string sAddressIPV6, uint16_t port, 
 						 uint16_t bidTemplateId, 
 						 ipap_message *mes );
 									  
@@ -77,7 +79,9 @@ class MAPIResourceRequestParser : public MAPIIpApMessageParser
 	ipap_message * get_ipap_message(fieldDefList_t *fieldDefs, 
 								    string recordId,
 									string resourceId,
-								    resourceReq_interval_t interval);
+								    resourceReq_interval_t interval,
+								    bool useIPV6, string sAddressIPV4, 
+								    string sAddressIPV6, uint16_t port);
 
 };
 

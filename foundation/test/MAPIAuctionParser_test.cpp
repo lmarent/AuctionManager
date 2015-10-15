@@ -102,10 +102,21 @@ void MAPIAuctionParser_Test::testParser()
 		CPPUNIT_ASSERT( new_auctions->size() == 1 );
 
 		saveDelete(new_auctions);
+		
+		cout << "# templates created:" << templates->get_num_templates() << endl;
 
+		list<int> templList2 = templates->get_template_list();
+		
+		for (list<int>::iterator i = templList2.begin(); i != templList2.end(); ++i ){
+			cout << "template id: " << *i << endl;
+		}
+
+		
 		// Parse a XML with an auction
 		
 		const string resourceRequestFilename = DEF_SYSCONFDIR "/ResponseRequestMessage.xml";
+		
+		cout << resourceRequestFilename << endl;
 		
 		std::ifstream in(resourceRequestFilename.c_str());
 		std::stringstream buffer;
@@ -115,18 +126,33 @@ void MAPIAuctionParser_Test::testParser()
 		anslp::msg::anslp_ipap_xml_message mess;
 		anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(test);
 		
+		cout << "# templates created:" << templates->get_num_templates() << endl;
+		list<int> templList3 = templates->get_template_list();
+		for (list<int>::iterator i = templList3.begin(); i != templList3.end(); ++i ){
+			cout << "template id: " << *i << endl;
+		}
 		
 		ptrMAPIAuctionParser->parse( &fieldDefs,
 									 &(ipap_mes->ip_message),
 									 new_auctions2,
 									 templates );
+
+		cout << "# templates created:" << templates->get_num_templates() << endl;
 		
 		CPPUNIT_ASSERT( new_auctions2->size() == 1 );
 		
 		saveDelete(new_auctions2);
+		
+		list<int> templList = templates->get_template_list();
+		
+		for (list<int>::iterator i = templList.begin(); i != templList.end(); ++i ){
+			cout << "template id: " << *i << endl;
+		}
+		
 	}
 	catch (Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 }
 
@@ -142,6 +168,7 @@ void MAPIAuctionParser_Test::loadFieldDefs(fieldDefList_t *fieldList)
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 }

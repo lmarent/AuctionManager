@@ -342,6 +342,7 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
  ../../user_agent/include/ResourceRequestIdSource.h \
  ../../user_agent/include/ResourceRequest.h \
  ../../foundation/include/AuctionFileParser.h \
+ ../../user_agent/include/AgentSession.h \
  ../../foundation/include/Session.h \
  ../../foundation/include/SessionManager.h \
  ../../foundation/include/Session.h \
@@ -1268,6 +1269,8 @@ netagent-main.o: main.cpp /usr/include/stdc-predef.h \
 ../../user_agent/include/ResourceRequest.h:
 
 ../../foundation/include/AuctionFileParser.h:
+
+../../user_agent/include/AgentSession.h:
 
 ../../foundation/include/Session.h:
 

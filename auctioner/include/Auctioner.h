@@ -53,9 +53,9 @@
 namespace auction
 {
 
-typedef map<int, ipap_template_container>   		  		auctionerTemplateList_t;
-typedef map<int, ipap_template_container>::iterator   		auctionerTemplateListIter_t;
-typedef map<int, ipap_template_container>::const_iterator   auctionerTemplateListConstIter_t;
+typedef map<int, ipap_template_container*>   		  		auctionerTemplateList_t;
+typedef map<int, ipap_template_container*>::iterator   		auctionerTemplateListIter_t;
+typedef map<int, ipap_template_container*>::const_iterator   auctionerTemplateListConstIter_t;
 
 
 
@@ -85,7 +85,6 @@ class Auctioner
     auto_ptr<AuctionManager>   			aucm;
     auto_ptr<SessionManager>			sesm;
     auto_ptr<EventSchedulerAuctioner>  	evnt;
-    auto_ptr<MAPIAuctionParser>			mpap;
 
     auto_ptr<AUMProcessor> 				proc;    
     auto_ptr<CtrlComm>        			comm;
@@ -155,8 +154,11 @@ class Auctioner
 	void handleProcModeleTimer(Event *e, fd_sets_t *fds);
 
 	void handlePushExecution(Event *e, fd_sets_t *fds);
+
+	void handleCreateCheckSession(Event *e, fd_sets_t *fds);
 	
 	void handleCreateSession(Event *e, fd_sets_t *fds);
+
     
   public:
 

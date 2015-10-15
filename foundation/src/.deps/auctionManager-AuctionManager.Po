@@ -231,10 +231,10 @@
  /usr/local/include/ipap/IpAp_field.h /usr/local/include/ipap/IpAp_def.h \
  /usr/local/include/ipap/IpAp_value_field.h \
  /usr/local/include/ipap/IpAp_exception.h \
+ /usr/local/include/ipap/IpAp_field_key.h \
  /usr/local/include/ipap/IpAp_message.h /usr/local/include/ipap/Logger.h \
  /usr/local/include/ipap/IpAp_field_container.h \
  /usr/local/include/ipap/IpAp_data_record.h \
- /usr/local/include/ipap/IpAp_field_key.h \
  /usr/local/include/ipap/IpAp_t.h \
  /usr/local/include/ipap/IpAp_template_container.h \
  ../../foundation/include/Field.h ../../foundation/include/FieldValue.h \
@@ -253,6 +253,19 @@
  ../../foundation/include/MAPIAuctionParser.h \
  ../../foundation/include/MAPIIpApMessageParser.h \
  ../../foundation/include/ParserFcts.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_message_splitter.h \
+ /usr/local/include/a-nslp/msg/anslp_ipap_message.h \
+ /usr/local/include/a-nslp/msg/anslp_mspec_object.h \
+ /usr/local/include/a-nslp/msg/anslp_object.h /usr/local/include/ie.h \
+ /usr/local/include/protlib_types.h /usr/include/c++/4.8/cassert \
+ /usr/local/include/network_message.h \
+ /usr/local/include/a-nslp/msg/session_lifetime.h \
+ /usr/local/include/a-nslp/msg/information_code.h \
+ /usr/local/include/a-nslp/msg/selection_auctioning_entities.h \
+ /usr/local/include/a-nslp/msg/msg_sequence_number.h \
+ /usr/local/include/a-nslp/msg/message_hop_count.h \
+ /usr/local/include/a-nslp/msg/xml_object_key.h \
+ /usr/local/include/ipap/IpAp_template.h \
  ../../foundation/include/Constants.h
 
 /usr/include/stdc-predef.h:
@@ -883,6 +896,8 @@
 
 /usr/local/include/ipap/IpAp_exception.h:
 
+/usr/local/include/ipap/IpAp_field_key.h:
+
 /usr/local/include/ipap/IpAp_message.h:
 
 /usr/local/include/ipap/Logger.h:
@@ -890,8 +905,6 @@
 /usr/local/include/ipap/IpAp_field_container.h:
 
 /usr/local/include/ipap/IpAp_data_record.h:
-
-/usr/local/include/ipap/IpAp_field_key.h:
 
 /usr/local/include/ipap/IpAp_t.h:
 
@@ -932,5 +945,35 @@
 ../../foundation/include/MAPIIpApMessageParser.h:
 
 ../../foundation/include/ParserFcts.h:
+
+/usr/local/include/a-nslp/msg/anslp_ipap_message_splitter.h:
+
+/usr/local/include/a-nslp/msg/anslp_ipap_message.h:
+
+/usr/local/include/a-nslp/msg/anslp_mspec_object.h:
+
+/usr/local/include/a-nslp/msg/anslp_object.h:
+
+/usr/local/include/ie.h:
+
+/usr/local/include/protlib_types.h:
+
+/usr/include/c++/4.8/cassert:
+
+/usr/local/include/network_message.h:
+
+/usr/local/include/a-nslp/msg/session_lifetime.h:
+
+/usr/local/include/a-nslp/msg/information_code.h:
+
+/usr/local/include/a-nslp/msg/selection_auctioning_entities.h:
+
+/usr/local/include/a-nslp/msg/msg_sequence_number.h:
+
+/usr/local/include/a-nslp/msg/message_hop_count.h:
+
+/usr/local/include/a-nslp/msg/xml_object_key.h:
+
+/usr/local/include/ipap/IpAp_template.h:
 
 ../../foundation/include/Constants.h:

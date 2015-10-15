@@ -55,23 +55,27 @@ uint16_t MAPIResourceRequestParser::addFieldsOptionTemplate(fieldDefList_t *fiel
 
 	uint16_t bidOptionTemplateId;
 	
-	// Add the option bid template
-	int nfields = 5;
-	bidOptionTemplateId = mes->new_data_template( nfields, IPAP_OPTNS_AUCTION_TEMPLATE );
+	
+	set<ipap_field_key> tFields;
+	
+	tFields.insert(ipap_field_key(0,IPAP_FT_IDAUCTION));
+	tFields.insert(ipap_field_key(0,IPAP_FT_IDRECORD));
+	tFields.insert(ipap_field_key(0,IPAP_FT_STARTSECONDS));
+	tFields.insert(ipap_field_key(0,IPAP_FT_ENDSECONDS));
+	tFields.insert(ipap_field_key(0,IPAP_FT_INTERVALSECONDS));
+	tFields.insert(ipap_field_key(0,IPAP_FT_IDRESOURCE));
+	tFields.insert(ipap_field_key(0,IPAP_FT_IPVERSION));
+	tFields.insert(ipap_field_key(0,IPAP_FT_SOURCEIPV4ADDRESS));
+	tFields.insert(ipap_field_key(0,IPAP_FT_SOURCEIPV6ADDRESS));
+	tFields.insert(ipap_field_key(0,IPAP_FT_SOURCEAUCTIONPORT));
+	
+	bidOptionTemplateId = mes->new_data_template( tFields.size(), IPAP_OPTNS_AUCTION_TEMPLATE );
 
-	// put the AUCTIONID.
-	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_IDAUCTION);
-	// put the RECORDID.
-	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_IDRECORD);
-	// put the ResourceID
-	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_IDRESOURCE);
-	// put the starttime
-	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_STARTSECONDS);
-	// put the endtime
-	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_ENDSECONDS);
-	// put the interval
-	mes->add_field(bidOptionTemplateId, 0, IPAP_FT_INTERVALSECONDS);
+	set<ipap_field_key>::iterator iter;
 
+	for (iter = tFields.begin(); iter != tFields.end(); ++iter){
+		mes->add_field(bidOptionTemplateId, iter->get_eno(), iter->get_ftype());
+	}
 
 #ifdef DEBUG
     log->dlog(ch, "Ending addFieldsOptionTemplate");
@@ -84,6 +88,8 @@ uint16_t MAPIResourceRequestParser::addFieldsOptionTemplate(fieldDefList_t *fiel
 void MAPIResourceRequestParser::addOptionRecord(string recordId,
 												string resourceId,
 												resourceReq_interval_t interval, 
+												bool useIPV6, string sAddressIPV4, 
+												string sAddressIPV6, uint16_t port,
 												uint16_t bidTemplateId, 
 												ipap_message *mes )
 {
@@ -133,6 +139,46 @@ void MAPIResourceRequestParser::addOptionRecord(string recordId,
 	ipap_field idIntervalF = mes->get_field_definition( 0, IPAP_FT_INTERVALSECONDS );
 	ipap_value_field fvalue5 = idIntervalF.get_ipap_value_field( uinter );
 	dataOption.insert_field(0, IPAP_FT_INTERVALSECONDS, fvalue5);
+
+	// Add the IPversion
+	ipap_field ipVersionF = mes->get_field_definition( 0, IPAP_FT_IPVERSION );
+	if (useIPV6){
+		uint8_t ipversion = 6;
+		ipap_value_field fvalueIp = ipVersionF.get_ipap_value_field(ipversion);
+		dataOption.insert_field(0, IPAP_FT_IPVERSION, fvalueIp);
+	}
+	else{
+		uint8_t ipversion = 4;
+		ipap_value_field fvalueIp = ipVersionF.get_ipap_value_field(ipversion);
+		dataOption.insert_field(0, IPAP_FT_IPVERSION, fvalueIp);
+	}	
+	
+	// Add the Ipv6 Address value
+	ipap_field ipAddr6F = mes->get_field_definition( 0, IPAP_FT_SOURCEIPV6ADDRESS );
+	if (useIPV6){	
+		ipap_value_field fvalueIpAddr6 = ipAddr6F.parseIP6ADDR(sAddressIPV6);
+		dataOption.insert_field(0, IPAP_FT_SOURCEIPV6ADDRESS, fvalueIpAddr6);
+	}
+	else{
+		ipap_value_field fvalueIpAddr6 = ipAddr6F.parseIP6ADDR("0:0:0:0:0:0:0:0");
+		dataOption.insert_field(0, IPAP_FT_SOURCEIPV6ADDRESS, fvalueIpAddr6);	
+	}
+
+	// Add the Ipv4 Address value
+	ipap_field ipAddr4F = mes->get_field_definition( 0, IPAP_FT_SOURCEIPV4ADDRESS );
+	if (useIPV6){	
+		ipap_value_field fvalueIpAddr4 = ipAddr4F.parseIP4ADDR("0.0.0.0");
+		dataOption.insert_field(0, IPAP_FT_SOURCEIPV4ADDRESS, fvalueIpAddr4);		
+	}
+	else{
+		ipap_value_field fvalueIpAddr4 = ipAddr4F.parseIP4ADDR(sAddressIPV4);
+		dataOption.insert_field(0, IPAP_FT_SOURCEIPV4ADDRESS, fvalueIpAddr4);
+	}
+	
+	// Add the destination port
+	ipap_field portF = mes->get_field_definition( 0, IPAP_FT_SOURCEAUCTIONPORT );
+	ipap_value_field fvaluePort = portF.get_ipap_value_field( port);
+	dataOption.insert_field(0, IPAP_FT_SOURCEAUCTIONPORT, fvaluePort);
 		
 	mes->include_data(bidTemplateId, dataOption);
 
@@ -149,7 +195,9 @@ ipap_message *
 MAPIResourceRequestParser::get_ipap_message(fieldDefList_t *fieldDefs, 
 											string recordId,
 											string resourceId,
-											resourceReq_interval_t interval )
+											resourceReq_interval_t interval,
+											bool useIPV6, string sAddressIPV4, 
+											string sAddressIPV6, uint16_t port )
 {
 #ifdef DEBUG
     log->dlog(ch, "Starting get_ipap_message");
@@ -163,7 +211,8 @@ MAPIResourceRequestParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	bidOptionTemplateId = addFieldsOptionTemplate(fieldDefs, mes);
 				
 	// Loop through the related auctions to include them in a option record.
-	addOptionRecord(recordId, resourceId, interval, bidOptionTemplateId, mes);
+	addOptionRecord(recordId, resourceId, interval, useIPV6, sAddressIPV4, 
+					sAddressIPV6, port, bidOptionTemplateId, mes);
 	
 #ifdef DEBUG
     log->dlog(ch, "Ending get_ipap_message");

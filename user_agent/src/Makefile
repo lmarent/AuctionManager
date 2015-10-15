@@ -139,6 +139,7 @@ am_netagent_OBJECTS =  \
 	netagent-MAPIResourceRequestParser.$(OBJEXT) \
 	netagent-TextResourceRequestParser.$(OBJEXT) \
 	netagent-ResourceRequestManager.$(OBJEXT) \
+	netagent-AgentSession.$(OBJEXT) \
 	netagent-EventSchedulerAgent.$(OBJEXT) \
 	netagent-PageRepository.$(OBJEXT) netagent-CtrlComm.$(OBJEXT) \
 	netagent-AgentManagerInfo.$(OBJEXT) \
@@ -433,6 +434,7 @@ netagent_SOURCES = ../../foundation/src/Constants.cpp \
 					MAPIResourceRequestParser.cpp \
 					TextResourceRequestParser.cpp \
 					ResourceRequestManager.cpp \
+					AgentSession.cpp \
 					EventSchedulerAgent.cpp \
 					PageRepository.cpp \
 					CtrlComm.cpp \
@@ -678,6 +680,7 @@ distclean-compile:
 include ./$(DEPDIR)/netagent-Agent.Po
 include ./$(DEPDIR)/netagent-AgentManagerInfo.Po
 include ./$(DEPDIR)/netagent-AgentProcessor.Po
+include ./$(DEPDIR)/netagent-AgentSession.Po
 include ./$(DEPDIR)/netagent-ConstantsAgent.Po
 include ./$(DEPDIR)/netagent-CtrlComm.Po
 include ./$(DEPDIR)/netagent-EventSchedulerAgent.Po
@@ -1337,6 +1340,20 @@ netagent-ResourceRequestManager.obj: ResourceRequestManager.cpp
 #	$(AM_V_CXX)source='ResourceRequestManager.cpp' object='netagent-ResourceRequestManager.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
 #	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o netagent-ResourceRequestManager.obj `if test -f 'ResourceRequestManager.cpp'; then $(CYGPATH_W) 'ResourceRequestManager.cpp'; else $(CYGPATH_W) '$(srcdir)/ResourceRequestManager.cpp'; fi`
+
+netagent-AgentSession.o: AgentSession.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netagent-AgentSession.o -MD -MP -MF $(DEPDIR)/netagent-AgentSession.Tpo -c -o netagent-AgentSession.o `test -f 'AgentSession.cpp' || echo '$(srcdir)/'`AgentSession.cpp
+	$(AM_V_at)$(am__mv) $(DEPDIR)/netagent-AgentSession.Tpo $(DEPDIR)/netagent-AgentSession.Po
+#	$(AM_V_CXX)source='AgentSession.cpp' object='netagent-AgentSession.o' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o netagent-AgentSession.o `test -f 'AgentSession.cpp' || echo '$(srcdir)/'`AgentSession.cpp
+
+netagent-AgentSession.obj: AgentSession.cpp
+	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netagent-AgentSession.obj -MD -MP -MF $(DEPDIR)/netagent-AgentSession.Tpo -c -o netagent-AgentSession.obj `if test -f 'AgentSession.cpp'; then $(CYGPATH_W) 'AgentSession.cpp'; else $(CYGPATH_W) '$(srcdir)/AgentSession.cpp'; fi`
+	$(AM_V_at)$(am__mv) $(DEPDIR)/netagent-AgentSession.Tpo $(DEPDIR)/netagent-AgentSession.Po
+#	$(AM_V_CXX)source='AgentSession.cpp' object='netagent-AgentSession.obj' libtool=no \
+#	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) \
+#	$(AM_V_CXX_no)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o netagent-AgentSession.obj `if test -f 'AgentSession.cpp'; then $(CYGPATH_W) 'AgentSession.cpp'; else $(CYGPATH_W) '$(srcdir)/AgentSession.cpp'; fi`
 
 netagent-EventSchedulerAgent.o: EventSchedulerAgent.cpp
 	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netagent-EventSchedulerAgent.o -MD -MP -MF $(DEPDIR)/netagent-EventSchedulerAgent.Tpo -c -o netagent-EventSchedulerAgent.o `test -f 'EventSchedulerAgent.cpp' || echo '$(srcdir)/'`EventSchedulerAgent.cpp

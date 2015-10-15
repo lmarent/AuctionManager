@@ -174,6 +174,8 @@ class CtrlComm : public AuctionManagerComponent
     */
     int processCmd(struct REQUEST *req );
 
+	char *processCheckSession(parseReq_t *preq); 
+
     //! add a session to the currently active sessions
     char *processAddSession(parseReq_t *preq );
 

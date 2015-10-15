@@ -40,7 +40,6 @@ const string NETAUM_LOCK_FILE   = DEF_STATEDIR "/run/netaum.pid";
 // Logger.h
 extern const string AUM_DEFAULT_LOG_FILE = DEF_STATEDIR "/log/netaum.log";
 
-
 // ConfigParser.h
 const string AUM_CONFIGFILE_DTD  = DEF_SYSCONFDIR "/netaum.conf.dtd";
 

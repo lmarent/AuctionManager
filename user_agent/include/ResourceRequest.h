@@ -34,7 +34,7 @@
 #include "ConfigParser.h"
 #include "ProcModuleInterface.h"
 #include "AuctionFileParser.h"
-#include "Session.h"
+#include "AgentSession.h"
 #include <uuid/uuid.h>
 
 namespace auction

@@ -1932,7 +1932,7 @@ target_alias=''
 #define HAVE_LIBXSLT_TRANSFORM_H 1
 #define HAVE_LIBXSLT_XSLTUTILS_H 1
 #define HAVE_CURL 1
-#define BUILD_TIME "08/10/2015 15:08:44"
+#define BUILD_TIME "12/10/2015 16:49:27"
 #define DEF_SYSCONFDIR "/home/luis/AuctionManager/etc"
 #define DEF_STATEDIR "/usr/local/var"
 #define DEF_LIBDIR "/usr/local/lib/auctionmanager"

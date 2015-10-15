@@ -7,6 +7,7 @@
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "ParserFcts.h"
 #include "AUMProcessor.h"
 #include "Constants.h"
 #include "ConstantsAum.h"
@@ -97,17 +98,20 @@ void AUMProcessor_Test::setUp()
 		ptrBid4 = new Bid(*((*new_bidsAgent4)[0]));
 		ptrBid5 = new Bid(*((*new_bidsAgent5)[0]));
 	
+		const string configDTD = DEF_SYSCONFDIR "/netaum.conf.dtd";
 		const string configFileName = NETAUM_DEFAULT_CONFIG_FILE;
-		configManagerPtr = new ConfigManager(configFileName, argv[0]);
+		configManagerPtr = new ConfigManager(configDTD, configFileName, argv[0]);
 
 		auto_ptr<EventScheduler> _evnt(new EventScheduler());
         evnt = _evnt;		
 		
-		auctionManagerPtr = new AuctionManager(fieldname);
+		ipap_template_container *templContainer = new ipap_template_container();
+		
+		auctionManagerPtr = new AuctionManager(fieldname, fieldValuename);
 
 		const string filenameAuctions = DEF_SYSCONFDIR "/example_auctions2.xml";
 		
-		auctionDB_t * auctions = auctionManagerPtr->parseAuctions(filenameAuctions);
+		auctionDB_t * auctions = auctionManagerPtr->parseAuctions(filenameAuctions, templContainer);
 				
 		Auction *auction = (*auctions)[0];
 		

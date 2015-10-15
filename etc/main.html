@@ -29,6 +29,13 @@ Param = <input type=text name=IParam><br>
 <input value="get info" type=submit>
 </form><br>
 
+/check_session?SessionID=&lt;sessionid&gt;Message=&lt;message&gt;: check a new session<br><br>
+<form method=post action=/check_session>
+SessionID = <input type=text name=SessionID><br>	
+Message = <textarea col=400 rows=10 name=Message></textarea><br>
+<input value="check session" type=submit>
+</form><br>
+
 /add_session?SessionID=&lt;sessionid&gt;Message=&lt;message&gt;: add a new session<br><br>
 <form method=post action=/add_session>
 SessionID = <input type=text name=SessionID><br>	

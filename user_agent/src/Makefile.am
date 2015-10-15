@@ -56,6 +56,7 @@ netagent_SOURCES =  @top_srcdir@/foundation/src/Constants.cpp \
 					MAPIResourceRequestParser.cpp \
 					TextResourceRequestParser.cpp \
 					ResourceRequestManager.cpp \
+					AgentSession.cpp \
 					EventSchedulerAgent.cpp \
 					PageRepository.cpp \
 					CtrlComm.cpp \

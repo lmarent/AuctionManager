@@ -560,18 +560,25 @@ char *CtrlComm::processResponseSessionCreate(parseReq_t *preq)
         throw Error("processResponseSessionCreate: missing parameter 'Message'" );
     }
 
-    // read the message and process by the auction manager
-    string sMessage = message->second;
-	
-	anslp::msg::anslp_ipap_xml_message mess;
-	anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(sMessage);
+	try
+	{
+		// read the message and process by the auction manager
+		string sMessage = message->second;
+		
+		anslp::msg::anslp_ipap_xml_message mess;
+		anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(sMessage);
 
-    retEvent = new auction::ResponseCreateSessionEvent(sessionId->second, ipap_mes->ip_message);
+		retEvent = new auction::ResponseCreateSessionEvent(sessionId->second, ipap_mes->ip_message);
 
 #ifdef DEBUG
-    log->log(ch, "ending processResponseSessionCreate");
+		log->log(ch, "ending processResponseSessionCreate");
 #endif
-
+	
+	} catch (Error &e) {
+        log->elog( ch, e.getError().c_str() );
+        throw Error(e.getError().c_str());
+    }    
+    
     return NULL;
 
 }

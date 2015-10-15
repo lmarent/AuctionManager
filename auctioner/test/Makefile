@@ -96,6 +96,43 @@ CONFIG_CLEAN_VPATH_FILES =
 am__EXEEXT_1 = test_runner$(EXEEXT)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_test_runner_OBJECTS =  \
+	../../foundation/src/Constants.$(OBJEXT) \
+	../../foundation/src/ConstantsAum.$(OBJEXT) \
+	../../foundation/src/ParserFcts.$(OBJEXT) \
+	../../foundation/src/XMLParser.$(OBJEXT) \
+	../../foundation/src/Timeval.$(OBJEXT) \
+	../../foundation/src/AuctionTimer.$(OBJEXT) \
+	../../foundation/src/Field.$(OBJEXT) \
+	../../foundation/src/FieldValue.$(OBJEXT) \
+	../../foundation/src/FieldDefParser.$(OBJEXT) \
+	../../foundation/src/FieldValParser.$(OBJEXT) \
+	../../foundation/src/TemplateIdSource.$(OBJEXT) \
+	../../foundation/src/MAPIIpApMessageParser.$(OBJEXT) \
+	../../foundation/src/BidIdSource.$(OBJEXT) \
+	../../foundation/src/AuctionIdSource.$(OBJEXT) \
+	../../foundation/src/Auction.$(OBJEXT) \
+	../../foundation/src/AuctionFileParser.$(OBJEXT) \
+	../../foundation/src/MAPIAuctionParser.$(OBJEXT) \
+	../../foundation/src/AuctionManagerInfo.$(OBJEXT) \
+	../../foundation/src/AuctionManagerComponent.$(OBJEXT) \
+	../../foundation/src/Event.$(OBJEXT) \
+	../../foundation/src/EventScheduler.$(OBJEXT) \
+	../../foundation/src/Bid.$(OBJEXT) \
+	../../foundation/src/BidFileParser.$(OBJEXT) \
+	../../foundation/src/MAPIBidParser.$(OBJEXT) \
+	../../foundation/src/BidManager.$(OBJEXT) \
+	../../foundation/src/CommandLineArgs.$(OBJEXT) \
+	../../foundation/src/ConfigManager.$(OBJEXT) \
+	../../foundation/src/ConfigParser.$(OBJEXT) \
+	../../foundation/src/Allocation.$(OBJEXT) \
+	../../foundation/src/AuctionManager.$(OBJEXT) \
+	../../foundation/src/AllocationIdSource.$(OBJEXT) \
+	../../foundation/src/MAPIAllocationParser.$(OBJEXT) \
+	../../foundation/src/AllocationManager.$(OBJEXT) \
+	../../foundation/src/AnslpClient.$(OBJEXT) \
+	../../foundation/src/SessionIdSource.$(OBJEXT) \
+	../../foundation/src/Session.$(OBJEXT) \
+	../../foundation/src/SessionManager.$(OBJEXT) \
 	../../auctioner/src/PageRepository.$(OBJEXT) \
 	../../auctioner/src/CtrlComm.$(OBJEXT) \
 	../../auctioner/src/ProcModule.$(OBJEXT) \
@@ -109,9 +146,7 @@ am_test_runner_OBJECTS =  \
 test_runner_OBJECTS = $(am_test_runner_OBJECTS)
 test_runner_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-test_runner_DEPENDENCIES =  \
-	$(top_builddir)/foundation/src/libfoundation.la \
-	$(am__DEPENDENCIES_1)
+test_runner_DEPENDENCIES = $(am__DEPENDENCIES_1)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
@@ -549,7 +584,44 @@ top_build_prefix = ../../
 top_builddir = ../..
 top_srcdir = ../..
 AUTOMAKE_OPTIONS = foreign
-test_runner_SOURCES = ../../auctioner/src/PageRepository.cpp \
+test_runner_SOURCES = ../../foundation/src/Constants.cpp \
+						../../foundation/src/ConstantsAum.cpp \
+						../../foundation/src/ParserFcts.cpp \
+						../../foundation/src/XMLParser.cpp \
+						../../foundation/src/Timeval.cpp \
+						../../foundation/src/AuctionTimer.cpp \
+						../../foundation/src/Field.cpp \
+						../../foundation/src/FieldValue.cpp \
+						../../foundation/src/FieldDefParser.cpp \
+						../../foundation/src/FieldValParser.cpp \
+						../../foundation/src/TemplateIdSource.cpp \
+						../../foundation/src/MAPIIpApMessageParser.cpp \
+						../../foundation/src/BidIdSource.cpp \
+						../../foundation/src/AuctionIdSource.cpp \
+						../../foundation/src/Auction.cpp \
+						../../foundation/src/AuctionFileParser.cpp \
+						../../foundation/src/MAPIAuctionParser.cpp \
+						../../foundation/src/AuctionManagerInfo.cpp \
+						../../foundation/src/AuctionManagerComponent.cpp \
+						../../foundation/src/Event.cpp \
+						../../foundation/src/EventScheduler.cpp \
+						../../foundation/src/Bid.cpp \
+						../../foundation/src/BidFileParser.cpp \
+						../../foundation/src/MAPIBidParser.cpp \
+						../../foundation/src/BidManager.cpp \
+						../../foundation/src/CommandLineArgs.cpp \
+						../../foundation/src/ConfigManager.cpp \
+						../../foundation/src/ConfigParser.cpp \
+						../../foundation/src/Allocation.cpp \
+						../../foundation/src/AuctionManager.cpp \
+						../../foundation/src/AllocationIdSource.cpp \
+						../../foundation/src/MAPIAllocationParser.cpp \
+						../../foundation/src/AllocationManager.cpp \
+						../../foundation/src/AnslpClient.cpp \
+						../../foundation/src/SessionIdSource.cpp \
+						../../foundation/src/Session.cpp \
+						../../foundation/src/SessionManager.cpp \
+						../../auctioner/src/PageRepository.cpp \
 						../../auctioner/src/CtrlComm.cpp \
 						../../auctioner/src/ProcModule.cpp \
 						../../auctioner/src/Module.cpp \
@@ -563,24 +635,29 @@ test_runner_SOURCES = ../../auctioner/src/PageRepository.cpp \
 #AM_CXXFLAGS = -O2 -I../../foundation/include $(CPPUNIT_CFLAGS) \
 #				-I../../auctioner/include \
 #				$(LIBIPAP_CFLAGS) \
-#			    -I$(top_srcdir)/lib/getopt_long \
-#			    -I$(top_srcdir)/lib/httpd 
+#			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
+#			    $(LIBIPAP_LIBS) $(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) \
+#			    $(LIBFASTQUEUE_CFLAGS) $(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) \
+#			    $(LIBANSLP_CFLAGS)			    
 
 AM_CXXFLAGS = -g -I../../foundation/include $(CPPUNIT_CFLAGS) \
 				-I../../auctioner/include \
 				$(LIBIPAP_CFLAGS) \
 			    -I$(top_srcdir)/lib/getopt_long \
 			    -I$(top_srcdir)/lib/httpd \
-			    -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING -DINTEL
+			    -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING -DINTEL \
+			    $(LIBIPAP_LIBS) $(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) \
+			    $(LIBFASTQUEUE_CFLAGS) $(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) \
+			    $(LIBANSLP_CFLAGS)			    
 
 AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit \
 			 $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 			 $(top_builddir)/lib/httpd/libhttpd.a \
 			    -lxml2 \
-			 -L$(abs_top_builddir)/foundation/src/libfoundation.la \
-			 $(LIBIPAP_LIBS)	
+			 $(LIBIPAP_LIBS) $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) \
+			 $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS)
 
-LDADD = $(top_builddir)/foundation/src/libfoundation.la	$(LIBIPAP_LIBS)
+LDADD = $(LIBIPAP_LIBS)
 all: all-am
 
 .SUFFIXES:
@@ -624,6 +701,123 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+../../foundation/src/$(am__dirstamp):
+	@$(MKDIR_P) ../../foundation/src
+	@: > ../../foundation/src/$(am__dirstamp)
+../../foundation/src/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) ../../foundation/src/$(DEPDIR)
+	@: > ../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/Constants.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/ConstantsAum.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/ParserFcts.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/XMLParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/Timeval.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/AuctionTimer.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/Field.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/FieldValue.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/FieldDefParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/FieldValParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/TemplateIdSource.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/MAPIIpApMessageParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/BidIdSource.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/AuctionIdSource.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/Auction.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/AuctionFileParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/MAPIAuctionParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/AuctionManagerInfo.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/AuctionManagerComponent.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/Event.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/EventScheduler.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/Bid.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/BidFileParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/MAPIBidParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/BidManager.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/CommandLineArgs.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/ConfigManager.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/ConfigParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/Allocation.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/AuctionManager.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/AllocationIdSource.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/MAPIAllocationParser.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/AllocationManager.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/AnslpClient.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/SessionIdSource.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/Session.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+../../foundation/src/SessionManager.$(OBJEXT):  \
+	../../foundation/src/$(am__dirstamp) \
+	../../foundation/src/$(DEPDIR)/$(am__dirstamp)
 ../../auctioner/src/$(am__dirstamp):
 	@$(MKDIR_P) ../../auctioner/src
 	@: > ../../auctioner/src/$(am__dirstamp)
@@ -675,6 +869,7 @@ mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f ../../auctioner/src/*.$(OBJEXT)
 	-rm -f ../../auctioner/test/*.$(OBJEXT)
+	-rm -f ../../foundation/src/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -689,6 +884,43 @@ include ../../auctioner/src/$(DEPDIR)/PageRepository.Po
 include ../../auctioner/src/$(DEPDIR)/ProcModule.Po
 include ../../auctioner/test/$(DEPDIR)/AUMProcessor_test.Po
 include ../../auctioner/test/$(DEPDIR)/test_runner.Po
+include ../../foundation/src/$(DEPDIR)/Allocation.Po
+include ../../foundation/src/$(DEPDIR)/AllocationIdSource.Po
+include ../../foundation/src/$(DEPDIR)/AllocationManager.Po
+include ../../foundation/src/$(DEPDIR)/AnslpClient.Po
+include ../../foundation/src/$(DEPDIR)/Auction.Po
+include ../../foundation/src/$(DEPDIR)/AuctionFileParser.Po
+include ../../foundation/src/$(DEPDIR)/AuctionIdSource.Po
+include ../../foundation/src/$(DEPDIR)/AuctionManager.Po
+include ../../foundation/src/$(DEPDIR)/AuctionManagerComponent.Po
+include ../../foundation/src/$(DEPDIR)/AuctionManagerInfo.Po
+include ../../foundation/src/$(DEPDIR)/AuctionTimer.Po
+include ../../foundation/src/$(DEPDIR)/Bid.Po
+include ../../foundation/src/$(DEPDIR)/BidFileParser.Po
+include ../../foundation/src/$(DEPDIR)/BidIdSource.Po
+include ../../foundation/src/$(DEPDIR)/BidManager.Po
+include ../../foundation/src/$(DEPDIR)/CommandLineArgs.Po
+include ../../foundation/src/$(DEPDIR)/ConfigManager.Po
+include ../../foundation/src/$(DEPDIR)/ConfigParser.Po
+include ../../foundation/src/$(DEPDIR)/Constants.Po
+include ../../foundation/src/$(DEPDIR)/ConstantsAum.Po
+include ../../foundation/src/$(DEPDIR)/Event.Po
+include ../../foundation/src/$(DEPDIR)/EventScheduler.Po
+include ../../foundation/src/$(DEPDIR)/Field.Po
+include ../../foundation/src/$(DEPDIR)/FieldDefParser.Po
+include ../../foundation/src/$(DEPDIR)/FieldValParser.Po
+include ../../foundation/src/$(DEPDIR)/FieldValue.Po
+include ../../foundation/src/$(DEPDIR)/MAPIAllocationParser.Po
+include ../../foundation/src/$(DEPDIR)/MAPIAuctionParser.Po
+include ../../foundation/src/$(DEPDIR)/MAPIBidParser.Po
+include ../../foundation/src/$(DEPDIR)/MAPIIpApMessageParser.Po
+include ../../foundation/src/$(DEPDIR)/ParserFcts.Po
+include ../../foundation/src/$(DEPDIR)/Session.Po
+include ../../foundation/src/$(DEPDIR)/SessionIdSource.Po
+include ../../foundation/src/$(DEPDIR)/SessionManager.Po
+include ../../foundation/src/$(DEPDIR)/TemplateIdSource.Po
+include ../../foundation/src/$(DEPDIR)/Timeval.Po
+include ../../foundation/src/$(DEPDIR)/XMLParser.Po
 
 .cpp.o:
 	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -1004,6 +1236,8 @@ distclean-generic:
 	-rm -f ../../auctioner/src/$(am__dirstamp)
 	-rm -f ../../auctioner/test/$(DEPDIR)/$(am__dirstamp)
 	-rm -f ../../auctioner/test/$(am__dirstamp)
+	-rm -f ../../foundation/src/$(DEPDIR)/$(am__dirstamp)
+	-rm -f ../../foundation/src/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -1014,7 +1248,7 @@ clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ../../auctioner/src/$(DEPDIR) ../../auctioner/test/$(DEPDIR)
+	-rm -rf ../../auctioner/src/$(DEPDIR) ../../auctioner/test/$(DEPDIR) ../../foundation/src/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1060,7 +1294,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ../../auctioner/src/$(DEPDIR) ../../auctioner/test/$(DEPDIR)
+	-rm -rf ../../auctioner/src/$(DEPDIR) ../../auctioner/test/$(DEPDIR) ../../foundation/src/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

@@ -217,8 +217,6 @@ ResourceRequest::getSession( time_t start, time_t stop,
 	
 	// Set the session lifetime
 	session->setLifetime(lifetime);
-	
-	session->
-	
+		
 	return session;
 }

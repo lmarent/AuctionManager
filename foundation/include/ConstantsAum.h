@@ -38,12 +38,12 @@ namespace auction
 // AuctionManager.h
 extern const string NETAUM_DEFAULT_CONFIG_FILE;
 
-
 // Logger.h
 extern const string AUM_DEFAULT_LOG_FILE;
 
 // ConfigParser.h
 extern const string AUM_CONFIGFILE_DTD;
+
 
 #ifdef USE_SSL
 // certificate file location (SSL)

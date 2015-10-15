@@ -243,7 +243,7 @@ void BidFileParser::calculateIntervals(time_t now, bid_auction_t *auction, miscL
 	    
     // do we have a stop time defined that is in the past ?
     if ((auction->stop != 0) && (auction->stop <= now)) {
-        throw Error(300, "task running time is already over");
+        throw Error(300, "Bid running time is already over");
     }
 	
     if (auction->start < now) {

@@ -530,6 +530,8 @@ int CtrlComm::processCmd(struct REQUEST *req)
             processGetInfo(&preq);
         } else if (preq.comm == "/get_modinfo") {
             processGetModInfo(&preq);
+        } else if (preq.comm == "/check_session") {
+			processCheckSession(&preq); 
         } else if (preq.comm == "/add_session") {
             processAddSession(&preq);
         } else if (preq.comm == "/del_session") {
@@ -559,6 +561,42 @@ int CtrlComm::processCmd(struct REQUEST *req)
     return 0;
 }
 
+/* ------------------------- processAddSessionCmd ------------------------- */
+
+char *CtrlComm::processCheckSession(parseReq_t *preq)
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting processCheckSession" );
+#endif	
+	
+    paramListIter_t sessionId = preq->params.find("SessionID");
+
+    if (sessionId == preq->params.end()) {
+        throw Error("check_Session: missing parameter 'SessionID'" );
+    }
+
+    paramListIter_t message = preq->params.find("Message");
+
+    if (message == preq->params.end() ) {
+        throw Error("check_Session: missing parameter 'Message'" );
+    }
+
+    try {
+        // assume xml ipap_message def
+        anslp::msg::anslp_ipap_xml_message mess;
+        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(message->second);
+        retEvent = new CreateCheckSessionEvent(sessionId->second, ipap_mes->ip_message);
+        
+    } catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		log->elog( ch, e.what() );
+        throw Error(e.what());
+    }
+
+    return NULL;
+}
+
+
 
 /* ------------------------- processAddSessionCmd ------------------------- */
 
@@ -586,6 +624,7 @@ char *CtrlComm::processAddSession(parseReq_t *preq)
         anslp::msg::anslp_ipap_xml_message mess;
         anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(message->second);
         retEvent = new CreateSessionEvent(sessionId->second, ipap_mes->ip_message);
+        
     } catch(anslp::msg::anslp_ipap_bad_argument &e) {
 		log->elog( ch, e.what() );
         throw Error(e.what());

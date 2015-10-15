@@ -30,8 +30,13 @@
 #include "ProcError.h"
 #include "AUMProcessor.h"
 #include "Module.h"
+#include "IpAp_create_map.h"
+
 
 using namespace auction;
+
+setFieldsList_t AUMProcessor::fieldSets;
+
 
 /* ------------------------- AUMProcessor ------------------------- */
 
@@ -533,19 +538,13 @@ AUMProcessor::getApplicableAuctions(ipap_message *message)
 	
 	// Read the option data auction template.
 	ipap_template *templOptAuct = readTemplate(message, IPAP_OPTNS_AUCTION_TEMPLATE);
-
+		
 	// Read the option data record template associated with the option data auction template.
 	if (templOptAuct != NULL){
 		dataRecordList_t dOptRecordList = readDataRecords(message, templOptAuct->get_template_id());
-		if (dOptRecordList.size() == 0){
-			// All auctions must be given.
-			auctionProcessListIter_t aucIter;
-			for (aucIter = auctions.begin(); aucIter != auctions.end(); ++aucIter){
-				auctions_anw->push_back((aucIter->second).auction);
-			}
-		} 
-		else{
-
+		
+		// If the option template is empty then the returned auction must be zero.		
+		if (dOptRecordList.size() > 0){
 			dateRecordListIter_t dataIter;
 			for (dataIter = dOptRecordList.begin(); dataIter != dOptRecordList.end(); ++dataIter)
 			{
@@ -565,7 +564,6 @@ AUMProcessor::getApplicableAuctions(ipap_message *message)
 				time_t stopDttm = (time_t) ipfield.parse(sstopDttm).get_value_int64();
 				 
 				string resourceId = getMiscVal(&miscs, "resourceid"); 
-
 				
 				auctionProcessListIter_t aucIter;
 				for (aucIter = auctions.begin(); aucIter != auctions.end(); ++aucIter){
@@ -579,16 +577,62 @@ AUMProcessor::getApplicableAuctions(ipap_message *message)
 			}
 		}	
 	}
-	else{
-		// All auctions must be given.
-		auctionProcessListIter_t aucIter;
-		for (aucIter = auctions.begin(); aucIter != auctions.end(); ++aucIter){
-			auctions_anw->push_back((aucIter->second).auction);
-		}
-	}
+
+#ifdef DEBUG
+    log->dlog(ch, "ending getApplicableAuctions Nbr:%d", auctions_anw->size());
+#endif
 	
 	return auctions_anw;
 }
+
+map<ipap_field_key,string> 
+AUMProcessor::getSessionInformation(ipap_message *message)
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "start getSessionInformation");
+#endif
+
+	AUTOLOCK(threaded, &maccess);
+
+	map<ipap_field_key, string> sessionInfo;
+	
+	// Read the option data auction template.
+	ipap_template *templOptAuct = readTemplate(message, IPAP_OPTNS_AUCTION_TEMPLATE);
+		
+	// Read the option data record template associated with the option data auction template.
+	if (templOptAuct != NULL){
+		dataRecordList_t dOptRecordList = readDataRecords(message, templOptAuct->get_template_id());
+		
+		// If the option template is empty then the returned auction must be zero.
+		// If the option template has more that a record then we assume 
+		// that all records have the same session information.
+		
+		if (dOptRecordList.size() > 0){
+			dateRecordListIter_t dataIter;
+			for (dataIter = dOptRecordList.begin(); dataIter != dOptRecordList.end(); ++dataIter)
+			{
+				miscList_t miscs = 
+					readMiscData( templOptAuct, *dataIter);
+				
+				set<ipap_field_key> fields = getSetField(AUM_SESSION_FIELD_SET_NAME);
+				set<ipap_field_key>::iterator setIter;
+				for (setIter = fields.begin(); setIter != fields.end(); ++setIter){
+				
+					fieldDefItem_t field = findField(&fieldDefs, 
+								setIter->get_eno(), setIter->get_ftype());
+					sessionInfo[*setIter] = getMiscVal(&miscs, field.name); 			
+				}
+				
+				break;				
+			}
+		}	
+	}
+	
+	return sessionInfo;
+}
+
+
 
 
 int 
@@ -698,4 +742,35 @@ ostream& auction::operator<< ( ostream &os, AUMProcessor &pe )
 {
     pe.dump(os);
     return os;
+}
+
+
+set<ipap_field_key> 
+AUMProcessor::getSetField(agentFieldSet_t setName)
+{
+	// Fill set of fields.
+	if (AUMProcessor::fieldSets.size() == 0 ){
+		
+		// Fill data auctions fields
+		set<ipap_field_key> agentSession;
+		agentSession.insert(ipap_field_key(0,IPAP_FT_IPVERSION));
+		agentSession.insert(ipap_field_key(0,IPAP_FT_SOURCEIPV4ADDRESS));
+		agentSession.insert(ipap_field_key(0,IPAP_FT_SOURCEIPV6ADDRESS));
+		agentSession.insert(ipap_field_key(0,IPAP_FT_SOURCEAUCTIONPORT));
+		
+		
+		// Fill option auctions fields
+		set<ipap_field_key> auctSearchFields;
+		auctSearchFields.insert(ipap_field_key(0,IPAP_FT_STARTSECONDS));
+		auctSearchFields.insert(ipap_field_key(0,IPAP_FT_ENDSECONDS));
+		auctSearchFields.insert(ipap_field_key(0,IPAP_FT_IDRESOURCE));
+				
+		AUMProcessor::fieldSets = ipap_create_map<agentFieldSet_t, set<ipap_field_key> >
+				(AUM_SESSION_FIELD_SET_NAME,agentSession)
+				(AUM_REQUEST_FIELD_SET_NAME,auctSearchFields);
+	}
+	
+	setFieldsListIter_t iter;
+	iter = AUMProcessor::fieldSets.find(setName);
+	return iter->second;
 }

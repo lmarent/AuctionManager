@@ -300,6 +300,7 @@ void MAPIAuctionParser::parseAuctionKey( fieldDefList_t *fieldDefs,
 						dataRecordIter != (datIter->second).end(); ++dataRecordIter){
 					
 					uint16_t templId = dataRecordIter->get_template_id();
+					// This line is used for updating templData and templOption
 					ipap_template *templ = findTemplate(templData, templOption, templatesOut, templId );
 					
 					// Read a data record for a data template 
@@ -376,8 +377,8 @@ void MAPIAuctionParser::parse( fieldDefList_t *fieldDefs,
 				
 		split(const_cast< anslp::msg::anslp_ipap_message &>(mes));
 		
-		anslp::msg::xmlDataFieldKeyIterList_t iter;
-		for (iter = objectDataRecordKeys.begin(); iter != objectDataRecordKeys.end();  ++iter)
+		anslp::msg::xmlDataRecordIterList_t iter;
+		for (iter = objectDataRecords.begin(); iter != objectDataRecords.end();  ++iter)
 		{
 			if ((iter->first).get_object_type() == anslp::msg::IPAP_AUCTION){
 				parseAuctionKey(fieldDefs, iter->first, auctions, templatesOut); 
@@ -397,39 +398,56 @@ void MAPIAuctionParser::parse( fieldDefList_t *fieldDefs,
 }
 
 /* ------------------------- getMessage ------------------------- */
-void MAPIAuctionParser::get_ipap_message(Auction *auctionPtr, 
-											fieldDefList_t *fieldDefs,
-											ipap_message *mes)
+void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
+										 Auction *auctionPtr, 
+										 ipap_template_container *templates,
+										 int domainId, bool useIPV6, string sAddressIPV4, 
+										 string sAddressIPV6, uint16_t port, ipap_message *mes)
 {
 
 #ifdef DEBUG
     log->dlog(ch, "Starting get_ipap_message");
 #endif
 
-	uint16_t auctionTemplateId, optAuctionTemplateId, templId; 
-	int nfields;
+	uint16_t auctionTemplateId, optAuctionTemplateId; 
 	action_t *action = auctionPtr->getAction();
 	
-	// Add the data auction template
-	nfields = 5;
-	auctionTemplateId = mes->new_data_template( nfields, IPAP_SETID_AUCTION_TEMPLATE );
-	//put the name
-	mes->add_field(auctionTemplateId, 0, IPAP_FT_IDAUCTION);
-	// put the recordId
-	mes->add_field(auctionTemplateId, 0, IPAP_FT_IDRECORD);
-	// put the starttime
-	mes->add_field(auctionTemplateId, 0, IPAP_FT_STARTSECONDS);
-	// put the endtime
-	mes->add_field(auctionTemplateId, 0, IPAP_FT_ENDSECONDS);
-	// put the interval.
-	mes->add_field(auctionTemplateId, 0, IPAP_FT_INTERVALSECONDS);
-
+	// Search in the template associated with the auction. If they exist
+	// then, we use them.
+	
+	auctionTemplateId = auctionPtr->getDataAuctionTemplate();
+	
+	ipap_template *aucTempl = templates->get_template(auctionTemplateId);
+	mes->make_template(aucTempl);
+		
 #ifdef DEBUG
     log->dlog(ch, "get_ipap_message - after insert data auction template");
 #endif
+
 	
 	//----------------- Add the option data auction template
-	nfields = 3;
+
+	ipap_field_container g_ipap_fields;
+	
+    g_ipap_fields.initialize_forward();
+
+    g_ipap_fields.initialize_reverse();
+
+	optAuctionTemplateId = auctionPtr->getOptionAuctionTemplate();
+
+#ifdef DEBUG
+    log->dlog(ch, "template Option Id:%d", optAuctionTemplateId);
+#endif
+
+	ipap_template *optTempl = templates->get_template(optAuctionTemplateId)->copy();
+
+	/* Following lines are used for inserting only non mandatory fields */
+	set<ipap_field_key> optMandatory = 
+		ipap_template::getTemplateTypeMandatoryFields(IPAP_OPTNS_AUCTION_TEMPLATE);
+	
+	
+	set<ipap_field_key> optAuct;
+	set<ipap_field_key>::iterator iter;
 	configItemListIter_t actItmiter;
 	for (actItmiter= action->conf.begin(); actItmiter!=action->conf.end(); ++actItmiter)
 	{
@@ -440,50 +458,73 @@ void MAPIAuctionParser::get_ipap_message(Auction *auctionPtr,
 			s << "Auction err: field definition not found" << actItmiter->name;
 			throw Error(s.str());
 		} else{
-			ipap_field fieldAct = mes->get_field_definition(fItem.eno, fItem.ftype);
-			nfields = nfields + 1; 
+			// Search the field in the set.
+			iter = optMandatory.find(ipap_field_key(fItem.eno, fItem.ftype));
+			if (iter == optMandatory.end()){
+
+#ifdef DEBUG
+			log->dlog(ch, "get_ipap_message - it is going to add %s eno:%d ftype:%d", 
+					actItmiter->name.c_str(), fItem.eno, fItem.ftype);
+#endif				
+				
+				// Check that the field is a valid field.
+				ipap_field fieldAct = mes->get_field_definition(fItem.eno, fItem.ftype);
+				optAuct.insert(ipap_field_key(fItem.eno, fItem.ftype));
+			}
 		}
-	}	
+	}		
 
-	optAuctionTemplateId = mes->new_data_template( nfields, IPAP_OPTNS_AUCTION_TEMPLATE );
-
-	// put the AuctionId
-	mes->add_field(optAuctionTemplateId, 0, IPAP_FT_IDAUCTION);
-	// put the recordId
-	mes->add_field(optAuctionTemplateId, 0, IPAP_FT_IDRECORD);
-	// put the procname.
-	mes->add_field(optAuctionTemplateId, 0, IPAP_FT_AUCTIONINGALGORITHMNAME);
-
-	for (actItmiter= action->conf.begin(); actItmiter!=action->conf.end(); ++actItmiter)
-	{
-		// Search the field in the list of fields.
-		fieldDefItem_t fItem = findField(fieldDefs, actItmiter->name);
-		ipap_field fieldAct = mes->get_field_definition(fItem.eno, fItem.ftype);
-		mes->add_field(optAuctionTemplateId, fItem.eno, fItem.ftype);
-	}
+#ifdef DEBUG
+	log->dlog(ch, "number of fields in opt template:%d", 
+					optTempl->get_numfields() + optAuct.size() );
+#endif	
+    
+    optTempl->set_maxfields(optTempl->get_numfields() + optAuct.size());
+    	
+    int encodeNetwork = 1;
+    set<ipap_field_key>::iterator fieldIter;
+    for (fieldIter = optAuct.begin(); fieldIter != optAuct.end(); ++fieldIter)
+    {
+		ipap_field field = g_ipap_fields.get_field(fieldIter->get_eno(), 
+									fieldIter->get_ftype());
+									
+		uint16_t length = (uint16_t) field.get_field_type().length;
+		optTempl->add_field(length,KNOWN,encodeNetwork,field);	
+   	}
+   	mes->make_template(optTempl);	
 	
 
+	uint16_t templateId = auctionPtr->getDataBidTemplate();
+	ipap_template *templ = templates->get_template(templateId);
+	mes->make_template(templ);	
 
-	//---------------- Add other templates
-	std::list<int> listIds = auctionPtr->getTemplateList()->get_template_list();
-	std::list<int>::iterator ids_iterator;
+	templateId = auctionPtr->getOptionBidTemplate();
+	templ = templates->get_template(templateId);
+	mes->make_template(templ);		
+
+	templateId = auctionPtr->getDataAllocationTemplate();
+	templ = templates->get_template(templateId);
+	mes->make_template(templ);	
 	
-	for (ids_iterator = listIds.begin(); ids_iterator != listIds.end(); ++ids_iterator){
-		ipap_template *templ = auctionPtr->getTemplateList()->get_template((uint16_t) *ids_iterator);
-		int numfields = templ->get_numfields();
-		templId = mes->new_data_template( numfields, templ->get_type() );
-		for (int i = 0; i < numfields; ++i){
-			ipap_template_field_t field = templ->get_field(i);
-			mes->add_field(templId, field.elem.get_field_type().eno, 
-								field.elem.get_field_type().ftype);
-		}
-	}
 
 #ifdef DEBUG
     log->dlog(ch, "get_ipap_message - after inserting all other templates");
 #endif
-	
-	string idAuctionS = auctionPtr->getSetName() + auctionPtr->getAuctionName();
+
+	// Add the option data record template associated with the option data auction template
+	int recordIndex = 1;
+	ostringstream ss;
+	ss << "Record_" << recordIndex;
+	string recordId = ss.str();
+
+	string idAuctionS;
+	if ((auctionPtr->getSetName()).empty()){
+		ostringstream ssA;
+		ssA << "Domain_" << domainId;
+		idAuctionS =  ssA.str() + "." + auctionPtr->getAuctionName();
+	} else {
+		idAuctionS = auctionPtr->getSetName() + "." + auctionPtr->getAuctionName();
+	}
 	// Add the data record template associated with the data auction template
 	ipap_field idAuctionF = mes->get_field_definition( 0, IPAP_FT_IDAUCTION );
 	ipap_value_field fvalue0 = idAuctionF.get_ipap_value_field( 
@@ -493,43 +534,63 @@ void MAPIAuctionParser::get_ipap_message(Auction *auctionPtr,
 	data.insert_field(0, IPAP_FT_IDAUCTION, fvalue0);
 
 	// Add the Record Id
-	string dataRecordId = "temporal";
 	ipap_field idRecordIdF = mes->get_field_definition( 0, IPAP_FT_IDRECORD );
 	ipap_value_field fvalue1 = idRecordIdF.get_ipap_value_field( 
-									strdup(dataRecordId.c_str()), dataRecordId.size() );
+									strdup(recordId.c_str()), recordId.size() );
 	data.insert_field(0, IPAP_FT_IDRECORD, fvalue1);
 
-	// Add the start time.
-	assert (sizeof(uint64_t) >= sizeof(time_t));
-	time_t time = auctionPtr->getStart();
-	uint64_t timeUint64 = *reinterpret_cast<uint64_t*>(&time);
-	ipap_field idStartF = mes->get_field_definition( 0, IPAP_FT_STARTSECONDS );
-	ipap_value_field fvalue2 = idStartF.get_ipap_value_field( timeUint64 );
-	data.insert_field(0, IPAP_FT_STARTSECONDS, fvalue2);
-
-	// Add the end time.
-	ipap_field idStopF = mes->get_field_definition( 0, IPAP_FT_ENDSECONDS );
-	time = auctionPtr->getStop();
-	timeUint64 = *reinterpret_cast<uint64_t*>(&time);
-	ipap_value_field fvalue3 = idStopF.get_ipap_value_field( timeUint64 );
-	data.insert_field(0, IPAP_FT_ENDSECONDS, fvalue3);
-
-	// Add the interval.
-	assert (sizeof(uint64_t) >= sizeof(unsigned long));
-	uint64_t uinter = static_cast<uint64_t>(auctionPtr->getInterval().interval);
-	ipap_field idIntervalF = mes->get_field_definition( 0, IPAP_FT_INTERVALSECONDS );
-	ipap_value_field fvalue4 = idIntervalF.get_ipap_value_field( uinter );
-	data.insert_field(0, IPAP_FT_INTERVALSECONDS, fvalue4);
+	// Add the IPversion
+	ipap_field ipVersionF = mes->get_field_definition( 0, IPAP_FT_IPVERSION );
+	if (useIPV6){
+		uint8_t ipversion = 6;
+		ipap_value_field fvalueIp = ipVersionF.get_ipap_value_field(ipversion);
+		data.insert_field(0, IPAP_FT_IPVERSION, fvalueIp);
+	}
+	else{
+		uint8_t ipversion = 4;
+		ipap_value_field fvalueIp = ipVersionF.get_ipap_value_field(ipversion);
+		data.insert_field(0, IPAP_FT_IPVERSION, fvalueIp);
+	}	
 	
+	// Add the Ipv6 Address value
+	ipap_field ipAddr6F = mes->get_field_definition( 0, IPAP_FT_DESTINATIONIPV6ADDRESS );
+	if (useIPV6){	
+		ipap_value_field fvalueIpAddr6 = ipAddr6F.parseIP6ADDR(sAddressIPV6);
+		data.insert_field(0, IPAP_FT_DESTINATIONIPV6ADDRESS, fvalueIpAddr6);
+	}
+	else{
+		ipap_value_field fvalueIpAddr6 = ipAddr6F.parseIP6ADDR("0:0:0:0:0:0:0:0");
+		data.insert_field(0, IPAP_FT_DESTINATIONIPV6ADDRESS, fvalueIpAddr6);	
+	}
+
+	// Add the Ipv4 Address value
+	ipap_field ipAddr4F = mes->get_field_definition( 0, IPAP_FT_DESTINATIONIPV4ADDRESS );
+	if (useIPV6){	
+		ipap_value_field fvalueIpAddr4 = ipAddr4F.parseIP4ADDR("0.0.0.0");
+		data.insert_field(0, IPAP_FT_DESTINATIONIPV4ADDRESS, fvalueIpAddr4);		
+	}
+	else{
+		ipap_value_field fvalueIpAddr4 = ipAddr4F.parseIP4ADDR(sAddressIPV4);
+		data.insert_field(0, IPAP_FT_DESTINATIONIPV4ADDRESS, fvalueIpAddr4);
+	}
+	
+	// Add the destination port
+	ipap_field portF = mes->get_field_definition( 0, IPAP_FT_DESTINATIONAUCTIONPORT );
+	ipap_value_field fvaluePort = portF.get_ipap_value_field( port);
+	data.insert_field(0, IPAP_FT_DESTINATIONAUCTIONPORT, fvaluePort);
+
 	// Include data to the message.
 	mes->include_data(auctionTemplateId, data);
-
+	
+	saveDelete(optTempl);
+	
 #ifdef DEBUG
     log->dlog(ch, "get_ipap_message - after inserting data records");
 #endif
-	
-	// Add the option data record template associated with the option data auction template
-	int recordIndex = 1;
+
+#ifdef DEBUG
+    log->dlog(ch, "get_ipap_message - Starting to write down the option data");
+#endif
 
 	ipap_data_record dataOpt(optAuctionTemplateId);
 
@@ -538,36 +599,56 @@ void MAPIAuctionParser::get_ipap_message(Auction *auctionPtr,
 
 	// Add the Record Id.
 	ipap_field optRecordIdF = mes->get_field_definition( 0, IPAP_FT_IDRECORD );
-	ostringstream ss;
-	ss << "Record_" << recordIndex;
-	string recordId = ss.str();
 	ipap_value_field fvalue5 = optRecordIdF.get_ipap_value_field( 
 									strdup(recordId.c_str()), recordId.size() );
 	dataOpt.insert_field(0, IPAP_FT_IDRECORD, fvalue5);
-			
-	
+
+	// Add the start time.
+	assert (sizeof(uint64_t) >= sizeof(time_t));
+	time_t time = auctionPtr->getStart();
+	uint64_t timeUint64 = *reinterpret_cast<uint64_t*>(&time);
+	ipap_field idStartF = mes->get_field_definition( 0, IPAP_FT_STARTSECONDS );
+	ipap_value_field fvalue2 = idStartF.get_ipap_value_field( timeUint64 );
+	dataOpt.insert_field(0, IPAP_FT_STARTSECONDS, fvalue2);
+
+	// Add the end time.
+	ipap_field idStopF = mes->get_field_definition( 0, IPAP_FT_ENDSECONDS );
+	time = auctionPtr->getStop();
+	timeUint64 = *reinterpret_cast<uint64_t*>(&time);
+	ipap_value_field fvalue3 = idStopF.get_ipap_value_field( timeUint64 );
+	dataOpt.insert_field(0, IPAP_FT_ENDSECONDS, fvalue3);
+
+	// Add the interval.
+	assert (sizeof(uint64_t) >= sizeof(unsigned long));
+	uint64_t uinter = static_cast<uint64_t>(auctionPtr->getInterval().interval);
+	ipap_field idIntervalF = mes->get_field_definition( 0, IPAP_FT_INTERVALSECONDS );
+	ipap_value_field fvalue4 = idIntervalF.get_ipap_value_field( uinter );
+	dataOpt.insert_field(0, IPAP_FT_INTERVALSECONDS, fvalue4);
+						
 	// Add the action.
 	ipap_field idActionF =  mes->get_field_definition(0, IPAP_FT_AUCTIONINGALGORITHMNAME);
 	ipap_value_field fvalue6 = idActionF.get_ipap_value_field( strdup(action->name.c_str()), 
 										action->name.size() );
 	dataOpt.insert_field(0, IPAP_FT_AUCTIONINGALGORITHMNAME, fvalue6);
-
-#ifdef DEBUG
-    log->dlog(ch, "get_ipap_message - added the algorithname");
-#endif
 	
+	set<ipap_field_key> optionFields = ipap_template::getTemplateTypeMandatoryFields(IPAP_OPTNS_AUCTION_TEMPLATE);	
 	for (actItmiter= action->conf.begin(); actItmiter!=action->conf.end(); ++actItmiter)
 	{
 		// Search the field in the list of fields, previously it was verified its existance.
 		fieldDefItem_t fItem = findField(fieldDefs, actItmiter->name);
 
+		iter = optionFields.find(ipap_field_key(fItem.eno, fItem.ftype));
+		if (iter == optionFields.end()){
+
 #ifdef DEBUG
 		log->dlog(ch, "get_ipap_message - it is going to add %s eno:%d ftype:%d", 
 					actItmiter->name.c_str(), fItem.eno, fItem.ftype);
 #endif
-		ipap_field fieldAct = mes->get_field_definition(fItem.eno, fItem.ftype);
-		ipap_value_field actFvalue = fieldAct.parse(actItmiter->value);
-		dataOpt.insert_field(fItem.eno, fItem.ftype, actFvalue);
+
+			ipap_field fieldAct = mes->get_field_definition(fItem.eno, fItem.ftype);
+			ipap_value_field actFvalue = fieldAct.parse(actItmiter->value);
+			dataOpt.insert_field(fItem.eno, fItem.ftype, actFvalue);
+		}
 	}	
 	mes->include_data(optAuctionTemplateId, dataOpt);
 	
@@ -580,20 +661,24 @@ void MAPIAuctionParser::get_ipap_message(Auction *auctionPtr,
 
 ipap_message *
 MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs, 
-									auctionDB_t *auctions)
+									auctionDB_t *auctions, 
+									ipap_template_container *templates,
+									int domainId, bool useIPV6, string sAddressIPV4, 
+									string sAddressIPV6, uint16_t port)
 {
 
 #ifdef DEBUG
     log->dlog(ch, "Starting get_ipap_message");
 #endif	
 	
-	ipap_message *mes = new ipap_message();
+	ipap_message *mes = new ipap_message(domainId, IPAP_VERSION, true);
 	
 	auctionDBIter_t auctionIter;
 	for (auctionIter=auctions->begin(); auctionIter!=auctions->end(); ++auctionIter)
 	{
 		Auction *a = *auctionIter;
-		get_ipap_message(a, fieldDefs, mes);
+		get_ipap_message(fieldDefs, a, templates,  
+							domainId, useIPV6, sAddressIPV4, sAddressIPV6, port, mes);
 	}
 
 #ifdef DEBUG

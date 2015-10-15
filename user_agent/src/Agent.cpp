@@ -30,6 +30,8 @@
 #include "Agent.h"
 #include "EventAgent.h"
 #include "ConstantsAgent.h"
+#include "anslp_ipap_message.h"
+#include "anslp_ipap_xml_message.h"
 
 using namespace auction;
 
@@ -175,6 +177,30 @@ Agent::Agent( int argc, char *argv[])
         log->dlog(ch,"------- startup -------" );
 #endif
 
+		// Verifies Addresses.
+		bool useIPV6 = false;
+		string _uIPV6, _sIPV6, _sIPV4;
+		_uIPV6 = conf->getValue("UseIPv6", "CONTROL");
+		if (ParserFcts::parseBool(_uIPV6) == 1){ 
+			useIPV6 = true;
+		}
+		
+		if (useIPV6){
+			_sIPV6 = conf->getValue("LocalAddr-V6", "CONTROL");
+			// Verifies that given address is actually a ipv6 Address;
+			struct in6_addr in6 = ParserFcts::parseIP6Addr(_sIPV6);
+		}
+		else{
+			_sIPV4 = conf->getValue("LocalAddr-V4", "CONTROL");
+			// Verifies that given address is actually a ipv4 Address;
+			struct in_addr in4 = ParserFcts::parseIPAddr(_sIPV4);
+		}
+		 
+#ifdef DEBUG
+        log->log(ch," UseIpv:%d, IPv6:%s, Ipv4:%s", 
+					useIPV6, _sIPV6.c_str(), _sIPV4.c_str());
+#endif
+
         // startup other core classes
         auto_ptr<AuctionTimer> _auct(AuctionTimer::getInstance());
         auct = _auct;
@@ -194,9 +220,6 @@ Agent::Agent( int argc, char *argv[])
         
         auto_ptr<MAPIResourceRequestParser> _mrrp(new MAPIResourceRequestParser());
         mrrp = _mrrp;
-
-		auto_ptr<MAPIAuctionParser> _macp(new MAPIAuctionParser()); 
-		macp = _macp;
 
         auto_ptr<SessionManager> _ssmp(new SessionManager());
         ssmp = _ssmp;
@@ -284,7 +307,12 @@ Agent::Agent( int argc, char *argv[])
 
 Agent::~Agent()
 {
-    // objects are destroyed by their auto ptrs
+    // other objects are destroyed by their auto ptrs
+
+	agentTemplateListIter_t iter;
+	for (iter = agentTemplates.begin(); iter != agentTemplates.end(); ++iter){
+		delete(iter->second);
+	}
 
 #ifdef DEBUG
 		log->dlog(ch,"------- end shutdown -------" );
@@ -638,8 +666,19 @@ void Agent::handleAddAuctions(Event *e, fd_sets_t *fds)
 #ifdef DEBUG
         log->dlog(ch,"processing event adding auctions" );
 #endif
+
+        // Put the auctions in the default domain, which is not valid.
+        int domainId = 0;
+        
+        // Search the domain in the template container
+        agentTemplateListIter_t iter = agentTemplates.find(domainId);
+        if(iter == agentTemplates.end()){
+			agentTemplates[domainId] = new ipap_template_container();
+		}
+		iter = agentTemplates.find(domainId);
+
         // support only XML rules from file
-        new_auctions = aucm->parseAuctions(((AddAuctionsEvent *)e)->getFileName());
+        new_auctions = aucm->parseAuctions(((AddAuctionsEvent *)e)->getFileName(), iter->second);
 
 #ifdef DEBUG
         log->dlog(ch,"Auctions sucessfully parsed " );
@@ -811,21 +850,46 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 			string resourceId = "ANY"; 
 			
 			resourceReq_interval_t interval = req->getIntervalByStart(start);
+
+			bool useIPV6 = false;
+			string _uIPV6, _sIPV6, _sIPV4;
+			_uIPV6 = conf->getValue("UseIPv6", "CONTROL");
+			if (ParserFcts::parseBool(_uIPV6) == 1){ 
+				useIPV6 = true;
+			}
+		
+			if (useIPV6){
+				_sIPV6 = conf->getValue("LocalAddr-V6", "CONTROL");
+			}
+			else{
+				_sIPV4 = conf->getValue("LocalAddr-V4", "CONTROL");
+			}
+
+			string sPort = conf->getValue("ControlPort", "CONTROL");
+			int port = atoi(sPort.c_str());
 				  
 			// Get the auctions corresponding with this resource request interval
 			mes = mrrp->get_ipap_message(proc->getFieldDefinitions(), 
-													   recordId,
-													   resourceId,
-													   interval);
+										 recordId,resourceId,interval,
+										 useIPV6, _sIPV4, _sIPV6, port);
 			
 			// Add to the index of sessions to resource request intervals.
-			
 			
 			session = req->getSession( interval.start, interval.stop, 
 									   defaultSourceAddr, defaultSourceAddr, 
 									   defaultDestinAddr, defaultSourcePort, 
 									   defaultDestinPort, defaultProtocol,
 									   defaultLifeTime  );
+			
+			// Convert the request to xml
+			anslp::msg::anslp_ipap_message message(*mes);
+			anslp::msg::anslp_ipap_xml_message xmlMes;
+			string xmlMessage3 = xmlMes.get_message(message);
+#ifdef DEBUG
+			log->dlog(ch,xmlMessage3.c_str() );
+#endif
+
+
 			
 			
 			// Call the anslp client for sending the message.
@@ -905,7 +969,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 #endif
 
 	ipap_message *message = NULL;
-	auctionDB_t *auctions = new auctionDB_t();
+	auctionDB_t *auctions = NULL;
 	int domainId;
 
 	try
@@ -920,22 +984,28 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 		domainId = message->get_domain();
 		if (domainId > 0){
 		
-			agentTemplateListIter_t tmplIter = agentTemplates.find(domainId);
-			if  (tmplIter == agentTemplates.end())
-				auto_ptr<ipap_template_container> ptrTemplCont(new ipap_template_container());
-				agentTemplates[domainId] = ptrTemplCont;
+			agentTemplateListIter_t tmplIter;
+			tmplIter = agentTemplates.find(domainId);
+			if  (tmplIter == agentTemplates.end()){
+				agentTemplates[domainId] = new ipap_template_container();
 			} 
 			
-			agentTemplateListIter_t tmplIter = agentTemplates.find(domainId);
+			tmplIter = agentTemplates.find(domainId);
 				
-			macp->parse( proc->getFieldDefinitions(), message, auctions, (tmplIter->second).get());
+			auctions = aucm->parseAuctionsMessage( message, tmplIter->second);
 			
+#ifdef DEBUG
+			log->dlog(ch,"handleResponseCreateSession: Number of auctions returned: %d", auctions->size() );
+#endif
+			
+			// insert auctions in container 
 			aucm->addAuctions(auctions, evnt.get());
-		
+			
+			// delete the pointer to auctionDB.
 			saveDelete(auctions);
 			
 			comm->sendMsg("", ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
-		} else
+		} else{
 			throw Error("Agent: Invalid domain id associated with the message");
 		}
 	}

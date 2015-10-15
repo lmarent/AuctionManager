@@ -45,7 +45,7 @@ TemplateIdSource *TemplateIdSource::getInstance()
 
 
 TemplateIdSource::TemplateIdSource()
-  : num(0), unique(0)
+  : num(255), unique(0)
 {
 
 #ifdef ENABLE_THREADS

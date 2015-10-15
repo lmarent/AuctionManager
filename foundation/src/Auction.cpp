@@ -44,8 +44,10 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
 				 miscList_t &m, AuctionTemplateMode_t mode, 
 				 auctionTemplateFieldList_t &templFields,
 				 ipap_template_container *templates )
-   : state(AS_NEW), auctionName(aname), resource(), setName(sname), action(a), 
-	 miscList(m)
+   : state(AS_NEW), auctionName(aname), resource(), setName(sname), 
+   	 dataAuctionTemplate(0), optionAuctionTemplate(0), 	dataBidTemplate(0),
+	 optionBidTemplate(0), dataAllocationTemplate(0), optionAllocationTemplate(0), 
+     action(a), miscList(m)
 {
 
     unsigned long duration;
@@ -124,7 +126,7 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
 	    
         // do we have a stop time defined that is in the past ?
         if ((stop != 0) && (stop <= now)) {
-            throw Error(300, "task running time is already over");
+            throw Error(300, "auction running time is already over");
         }
 	
         if (start < now) {
@@ -187,7 +189,6 @@ Auction::Auction(const Auction &rhs):
 	configItemListConstIter_t iter;
 	for (iter = (rhs.action.conf).begin(); iter != (rhs.action.conf).end(); ++iter)
 	{
-		cout << "Entro configured item action" << endl;
 		configItem_t item;
 		item.group = iter->group;
 		item.module = iter->module;
@@ -214,6 +215,10 @@ Auction::Auction(const Auction &rhs):
 		item.type = (misc_it->second).type;
 		miscList.insert( std::pair<string,configItem_t>(item.name,item) );
 	}
+
+	// Copy references to templates 
+	// It just maintains references, the template container is the one controlling memory
+	
 	
 }
 
@@ -241,11 +246,11 @@ void Auction::addTemplateField(ipap_template *templ,
 
 }
 
-void Auction::addTemplateFieldKeys(ipap_template *templ, 
-								   ipap_field_container g_ipap_fields)
+void Auction::addTemplateMandatoryFields(ipap_template *templ, 
+										ipap_field_container g_ipap_fields)
 {
 	ipap_templ_type_t templType = templ->get_type();
-	set<ipap_field_key> keys = ipap_template::getTemplateTypeKeys(templType);
+	set<ipap_field_key> keys = ipap_template::getTemplateTypeMandatoryFields(templType);
 	
 	set<ipap_field_key>::iterator iter;
 	for (iter = keys.begin(); iter != keys.end(); ++iter){
@@ -254,14 +259,13 @@ void Auction::addTemplateFieldKeys(ipap_template *templ,
 	
 }
 
-int 
-Auction::calculateNbrFieldTemplateData(ipap_templ_type_t templType, 
+set<ipap_field_key> 
+Auction::calculateTemplateFields(ipap_templ_type_t templType, 
 									   auctionTemplateFieldList_t &templFields)
 {
     
     
-    set<ipap_field_key> keys = ipap_template::getTemplateTypeKeys(templType);
-    int nbrFields = keys.size();
+    set<ipap_field_key> tFields = ipap_template::getTemplateTypeMandatoryFields(templType);
     
     auctionTemplateFieldListIter_t fieldIter;
     for (fieldIter = templFields.begin(); fieldIter != templFields.end();  ++fieldIter)
@@ -287,14 +291,14 @@ Auction::calculateNbrFieldTemplateData(ipap_templ_type_t templType,
 			ipap_field_key key((fieldIter->second).field.eno, 
 							   (fieldIter->second).field.ftype);
 			// Exclude keys from the number of fields.
-			if (keys.find(key) == keys.end()){
-				nbrFields++; 
+			if (tFields.find(key) == tFields.end()){
+				tFields.insert(key);
 			}
 		}
 
 	} 
 
-	return nbrFields;
+	return tFields;
 }
 
 ipap_template * 
@@ -305,46 +309,23 @@ Auction::createTemplate(auctionTemplateFieldList_t &templFields,
 
 	TemplateIdSource *tId = TemplateIdSource::getInstance();
 
-    int numFields = calculateNbrFieldTemplateData(templType, templFields);
+    set<ipap_field_key> tFields = calculateTemplateFields(templType, templFields);
     		
     // Create the bid template associated with the auction
     ipap_template *templ = new ipap_template();
 	templ->set_id( tId->newId() );
-	templ->set_maxfields( numFields );
+	templ->set_maxfields( tFields.size() );
 	templ->set_type(templType);
-    
-    // Put the Bid Key Fields required.
-	addTemplateFieldKeys(templ, g_ipap_fields);
-	
-    auctionTemplateFieldListIter_t fieldIter;
-    for (fieldIter = templFields.begin(); fieldIter != templFields.end(); ++fieldIter)
+    	
+    set<ipap_field_key>::iterator fieldIter;
+    for (fieldIter = tFields.begin(); fieldIter != tFields.end(); ++fieldIter)
     {
-		bool include = false;
-		
-		if (((fieldIter->second).isBidtemplate)	&&  
-			( templType == IPAP_SETID_BID_TEMPLATE) ){
-			include = true;
-		}
-
-		if (((fieldIter->second).isOptBidTemplate) &&  
-			 ( templType == IPAP_OPTNS_BID_TEMPLATE) ){
-			include = true;
-		}
-
-		if (((fieldIter->second).isAllocTemplate) &&  
-			( templType == IPAP_SETID_ALLOCATION_TEMPLATE) ){
-			include = true;
-		}
-		
-		if (include){
-			addTemplateField(templ, g_ipap_fields, 
-							(fieldIter->second).field.eno, 
-							(fieldIter->second).field.ftype);
-		}
+		addTemplateField(templ, g_ipap_fields, fieldIter->get_eno(), fieldIter->get_ftype());
 	} 
 
 	return templ;
 }
+
 void Auction::buildTemplates(auctionTemplateFieldList_t &templFields, 
 							 ipap_template_container *templateContainer)
 {
@@ -357,11 +338,24 @@ void Auction::buildTemplates(auctionTemplateFieldList_t &templFields,
 
     g_ipap_fields.initialize_reverse();
 	
+	// Creates the auction data template
+	ipap_template *auctTemplate = createTemplate(templFields, 
+								g_ipap_fields, IPAP_SETID_AUCTION_TEMPLATE);
+	setDataAuctionTemplate(auctTemplate->get_template_id());
+	templateContainer->add_template(auctTemplate);
+	
+	// Creates the option auction template
+	ipap_template *optAuctTemplate = createTemplate(templFields, 
+								g_ipap_fields, IPAP_OPTNS_AUCTION_TEMPLATE);
+	setOptionAuctionTemplate(optAuctTemplate->get_template_id()); 
+	templateContainer->add_template(optAuctTemplate);
+	
+	
 	ipap_template *bidTemplate = createTemplate(templFields, 
 								g_ipap_fields, IPAP_SETID_BID_TEMPLATE);
 
 	// Add a local reference to the template.
-	templates.add_template(bidTemplate);
+	setDataBidTemplate(bidTemplate->get_template_id());
 	
 	// Insert the template in the general container.
 	templateContainer->add_template(bidTemplate);
@@ -370,7 +364,7 @@ void Auction::buildTemplates(auctionTemplateFieldList_t &templFields,
 								g_ipap_fields, IPAP_OPTNS_BID_TEMPLATE);
 
 	// Add a local reference to the template.
-	templates.add_template(OptBidTemplate);
+	setOptionBidTemplate(OptBidTemplate->get_template_id());
 	
 	// Insert the template in the general container.
 	templateContainer->add_template(OptBidTemplate);
@@ -380,7 +374,7 @@ void Auction::buildTemplates(auctionTemplateFieldList_t &templFields,
 								g_ipap_fields, IPAP_SETID_ALLOCATION_TEMPLATE);
 
 	// Add a local reference to the template.
-	templates.add_template(allocTemplate);
+	setDataAllocationTemplate(allocTemplate->get_template_id());
 	
 	// Insert the template in the general container.
 	templateContainer->add_template(allocTemplate);
@@ -485,13 +479,78 @@ miscList_t *Auction::getMisc()
     return &miscList;
 }
 
-/* ------------------- getTemplateList ---------------------- */
+/* ------------------- getDataAuctionTemplate ---------------------- */
 
-ipap_template_container * Auction::getTemplateList()
+uint16_t Auction::getDataAuctionTemplate(void)
 {
-	return &templates;
+	return dataAuctionTemplate;
 }
-
+    
+/* ------------------- setDataAuctionTemplate ---------------------- */
+void Auction::setDataAuctionTemplate(uint16_t templId)
+{
+	dataAuctionTemplate = templId;
+}
+    
+/* ------------------- getOptionAuctionTemplate ---------------------- */
+uint16_t Auction::getOptionAuctionTemplate(void)
+{
+	return optionAuctionTemplate;
+}
+	
+/* ------------------- setOptionAuctionTemplate ---------------------- */
+void Auction::setOptionAuctionTemplate(uint16_t templId)
+{
+	optionAuctionTemplate = templId;
+}
+	
+/* ------------------- getDataBidTemplate ---------------------- */
+uint16_t Auction::getDataBidTemplate(void)
+{
+	return dataBidTemplate;
+}
+	
+/* ------------------- setDataBidTemplate ---------------------- */
+void Auction::setDataBidTemplate(uint16_t templId)
+{
+	dataBidTemplate = templId;
+}
+	
+/* ------------------- getOptionBidTemplate ---------------------- */
+uint16_t Auction::getOptionBidTemplate(void)
+{
+	return optionBidTemplate;
+}
+	
+/* ------------------- setOptionBidTemplate ---------------------- */
+void Auction::setOptionBidTemplate(uint16_t templId)
+{
+	optionBidTemplate = templId;
+}
+	
+/* ------------------- getDataAllocationTemplate ------------------ */
+uint16_t Auction::getDataAllocationTemplate(void)
+{
+	return dataAllocationTemplate;
+}
+	
+/* ------------------- setDataAllocationTemplate ------------------ */
+void Auction::setDataAllocationTemplate(uint16_t templId)
+{
+	dataAllocationTemplate = templId;
+}
+	
+/* ------------------- getOptionAllocationTemplate ------------------ */
+uint16_t Auction::getOptionAllocationTemplate(void)
+{
+	return optionAllocationTemplate;
+}
+ 
+/* ------------------- setOptionAllocationTemplate ------------------ */
+void Auction::setOptionAllocationTemplate(uint16_t templId)
+{
+	optionAllocationTemplate = templId;
+}
 
 /* ------------------------- dump ------------------------- */
 

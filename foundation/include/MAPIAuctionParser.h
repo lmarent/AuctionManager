@@ -58,7 +58,10 @@ class MAPIAuctionParser : public MAPIIpApMessageParser, public anslp::msg::anslp
 						   fieldDefList_t *fieldDefs,
 						   auctionTemplateFieldList_t *templList);
 		
-	void get_ipap_message(Auction *auctionPtr, fieldDefList_t *fieldDefs, ipap_message *);
+	void get_ipap_message(fieldDefList_t *fieldDefs, Auction *auctionPtr,
+						  ipap_template_container *templates,
+						  int domainId, bool useIPV6, string sAddressIPV4, 
+						  string sAddressIPV6, uint16_t port, ipap_message *);
 	
    /**
     * Verify that templData and templOption are equal to those in the container
@@ -106,7 +109,11 @@ class MAPIAuctionParser : public MAPIIpApMessageParser, public anslp::msg::anslp
 					    ipap_template_container *templatesOut );
 
 	//! get the ipap_message that represents the set of auctions.
-	ipap_message * get_ipap_message(fieldDefList_t *fieldDefs, auctionDB_t *auctions);
+	ipap_message * get_ipap_message(fieldDefList_t *fieldDefs, 
+									auctionDB_t *auctions, 
+									ipap_template_container *templates,
+									int domainId, bool useIPV6, string sAddressIPV4, 
+									string sAddressIPV6, uint16_t port );
 
 };
 

@@ -53,7 +53,6 @@ AuctionManager::AuctionManager( string fdname, string fvname)
     loadFieldVals(fieldValFileName);
 
 	
-	message = new ipap_message();
 }
 
 
@@ -77,8 +76,6 @@ AuctionManager::~AuctionManager()
     for (auctionDoneIter_t i = auctionDone.begin(); i != auctionDone.end(); i++) {
         saveDelete(*i);
     }
-
-	saveDelete(message);
 
 #ifdef DEBUG
     log->dlog(ch,"Finish shutdown");
@@ -292,11 +289,11 @@ AuctionManager::parseAuctionsMessage(ipap_message *messageIn,
     auctionDB_t *new_auctions = new auctionDB_t();
 
     try {
-			
-        MAPIAuctionParser map = MAPIAuctionParser();
+			       
+       	MAPIAuctionParser mpap = MAPIAuctionParser();
         
-        map.parse(&fieldDefs, messageIn, new_auctions, templates);
-
+        mpap.parse(&fieldDefs, messageIn, new_auctions, templates);
+		
         return new_auctions;
 	
     } catch (Error &e) {
@@ -425,6 +422,18 @@ void AuctionManager::addAuction(Auction *a)
     }
 }
 
+/* ---------------------- get_ipap_message ------------------------- */
+ipap_message * AuctionManager::get_ipap_message(auctionDB_t *auctions, 
+												ipap_template_container *templates,
+												int domainId,  bool useIPV6, string sAddressIPV4, 
+												string sAddressIPV6, uint16_t port)
+{
+
+	MAPIAuctionParser mpap = MAPIAuctionParser();
+
+	return mpap.get_ipap_message(&fieldDefs, auctions,templates, 
+									domainId, useIPV6, sAddressIPV4, sAddressIPV6, port);
+}
 
 /* ------------------------- getInfo ------------------------- */
 

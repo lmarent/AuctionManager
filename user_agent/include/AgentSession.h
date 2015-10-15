@@ -28,13 +28,10 @@
 #ifndef _AGENT_SESSION_H_
 #define _AGENT_SESSION_H_
 
-#include "session.h"
+#include "Session.h"
 
 namespace auction
 {
-
-
-
 
 class AgentSession : public Session
 {
@@ -48,9 +45,11 @@ public:
 
 	~AgentSession();
 
-	setStart(time_t _start);
+	void setStart(time_t _start);
 	
-	setStop(time_t s_top);
+	void setStop(time_t s_top);
+	
+	string getInfo();
 	
 protected:
 	

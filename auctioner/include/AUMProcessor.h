@@ -43,6 +43,12 @@
 namespace auction
 {
 
+typedef enum
+{
+	AUM_SESSION_FIELD_SET_NAME = 0,
+	AUM_REQUEST_FIELD_SET_NAME
+} agentFieldSet_t;
+
 typedef struct
 {
     ProcModule *module;
@@ -63,6 +69,9 @@ typedef struct {
 //! action list for each auction
 typedef map<int, auctionProcess_t>            auctionProcessList_t;
 typedef map<int, auctionProcess_t>::iterator  auctionProcessListIter_t;
+
+typedef map< agentFieldSet_t, set<ipap_field_key> >  		  setFieldsList_t;
+typedef map< agentFieldSet_t, set<ipap_field_key> >::iterator  setFieldsListIter_t;
 
 
 /*! \short   manage and execute algoirthms for a set of auctions.
@@ -101,6 +110,8 @@ class AUMProcessor : public AuctionManagerComponent, public MAPIIpApMessageParse
 	bool forResource(string resourceAuc, string resourceIdReq);
 	
   public:
+
+	static setFieldsList_t fieldSets;
 
     /*! \short   construct and initialize a PacketProcessor object
 
@@ -163,6 +174,12 @@ class AUMProcessor : public AuctionManagerComponent, public MAPIIpApMessageParse
     */
 	auctionDB_t * getApplicableAuctions(ipap_message *message);
 
+    /*! \short   get the session information within the message.
+        \arg \message a pointer to a message with the options to filter.
+        \returns 0 - map of values that identify the session.
+    */
+	map<ipap_field_key,string> getSessionInformation(ipap_message *message);
+
     //! handle file descriptor event
     virtual int handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds);
 
@@ -195,6 +212,8 @@ class AUMProcessor : public AuctionManagerComponent, public MAPIIpApMessageParse
     }
 
     virtual void waitUntilDone();
+
+	static set<ipap_field_key> getSetField(agentFieldSet_t setName);
 
 };
 

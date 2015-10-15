@@ -139,6 +139,7 @@ am_netagent_OBJECTS =  \
 	netagent-MAPIResourceRequestParser.$(OBJEXT) \
 	netagent-TextResourceRequestParser.$(OBJEXT) \
 	netagent-ResourceRequestManager.$(OBJEXT) \
+	netagent-AgentSession.$(OBJEXT) \
 	netagent-EventSchedulerAgent.$(OBJEXT) \
 	netagent-PageRepository.$(OBJEXT) netagent-CtrlComm.$(OBJEXT) \
 	netagent-AgentManagerInfo.$(OBJEXT) \
@@ -433,6 +434,7 @@ netagent_SOURCES = @top_srcdir@/foundation/src/Constants.cpp \
 					MAPIResourceRequestParser.cpp \
 					TextResourceRequestParser.cpp \
 					ResourceRequestManager.cpp \
+					AgentSession.cpp \
 					EventSchedulerAgent.cpp \
 					PageRepository.cpp \
 					CtrlComm.cpp \
@@ -678,6 +680,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netagent-Agent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netagent-AgentManagerInfo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netagent-AgentProcessor.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netagent-AgentSession.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netagent-ConstantsAgent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netagent-CtrlComm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netagent-EventSchedulerAgent.Po@am__quote@
@@ -1337,6 +1340,20 @@ netagent-ResourceRequestManager.obj: ResourceRequestManager.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='ResourceRequestManager.cpp' object='netagent-ResourceRequestManager.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o netagent-ResourceRequestManager.obj `if test -f 'ResourceRequestManager.cpp'; then $(CYGPATH_W) 'ResourceRequestManager.cpp'; else $(CYGPATH_W) '$(srcdir)/ResourceRequestManager.cpp'; fi`
+
+netagent-AgentSession.o: AgentSession.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netagent-AgentSession.o -MD -MP -MF $(DEPDIR)/netagent-AgentSession.Tpo -c -o netagent-AgentSession.o `test -f 'AgentSession.cpp' || echo '$(srcdir)/'`AgentSession.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/netagent-AgentSession.Tpo $(DEPDIR)/netagent-AgentSession.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='AgentSession.cpp' object='netagent-AgentSession.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o netagent-AgentSession.o `test -f 'AgentSession.cpp' || echo '$(srcdir)/'`AgentSession.cpp
+
+netagent-AgentSession.obj: AgentSession.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netagent-AgentSession.obj -MD -MP -MF $(DEPDIR)/netagent-AgentSession.Tpo -c -o netagent-AgentSession.obj `if test -f 'AgentSession.cpp'; then $(CYGPATH_W) 'AgentSession.cpp'; else $(CYGPATH_W) '$(srcdir)/AgentSession.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/netagent-AgentSession.Tpo $(DEPDIR)/netagent-AgentSession.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='AgentSession.cpp' object='netagent-AgentSession.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o netagent-AgentSession.obj `if test -f 'AgentSession.cpp'; then $(CYGPATH_W) 'AgentSession.cpp'; else $(CYGPATH_W) '$(srcdir)/AgentSession.cpp'; fi`
 
 netagent-EventSchedulerAgent.o: EventSchedulerAgent.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(netagent_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netagent-EventSchedulerAgent.o -MD -MP -MF $(DEPDIR)/netagent-EventSchedulerAgent.Tpo -c -o netagent-EventSchedulerAgent.o `test -f 'EventSchedulerAgent.cpp' || echo '$(srcdir)/'`EventSchedulerAgent.cpp
