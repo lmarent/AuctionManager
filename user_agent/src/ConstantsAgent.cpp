@@ -46,7 +46,7 @@ const int    AGNT_EXPIRY_TIME     = 3600; 		  //!< expiry time for web pages ser
 const int    AGNT_DEF_PORT        = 12246;         //!< default TCP port to connect to
 
 // Logger.h
-extern const string AGNT_DEFAULT_LOG_FILE = DEF_SYSCONFDIR "/log/netagent.log";
+extern const string AGNT_DEFAULT_LOG_FILE = DEF_STATEDIR "/log/netagent.log";
 
 
 // ConfigParser.h
