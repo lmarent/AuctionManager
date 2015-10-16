@@ -11,11 +11,11 @@
     <!-- Domain Id that uniquely identifies this auction manager when exchanging ipap_messages -->    
     <PREF NAME="Domain">5</PREF>
     <!-- filter attribute definition file -->    
-    <PREF NAME="FilterDefFile">@DEF_STATEDIR@/etc/fielddef.xml</PREF>
+    <PREF NAME="FilterDefFile">@DEF_SYSCONFDIR@/fielddef.xml</PREF>
     <!-- filter constant file -->
-    <PREF NAME="FilterConstFile">@DEF_STATEDIR@/etc/fieldval.xml</PREF>     
+    <PREF NAME="FilterConstFile">@DEF_SYSCONFDIR@/fieldval.xml</PREF>     
     <!-- auction file to load at start -->
-    <PREF NAME="AuctionFile">@DEF_STATEDIR@/etc/example_auctions2.xml</PREF>
+    <PREF NAME="AuctionFile">@DEF_SYSCONFDIR@/example_auctions2.xml</PREF>
   </MAIN>
   <CONTROL>
     <!-- port for control connections -->

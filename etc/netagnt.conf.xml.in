@@ -5,17 +5,17 @@
     <!-- verbose level for logging -->
     <PREF NAME="VerboseLevel" TYPE="UInt8">4</PREF>
     <!-- log file name -->
-    <PREF NAME="LogFile">@DEF_STATEDIR@/etc/log/netagent.log</PREF>
+    <PREF NAME="LogFile">@DEF_STATEDIR@/log/netagent.log</PREF>
     <!-- pid file location -->
     <PREF NAME="PidFile">/tmp/netagent.pid</PREF>
     <!-- ansl-client configuration file -->    
-    <PREF NAME="AnslpConfFile">@DEF_STATEDIR@/etc/nsis-ka_agent.conf</PREF>
+    <PREF NAME="AnslpConfFile">@DEF_SYSCONFDIR@/nsis-ka_agent.conf</PREF>
     <!-- field attribute definition file -->    
-    <PREF NAME="FieldDefFile">@DEF_STATEDIR@/etc/fielddef.xml</PREF>
+    <PREF NAME="FieldDefFile">@DEF_SYSCONFDIR@/fielddef.xml</PREF>
     <!-- filter constant file -->
-    <PREF NAME="FieldConstFile">@DEF_STATEDIR@/etc/fieldval.xml</PREF>     
+    <PREF NAME="FieldConstFile">@DEF_SYSCONFDIR@/fieldval.xml</PREF>     
     <!-- auction file to load at start -->
-    <PREF NAME="ResourceRequestFile">@DEF_STATEDIR@/etc/example_resource_request1.xml</PREF>
+    <PREF NAME="ResourceRequestFile">@DEF_SYSCONFDIR@/example_resource_request1.xml</PREF>
     <!-- Target defaults -->
     <PREF NAME="DefaultDestinAddr" TYPE="IPAddr">8.8.8.8</PREF>
     <PREF NAME="DefaultDestinPort" TYPE="UInt16">80</PREF>
