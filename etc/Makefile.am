@@ -3,7 +3,8 @@
 dist_sysconf_DATA = auctionfile.dtd bidfile.dtd fielddef.xml \
                     fielddef.dtd fieldval.xml fieldval.dtd netaum.conf.dtd \
                     netagnt.conf.dtd  reply.xml reply.xsl reply2.xsl \
-					example_auctions1.xml example_auctions2.xml
+					example_auctions1.xml example_auctions2.xml nsis-ka_agent.conf \
+					main.html main_agnt.html
 		    
 nodist_sysconf_DATA = netaum.conf.xml netagnt.conf.xml
 
