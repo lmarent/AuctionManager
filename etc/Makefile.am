@@ -10,7 +10,7 @@ nodist_sysconf_DATA = netaum.conf.xml
 DISTCLEANFILES = gen_cert.sh netaum.conf.xml
 
 if ENABLE_SSL
-  nodist_bin_SCRIPTS += gen_cert.sh 
+  nodist_bin_SCRIPTS = gen_cert.sh 
   DISTCLEANFILES += netaum.pem
 endif
 
