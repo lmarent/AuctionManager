@@ -12,7 +12,7 @@ const int MOD_INIT_REQUIRED_PARAMS = 1;
 double bandwidth_to_sell = 0;
 double reserve_price = 0;
 
-double getResourceAvailability( configParam_t *params )
+double getResourceAvailability( auction::configParam_t *params )
 {
  
 	 cout << "Starting getResourceAvailability" << endl;
@@ -32,11 +32,11 @@ double getResourceAvailability( configParam_t *params )
      }
      
      if (numparams == 0)
-		throw ProcError(AUM_PROC_PARAMETER_ERROR, 
+		throw auction::ProcError(AUM_PROC_PARAMETER_ERROR, 
 					"bas init module - not enought parameters");
 	
 	if (bandwidth <= 0)
-		throw ProcError(AUM_PROC_BANDWIDTH_AVAILABLE_ERROR, 
+		throw auction::ProcError(AUM_PROC_BANDWIDTH_AVAILABLE_ERROR, 
 					"bas init module - The given bandwidth parameter is incorrect");
 
 	cout << "Ending getResourceAvailability - Bandwidth:" << bandwidth << endl;
@@ -46,7 +46,7 @@ double getResourceAvailability( configParam_t *params )
 }
 
 
-double getReservePrice( configParam_t *params )
+double getReservePrice( auction::configParam_t *params )
 {
      double price = 0;
      int numparams = 0;
@@ -65,11 +65,11 @@ double getReservePrice( configParam_t *params )
      }
      
      if (numparams == 0)
-		throw ProcError(AUM_PROC_PARAMETER_ERROR, 
+		throw auction::ProcError(AUM_PROC_PARAMETER_ERROR, 
 					"bas init module - not enought parameters");
 	
 	if (price < 0)
-		throw ProcError(AUM_PRICE_RESERVE_ERROR, 
+		throw auction::ProcError(AUM_PRICE_RESERVE_ERROR, 
 					"bas init module - The given reserve price is incorrect");
 	
 	cout << "Ending getReservePrice" << price << endl;
@@ -80,7 +80,7 @@ double getReservePrice( configParam_t *params )
 }
 
 
-void initModule( configParam_t *params )
+void initModule( auction::configParam_t *params )
 {
 
 	cout <<  "bas module: start init module" << endl;
@@ -89,7 +89,7 @@ void initModule( configParam_t *params )
 
 }
 
-void destroyModule( configParam_t *params )
+void destroyModule( auction::configParam_t *params )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start destroy module \n");
@@ -102,11 +102,11 @@ void destroyModule( configParam_t *params )
 
 }
 
-double getDoubleField(fieldList_t *fields, string name)
+double getDoubleField(auction::fieldList_t *fields, string name)
 {
 	cout << "starting getDoubleField" << name << "num fields:" << fields->size() << endl;
 	
-	fieldListIter_t field_iter;
+	auction::fieldListIter_t field_iter;
 		
 	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
 	{
@@ -116,7 +116,7 @@ double getDoubleField(fieldList_t *fields, string name)
 		}
 	}
 	
-	throw ProcError(AUM_FIELD_NOT_FOUND_ERROR, 
+	throw auction::ProcError(AUM_FIELD_NOT_FOUND_ERROR, 
 					"bas init module - The given field was not included");
 }
 
@@ -133,16 +133,20 @@ string makeKey(string auctionSet, string auctionName,
 	return auctionSet + auctionName + bidSet + bidName;
 }
 
-Allocation *createAllocation(string auctionSet, string auctionName, 
+auction::Allocation *createAllocation(string auctionSet, string auctionName, 
 							  string bidSet, string bidName, 
-							  fieldDefList_t *fieldDefs, 
+							  auction::fieldDefList_t *fieldDefs, 
 							  double quantity, double price)
 {										  		
-	fieldList_t fields;
+	auction::fieldList_t fields;
+	
+	// TODO AM: replace this code with true values
+	string allocset = "setalloc";
+	string allocname = "allocaname";
 		
-	field_t field1;
+	auction::field_t field1;
 		
-	fieldDefListIter_t iter; 
+	auction::fieldDefListIter_t iter; 
 	iter = fieldDefs->find("quantity");
 	field1.name = iter->second.name;
 	field1.len = iter->second.len;
@@ -150,7 +154,7 @@ Allocation *createAllocation(string auctionSet, string auctionName,
 	string fvalue =double_to_string(quantity);
 	field1.parseFieldValue(fvalue);
 						
-	field_t field2;
+	auction::field_t field2;
 
 	iter = fieldDefs->find("unitprice");
 	field2.name = iter->second.name;
@@ -162,25 +166,25 @@ Allocation *createAllocation(string auctionSet, string auctionName,
 	fields.push_back(field1);
 	fields.push_back(field2);
 
-	allocationIntervalList_t interv;	
+	auction::allocationIntervalList_t interv;	
 	
-    Allocation *alloc = new Allocation(auctionSet, auctionName, 
-										bidSet, bidName, fields, interv);
+    auction::Allocation *alloc = new auction::Allocation(auctionSet, auctionName, 
+										bidSet, bidName, allocset, allocname,  fields, interv);
 
 	
 	return alloc;
 }
 
-void incrementQuantityAllocation(Allocation *allocation, double quantity)
+void incrementQuantityAllocation(auction::Allocation *allocation, double quantity)
 {
-	fieldList_t *fields = allocation->getFields();
+	auction::fieldList_t *fields = allocation->getFields();
 	
-	fieldListIter_t field_iter;
+	auction::fieldListIter_t field_iter;
 	
 	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
 	{
 		if ((field_iter->name).compare("quantity")){
-			field_t field = *field_iter;
+			auction::field_t field = *field_iter;
 			double temp_qty = parseDouble( ((field.value)[0]).getValue());
 			temp_qty += quantity;
 			string fvalue = double_to_string(temp_qty);
@@ -191,9 +195,9 @@ void incrementQuantityAllocation(Allocation *allocation, double quantity)
 	
 }
 
-void execute( configParam_t *params, string aset, string aname, 
-			  fieldDefList_t *fieldDefs,  bidDB_t *bids, 
-			   allocationDB_t **allocationdata )
+void execute( auction::configParam_t *params, string aset, string aname, 
+			  auction::fieldDefList_t *fieldDefs,  auction::bidDB_t *bids, 
+			  auction::allocationDB_t **allocationdata )
 {
 
 	cout << "bas module: start execute" << (int) bids->size() << endl;
@@ -203,23 +207,23 @@ void execute( configParam_t *params, string aset, string aname,
 
 	std::multimap<double, alloc_proc_t>  orderedBids;
 	// Order Bids by elements.
-	bidDBIter_t bid_iter; 
+	auction::bidDBIter_t bid_iter; 
 	
 	for (bid_iter = bids->begin(); bid_iter != bids->end(); ++bid_iter ){
-		Bid * bid = *bid_iter;
+		auction::Bid * bid = *bid_iter;
 				
-		elementList_t *elems = bid->getElements();
+		auction::elementList_t *elems = bid->getElements();
 				
-		elementListIter_t elem_iter;
+		auction::elementListIter_t elem_iter;
 		for ( elem_iter = elems->begin(); elem_iter != elems->end(); ++elem_iter )
 		{
-			double price = getDoubleField(&(elem_iter->fields), "unitprice");
-			double quantity = getDoubleField(&(elem_iter->fields), "quantity");
+			double price = getDoubleField(&(elem_iter->second), "unitprice");
+			double quantity = getDoubleField(&(elem_iter->second), "quantity");
 			alloc_proc_t alloc;
 		
 			alloc.bidSet = bid->getSetName();
 			alloc.bidName = bid->getBidName();
-			alloc.elementName = elem_iter->name;
+			alloc.elementName = elem_iter->first;
 			alloc.quantity = quantity;
 			orderedBids.insert(make_pair(price,alloc));
 		}
@@ -251,8 +255,8 @@ void execute( configParam_t *params, string aset, string aname,
 
 	cout << "bas module: after executing the auction" << (int) bids->size() << endl;
 	
-	map<string,Allocation *> allocations;
-	map<string,Allocation *>::iterator alloc_iter;
+	map<string,auction::Allocation *> allocations;
+	map<string,auction::Allocation *>::iterator alloc_iter;
 	
 	// Creates allocations
 	it = orderedBids.end();
@@ -267,7 +271,7 @@ void execute( configParam_t *params, string aset, string aname,
 			incrementQuantityAllocation(alloc_iter->second, (it->second).quantity); 					
 		}
 		else{
-			Allocation *alloc = createAllocation(aset, aname, 
+			auction::Allocation *alloc = createAllocation(aset, aname, 
 												   (it->second).bidSet, (it->second).bidName, 
 													fieldDefs, 
 													(it->second).quantity, sellPrice);
@@ -278,7 +282,7 @@ void execute( configParam_t *params, string aset, string aname,
 	} while (it != orderedBids.begin());
 	
 	// Convert from the map to the final allocationDB result
-	allocationDB_t dbResult;
+	auction::allocationDB_t dbResult;
 	for ( alloc_iter = allocations.begin(); 
 				alloc_iter != allocations.end(); ++alloc_iter )
 	{
@@ -288,7 +292,7 @@ void execute( configParam_t *params, string aset, string aname,
 	cout << "bas module: end execute" <<  endl;
 }
 
-timers_t* getTimers( )
+auction::timers_t* getTimers( )
 {
 
 #ifdef DEBUG
@@ -303,7 +307,7 @@ timers_t* getTimers( )
 
 }
 
-void destroy( configParam_t *params, allocationDB_t *allocationdata )
+void destroy( auction::configParam_t *params, auction::allocationDB_t *allocationdata )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start destroy \n");
@@ -314,7 +318,7 @@ void destroy( configParam_t *params, allocationDB_t *allocationdata )
 #endif
 }
 
-void reset( configParam_t *params )
+void reset( auction::configParam_t *params )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start reset \n");
@@ -345,20 +349,20 @@ const char* getModuleInfo( int i )
     /* fprintf( stderr, "count : getModuleInfo(%d)\n",i ); */
 
     switch(i) {
-    case I_MODNAME:    return "Basic Auction procedure";
-    case I_ID:		   return "bas";
-    case I_VERSION:    return "0.1";
-    case I_CREATED:    return "2015/08/03";
-    case I_MODIFIED:   return "2015/08/03";
-    case I_BRIEF:      return "Auction process to verify general functionality of the auction manager";
-    case I_VERBOSE:    return "The auction process gives does not care about capacity and gives allocations equal to quantity requested for all bids"; 
-    case I_HTMLDOCS:   return "http://www.uniandes.edu.co/... ";
-    case I_PARAMS:     return "None";
-    case I_RESULTS:    return "The set of assigments";
-    case I_AUTHOR:     return "Andres Marentes";
-    case I_AFFILI:     return "Universidad de los Andes, Colombia";
-    case I_EMAIL:      return "la.marentes455@uniandes.edu.co";
-    case I_HOMEPAGE:   return "http://homepage";
+    case auction::I_MODNAME:    return "Basic Auction procedure";
+    case auction::I_ID:		   return "bas";
+    case auction::I_VERSION:    return "0.1";
+    case auction::I_CREATED:    return "2015/08/03";
+    case auction::I_MODIFIED:   return "2015/08/03";
+    case auction::I_BRIEF:      return "Auction process to verify general functionality of the auction manager";
+    case auction::I_VERBOSE:    return "The auction process gives does not care about capacity and gives allocations equal to quantity requested for all bids"; 
+    case auction::I_HTMLDOCS:   return "http://www.uniandes.edu.co/... ";
+    case auction::I_PARAMS:     return "None";
+    case auction::I_RESULTS:    return "The set of assigments";
+    case auction::I_AUTHOR:     return "Andres Marentes";
+    case auction::I_AFFILI:     return "Universidad de los Andes, Colombia";
+    case auction::I_EMAIL:      return "la.marentes455@uniandes.edu.co";
+    case auction::I_HOMEPAGE:   return "http://homepage";
     default: return NULL;
     }
 

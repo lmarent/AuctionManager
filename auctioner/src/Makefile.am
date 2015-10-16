@@ -70,13 +70,24 @@ auctionManager_LDADD = $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 					   $(top_builddir)/lib/httpd/libhttpd.a \
 					   @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@
 
+auctionManager_LDFLAGS = -export-dynamic -module \
+						 $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
+						 $(top_builddir)/lib/httpd/libhttpd.a \
+						 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ $(LIBIPAP_LIBS) \
+						 $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) \
+					     $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS)
+
 # what flags you want to pass to the C compiler & linker
 AM_CPPFLAGS = -g -I@top_srcdir@/include
-
-AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
-			 $(top_builddir)/lib/httpd/libhttpd.a \
-			 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ $(LIBIPAP_LIBS) \
-			 $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) \
-			 $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS)
 			 
 LDADD = $(LIBIPAP_LIBS)
+
+$(top_builddir)/lib/httpd/libhttpd.a:
+	cd $(top_builddir)/lib/httpd ; $(MAKE)
+
+$(top_builddir)/lib/getopt_long/libgetopt_long.a:
+	cd $(top_builddir)/lib/getopt_long ; $(MAKE)
+
+install-data-hook:
+	$(INSTALL) -d $(DESTDIR)/$(localstatedir)/run
+	$(INSTALL) -d $(DESTDIR)/$(localstatedir)/log

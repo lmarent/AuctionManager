@@ -50,7 +50,7 @@ typedef struct
 	double sellPrice;
 } alloc_proc_t;
 
-void initializeField(field_t *f); 
+void initializeField(auction::field_t *f); 
  
 long parseLong( string s );
 
@@ -75,7 +75,7 @@ float parseFloat( string s);
 double parseDouble( string s);
 
 /*! \short   declaration of struct containing all function pointers of a module */
-extern ProcModuleInterface_t func;
+extern auction::ProcModuleInterface_t func;
 
 #endif /* __PROCMODULE_H */
 

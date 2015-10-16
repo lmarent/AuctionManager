@@ -34,18 +34,18 @@
 int magic = PROC_MAGIC;
 
 /*! \short   declaration of struct containing all function pointers of a module */
-ProcModuleInterface_t func = 
+auction::ProcModuleInterface_t func = 
 { 
     3, 
-    initModule, 
-    destroyModule, 
-    execute, 
-    getTimers, 
-    destroy,
-    reset, 
-    timeout, 
-    getModuleInfo, 
-    getErrorMsg 
+    auction::initModule, 
+    auction::destroyModule, 
+    auction::execute, 
+    auction::getTimers, 
+    auction::destroy,
+    auction::reset, 
+    auction::timeout, 
+    auction::getModuleInfo, 
+    auction::getErrorMsg 
 };
 
 
@@ -59,12 +59,12 @@ int   _listpos;
 /* align macro */
 #define ALIGN( var, type ) var = ( var + sizeof(type)-1 )/sizeof(type) * sizeof(type)
 
-void initializeField(field_t *f)
+void initializeField(auction::field_t *f)
 {
 	// Initialize the values for the field.
-	for (int i=0 ; i < MAX_FIELD_SET_SIZE; i++)
+	for (int i=0 ; i < auction::MAX_FIELD_SET_SIZE; i++)
 	{
-		FieldValue fielvalue;
+		auction::FieldValue fielvalue;
 		f->value.push_back(fielvalue);
 	}
 
@@ -79,7 +79,7 @@ long parseLong( string s )
     n = strtol(s.c_str(), &errp, 0);
 
     if (s.empty() || (*errp != '\0')) {
-        throw ProcError("Not a long number: %s", errp);
+        throw auction::ProcError("Not a long number: %s", errp);
     }
     
     return n;
@@ -101,7 +101,7 @@ unsigned long parseULong( string s )
     n = strtoul(s.c_str(), &errp, 0);
 
     if (s.empty() || (*errp != '\0')) {
-        throw ProcError("Not an unsigned long number: %s", errp);
+        throw auction::ProcError("Not an unsigned long number: %s", errp);
     }
     
     return n;	
@@ -121,7 +121,7 @@ long long parseLLong( string s )
     n = strtoll(s.c_str(), &errp, 0);
 
     if (s.empty() || (*errp != '\0')) {
-        throw ProcError("Not a long long number: %s", errp);
+        throw auction::ProcError("Not a long long number: %s", errp);
     }
     
     return n;	
@@ -144,7 +144,7 @@ unsigned long long parseULLong( string s )
     n = strtoull(s.c_str(), &errp, 0);
 
     if (s.empty() || (*errp != '\0')) {
-        throw ProcError("Not an unsigned long long number: %s", errp);
+        throw auction::ProcError("Not an unsigned long long number: %s", errp);
     }
     
     return n;
@@ -158,7 +158,7 @@ int parseInt( string s )
     
     n = (int) strtol(s.c_str(), &errp, 0);
     if (s.empty() || (*errp != '\0'))
-        throw ProcError("Not an int number: %s", errp);
+        throw auction::ProcError("Not an int number: %s", errp);
     
     return n;
 	
@@ -171,7 +171,7 @@ int parseBool(string s)
     } else if ((s == "no") || (s == "0") || (s == "false")) {
         return 0;
     } else {
-        throw ProcError("Invalid bool value: %s", s.c_str());
+        throw auction::ProcError("Invalid bool value: %s", s.c_str());
     }
 	
 }
@@ -184,7 +184,7 @@ float parseFloat(string s)
     n = strtof(s.c_str(), &errp);
 
     if (s.empty() || (*errp != '\0')) {
-        throw ProcError("Not a float number: %s", errp);
+        throw auction::ProcError("Not a float number: %s", errp);
     }
 
     return n;	
@@ -198,13 +198,9 @@ double parseDouble(string s)
     n = strtod(s.c_str(), &errp);
 
     if (s.empty() || (*errp != '\0')) {
-        throw ProcError("Not a double number: %s", errp);
+        throw auction::ProcError("Not a double number: %s", errp);
     }
 
     return n;
 
 }
-
-
-
-

@@ -111,6 +111,17 @@ if test $debug = true ; then
   AC_DEFINE(ENABLE_DEBUG, 1, [enable debug build])
 fi
 
+AC_ARG_ENABLE(test,
+  [  --enable-test            enable all test applications ],
+  [case "${enableval}" in
+    yes) tst=true ;;
+    no)  tst=false ;;
+    *) AC_MSG_ERROR(bad value ${enableval} for --enable-test) ;;
+  esac],[tst=false])
+AM_CONDITIONAL(ENABLE_TEST, test x$tst = xtrue)
+if test $tst = true ; then
+  AC_DEFINE(ENABLE_TEST, 1, [enable test applications])
+fi
 
 AC_ARG_ENABLE(mp,
   [  --enable-mp            enable mpatrol memory surveillance ],
@@ -401,6 +412,7 @@ AC_SUBST(DOXY)
 
 
 AC_CONFIG_FILES([Makefile \
+				 lib/Makefile \
 				 lib/getpass/Makefile \
   				 lib/httpd/Makefile \
 				 lib/getopt_long/Makefile \
@@ -409,11 +421,8 @@ AC_CONFIG_FILES([Makefile \
 				 etc/netagnt.conf.xml \
 				 nagtrsh/Makefile \
 				 foundation/src/Makefile \
-				 foundation/test/Makefile \
 				 proc_modules/Makefile \
 				 auctioner/src/Makefile \
-				 auctioner/test/Makefile \
-                 user_agent/src/Makefile \
-                 user_agent/test/Makefile ] )
+                 user_agent/src/Makefile ] )
 
 AC_OUTPUT

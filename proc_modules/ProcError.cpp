@@ -30,6 +30,7 @@
 
 const int ERROR_MSG_BUFSIZE = 8192;
 
+using namespace auction;
 
 /* ------------------------- Error ------------------------- */
 

@@ -4,24 +4,24 @@ lib_LTLIBRARIES = bas.la
 
 if ENABLE_DEBUG
   AM_CFLAGS = -I$(top_srcdir)/foundation/include \
-			  -I/usr/src/linux/include \
+			  -I/usr/src/linux/include $(LIBIPAP_CFLAGS) \
 			  -g -DDEBUG -DPROFILING -D_GLIBCXX_DEBUG -fPIC 
 			  
   AM_CXXFLAGS = -I$(top_srcdir)/foundation/include \
-			    -I/usr/src/linux/include \
+			    -I/usr/src/linux/include $(LIBIPAP_CFLAGS) \
 			    -g -DDEBUG -DPROFILING -D_GLIBCXX_DEBUG
 else
   AM_CFLAGS = -I$(top_srcdir)/foundation/include \
-			  -I/usr/src/linux/include \
+			  -I/usr/src/linux/include $(LIBIPAP_CFLAGS) \
 			  -O2 -fPIC 
 			  
   AM_CXXFLAGS = -I$(top_srcdir)/foundation/include \
-			    -I/usr/src/linux/include \
+			    -I/usr/src/linux/include $(LIBIPAP_CFLAGS) \
 			    -O2 
 endif
 
 bas_la_CPPFLAGS = -I$(top_srcdir)/foundation/include \
-				  -I/usr/src/linux/include
+				  -I/usr/src/linux/include $(LIBIPAP_CFLAGS)
 		   
 bas_la_LDFLAGS = -export-dynamic -module 
 					
