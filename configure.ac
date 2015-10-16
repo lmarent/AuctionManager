@@ -425,6 +425,9 @@ AC_CONFIG_FILES([Makefile \
 				 lib/getpass/Makefile \
   				 lib/httpd/Makefile \
 				 lib/getopt_long/Makefile \
+				 etc/Makefile \
+				 etc/netaum.conf.xml \
+				 etc/netagnt.conf.xml \
 				 nagtrsh/Makefile \
 				 foundation/src/Makefile \
 				 foundation/test/Makefile \

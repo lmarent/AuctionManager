@@ -49,5 +49,13 @@
 *.out
 *.app
 
-# Configuration Files
+# Configuration Files #
+###################
 *.xml
+
+# Generated MakeFiles #
+Makefile.in
+Makefile
+config.h
+config.status
+configure
