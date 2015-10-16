@@ -421,6 +421,7 @@ AC_CONFIG_FILES([Makefile \
 				 etc/netagnt.conf.xml \
 				 nagtrsh/Makefile \
 				 foundation/src/Makefile \
+				 foundation/Makefile \
 				 proc_modules/Makefile \
 				 auctioner/src/Makefile \
 				 auctioner/Makefile \
