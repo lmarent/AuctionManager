@@ -376,12 +376,9 @@ if test "${prefix}" = "NONE" ; then
 fi
 
 dnl # set default config directory for testing
-#sysconfdir="${sysconfdir}/$PACKAGE"
+sysconfdir="${sysconfdir}/$PACKAGE"
 
-sysconfdir="/home/luis/AuctionManager/etc"
-
-#DEF_SYSCONFDIR=`eval echo ${sysconfdir}`
-DEF_SYSCONFDIR="/home/luis/AuctionManager/etc"
+DEF_SYSCONFDIR=`eval echo ${sysconfdir}`
 AC_DEFINE_UNQUOTED(DEF_SYSCONFDIR, "$DEF_SYSCONFDIR", "sysconfig dir")
 
 DEF_STATEDIR=`eval echo ${localstatedir}`
