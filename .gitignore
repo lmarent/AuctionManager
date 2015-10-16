@@ -48,3 +48,6 @@
 *.exe
 *.out
 *.app
+
+# Configuration Files
+*.xml
