@@ -5,9 +5,9 @@ dist_sysconf_DATA = auctionfile.dtd bidfile.dtd fielddef.xml \
                     netagnt.conf.dtd  reply.xml reply.xsl reply2.xsl \
 					example_auctions1.xml example_auctions2.xml
 		    
-nodist_sysconf_DATA = netaum.conf.xml
+nodist_sysconf_DATA = netaum.conf.xml netagnt.conf.xml
 
-DISTCLEANFILES = gen_cert.sh netaum.conf.xml
+DISTCLEANFILES = gen_cert.sh netaum.conf.xml netagnt.conf.xml
 
 if ENABLE_SSL
   nodist_bin_SCRIPTS = gen_cert.sh 
