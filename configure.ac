@@ -210,27 +210,6 @@ AC_HEADER_STDBOOL
 AC_CHECK_FUNCS([alarm bzero floor getaddrinfo inet_ntoa gettimeofday memmove memset select socket strdup strchr strerror strstr atoll strtof getopt_long])
 
 
-PKG_CHECK_MODULES(NL3, libnl-3.0 >= 3.2.25, [
-	AC_SUBST(NL3_CFLAGS)
-	AC_SUBST(NL3_LIBS)
-	AC_DEFINE(HAVE_LIBNL, [1], ["libnl is available"])
-		has_libnl="yes"
-], [
-	AC_MSG_WARN([libnl not found])
-])
-
-
-PKG_CHECK_MODULES(NL_ROUTE_3, libnl-route-3.0 >= 3.2.25, [
-	AC_SUBST(NL_ROUTE_3_CFLAGS)
-	AC_SUBST(NL_ROUTE_3_LIBS)
-	AC_DEFINE(HAVE_LIBNL_ROUTE, [1], ["libnl-route is available"])
-		has_libnl_route="yes"
-], [
-	AC_MSG_WARN([libnl_route not found])
-])
-
-
-
 if test $threads = true ; then
   AC_CHECK_HEADERS([pthread.h])
   if test $OS = FREEBSD ; then
