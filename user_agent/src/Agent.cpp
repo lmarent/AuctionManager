@@ -893,7 +893,7 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 			
 			
 			// Call the anslp client for sending the message.
-			/*
+			
 			anslp::session_id sid = anslpc->tg_create( session->getSenderAddress(), 
 											   session->getReceiverAddress(), 
 											   session->getSenderPort(),
@@ -902,8 +902,6 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 											   session->getLifetime(),
 											   mes );
 			session.setAnlspSession(sid);
-			*/	
-			
 			
 			// Store the session as new in the sessionManager
 			ssmp->addSession(session);
