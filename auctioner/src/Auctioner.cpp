@@ -664,9 +664,6 @@ void Auctioner::handleActivateAuction(Event *e, fd_sets_t *fds)
 
 	}
 	catch (Error &err) {
-        if (auctions) {
-             saveDelete(auctions);
-        }
 		log->dlog( ch, err.getError().c_str() );
 	}
 
