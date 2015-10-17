@@ -80,7 +80,7 @@ double getReservePrice( auction::configParam_t *params )
 }
 
 
-void initModule( auction::configParam_t *params )
+void auction::initModule( auction::configParam_t *params )
 {
 
 	cout <<  "bas module: start init module" << endl;
@@ -89,7 +89,7 @@ void initModule( auction::configParam_t *params )
 
 }
 
-void destroyModule( auction::configParam_t *params )
+void auction::destroyModule( auction::configParam_t *params )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start destroy module \n");
@@ -195,7 +195,7 @@ void incrementQuantityAllocation(auction::Allocation *allocation, double quantit
 	
 }
 
-void execute( auction::configParam_t *params, string aset, string aname, 
+void auction::execute( auction::configParam_t *params, string aset, string aname, 
 			  auction::fieldDefList_t *fieldDefs,  auction::bidDB_t *bids, 
 			  auction::allocationDB_t **allocationdata )
 {
@@ -292,7 +292,7 @@ void execute( auction::configParam_t *params, string aset, string aname,
 	cout << "bas module: end execute" <<  endl;
 }
 
-auction::timers_t* getTimers( )
+auction::timers_t* auction::getTimers( )
 {
 
 #ifdef DEBUG
@@ -307,7 +307,7 @@ auction::timers_t* getTimers( )
 
 }
 
-void destroy( auction::configParam_t *params, auction::allocationDB_t *allocationdata )
+void auction::destroy( auction::configParam_t *params, auction::allocationDB_t *allocationdata )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start destroy \n");
@@ -318,7 +318,7 @@ void destroy( auction::configParam_t *params, auction::allocationDB_t *allocatio
 #endif
 }
 
-void reset( auction::configParam_t *params )
+void auction::reset( auction::configParam_t *params )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start reset \n");
@@ -329,7 +329,7 @@ void reset( auction::configParam_t *params )
 #endif
 }
 
-int timeout( int timerID )
+int auction::timeout( int timerID )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start timeout \n");
@@ -340,7 +340,7 @@ int timeout( int timerID )
 #endif
 }
 
-const char* getModuleInfo( int i )
+const char* auction::getModuleInfo( int i )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start getModuleInfo \n");
@@ -371,7 +371,7 @@ const char* getModuleInfo( int i )
 #endif
 }
 
-char* getErrorMsg( int code )
+char* auction::getErrorMsg( int code )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start getErrorMsg \n");
