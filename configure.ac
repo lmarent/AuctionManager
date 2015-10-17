@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.68])
+AC_PREREQ([2.69])
 AC_INIT([auctionManager],[0.1],[la.marentes455@uniandes.edu.co])
 AM_INIT_AUTOMAKE([subdir-objects])
 LT_INIT
@@ -82,21 +82,18 @@ CXXFLAGS="$_CXXFLAGS -Wall -Wno-deprecated "
 
 dnl # check the options
 
-AC_WITH(ssl,
-  [LDFLAGS="$LDFLAGS -L$withval/lib"
+AC_ARG_WITH([ssl],[  --with-ssl],[LDFLAGS="$LDFLAGS -L$withval/lib"
    CXXFLAGS="$CXXFLAGS -I$withval/include"
    CFLAGS="$CFLAGS -I$withval/include"
    CPPFLAGS="$CPPFLAGS -I$withval/include"
    SSL_DIR=$withval
-])
+],[])
 
-AC_WITH(xml2,
-  [XML2_DIR=$withval
-])
+AC_ARG_WITH([xml2],[  --with-xml2],[XML2_DIR=$withval
+],[])
 
-AC_WITH(xslt,
-  [XSLT_DIR=$withval
-])
+AC_ARG_WITH([xslt],[  --with-xslt],[XSLT_DIR=$withval
+],[])
 
 
 AC_ARG_ENABLE(debug,
