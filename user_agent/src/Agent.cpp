@@ -901,7 +901,7 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 											   session->getProtocol(),
 											   session->getLifetime(),
 											   mes );
-			session.setAnlspSession(sid);
+			session->setAnlspSession(sid);
 			
 			// Store the session as new in the sessionManager
 			ssmp->addSession(session);
