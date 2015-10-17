@@ -20,12 +20,12 @@ else
 			    -O2 
 endif
 
-bas_la_CPPFLAGS = -I$(top_srcdir)/foundation/include \
+libbas_la_CPPFLAGS = -I$(top_srcdir)/foundation/include \
 				  -I/usr/src/linux/include $(LIBIPAP_CFLAGS)
 		   
-bas_la_LDFLAGS = -export-dynamic
+libbas_la_LDFLAGS = -export-dynamic
 					
-bas_la_SOURCES = bas.cpp
-bas_la_LIBADD = ProcModule.lo ProcError.lo ../foundation/src/libfoundation.la
+libbas_la_SOURCES = bas.cpp
+libbas_la_LIBADD = ProcModule.lo ProcError.lo ../foundation/src/libfoundation.la
 
 
