@@ -1,6 +1,6 @@
 EXTRA_DIST = ProcModule.h ProcModule.cpp ProcError.cpp
 
-lib_LTLIBRARIES = bas.la
+lib_LTLIBRARIES = libbas.la
 
 if ENABLE_DEBUG
   AM_CFLAGS = -I$(top_srcdir)/foundation/include \
