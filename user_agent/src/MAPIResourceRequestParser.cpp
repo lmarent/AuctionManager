@@ -214,6 +214,8 @@ MAPIResourceRequestParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	addOptionRecord(recordId, resourceId, interval, useIPV6, sAddressIPV4, 
 					sAddressIPV6, port, bidOptionTemplateId, mes);
 	
+	mes->output();
+	
 #ifdef DEBUG
     log->dlog(ch, "Ending get_ipap_message");
 #endif	
