@@ -680,7 +680,9 @@ MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 		get_ipap_message(fieldDefs, a, templates,  
 							domainId, useIPV6, sAddressIPV4, sAddressIPV6, port, mes);
 	}
-
+	mes->output();
+	
+	
 #ifdef DEBUG
     log->dlog(ch, "Ending get_ipap_message");
 #endif
