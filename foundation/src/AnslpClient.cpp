@@ -173,6 +173,18 @@ AnslpClient::tg_create( const hostaddress &source_addr,
     protlib::message *ret_msg = ret.dequeue_timedwait(10000);
 
     anslp_event_msg *r = dynamic_cast<anslp_event_msg *>(ret_msg);
+
+	time_t now;
+	struct tm *current;
+	now = time(0);
+	current = localtime(&now);
+	struct timeval detail_time;
+	gettimeofday(&detail_time,NULL);
+
+	cout << "hour: " << current->tm_hour 
+		 << "mins: " << current->tm_min
+		 << "sec: " << current->tm_sec 
+		 << "milli: " << detail_time.tv_usec/1000 << endl;	
 	
     anslp::session_id sid = r->get_session_id();
         
