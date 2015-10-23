@@ -32,6 +32,7 @@
 #include "ParserFcts.h"
 #include "Auction.h"
 #include "Error.h"
+#include "Timeval.h"
 #include "IpAp_def.h"
 #include "IpAp_message.h"
 #include "TemplateIdSource.h"
