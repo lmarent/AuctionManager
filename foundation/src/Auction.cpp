@@ -149,7 +149,10 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
            	ientry.align = align;
 			
 #ifdef DEBUG
-    log->dlog(ch, "Interval: %d - Align:%d", interval, align);
+    log->dlog(ch, "Start:%s End:%s Interval: %d - Align:%d", 
+					(Timeval::toString(start)).c_str(), 
+						(Timeval::toString(stop)).c_str(),
+							interval, align);
 #endif    
 			
            	mainInterval = ientry;
