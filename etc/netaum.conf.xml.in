@@ -45,9 +45,9 @@
     <!-- allow on-demand loading i.e. when new module is used in rule definition --> 
     <PREF NAME="ModuleDynamicLoad" TYPE="Bool">yes</PREF>
     <!-- module which is preloaded at startup, if the user put a list, the SW will only load the first module defined-->
-    <PREF NAME="Modules">bas </PREF>
+    <PREF NAME="Modules">libbas </PREF>
     <MODULES>
-      <MODULE NAME="bas">
+      <MODULE NAME="libbas">
 		  <!-- Total interface Rate is on bytes  -->
 		  <PREF NAME="Rate" TYPE="UInt32">102400</PREF>
 		  <!-- Burst for the interface is on bytes -->

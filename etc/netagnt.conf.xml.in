@@ -17,7 +17,7 @@
     <!-- auction file to load at start -->
     <PREF NAME="ResourceRequestFile">@DEF_SYSCONFDIR@/example_resource_request1.xml</PREF>
     <!-- Target defaults -->
-    <PREF NAME="DefaultDestinAddr" TYPE="IPAddr">8.8.8.8</PREF>
+    <PREF NAME="DefaultDestinAddr" TYPE="IPAddr">192.168.3.3</PREF>
     <PREF NAME="DefaultDestinPort" TYPE="UInt16">80</PREF>
     <!-- Tcp by default -->
     <PREF NAME="DefaultProtocol" TYPE="UInt8">6</PREF>    
@@ -37,7 +37,7 @@
     <PREF NAME="LogOnConnect" TYPE="Bool">yes</PREF>
     <!-- log all agent commands -->
     <PREF NAME="LogCommand" TYPE="Bool">yes</PREF>   
-    <PREF NAME="LocalAddr-V4" TYPE="IPAddr">10.0.2.15</PREF>
+    <PREF NAME="LocalAddr-V4" TYPE="IPAddr">192.168.2.11</PREF>
     <PREF NAME="LocalAddr-V6" TYPE="IP6Addr">0:0:0:0:0:0:0:0</PREF>     
     <!-- access list -->
     <ACCESS>
@@ -49,12 +49,6 @@
   <AGENT_PROCESSOR>
     <!-- run as separate thread -->
     <PREF NAME="Thread" TYPE="Bool">no</PREF>
-    <!-- Auctioner server data-->
-    <PREF NAME="AuctionerServer" TYPE="IPAddr">no</PREF>
-    <PREF NAME="Auctionerport" TYPE="UInt16">no</PREF>
-    <PREF NAME="User" TYPE="String">no</PREF>
-    <PREF NAME="Password" TYPE="String">no</PREF>
-    <!-- Agent Parameters-->
     
   </AGENT_PROCESSOR>  
 </CONFIG>

@@ -144,10 +144,15 @@ configItemList_t MAPIAuctionParser::readMiscAuctionData(ipap_template *templ,
 				actionName = field.writeValue(dFieldValue);
 			}
 			else {
-				configItem_t item;
+				configItem_t item;		
 				item.name = fItem.name;
 				item.type = fItem.type;
 				item.value = field.writeValue(dFieldValue);
+
+#ifdef DEBUG
+	log->dlog(ch, "Field Read name:%s value:%s", item.name.c_str(), item.value.c_str());
+#endif
+				
 				miscs.push_back(item);
 			}
 		}
