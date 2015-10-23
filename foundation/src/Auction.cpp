@@ -85,6 +85,13 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
         string sduration = getMiscVal("duration");
         string sinterval = getMiscVal("interval");
         string salign = getMiscVal("align");
+
+#ifdef DEBUG
+		log->dlog(ch, "SStart:%s SStop:%s SDuration:%s SInterval:%s, SAlign:%s", 
+					sstart.c_str(), sstop.c_str(), sduration.c_str(),
+					sinterval.c_str(), salign.c_str());
+#endif
+
 	    
         if (!sstart.empty() && !sstop.empty() && !sduration.empty()) {
             throw Error(409, "illegal to specify: start+stop+duration time");
