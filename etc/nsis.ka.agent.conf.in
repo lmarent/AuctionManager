@@ -171,8 +171,8 @@ dispatcher-threads = 1
 
 ms-is-meter 				= false
 ms-install-policy-rules		= false
-ms-export-config-file		= "/home/admin-isp/nsis-ka-0.97/etc/export.xml"
-ms-filter-config-file		= "/home/admin-isp/nsis-ka-0.97/etc/configuration.xml"
+ms-export-config-file		= "@DEF_SYSCONFDIR@/export.xml"
+ms-filter-config-file		= "@DEF_SYSCONFDIR@/configuration.xml"
 
 #---------------------------------------------------
 # Connection settings for the metering application
@@ -182,7 +182,7 @@ ms-metering-user			= "admin"
 ms-metering-password		= "admin"
 ms-metering-server			= "localhost"
 # xsl file for decoding xml responses for netmate
-ms-metering-def-xsl			= "/home/admin_isp/nsis-ka-0.97/etc/reply2.xsl"
+ms-metering-def-xsl			= "@DEF_SYSCONFDIR@/reply2.xsl"
 ms-metering-port			= 12244 	# default metering port to connect
 
 # settings for an inititator
@@ -220,6 +220,7 @@ as-auctioneer-user			= "admin"
 as-auctioneer-password		= "admin"
 as-auctioneer-server		= "localhost"
 as-auctioneer-port			= 12245 	# default auctioneer port to connect
+as-auctioneer-def-xsl       = "@DEF_SYSCONFDIR@/reply2.xsl"
 
 # settings for an inititator
 #

@@ -416,6 +416,7 @@ AC_CONFIG_FILES([Makefile \
 				 etc/Makefile \
 				 etc/netaum.conf.xml \
 				 etc/netagnt.conf.xml \
+				 etc/nsis.ka.agent.conf \
 				 nagtrsh/Makefile \
 				 foundation/src/Makefile \
 				 foundation/Makefile \

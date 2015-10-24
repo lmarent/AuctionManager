@@ -3,11 +3,11 @@
 dist_sysconf_DATA = auctionfile.dtd bidfile.dtd fielddef.xml \
                     fielddef.dtd fieldval.xml fieldval.dtd netaum.conf.dtd \
                     netagnt.conf.dtd  reply.xml reply.xsl reply2.xsl \
-					example_auctions1.xml example_auctions2.xml nsis-ka_agent.conf \
+					example_auctions1.xml example_auctions2.xml \
 					main.html main_agnt.html example_resource_request1.xml \
 					resourcerequestfile.dtd
 		    
-nodist_sysconf_DATA = netaum.conf.xml netagnt.conf.xml
+nodist_sysconf_DATA = netaum.conf.xml netagnt.conf.xml nsis.ka.agent.conf
 
 DISTCLEANFILES = gen_cert.sh netaum.conf.xml netagnt.conf.xml
 
