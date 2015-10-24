@@ -991,11 +991,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 			tmplIter = agentTemplates.find(domainId);
 				
 			auctions = aucm->parseAuctionsMessage( message, tmplIter->second);
-			
-#ifdef DEBUG
-			log->dlog(ch,"handleResponseCreateSession: Number of auctions returned: %d", auctions->size() );
-#endif
-			
+					
 			// insert auctions in container 
 			aucm->addAuctions(auctions, evnt.get());
 			
@@ -1003,6 +999,11 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 			saveDelete(auctions);
 			
 			comm->sendMsg("", ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
+
+#ifdef DEBUG
+			log->dlog(ch,"Ending event handleResponseCreateSession - auctions number:%d", auctions->size() );
+#endif
+			
 		} else{
 			throw Error("Agent: Invalid domain id associated with the message");
 		}
