@@ -584,6 +584,29 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	ipap_value_field fvaluePort = portF.get_ipap_value_field( port);
 	data.insert_field(0, IPAP_FT_DESTINATIONAUCTIONPORT, fvaluePort);
 
+
+	// Add the start time.
+	assert (sizeof(uint64_t) >= sizeof(time_t));
+	time_t time = auctionPtr->getStart();
+	uint64_t timeUint64 = *reinterpret_cast<uint64_t*>(&time);
+	ipap_field idStartF = mes->get_field_definition( 0, IPAP_FT_STARTSECONDS );
+	ipap_value_field fvalueStart = idStartF.get_ipap_value_field( timeUint64 );
+	data.insert_field(0, IPAP_FT_STARTSECONDS, fvalueStart);
+
+	// Add the end time.
+	ipap_field idStopF = mes->get_field_definition( 0, IPAP_FT_ENDSECONDS );
+	time = auctionPtr->getStop();
+	timeUint64 = *reinterpret_cast<uint64_t*>(&time);
+	ipap_value_field fvalueStop = idStopF.get_ipap_value_field( timeUint64 );
+	data.insert_field(0, IPAP_FT_ENDSECONDS, fvalueStop);
+
+	// Add the interval.
+	assert (sizeof(uint64_t) >= sizeof(unsigned long));
+	uint64_t uinter = static_cast<uint64_t>(auctionPtr->getInterval().interval);
+	ipap_field idIntervalF = mes->get_field_definition( 0, IPAP_FT_INTERVALSECONDS );
+	ipap_value_field fvalueInterval = idIntervalF.get_ipap_value_field( uinter );
+	data.insert_field(0, IPAP_FT_INTERVALSECONDS, fvalueInterval);
+
 	// Include data to the message.
 	mes->include_data(auctionTemplateId, data);
 	
@@ -607,28 +630,6 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	ipap_value_field fvalue5 = optRecordIdF.get_ipap_value_field( 
 									strdup(recordId.c_str()), recordId.size() );
 	dataOpt.insert_field(0, IPAP_FT_IDRECORD, fvalue5);
-
-	// Add the start time.
-	assert (sizeof(uint64_t) >= sizeof(time_t));
-	time_t time = auctionPtr->getStart();
-	uint64_t timeUint64 = *reinterpret_cast<uint64_t*>(&time);
-	ipap_field idStartF = mes->get_field_definition( 0, IPAP_FT_STARTSECONDS );
-	ipap_value_field fvalue2 = idStartF.get_ipap_value_field( timeUint64 );
-	dataOpt.insert_field(0, IPAP_FT_STARTSECONDS, fvalue2);
-
-	// Add the end time.
-	ipap_field idStopF = mes->get_field_definition( 0, IPAP_FT_ENDSECONDS );
-	time = auctionPtr->getStop();
-	timeUint64 = *reinterpret_cast<uint64_t*>(&time);
-	ipap_value_field fvalue3 = idStopF.get_ipap_value_field( timeUint64 );
-	dataOpt.insert_field(0, IPAP_FT_ENDSECONDS, fvalue3);
-
-	// Add the interval.
-	assert (sizeof(uint64_t) >= sizeof(unsigned long));
-	uint64_t uinter = static_cast<uint64_t>(auctionPtr->getInterval().interval);
-	ipap_field idIntervalF = mes->get_field_definition( 0, IPAP_FT_INTERVALSECONDS );
-	ipap_value_field fvalue4 = idIntervalF.get_ipap_value_field( uinter );
-	dataOpt.insert_field(0, IPAP_FT_INTERVALSECONDS, fvalue4);
 						
 	// Add the action.
 	ipap_field idActionF =  mes->get_field_definition(0, IPAP_FT_AUCTIONINGALGORITHMNAME);
