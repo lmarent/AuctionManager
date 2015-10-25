@@ -51,7 +51,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( BidFileParser_Test );
 
 void BidFileParser_Test::setUp() 
 {
-	const string filename = DEF_SYSCONFDIR "/example_bids1.xml";
+	const string filename = "../../etc/example_bids1.xml";
 
 	try
 	{

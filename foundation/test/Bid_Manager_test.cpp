@@ -71,7 +71,7 @@ void Bid_Manager_Test::setUp()
 	try
 	{
 
-		const string filename = DEF_SYSCONFDIR "/example_bids1.xml";
+		const string filename = "../../etc/example_bids1.xml";
 		const string fieldname = DEF_SYSCONFDIR "/fielddef.xml";
 		const string fieldValuename = DEF_SYSCONFDIR "/fieldval.xml";
 		
@@ -200,26 +200,26 @@ void Bid_Manager_Test::testBidManager3()
 	
 
 
-		const string filename2 = DEF_SYSCONFDIR "/example_bids2.xml";
+		const string filename2 = "../../etc/example_bids2.xml";
 		bidDB_t *new_bids2 = manager->parseBids(filename2);
 		CPPUNIT_ASSERT( new_bids2->size() == 1 );
 		ptrBid2 = new Bid(*((*new_bids2)[0]));
 		saveDelete(new_bids2);
 		
 
-		const string filename3 = DEF_SYSCONFDIR "/example_bids3.xml";
+		const string filename3 = "../../etc/example_bids3.xml";
 		bidDB_t *new_bids3 = manager->parseBids(filename3);
 		CPPUNIT_ASSERT( new_bids3->size() == 1 );
 		ptrBid3 = new Bid(*((*new_bids3)[0]));
 		saveDelete(new_bids3);
 
-		const string filename4 = DEF_SYSCONFDIR "/example_bids4.xml";
+		const string filename4 = "../../etc/example_bids4.xml";
 		bidDB_t *new_bids4 = manager->parseBids(filename4);
 		CPPUNIT_ASSERT( new_bids4->size() == 1 );
 		ptrBid4 = new Bid(*((*new_bids4)[0]));
 		saveDelete(new_bids4);
 
-		const string filename5 = DEF_SYSCONFDIR "/example_bids5.xml";
+		const string filename5 = "../../etc/example_bids5.xml";
 		bidDB_t *new_bids5 = manager->parseBids(filename5);
 		CPPUNIT_ASSERT( new_bids5->size() == 1 );
 		ptrBid5 = new Bid(*((*new_bids5)[0]));

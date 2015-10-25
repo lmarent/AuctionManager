@@ -88,14 +88,23 @@ void MAPIAuctionParser_Test::testParser()
 	try
 	{
 		
+		int domainId = 3;
+		bool useIPV6 = false;
+		string sAddressIPV4 = "192.168.2.11";
+		string sAddressIPV6 = "0:0:0:0:0:0:0";
+		uint16_t port = 12246;
+		
+		
 		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, idSource, templates );
 				
 		cout << (*new_auctions)[0]->getInfo() << endl;
 		
 		// Build the message from auctions in the vector
-		
+				
 		ipap_message * messages2 = ptrMAPIAuctionParser->
-						get_ipap_message(&fieldDefs, new_auctions);
+						get_ipap_message(&fieldDefs, new_auctions, 
+										  templates, domainId, useIPV6, 
+										  sAddressIPV4, sAddressIPV6, port );
 
 		saveDelete(messages2);
 
@@ -111,10 +120,11 @@ void MAPIAuctionParser_Test::testParser()
 			cout << "template id: " << *i << endl;
 		}
 
+		templates->delete_all_templates();
 		
 		// Parse a XML with an auction
 		
-		const string resourceRequestFilename = DEF_SYSCONFDIR "/ResponseRequestMessage.xml";
+		const string resourceRequestFilename = "../../etc/ResponseRequestMessage.xml";
 		
 		cout << resourceRequestFilename << endl;
 		

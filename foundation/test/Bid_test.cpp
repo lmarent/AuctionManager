@@ -62,7 +62,7 @@ void Bid_Test::setUp()
 	try
 	{
 
-		const string filename = DEF_SYSCONFDIR "/example_bids1.xml";
+		const string filename = "../../etc/example_bids1.xml";
 		ptrBidFileParser = new BidFileParser(filename);
 		idSource = new BidIdSource(1);
 

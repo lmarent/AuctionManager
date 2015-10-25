@@ -332,13 +332,11 @@ void AuctionManager::addAuctions(auctionDB_t * _auctions, EventScheduler *e)
 
         } catch (Error &e ) {
             saveDelete(a);
-            // if only one rule return error
-            if (_auctions->size() == 1) {
+            if (e.getErrorNo() != 408) {
+				// only throws the error, if its is different from duplicate key.
                 throw e;
             }
-            // FIXME else return number of successively installed bids
         }
-      
     }
     
 #ifdef DEBUG    
@@ -654,4 +652,37 @@ ostream& operator<< ( ostream &os, AuctionManager &am )
 {
     am.dump(os);
     return os;
+}
+
+void AuctionManager::getIds(auctionDB_t *_auctions, auctionSet_t &setParam)
+{
+    
+    auctionDBIter_t        iter;
+    for (iter = _auctions->begin(); iter != _auctions->end(); iter++) {
+        Auction *a = *iter;
+        Auction *a2 = getAuction(a->getSetName(), a->getAuctionName());
+        setParam.insert(a2->getUId());
+    }
+}
+
+void AuctionManager::incrementReferences(auctionSet_t & setParam, string sessionId)
+{
+	auctionSetIter_t iter;
+	for (iter = setParam.begin(); iter != setParam.end(); ++iter)
+	{
+		int _uid = *iter;
+		Auction *a = getAuction(_uid);
+		a->incrementSessionReferences(sessionId);
+	}
+}
+
+void AuctionManager::decrementReferences(auctionSet_t & setParam, string sessionId)
+{
+	auctionSetIter_t iter;
+	for (iter = setParam.begin(); iter != setParam.end(); ++iter)
+	{
+		int _uid = *iter;
+		Auction *a = getAuction(_uid);
+		a->decrementSessionReferences(sessionId);
+	}
 }

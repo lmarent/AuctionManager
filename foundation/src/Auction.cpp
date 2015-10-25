@@ -133,8 +133,11 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
         // indicating an infinite rule
 	    
         // do we have a stop time defined that is in the past ?
-        if ((stop != 0) && (stop <= now)) {
-            throw Error(300, "auction running time is already over");
+        if ((stop != 0) && (stop <= now)) 
+        {
+#ifdef DEBUG
+			log->dlog(ch, "auction running time is already over");
+#endif 			
         }
 	
         if (start < now) {
@@ -185,7 +188,7 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
 
 Auction::Auction(const Auction &rhs): 
 	state(rhs.state), auctionName(rhs.auctionName), setName(rhs.setName), 
-	 resource(rhs.resource)/*,action(),intervals(), miscList()*/
+	 resource(rhs.resource)
 {
 
     log = Logger::getInstance();
@@ -227,9 +230,12 @@ Auction::Auction(const Auction &rhs):
 		miscList.insert( std::pair<string,configItem_t>(item.name,item) );
 	}
 
-	// Copy references to templates 
-	// It just maintains references, the template container is the one controlling memory
-	
+	// Copy references to sessions 
+	sessionListIter_t session_it;
+	for (session_it = rhs.sessions.begin(); session_it != rhs.sessions.end(); ++session_it)
+	{
+		sessions.insert(*session_it);
+	}
 	
 }
 
@@ -644,3 +650,14 @@ string Auction::getInfo(void)
     return s.str();
 }
 
+void Auction::incrementSessionReferences(string sessionId)
+{
+	sessions.insert(sessionId);
+}
+	
+	//! decrement the number of session references to this auction
+void Auction::decrementSessionReferences(string sessionId)
+{
+	sessionListIter_t it = sessions.find(sessionId);
+	sessions.erase(it);
+}

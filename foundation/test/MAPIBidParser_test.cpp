@@ -75,7 +75,7 @@ void MAPIBidParser_Test::setUp()
 
 		BidIdSource *idSource = new BidIdSource(1);
 
-		const string filename1 = DEF_SYSCONFDIR "/example_bids1.xml";
+		const string filename1 =  "../../etc/example_bids1.xml";
 		ptrBidFileParser = new BidFileParser(filename1);
 		
 		bidDB_t *new_bids1 = new bidDB_t();		
@@ -87,7 +87,7 @@ void MAPIBidParser_Test::setUp()
 		saveDelete(new_bids1);
 		saveDelete(ptrBidFileParser);
 		
-		const string filename2 = DEF_SYSCONFDIR "/example_bids2.xml";	
+		const string filename2 = "../../etc/example_bids2.xml";	
 		ptrBidFileParser = new BidFileParser(filename2);
 		
 		bidDB_t *new_bids2 = new bidDB_t();		
@@ -97,7 +97,7 @@ void MAPIBidParser_Test::setUp()
 		saveDelete(new_bids2);
 		saveDelete(ptrBidFileParser);
 
-		const string filename3 = DEF_SYSCONFDIR "/example_bids3.xml";	
+		const string filename3 = "../../etc/example_bids3.xml";	
 		ptrBidFileParser = new BidFileParser(filename3);
 		
 		bidDB_t *new_bids3 = new bidDB_t();		

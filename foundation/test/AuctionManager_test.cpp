@@ -93,6 +93,18 @@ void AuctionManager_Test::test()
 		Auction *auction2 = new Auction(*auctionPtr);
 		
 		auction2->setAuctionName("2");
+		
+		// test the increment and decrement functions for auctions.
+		
+		auction2->incrementSessionReferences("session1");
+		auction2->incrementSessionReferences("session2");
+		auction2->incrementSessionReferences("session3");
+		
+		CPPUNIT_ASSERT( auction2->getSessionReferences() == 3 );
+		
+		auction2->decrementSessionReferences("session2");
+		
+		CPPUNIT_ASSERT( auction2->getSessionReferences() == 2 );
 						
 		auctionManagerPtr->addAuction(auction2);
 				

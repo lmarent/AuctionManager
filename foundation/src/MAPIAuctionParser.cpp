@@ -181,14 +181,14 @@ MAPIAuctionParser::verifyInsertTemplates(ipap_template *templData, ipap_template
 	try {
 		templData2  = templatesOut->get_template(templData->get_template_id());
 	} catch (Error &e){
-		templatesOut->add_template(templData);
+		templatesOut->add_template(templData->copy());
 		templData2  = templatesOut->get_template(templData->get_template_id());
 	}
 	
 	try {
 		templOption2 = templatesOut->get_template(templOption->get_template_id());
 	} catch (Error &e){
-		templatesOut->add_template(templOption);
+		templatesOut->add_template(templOption->copy());
 		templOption2 = templatesOut->get_template(templOption->get_template_id());
 	}
 	
@@ -332,7 +332,7 @@ void MAPIAuctionParser::parseAuctionKey( fieldDefList_t *fieldDefs,
 				}
 				
 				if (NbrDataRead > 1){
-					throw Error("MAPI Auction Parser: more than a data template"); 
+					throw Error("MAPI Auction Parser: more than a data template "); 
 				}
 
 				if (NbrDataRead == 0){
