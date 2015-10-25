@@ -419,6 +419,7 @@ AC_CONFIG_FILES([Makefile \
 				 etc/nsis.ka.agent.conf \
 				 nagtrsh/Makefile \
 				 foundation/src/Makefile \
+				 foundation/test/Makefile \
 				 foundation/Makefile \
 				 proc_modules/Makefile \
 				 auctioner/src/Makefile \

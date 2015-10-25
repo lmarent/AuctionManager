@@ -92,6 +92,10 @@ typedef map<string, auctionTemplateField_t>						auctionTemplateFieldList_t;
 typedef map<string, auctionTemplateField_t>::iterator			auctionTemplateFieldListIter_t;
 typedef map<string, auctionTemplateField_t>::const_iterator		auctionTemplateFieldLisConstIter_t;
 
+typedef set<string> 			sessionList_t;
+typedef set<string>::iterator 	sessionListIter_t;
+
+
 class Auction
 {
   private:
@@ -135,6 +139,9 @@ class Auction
 
     //! list of misc stuff (start, stop, duration etc.)
     miscList_t miscList;
+
+	//! session referencing this auction
+	sessionList_t sessions;
 
     /*! \short   parse identifier format 'sourcename.rulename'
 
@@ -341,6 +348,14 @@ class Auction
 
     //! get rule info string
     string getInfo(void);
+	
+	//! increment the number of session references to this auction
+	void incrementSessionReferences(string sessionId);
+	
+	//! decrement the number of session references to this auction
+	void decrementSessionReferences(string sessionId);
+	
+	int getSessionReferences(){ return sessions.size(); } 
 	
 };
 

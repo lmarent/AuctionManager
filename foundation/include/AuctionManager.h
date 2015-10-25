@@ -78,6 +78,9 @@ typedef map<procdef_t, auctionDB_t, lttexp>            auctionIntervalsIndex_t;
 typedef map<procdef_t, auctionDB_t, lttexp>::iterator  auctionIntervalsIndexIter_t;
 
 
+typedef set<int> 		    auctionSet_t;
+typedef set<int>::iterator  auctionSetIter_t;
+
 /*! \short   manage adding/deleting of complete auction descriptions
   
   the AuctionManager class allows to add and remove auctions in the Auction
@@ -236,6 +239,20 @@ class AuctionManager
 
     //! dump a AuctionManager object
     void dump( ostream &os );
+    
+    /*! \short This function return the ids resgistered for a ser of auctions
+     */
+	void getIds(auctionDB_t *_auctions, auctionSet_t &setParam);
+	
+    /*! \short This function increment the session's reference number
+     */	
+	void incrementReferences(auctionSet_t & setParam, string sessionId);
+
+    /*! \short This function decrement the session's reference number
+     */	
+	void decrementReferences(auctionSet_t & setParam, string sessionId);
+	
+	
 };
 
 

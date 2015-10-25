@@ -115,7 +115,7 @@ intercept-requires-rao = no
 # this will hexdump every protocol data unit that is sent or received
 debug-tp = off
 
-intercept-cmd = ""
+intercept-cmd = "@DEF_SYSCONFDIR@/intercept"
 
 ##########################################################################################
 # QOS NSLP Parameters

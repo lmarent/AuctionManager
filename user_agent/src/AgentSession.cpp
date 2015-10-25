@@ -27,6 +27,7 @@
 //
 // ===========================================================
 
+#include "ParserFcts.h"
 #include "AgentSession.h"
 #include "Timeval.h"
 
@@ -40,7 +41,9 @@ using namespace auction;
 AgentSession::AgentSession(string _sessionId):
 	Session(_sessionId)
 {
-	
+
+    log = Logger::getInstance();
+    ch = log->createChannel("AgentSession");	
 }
 
 /**
@@ -69,4 +72,28 @@ string AgentSession::getInfo()
 	str =  str + "Start:" + Timeval::toString(start);
 	str =  str + " Stop:" + Timeval::toString(stop);
 	return str;
+}
+
+void AgentSession::setAuctions(auctionSet_t &setParam)
+{
+
+#ifdef DEBUG    
+    log->dlog(ch, "start Set Auctions");
+#endif 
+
+	auctionSetIter_t iter;
+    for (iter = setParam.begin(); iter != setParam.end(); iter++) 
+    {
+		auctionSet.insert(*iter);  
+	}
+
+#ifdef DEBUG    
+    log->dlog(ch, "end Set Auctions");
+#endif 
+	
+}
+
+auctionSet_t & AgentSession::getAuctions(void)
+{
+	return auctionSet;
 }

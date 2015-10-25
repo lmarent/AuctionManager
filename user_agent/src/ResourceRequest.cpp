@@ -217,6 +217,33 @@ ResourceRequest::getSession( time_t start, time_t stop,
 	
 	// Set the session lifetime
 	session->setLifetime(lifetime);
+	
+	// Assign the session for the interval
+	resourceReqIntervalListIter_t inter_iter;
+	for (inter_iter = intervals.begin(); inter_iter != intervals.end(); ++inter_iter)
+	{
+		if (inter_iter->stop == stop) {
+			inter_iter->sessionId = session->getSessionId();
+		}
+	}	
 		
 	return session;
+}
+
+/*----------------- getSession --------------------------*/
+string ResourceRequest::getSession(time_t start)
+{
+	string valReturn;
+	
+	// Assign the session for the interval
+	resourceReqIntervalListIter_t inter_iter;
+	for (inter_iter = intervals.begin(); inter_iter != intervals.end(); ++inter_iter)
+	{
+		if (inter_iter->start == start) {
+			valReturn = inter_iter->sessionId;
+			break;
+		}
+	}	
+	
+	return valReturn;
 }

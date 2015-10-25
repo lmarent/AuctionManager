@@ -935,25 +935,52 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 	log->dlog(ch,"Starting event remove resource request interval" );
 #endif
 
-    time_t start = ((RemoveResourceRequestIntervalEvent *)e)->getStartTime();
-    resourceRequestDB_t *request = ((ActivateResourceRequestIntervalEvent *)e)->getResourceRequests();
-	resourceRequestDBIter_t iter;
-	auctionDB_t *auctions = NULL;
-	for (iter = request->begin(); iter != request->end(); ++iter)
-	{
-		
-		//ResourceRequest *req = *iter;
-		// Get the auctions corresponding with this resource request interval
-		//auctions = req->askForAuctions(start);
-		
-		//if (auctions != NULL)
-		    // Remove auctions associated  with the resource interval
-		//	evnt->addEvent(new RemoveAuctionsEvent(*auctions));
-		
-		// Delete pointers to auction objects.
-        //saveDelete(auctions);	
-	}
+	time_t start = ((RemoveResourceRequestIntervalEvent *)e)->getStartTime();
+	resourceRequestDB_t *request = 
+				((RemoveResourceRequestIntervalEvent *)e)->getResourceRequests();
 
+	auctionDB_t *auctionDb = NULL;
+
+	try{
+
+		resourceRequestDBIter_t iter;
+		for (iter = request->begin(); iter != request->end(); ++iter)
+		{
+			
+			ResourceRequest *req = *iter;
+			// Get the auctions corresponding with this resource request interval
+			string sessionId = req->getSession(start);
+			
+			AgentSession *session = reinterpret_cast<AgentSession *>(ssmp->getSession(sessionId));
+			auctionSet_t auctions = session->getAuctions();
+
+			// Add a new reference to the auction (there is another session reference it).
+			aucm->decrementReferences(auctions, sessionId);
+			
+			auctionDb = new auctionDB_t();
+			
+			auctionSetIter_t iterAuctions;
+			for (iterAuctions = auctions.begin(); iterAuctions != auctions.end(); ++iterAuctions)
+			{
+				if (((aucm->getAuction(*iterAuctions))->getSessionReferences()) == 0){
+					auctionDb->push_back(aucm->getAuction(*iterAuctions));
+				}
+			}
+			
+			if (auctionDb->size() > 0 )
+				// Remove auctions associated  with the resource interval
+				evnt->addEvent(new RemoveAuctionsEvent(*auctionDb));
+			
+			// Delete pointers to auction objects.
+			saveDelete(auctionDb);	
+		}
+	} catch (Error &err) {
+		if (auctionDb){
+			saveDelete(auctionDb);
+		}
+		
+		log->dlog( ch, err.getError().c_str() );	
+	}
 #ifdef DEBUG
 	log->dlog(ch,"Ending event remove resource request interval" );
 #endif
@@ -994,6 +1021,19 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 					
 			// insert auctions in container 
 			aucm->addAuctions(auctions, evnt.get());
+			
+			// Bring the id of every auction in the auctionDB.
+			auctionSet_t setAuc; 
+			aucm->getIds(auctions, setAuc);
+			
+			// Bring a reference to the session
+			AgentSession *session = reinterpret_cast<AgentSession *>(ssmp->getSession(sessionId));
+			
+			// Add a new reference to the auction (there is another session reference it).
+			aucm->incrementReferences(setAuc, sessionId );
+			
+			// Add related auctions to session object.
+			session->setAuctions(setAuc);
 			
 			// delete the pointer to auctionDB.
 			saveDelete(auctions);
