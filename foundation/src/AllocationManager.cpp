@@ -27,6 +27,7 @@
 
 */
 
+#include "ParserFcts.h"
 #include "AllocationManager.h"
 #include "Constants.h"
 

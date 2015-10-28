@@ -15,6 +15,9 @@
 #include "BidIdSource.h"
 #include "BidFileParser.h"
 #include "MAPIBidParser.h"
+#include "anslp_ipap_message.h"
+#include "anslp_ipap_xml_message.h"
+
 
 
 using namespace auction;
@@ -33,18 +36,17 @@ class MAPIBidParser_Test : public CppUnit::TestFixture {
 	void testMAPIBidParser();
 	void loadFieldDefs(fieldDefList_t *fieldList);
 	void loadFieldVals(fieldValList_t *fieldValList);
+	auctionDB_t * loadAuctions();
+	bidDB_t * loadBidsFromFile();
 	
 
   private:
-    
-    Bid *ptrBid1;
-    Bid *ptrBid2;
-    Bid *ptrBid3;
-    
+        
     FieldDefParser *ptrFieldParsers;
     FieldValParser *ptrFieldValParser;    
-    BidFileParser *ptrBidFileParser;
     MAPIBidParser * ptrMAPIBidParser;    
+    
+    ipap_template_container *templates;
     
     //! filter definitions
     fieldDefList_t fieldDefs;
@@ -57,6 +59,107 @@ class MAPIBidParser_Test : public CppUnit::TestFixture {
 
 CPPUNIT_TEST_SUITE_REGISTRATION( MAPIBidParser_Test );
 
+
+auctionDB_t * 
+MAPIBidParser_Test::loadAuctions()
+{
+	
+	const string filename = DEF_SYSCONFDIR "/example_auctions2.xml";
+	auctionDB_t *new_auctions = NULL;
+	AuctionFileParser *ptrAuctionFileParser = NULL; 
+	AuctionIdSource *idSource = NULL; 
+	try {
+		
+		new_auctions = new auctionDB_t();
+		ptrAuctionFileParser = new AuctionFileParser(filename);
+		idSource = new AuctionIdSource(1); // Unique.
+		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, idSource, templates );
+		
+		saveDelete(ptrAuctionFileParser);
+		saveDelete(idSource);
+		
+		return new_auctions;
+
+	} catch (Error &e){
+		
+		if (ptrAuctionFileParser!= NULL)
+			saveDelete(ptrAuctionFileParser);
+			
+		if (idSource != NULL)
+			saveDelete(idSource);
+		
+		for(auctionDBIter_t i=new_auctions->begin(); i != new_auctions->end(); i++) {
+            saveDelete(*i);
+        }
+        saveDelete(new_auctions);
+		
+		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
+	}
+}
+
+bidDB_t * 
+MAPIBidParser_Test::loadBidsFromFile()
+{
+
+    bidDB_t *new_bids = NULL;
+    BidFileParser *ptrBidFileParser = NULL; 
+    BidIdSource *idSource = NULL; 
+	
+	try {
+		
+		new_bids = new bidDB_t();
+		idSource = new BidIdSource(1); // Unique.
+		
+		const string filename1 =  "../../etc/example_bids1.xml";
+		ptrBidFileParser = new BidFileParser(filename1);
+			
+		bidDB_t *new_bids1 = new bidDB_t();		
+		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids1,idSource );
+		new_bids->push_back((*new_bids1)[0]);
+		
+		saveDelete(new_bids1);
+		saveDelete(ptrBidFileParser);
+			
+		const string filename2 = "../../etc/example_bids2.xml";	
+		ptrBidFileParser = new BidFileParser(filename2);
+			
+		bidDB_t *new_bids2 = new bidDB_t();		
+		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids2, idSource );
+		new_bids->push_back((*new_bids2)[0]);	
+		saveDelete(new_bids2);
+		saveDelete(ptrBidFileParser);
+
+		const string filename3 = "../../etc/example_bids3.xml";	
+		ptrBidFileParser = new BidFileParser(filename3);
+			
+		bidDB_t *new_bids3 = new bidDB_t();		
+		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids3, idSource );
+		new_bids->push_back((*new_bids3)[0]);	
+		
+		saveDelete(new_bids3);
+		saveDelete(ptrBidFileParser);
+		saveDelete(idSource);
+		
+		return new_bids;
+		
+	} catch (Error &e) {
+		if (ptrBidFileParser!= NULL)
+			saveDelete(ptrBidFileParser);
+		
+		if (idSource != NULL)
+			saveDelete(idSource);
+
+		for(bidDBIter_t i=new_bids->begin(); i != new_bids->end(); i++) {
+            saveDelete(*i);
+        }
+        saveDelete(new_bids);
+
+		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;		
+	}
+	
+}
 
 void MAPIBidParser_Test::setUp() 
 {
@@ -72,39 +175,9 @@ void MAPIBidParser_Test::setUp()
 	
 		// load the filter val list
 		loadFieldVals(&fieldVals);
-
-		BidIdSource *idSource = new BidIdSource(1);
-
-		const string filename1 =  "../../etc/example_bids1.xml";
-		ptrBidFileParser = new BidFileParser(filename1);
 		
-		bidDB_t *new_bids1 = new bidDB_t();		
-		ptrBidFileParser->parse(&fieldDefs, 
-							&fieldVals, 
-							new_bids1,
-							idSource );
-		ptrBid1 = new Bid(*((*new_bids1)[0]));
-		saveDelete(new_bids1);
-		saveDelete(ptrBidFileParser);
-		
-		const string filename2 = "../../etc/example_bids2.xml";	
-		ptrBidFileParser = new BidFileParser(filename2);
-		
-		bidDB_t *new_bids2 = new bidDB_t();		
-		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids2, idSource );
-		
-		ptrBid2 = new Bid(*((*new_bids2)[0]));
-		saveDelete(new_bids2);
-		saveDelete(ptrBidFileParser);
-
-		const string filename3 = "../../etc/example_bids3.xml";	
-		ptrBidFileParser = new BidFileParser(filename3);
-		
-		bidDB_t *new_bids3 = new bidDB_t();		
-		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids3, idSource );
-		ptrBid3 = new Bid(*((*new_bids3)[0]));
-		saveDelete(new_bids3);
-		saveDelete(ptrBidFileParser);
+		// templates
+		templates = new ipap_template_container();
 				
 		ptrMAPIBidParser = new MAPIBidParser();
 		        		
@@ -119,9 +192,7 @@ void MAPIBidParser_Test::tearDown()
 	saveDelete(ptrFieldParsers);
     saveDelete(ptrFieldValParser);
 	saveDelete(ptrMAPIBidParser);
-	saveDelete(ptrBid1);
-	saveDelete(ptrBid2);
-	saveDelete(ptrBid3);
+	saveDelete(templates);
 	
 }
 
@@ -131,59 +202,69 @@ void MAPIBidParser_Test::testMAPIBidParser()
 	try
 	{
 		
-		Bid *ptrBidTmp;
-		BidIdSource *idSource = new BidIdSource(1);
-		bidDB_t *bids = new bidDB_t();	
-		bids->push_back(ptrBid1);
-		bids->push_back(ptrBid2);
-		bids->push_back(ptrBid3);
+		int domain = 7;
+		Bid *ptrBidTmp1, *ptrBidTmp2, *ptrBidTmp3, *ptrBidTmp4, *ptrBidTmp5, *ptrBidTmp6;
+
+		auctionDB_t * auctions = loadAuctions();
+		bidDB_t *bids = loadBidsFromFile();
 		
-		vector<ipap_message *> vct_message = ptrMAPIBidParser->get_ipap_messages(&fieldDefs, bids);
+		cout << "number of templates:" << templates->get_num_templates() << endl;
 		
-		CPPUNIT_ASSERT( vct_message.size() == 3 );
+		ipap_message * message = ptrMAPIBidParser->get_ipap_message(&fieldDefs, bids, auctions, templates, domain );
 		
-		ipap_message *output = new ipap_message(); 
+		anslp::msg::anslp_ipap_message mes(*message);
 		
+		anslp::msg::anslp_ipap_xml_message xmlmes;
+	
+		string xmlMessage = xmlmes.get_message(mes);	
 		
+		cout << "message:" << xmlMessage << endl;
+						
 		bidDB_t *bids2 = new bidDB_t();	
 		
-		ptrMAPIBidParser->parse(&fieldDefs, &fieldVals, vct_message[0],
-								bids2, idSource, output );
+		ptrMAPIBidParser->parse(&fieldDefs, &fieldVals, message, bids2, templates );
 		
-		CPPUNIT_ASSERT( bids2->size() == 1 );
+		cout << "Bids able to read:" << bids2->size() << endl;
 		
-		ptrBidTmp = (*bids2)[0];
+		CPPUNIT_ASSERT( bids2->size() == 3 );
+		
+		
+		ptrBidTmp1 = (*bids)[0];
+		ptrBidTmp2 = (*bids2)[0];
 				
-		CPPUNIT_ASSERT( *ptrBidTmp == *ptrBid1 );
-		saveDelete(bids2);
+		CPPUNIT_ASSERT( *ptrBidTmp1 == *ptrBidTmp2 );
 
-		bidDB_t *bids3 = new bidDB_t();	
+		ptrBidTmp3 = (*bids)[1];
+		ptrBidTmp4 = (*bids2)[1];
+	
+		CPPUNIT_ASSERT( *ptrBidTmp3 == *ptrBidTmp4 );
 		
-		ptrMAPIBidParser->parse(&fieldDefs, &fieldVals, vct_message[1],
-								bids3, idSource, output );
-		
-		CPPUNIT_ASSERT( bids3->size() == 1 );
-		
-		ptrBidTmp = (*bids3)[0];
-		CPPUNIT_ASSERT( *ptrBidTmp == *ptrBid2 );
-		saveDelete(bids3);
+		ptrBidTmp5 = (*bids)[2];
+		ptrBidTmp6 = (*bids2)[2];
+
+		CPPUNIT_ASSERT( *ptrBidTmp5 == *ptrBidTmp6 );
 
 
-		bidDB_t *bids4 = new bidDB_t();	
-		
-		ptrMAPIBidParser->parse(&fieldDefs, &fieldVals, vct_message[2],
-								bids4, idSource, output );
-		
-		CPPUNIT_ASSERT( bids4->size() == 1 );
-		
-		ptrBidTmp = (*bids4)[0];
-		CPPUNIT_ASSERT( *ptrBidTmp == *ptrBid3 );
-		saveDelete(bids4);
-		
+		// Delete bids and auctions
+		for(auctionDBIter_t i=auctions->begin(); i != auctions->end(); i++) {
+            saveDelete(*i);
+        }
+        saveDelete(auctions);
+
+
+		for(bidDBIter_t i=bids->begin(); i != bids->end(); i++) {
+            saveDelete(*i);
+        }
+        saveDelete(bids);
+
+		for(bidDBIter_t i=bids2->begin(); i != bids2->end(); i++) {
+            saveDelete(*i);
+        }
+        saveDelete(bids2);		
 			
 	} catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
-		CPPUNIT_ASSERT( "An anormal exception was generated" == "0" );
+		throw e;
 	}
 
 
@@ -202,6 +283,7 @@ void MAPIBidParser_Test::loadFieldDefs(fieldDefList_t *fieldList)
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 }
@@ -217,6 +299,7 @@ void MAPIBidParser_Test::loadFieldVals(fieldValList_t *fieldValList)
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 }

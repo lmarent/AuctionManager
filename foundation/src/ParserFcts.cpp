@@ -269,6 +269,31 @@ double ParserFcts::parseDouble(string s, double min, double max)
     return n;
 }
 
+/* ------------------------- parseTime ------------------------- */
+time_t 
+ParserFcts::parseTime(string timestr)
+{
+    struct tm  t;
+  
+    if (timestr[0] == '+') {
+        // relative time in secs to start
+        try {
+	    struct tm tm;
+            int secs = parseInt(timestr.substr(1,timestr.length()));
+            time_t start = time(NULL) + secs;
+            return mktime(localtime_r(&start,&tm));
+        } catch (Error &e) {
+            throw Error("Incorrect relative time value '%s'", timestr.c_str());
+        }
+    } else {
+        // absolute time
+        if (timestr.empty() || (strptime(timestr.c_str(), TIME_FORMAT.c_str(), &t) == NULL)) {
+            return 0;
+        }
+    }
+    return mktime(&t);
+}
+
 
 // parse config items
 void ParserFcts::parseItem(string type, string value)
@@ -296,3 +321,4 @@ void ParserFcts::parseItem(string type, string value)
         throw Error("Unsupported type: %s", type.c_str());
     }
 }
+

@@ -1,22 +1,29 @@
 <?xml version ="1.0" encoding="UTF-8"?>
 <!DOCTYPE AGENT SYSTEM "bidfile.dtd"> 
-<AGENT ID="Agent1">
+<AGENT ID = "Agent1">
 
-  <BID ID="1">    
+  <BID AUCTION_ID = "General1.1" BID_ID= "Agent1.Bid1" >    
 
-    <ELEMENT ID="element1">
+	<ELEMENT ID="element1">
 		<FIELD NAME="quantity">1</FIELD>
+		<FIELD NAME="unitbudget">0.14</FIELD>
 		<FIELD NAME="unitprice">0.15</FIELD>		
-    </ELEMENT>
+	</ELEMENT>
 
-    <ELEMENT ID="element2">
+	<ELEMENT ID="element2">
 		<FIELD NAME="quantity">2</FIELD>
+		<FIELD NAME="unitbudget">0.13</FIELD>
 		<FIELD NAME="unitprice">0.16</FIELD>		
-    </ELEMENT>
+	</ELEMENT>
     
-    <AUCTION ID="General1.1">
-		<PREF NAME="Duration">60</PREF>
-    </AUCTION>
+    <OPTION ID="option1">		
+		<PREF NAME="BidDuration">600</PREF>
+    </OPTION>
+
+    <OPTION ID="option2">		
+		<PREF NAME="BidDuration">60</PREF>
+    </OPTION>
+
     
   </BID>  
 </AGENT>

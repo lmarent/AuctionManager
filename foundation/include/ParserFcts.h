@@ -63,6 +63,9 @@ class ParserFcts
 
     static void parseItem(string type, string value);
 
+	//! parse time string
+	static time_t parseTime(string timestr);    
+
 };
 
 }; // namespace auction

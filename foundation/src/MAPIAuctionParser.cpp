@@ -30,8 +30,8 @@
 using namespace std;
 using namespace auction;
 
-MAPIAuctionParser::MAPIAuctionParser():
-	MAPIIpApMessageParser(), anslp_ipap_message_splitter()
+MAPIAuctionParser::MAPIAuctionParser(): 
+	IpApMessageParser(), anslp_ipap_message_splitter()
 {
     log = Logger::getInstance();
     ch = log->createChannel("MAPIAuctionParser");

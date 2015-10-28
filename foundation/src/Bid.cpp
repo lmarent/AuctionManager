@@ -34,43 +34,13 @@
 
 using namespace auction;
 
-bool 
-bid_auction_t::operator==(const bid_auction_t &rhs)
-{
-	if (auctionSet.compare(rhs.auctionSet) != 0)
-		return false;
-		
-	if (auctionName.compare(rhs.auctionName) != 0)
-		return false;
-
-	if (interval != rhs.interval)
-		return false;
-
-	if (align != rhs.align)
-		return false;
-
-	if (start != rhs.start)
-		return false;
-
-	if (stop != rhs.stop)
-		return false;
-
-	return true;
-}
-
-bool 
-bid_auction_t::operator!=(const bid_auction_t &param)
-{
-	return !(operator==(param));
-}
-
 
 /* ------------------------- Bid ------------------------- */
 
-Bid::Bid( string sname, string rname, elementList_t &elements,
-		 bidAuctionList_t &ba)
-  : uid(0), setName(sname), bidName(rname), state(BS_NEW), 
-	elementList(elements), auctionList(ba)
+Bid::Bid( string auctionSet, string auctionName, string bidSet, string bidName, 
+		  elementList_t &elements, optionList_t &options)
+  : uid(0), state(BS_NEW), auctionSet(auctionSet), auctionName(auctionName), 
+	bidSet(bidSet), bidName(bidName), elementList(elements), optionList(options)
 {
 
     log = Logger::getInstance();
@@ -90,7 +60,9 @@ Bid::Bid( const Bid &rhs )
     ch = log->createChannel("Bid");
 
 	uid = rhs.uid;
-	setName = rhs.setName;
+	auctionSet = rhs.auctionSet;
+	auctionName = rhs.auctionName;
+	bidSet = rhs.bidSet;
 	bidName = rhs.bidName;
 	
 	// Copy elements part of the bid.
@@ -124,21 +96,36 @@ Bid::Bid( const Bid &rhs )
 		elementList[iter->first] = fieldList;
 	}
 	
-	// Copy auctions part of the bid
-	bidAuctionListConstIter_t iter_act;
-	for (iter_act = (rhs.auctionList).begin(); iter_act != (rhs.auctionList).end(); ++iter_act )
-	{
-		bid_auction_t auction;
-		auction.auctionSet = (iter_act->second).auctionSet;
-		auction.auctionName = (iter_act->second).auctionName;
-		auction.start = (iter_act->second).start;
-		auction.stop = (iter_act->second).stop;
-		auction.interval = (iter_act->second).interval;
-		auction.align = (iter_act->second).align;
-		string actId = auction.getId();
-		auctionList[actId] = auction;
-	}
-	
+	// Copy options part of the bid.
+	optionListConstIter_t iterOpt;
+	for (iterOpt = (rhs.optionList).begin(); iterOpt != (rhs.optionList).end(); ++iterOpt ){
+		fieldList_t fieldList;
+		fieldListconstIter_t fielditer;
+		
+		for ( fielditer = (iterOpt->second).begin(); 
+				fielditer != (iterOpt->second).end(); ++fielditer ){
+			field_t field;
+			field.name = (*fielditer).name;
+			field.type = (*fielditer).type;
+			field.mtype = (*fielditer).mtype;
+			field.len = (*fielditer).len;
+			field.cnt = (*fielditer).cnt;
+			
+			// Initialize the values for the field.
+			for (int i=0 ; i < MAX_FIELD_SET_SIZE; i++)
+			{
+				FieldValue fielvalue;
+				field.value.push_back(fielvalue);
+			}
+
+			// Assign the values from the bid.
+			for (int i=0 ; i< MAX_FIELD_SET_SIZE; ++i) {
+				field.value[i] = FieldValue((*fielditer).value[i]);
+			}
+			fieldList.push_back(field);
+		}
+		optionList.push_back(pair<string, fieldList_t>(iterOpt->first,fieldList));
+	}	
 }
 
 Bid::~Bid()
@@ -149,27 +136,17 @@ Bid::~Bid()
 
 }
 
-void Bid::deleteAuction(string aset, string aName)
-{
-	bidAuctionListIter_t auctListIter;
-	for (auctListIter = auctionList.begin(); 
-			auctListIter != auctionList.end(); ++auctListIter){
-		if ((strcmp(aset.c_str(), ((auctListIter->second).auctionSet).c_str()) == 0) &&
-			(strcmp(aName.c_str(), ((auctListIter->second).auctionName).c_str()) == 0)){
-			auctionList.erase(auctListIter);
-			break;
-		}
-	}
-}
-
 string Bid::getInfo()
 {
 	std::stringstream output;
 
-	output << "Set:" << getSetName() 
-		   << " Name:" << getBidName();
+	output << "auctionSet:" << getAuctionSet() 
+		   << " auctionName:" << getAuctionName();
 
-	output 	<< " NbrElements:" << elementList.size()
+	output << "bidSet:" << getBidSet() 
+		   << " bidName:" << getBidName();
+
+	output 	<< " NbrElementLists:" << elementList.size()
 			<< std::endl;
 	
 	elementListIter_t iter;
@@ -190,19 +167,28 @@ string Bid::getInfo()
 		}
 
 	}
-	
-	output  << "Nbr Auctions:" << auctionList.size();
-	bidAuctionListIter_t ait;
-	for (ait = auctionList.begin(); ait != auctionList.end(); ++ait ){
-		output << " AuctionSet:" << (ait->second).auctionSet
-			   << " AuctionName:" << (ait->second).auctionName 
-			   << " Start: " << Timeval::toString((ait->second).start) 
-			   << " Stop:" << Timeval::toString((ait->second).stop) 
-			   << " Interval: " <<  ((ait->second).interval)
-			   << " Align: " <<  ((ait->second).align)
-			   << std::endl;		 
+
+	output 	<< " NbrOptionLists:" << optionList.size()
+			<< std::endl;
+			
+	optionListIter_t iterOpt;
+	for (iterOpt = optionList.begin(); iterOpt != optionList.end(); ++iterOpt ){
+
+		output << "Option Name:" << iterOpt->first << std::endl;
+
+		fieldListIter_t fieldIter;
+		
+		output << " Field number:" << iterOpt->second.size() << std::endl;
+		for (fieldIter = (iterOpt->second).begin(); fieldIter != iterOpt->second.end(); ++fieldIter)
+		{
+			output << "field name:" << fieldIter->name 
+				   << " type:" << fieldIter->type
+				   << " len:" << fieldIter->len
+				   << " Value:" << ((fieldIter->value)[0]).getValue()
+				   << std::endl;
+		}
+
 	}
-	
 	
 	return output.str();
 }
@@ -214,9 +200,15 @@ bool Bid::operator==(const Bid &rhs)
     log->dlog(ch, "Starting operator == ");
 #endif  
 
-	if (setName.compare(rhs.setName) != 0 )
+	if (auctionSet.compare(rhs.auctionSet) != 0 )
 		return false;
 		
+	if (auctionName.compare(rhs.auctionName) != 0 )
+		return false;
+
+	if (bidSet.compare(rhs.bidSet) != 0 )
+		return false;
+
 	if (bidName.compare(rhs.bidName) != 0 )
 		return false;
 
@@ -263,17 +255,43 @@ bool Bid::operator==(const Bid &rhs)
     log->dlog(ch, "operator == equal elements info");
 #endif
 
-	if (auctionList.size() != rhs.auctionList.size())
+
+	if (optionList.size() != rhs.optionList.size())
 		return false;
 		
-	bidAuctionListIter_t bidActionIter;
-	for (bidActionIter = auctionList.begin(); bidActionIter != auctionList.end(); ++bidActionIter ){
-		string actId = bidActionIter->first;
-		bidAuctionListConstIter_t rhsActIter = rhs.auctionList.find(actId);
-		if (rhsActIter == rhs.auctionList.end()){
+	optionListIter_t iterOpt;
+	for (iterOpt = optionList.begin(); iterOpt != optionList.end(); ++iterOpt ){
+		
+		// Look for the same option in the rhs object
+		optionListConstIter_t optionConstIter;
+		for (optionConstIter = rhs.optionList.begin(); optionConstIter != rhs.optionList.end(); ++optionConstIter){
+			if (optionConstIter->first == iterOpt->first){
+				break;
+			}
+		}
+		
+		if (optionConstIter == rhs.optionList.end()){			
 			return false;
 		} else {
-			if (bidActionIter->second != rhsActIter->second){
+			
+			try{
+				for (size_t i = 0; i < (iterOpt->second).size(); ++i ){
+					// Look for the field in the rhs with the name.
+					
+					field_t ls = (iterOpt->second)[i];
+					field_t rs;
+					for (size_t j = 0; j < (optionConstIter->second).size(); ++j){
+						if (ls.name == (optionConstIter->second)[j].name){
+							rs = (optionConstIter->second)[j];
+							break;
+						}
+					}
+					
+					if ( ls != rs){
+						return false;
+					}
+				}		
+			} catch (out_of_range &e){
 				return false;
 			}
 		}
@@ -286,8 +304,164 @@ bool Bid::operator==(const Bid &rhs)
 	return true;
 }
 
-bool 
-Bid::operator!=(const Bid &param)
+bool Bid::operator!=(const Bid &param)
 {
 	return !(operator==(param));
+}
+
+field_t 
+Bid::getElementVal(string elementName, string name)
+{
+	field_t field;
+	elementListIter_t iter = elementList.find(elementName);
+	
+	if (iter != elementList.end())
+	{
+		fieldListIter_t fieldIter;
+		for (fieldIter = (iter->second).begin(); fieldIter != (iter->second).end(); ++fieldIter){
+			if (fieldIter->name == name) {
+				return *fieldIter;
+			} 
+		}
+	}
+	
+	return field;
+}
+
+/* functions for accessing the templates */
+field_t
+Bid::getOptionVal(string optionName, string name)
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "starting getOptionVal OptName:%s fieldname:%s", 
+					optionName.c_str(), name.c_str());
+#endif
+	
+	// Convert to lower case for comparison.
+	transform(optionName.begin(), optionName.end(), optionName.begin(), ToLower());
+	transform(name.begin(), name.end(), name.begin(), ToLower());
+	
+	field_t field;
+	
+	optionListIter_t iter;
+	for (iter = optionList.begin(); iter != optionList.end(); ++iter ){
+		if (iter->first == optionName){ 
+			fieldListIter_t fieldIter;
+
+			for (fieldIter = (iter->second).begin(); fieldIter != (iter->second).end(); ++fieldIter){
+				if (fieldIter->name == name) 
+					return *fieldIter;
+			}
+		}
+	}
+	
+	return field;
+}
+
+
+void Bid::calculateIntervals(time_t now, bidIntervalList_t *list)
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "Start calculate intervals");
+#endif
+    
+    time_t laststart = now;
+    time_t laststop = now;  
+    unsigned long duration;
+
+	optionListIter_t iter;
+	for (iter = optionList.begin(); iter != optionList.end(); ++iter)
+	{
+		
+		bidInterval_t bidInterval;
+		bidInterval.start = 0;
+		bidInterval.stop = 0;
+		
+		
+		field_t fstart = getOptionVal(iter->first, "Start");
+		field_t fstop = getOptionVal(iter->first, "Stop");
+		field_t fduration = getOptionVal(iter->first, "BidDuration");				
+
+#ifdef DEBUG
+    log->dlog(ch, "bid: %s.%s - fstart %s", getBidSet().c_str(), 
+					getBidName().c_str(), (fstart.getInfo()).c_str());
+
+    log->dlog(ch, "bid: %s.%s - fstop %s", getBidSet().c_str(), 
+					getBidName().c_str(), (fstop.getInfo()).c_str());
+
+    log->dlog(ch, "bid: %s.%s - fduration %s", getBidSet().c_str(), 
+					getBidName().c_str(), (fduration.getInfo()).c_str());
+					
+#endif
+
+		if ( (fstart.mtype == FT_WILD)  && 
+				(fstop.mtype == FT_WILD) && 
+					(fduration.mtype == FT_WILD) ) {
+			throw Error(409, "illegal to specify: start+stop+duration time");
+		}
+
+		if (fstart.mtype != FT_WILD) {
+			string sstart = ((fstart.value)[0]).getString();
+			bidInterval.start = ParserFcts::parseTime(sstart);
+			if(bidInterval.start == 0) {
+				throw Error(410, "invalid start time %s", sstart.c_str());
+			}
+		}
+
+		if (fstop.mtype != FT_WILD) {
+			string sstop = ((fstop.value)[0]).getString();
+			bidInterval.stop = ParserFcts::parseTime(sstop);
+			if(bidInterval.stop == 0) {
+				throw Error(411, "invalid stop time %s", sstop.c_str());
+			}
+		}
+		
+		if (fduration.mtype != FT_WILD) {
+			string sduration = ((fduration.value)[0]).getString();
+			duration = ParserFcts::parseULong(sduration);
+		}
+
+		if ( duration > 0) {
+			if (bidInterval.stop) {
+				// stop + duration specified
+				bidInterval.start = bidInterval.stop - duration;
+			} else {
+				// stop [+ start] specified
+				
+				if (bidInterval.start) {
+					bidInterval.stop = bidInterval.start + duration;
+				} else {
+					bidInterval.start = laststop;
+					bidInterval.stop = bidInterval.start + duration;
+				}
+			}
+		}
+
+#ifdef DEBUG
+    log->dlog(ch, "bid: %s.%s - now:%s stop %s", getBidSet().c_str(), 
+					getBidName().c_str(), Timeval::toString(now).c_str(),
+					Timeval::toString(bidInterval.stop).c_str());					
+#endif
+
+		// now start has a defined value, while stop may still be zero 
+		// indicating an infinite rule
+			
+		// do we have a stop time defined that is in the past ?
+		if ((bidInterval.stop != 0) && (bidInterval.stop <= now)) {
+			throw Error(300, "Bid running time is already over");
+		}
+		
+		if (bidInterval.start < now) {
+			// start late tasks immediately
+			bidInterval.start = now;
+		}
+
+		laststart = bidInterval.start;
+		laststop = bidInterval.stop;
+		
+		list->push_back(pair<time_t,bidInterval_t>(bidInterval.start, bidInterval));
+    }    
+		
 }

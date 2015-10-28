@@ -26,13 +26,13 @@
 */
 
 #include "ParserFcts.h"
-#include "MAPIIpApMessageParser.h"
+#include "IpApMessageParser.h"
 
 using namespace auction;
 
 /* ------------------------- lookup ------------------------- */
 string 
-MAPIIpApMessageParser::lookup(fieldValList_t *fieldVals, string fvalue, field_t *f)
+IpApMessageParser::lookup(fieldValList_t *fieldVals, string fvalue, field_t *f)
 {
     fieldValListIter_t iter2 = fieldVals->find(fvalue);
     if ((iter2 != fieldVals->end()) && (iter2->second.type == f->type)) {
@@ -43,7 +43,8 @@ MAPIIpApMessageParser::lookup(fieldValList_t *fieldVals, string fvalue, field_t 
     return fvalue;
 }
 
-void MAPIIpApMessageParser::parseFieldValue(fieldValList_t *fieldVals, string value, field_t *f)
+void 
+IpApMessageParser::parseFieldValue(fieldValList_t *fieldVals, string value, field_t *f)
 {
     int n;
 	
@@ -85,34 +86,10 @@ void MAPIIpApMessageParser::parseFieldValue(fieldValList_t *fieldVals, string va
     }
 }
 
-/* ------------------------- parseTime ------------------------- */
-time_t 
-MAPIIpApMessageParser::parseTime(string timestr)
-{
-    struct tm  t;
-  
-    if (timestr[0] == '+') {
-        // relative time in secs to start
-        try {
-	    struct tm tm;
-            int secs = ParserFcts::parseInt(timestr.substr(1,timestr.length()));
-            time_t start = time(NULL) + secs;
-            return mktime(localtime_r(&start,&tm));
-        } catch (Error &e) {
-            throw Error("Incorrect relative time value '%s'", timestr.c_str());
-        }
-    } else {
-        // absolute time
-        if (timestr.empty() || (strptime(timestr.c_str(), TIME_FORMAT.c_str(), &t) == NULL)) {
-            return 0;
-        }
-    }
-    return mktime(&t);
-}
 
 /* ------------------------- parseName ------------------------- */
 void 
-MAPIIpApMessageParser::parseName(string id, string &set, string &name)
+IpApMessageParser::parseName(string id, string &set, string &name)
 {
 
     if (id.empty()) {
@@ -134,7 +111,7 @@ MAPIIpApMessageParser::parseName(string id, string &set, string &name)
 
 /* ------------------------- getMiscVal ------------------------- */
 string 
-MAPIIpApMessageParser::getMiscVal(miscList_t *_miscList, string name)
+IpApMessageParser::getMiscVal(miscList_t *_miscList, string name)
 {
     miscListIter_t iter;
 
@@ -152,7 +129,7 @@ MAPIIpApMessageParser::getMiscVal(miscList_t *_miscList, string name)
 
 /* ------------------------- findField ------------------------- */
 fieldDefItem_t 
-MAPIIpApMessageParser::findField(fieldDefList_t *fieldDefs, int eno, int ftype)
+IpApMessageParser::findField(fieldDefList_t *fieldDefs, int eno, int ftype)
 {
 	fieldDefItem_t val_return;
 		
@@ -170,7 +147,7 @@ MAPIIpApMessageParser::findField(fieldDefList_t *fieldDefs, int eno, int ftype)
 
 /* ------------------------- findField ------------------------- */
 fieldDefItem_t 
-MAPIIpApMessageParser::findField(fieldDefList_t *fieldDefs, string fname)
+IpApMessageParser::findField(fieldDefList_t *fieldDefs, string fname)
 {
 	fieldDefItem_t val_return;
 	fieldDefListIter_t iter = fieldDefs->find(fname);
@@ -184,7 +161,7 @@ MAPIIpApMessageParser::findField(fieldDefList_t *fieldDefs, string fname)
 
 /* ------------------------- readTemplate ------------------------- */
 ipap_template * 
-MAPIIpApMessageParser::readTemplate(ipap_message * message,  
+IpApMessageParser::readTemplate(ipap_message * message,  
 									ipap_templ_type_t type)
 {
 	std::list<int> tempList = message->get_template_list();
@@ -204,7 +181,7 @@ MAPIIpApMessageParser::readTemplate(ipap_message * message,
 
 /* ------------------------- readDataRecords ------------------------- */
 dataRecordList_t 
-MAPIIpApMessageParser::readDataRecords(ipap_message * message, 
+IpApMessageParser::readDataRecords(ipap_message * message, 
 									   uint16_t templId)
 {
 	

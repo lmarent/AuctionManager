@@ -49,44 +49,29 @@ typedef enum
     BS_ERROR
 } bidState_t;
 
-
-//! execution list intervals.
-typedef vector<interval_t>            bidIntervalList_t;
-typedef vector<interval_t>::iterator  bidIntervalListIter_t;
-typedef vector<interval_t>::const_iterator  bidIntervalListConstIter_t;
-
-//! This bid applies to bid in this auction.
-class bid_auction_t
+typedef struct
 {
-  public:
-	string auctionSet;
-	string auctionName;
-	int interval;
-	int align;
-	//! define the bid-auction running time properties
 	time_t start;
 	time_t stop;
-	
-	bid_auction_t(){}
-	
-	~bid_auction_t(){}
-		
-	string getId(){ return auctionSet + "." + auctionName; }
-		
-	bool operator==(const bid_auction_t &rhs);
-		
-	bool operator!=(const bid_auction_t &rhs);
-	
-};
 
-//! element map (elementName, fieldlist)
+} bidInterval_t;
+
+//! Intervals defined for the bid.
+typedef vector< pair<time_t, bidInterval_t> > 					bidIntervalList_t;
+typedef vector< pair<time_t, bidInterval_t> >::iterator			bidIntervalListIter_t;
+typedef vector< pair<time_t, bidInterval_t> >::const_iterator	bidIntervalListConstIter_t;
+
+
+//! element map (elementName, fieldlist).
 typedef map<string, fieldList_t>            		elementList_t;
 typedef map<string, fieldList_t>::iterator  		elementListIter_t;
 typedef map<string, fieldList_t>::const_iterator  	elementListConstIter_t;
 
-typedef map<string, bid_auction_t>						bidAuctionList_t;
-typedef map<string, bid_auction_t>::iterator			bidAuctionListIter_t;
-typedef map<string, bid_auction_t>::const_iterator		bidAuctionListConstIter_t;
+
+//! option vector (optionName, fieldlist), options must be ordered.
+typedef vector< pair<string, fieldList_t> >            			optionList_t;
+typedef vector< pair<string, fieldList_t> >::iterator  			optionListIter_t;
+typedef vector< pair<string, fieldList_t> >::const_iterator  	optionListConstIter_t;
 
 class Bid
 {
@@ -100,7 +85,8 @@ public:
     /*! \short   This function creates a new object instance. It recalculates intervals.
         \returns a new object instance.
     */
-	Bid( string sname, string rname, elementList_t &e, bidAuctionList_t &ba );
+	Bid( string auctionSet, string auctionName, string bidSet, string bidName, 
+			elementList_t &elements, optionList_t &options );
 
 	Bid( const Bid &rhs );
 
@@ -116,25 +102,24 @@ public:
         uid = nuid;
     }
 
-		
     void setState(bidState_t s) 
     { 
         state = s;
     }
 
-    bidState_t getState()
+    bidState_t getBidState()
     {
         return state;
     }
 
-    void setSetName(string _setName)
+    void setBidSet(string _bidset)
 	{
-		setName = _setName;
+		bidSet = _bidset;
 	}	
 
-    string getSetName()
+    string getBidSet()
     {
-        return setName;
+        return bidSet;
     }
 
 	void setBidName(string _bidName)
@@ -148,6 +133,27 @@ public:
     }
 
 
+    void setAuctionSet(string _auctionset)
+	{
+		auctionSet = _auctionset;
+	}	
+
+    string getAuctionSet()
+    {
+        return auctionSet;
+    }
+
+	void setAuctionName(string _auctionName)
+	{
+		auctionName = _auctionName;
+	}
+
+    string getAuctionName()
+    {
+        return auctionName;
+    }
+
+
 	string getInfo();
 		
 
@@ -156,38 +162,50 @@ public:
     */
     inline elementList_t *getElements(){ return &elementList; }
 
-	
-    /*! \short   get set and name of all auctions to compete.
-        \returns a pointer (link) to a list that contains the auctions for this bid
-    */
-	inline bidAuctionList_t *getAuctions(){ return &auctionList; }
-	
-	void deleteAuction(string aset, string aName);
+	inline optionList_t *getOptions() {return &optionList; }
 	
 	bool operator==(const Bid &rhs);
 	
 	bool operator!=(const Bid &rhs);
+	
+	//! get a value by name from the element attributes 
+	field_t getElementVal(string elementName, string name);
+	
+	//! get a value by name from the misc rule attributes
+    field_t getOptionVal(string optionName, string name);
+
+	//! Calculates intervals associated to bid.
+	void calculateIntervals(time_t now, bidIntervalList_t *list);
+    
+       
 	
 protected:
 	
     //! unique bidID of this Rule instance (has to be provided)
     int uid;
 
-    //! name of the rule for the external system calling the Auction Manager
-    string bidName;
-
-    //! name of the agent set this bid belongs to
-    string setName;
-   
-	//! state of this rule
+	//! state of this bid
     bidState_t state;
 
+    //! set of the auction that this bid belongs to 
+    string auctionSet;
+    
+    //! name of the auction that this bid belongs to 
+    string auctionName;
+
+    //! name of the set that this bid belongs to
+    string bidSet;
+
+    //! name of the rule for the external system calling the Auction Manager
+    string bidName;
+   
     //! list of elements
     elementList_t elementList;
     
-    //! list of auctions for this bid
-    bidAuctionList_t auctionList;
-
+    //! List of options associated with the bid.
+    //! Important options are start and stop, which define rul
+    optionList_t optionList;
+    
 };
 
 }; // namespace auction

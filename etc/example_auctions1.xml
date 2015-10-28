@@ -1,6 +1,6 @@
 <?xml version ="1.0" encoding="UTF-8"?>
 <!DOCTYPE AUCTIONSET SYSTEM "auctionfile.dtd"> 
-<AUCTIONSET ID="General">
+<AUCTIONSET ID="General1">
   <!-- global part is the default for all auctions -->
   <!-- overwritten by rule specific configuration -->
   <GLOBAL>
@@ -15,6 +15,6 @@
 	<FIELD BID_TEMPL="yes" BID_OPT_TEMPL="no" ALLOC_TEMPL="yes">quantity</FIELD>
 	<FIELD BID_TEMPL="yes" BID_OPT_TEMPL="no">unitbudget</FIELD>
 	<FIELD BID_TEMPL="yes" BID_OPT_TEMPL="no" ALLOC_TEMPL="yes">unitprice</FIELD>
-	<FIELD BID_TEMPL="no" BID_OPT_TEMPL="yes" ALLOC_TEMPL="no">bidingduration</FIELD>
+	<FIELD BID_TEMPL="no" BID_OPT_TEMPL="yes" ALLOC_TEMPL="no">bidduration</FIELD>
   </AUCTION>
 </AUCTIONSET>

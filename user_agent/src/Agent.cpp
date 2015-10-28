@@ -632,8 +632,7 @@ void Agent::handleRemoveBidFromAuction(Event *e)
         string auctionSet = ((RemoveBidAuctionEvent *) e)->getAuctionSet();
         string auctionName = ((RemoveBidAuctionEvent *) e)->getAuctionName();
         proc->delBidAuction(auctionSet, auctionName, b);
-        bidm->delBidAuction(auctionSet, auctionName, 
-							 b->getSetName(), b->getBidName(), evnt.get());
+        bidm->delBid(b->getBidSet(), b->getBidName(), evnt.get());
         
     } catch(Error &err) {
 		log->dlog( ch, err.getError().c_str() );
@@ -752,14 +751,7 @@ void Agent::handleRemoveAuctions(Event *e)
 		{
 			Bid * bid = bidm->getBid(*bidListIter);
 			
-			bidAuctionListIter_t auctIter;
-			for (auctIter = bid->getAuctions()->begin(); 
-				auctIter != bid->getAuctions()->end(); ++auctIter)
-			{
-				evnt->addEvent(new RemoveBidAuctionEvent(bid, 
-													(auctIter->second).auctionSet, 
-													(auctIter->second).auctionName));
-			}
+			evnt->addEvent(new RemoveBidAuctionEvent(bid, bid->getAuctionSet(), bid->getAuctionName() ));
 		}
 	}
 		

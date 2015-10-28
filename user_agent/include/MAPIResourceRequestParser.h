@@ -34,14 +34,14 @@
 #include "Logger.h"
 #include "ResourceRequest.h"
 #include "IpAp_message.h"
-#include "MAPIIpApMessageParser.h"
+#include "IpApMessageParser.h"
 
 namespace auction
 {
 
 //! parser for API ipap_message syntax
 
-class MAPIResourceRequestParser : public MAPIIpApMessageParser
+class MAPIResourceRequestParser : public IpApMessageParser
 {
 
   private:

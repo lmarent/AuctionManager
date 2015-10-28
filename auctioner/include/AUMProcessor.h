@@ -38,7 +38,7 @@
 #include "Error.h"
 #include "Logger.h"
 #include "EventScheduler.h"
-#include "MAPIIpApMessageParser.h"
+#include "IpApMessageParser.h"
 
 namespace auction
 {
@@ -79,7 +79,7 @@ typedef map< agentFieldSet_t, set<ipap_field_key> >::iterator  setFieldsListIter
     the AuctionProcessor class allows auctioning between bids 
 */
 
-class AUMProcessor : public AuctionManagerComponent, public MAPIIpApMessageParser
+class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser
 {
   private:
 

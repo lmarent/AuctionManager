@@ -24,7 +24,7 @@ netagent_SOURCES =  @top_srcdir@/foundation/src/Constants.cpp \
 					@top_srcdir@/foundation/src/FieldDefParser.cpp \
 					@top_srcdir@/foundation/src/FieldValParser.cpp \
 					@top_srcdir@/foundation/src/TemplateIdSource.cpp \
-					@top_srcdir@/foundation/src/MAPIIpApMessageParser.cpp \
+					@top_srcdir@/foundation/src/IpApMessageParser.cpp \
 					@top_srcdir@/foundation/src/BidIdSource.cpp \
 					@top_srcdir@/foundation/src/AuctionIdSource.cpp \
 					@top_srcdir@/foundation/src/Auction.cpp \

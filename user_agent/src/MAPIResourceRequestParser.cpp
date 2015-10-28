@@ -33,7 +33,7 @@
 using namespace auction;
 
 MAPIResourceRequestParser::MAPIResourceRequestParser()
-    : MAPIIpApMessageParser()
+    : IpApMessageParser()
 {
     log = Logger::getInstance();
     ch = log->createChannel("MAPIResourceRequestParser" );

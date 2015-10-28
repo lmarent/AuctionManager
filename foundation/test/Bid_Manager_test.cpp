@@ -23,7 +23,6 @@ class Bid_Manager_Test : public CppUnit::TestFixture {
 	CPPUNIT_TEST_SUITE( Bid_Manager_Test );
 
     CPPUNIT_TEST( testBidManager );
-    CPPUNIT_TEST( testBidManager2 );
     CPPUNIT_TEST( testBidManager3 );
 	CPPUNIT_TEST_SUITE_END();
 
@@ -120,18 +119,18 @@ void Bid_Manager_Test::testBidManager()
 		
 		CPPUNIT_ASSERT( manager->getNumBids() == 1 );
 
-		ptrBid2->setSetName("Agent2");
+		ptrBid2->setBidSet("Agent2");
 		manager->addBid(ptrBid2);
 		CPPUNIT_ASSERT( manager->getNumBids() == 2 );
-		manager->delBid(ptrBid1->getSetName(), ptrBid1->getBidName(), evnt.get());
+		manager->delBid(ptrBid1->getBidSet(), ptrBid1->getBidName(), evnt.get());
 		
-		Bid * bid2 = manager->getBid(ptrBid2->getSetName(), 
+		Bid * bid2 = manager->getBid(ptrBid2->getBidSet(), 
 										ptrBid2->getBidName());
 		
 		manager->delBid(bid2->getUId(), evnt.get());
 		CPPUNIT_ASSERT( manager->getNumBids() == 0 );
-		ptrBid3->setSetName("Agent3");
-		ptrBid4->setSetName("Agent4");		
+		ptrBid3->setBidSet("Agent3");
+		ptrBid4->setBidSet("Agent4");		
 		manager->addBid(ptrBid3);
 		manager->addBid(ptrBid4);
 		CPPUNIT_ASSERT( manager->getNumBids() == 2 );
@@ -140,7 +139,7 @@ void Bid_Manager_Test::testBidManager()
 		manager->delBids(&in_bids, evnt.get());
 		CPPUNIT_ASSERT( manager->getNumBids() == 0 );
 	
-		ptrBid5->setSetName("Agent5");
+		ptrBid5->setBidSet("Agent5");
 		manager->addBid(ptrBid5);
 		CPPUNIT_ASSERT( manager->getNumBids() == 1 );
 		manager->delBids("Agent5", evnt.get());
@@ -154,42 +153,7 @@ void Bid_Manager_Test::testBidManager()
 
 }
 
-void Bid_Manager_Test::testBidManager2() 
-{
 
-	try
-	{
-	
-		ptrBid2 = new Bid(*ptrBid1);
-		manager->addBid(ptrBid2);
-		
-		CPPUNIT_ASSERT( manager->getNumBids() == 1 );
-		
-		// Delete the reference to the auction and should 
-		// delete the bid from the container
-		
-		bidAuctionListIter_t auctIter;
-		for (auctIter = ptrBid1->getAuctions()->begin(); 
-				auctIter != ptrBid1->getAuctions()->end(); ++auctIter)
-		{
-			manager->delBidAuction((auctIter->second).auctionSet, 
-								   (auctIter->second).auctionName, 
-								   ptrBid2->getUId(), 
-								   evnt.get());
-		}
-		
-		CPPUNIT_ASSERT( manager->getNumBids() == 0 );
-		
-		saveDelete(ptrBid1);
-
-			
-	} catch(Error &e){
-		std::cout << "Error:" << e.getError() << std::endl << std::flush;
-		throw e;
-	}
-
-
-}
 
 // This methods is implemented for testing auction indexes 
 void Bid_Manager_Test::testBidManager3() 

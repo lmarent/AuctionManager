@@ -174,7 +174,7 @@ class BidManager
     bidDB_t *parseBidsBuffer(char *buf, int len);
 
     //! parse bids from ipap_message 
-    bidDB_t *parseBidsMessage(ipap_message *messageIn, ipap_message *messageOut);
+    bidDB_t *parseBidMessage(ipap_message *messageIn, ipap_template_container *templates);
 
    
     /*! \short   add a bid list
@@ -221,21 +221,6 @@ class BidManager
     string getInfo(Bid *r);
     string getInfo(string sname, string rname);
     string getInfo(string sname);
-
-    /*! \short   delete a relationship between a bid and an auction by id.
-     * 			 if the bid does not have any other relationship with another
-     * 			 auction, then the manager triggers the bid remove.
-
-    */
-	void delBidAuction(string auctionSet, string auctionName, int uid, EventScheduler *e);
-
-    /*! \short   delete a relationship between a bid and an auction by set and name
-     * 			 if the bid does not have any other relationship with another
-     * 			 auction, then the manager triggers the bid remove.
-
-    */
-	void delBidAuction(string auctionSet, string auctionName, 
-					   string bset, string bname, EventScheduler *e);
 
     //! dump a BidManager object
     void dump( ostream &os );

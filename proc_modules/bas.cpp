@@ -221,7 +221,7 @@ void auction::execute( auction::configParam_t *params, string aset, string aname
 			double quantity = getDoubleField(&(elem_iter->second), "quantity");
 			alloc_proc_t alloc;
 		
-			alloc.bidSet = bid->getSetName();
+			alloc.bidSet = bid->getBidSet();
 			alloc.bidName = bid->getBidName();
 			alloc.elementName = elem_iter->first;
 			alloc.quantity = quantity;

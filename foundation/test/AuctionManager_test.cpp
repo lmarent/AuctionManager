@@ -189,15 +189,14 @@ void AuctionManager_Test::test()
 				
 		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
 				
-		auctionPtr = auctionManagerPtr->getAuction("general","1");
+		auctionPtr = auctionManagerPtr->getAuction("general1","1");
 				
-		auction2 = new Auction(*auctionPtr);
-		
-		auction2->setAuctionName("2");
-				
-		auctionManagerPtr->addAuction(auction2);
-				
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 2 );
+		if (auctionPtr != NULL){
+			auction2 = new Auction(*auctionPtr);
+			auction2->setAuctionName("2");	
+			auctionManagerPtr->addAuction(auction2);		
+			CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 2 );
+		}
 						
 		auctions3 = auctionManagerPtr->getAuctions();	
 		

@@ -165,3 +165,35 @@ field_t::operator!=(const field_t &param)
 {
 	return !(operator==(param));
 }
+
+field_t &
+field_t::operator=(const field_t &param)
+{
+	name = param.name;
+	type = param.type;
+	mtype = param.mtype;
+	len = param.len;
+	//! number of values
+	cnt = param.cnt;
+
+	vector<FieldValue>::const_iterator fval_iter;
+	for ( fval_iter = param.value.begin(); fval_iter != param.value.end(); ++fval_iter )
+	{
+		value.push_back(*fval_iter);
+	}
+	
+	return *this;
+}
+
+/* ------------------------- dump ------------------------- */
+void field_t::dump(ostream &os)
+{
+	os << getInfo();
+}
+
+/* ------------------------- operator<< ------------------------- */
+ostream& operator<< ( ostream &os, field_t &f )
+{
+    f.dump(os);
+    return os;
+}

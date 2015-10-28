@@ -36,15 +36,15 @@
 #include "XMLParser.h"
 #include "ProcModuleInterface.h"
 #include "FieldDefParser.h"
-#include "ConfigParser.h"
 #include "FieldValParser.h"
 #include "BidIdSource.h"
 #include "Bid.h"
+#include "IpApMessageParser.h"
 
 namespace auction
 {
 
-class BidFileParser : public XMLParser
+class BidFileParser : public XMLParser, public IpApMessageParser
 {
   private:
 
@@ -53,22 +53,7 @@ class BidFileParser : public XMLParser
 
     //! parse a config item
     configItem_t parsePref(xmlNodePtr cur);
-
-    //! lookup field value
-    string lookup(fieldValList_t *fieldVals, string fvalue, field_t *f);
-
-	//! parse a field value
-	void parseFieldValue(fieldValList_t *fieldVals, string value, field_t *f);   
-		
-	//! Calculates intervals associated to auction.
-	void calculateIntervals(time_t now, bid_auction_t *auction, miscList_t &list);
-
-    //! parse time string
-    time_t parseTime(string timestr);
-
-    //! get a value by name from the misc rule attriutes
-    string getMiscVal(miscList_t *miscList, string name);    
-
+		  
   public:
 
     BidFileParser( string fname );

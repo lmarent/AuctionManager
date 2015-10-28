@@ -33,14 +33,14 @@
 #include "IpAp_message.h"
 #include "AllocationIdSource.h"
 #include "Allocation.h"
-#include "MAPIIpApMessageParser.h"
+#include "IpApMessageParser.h"
 
 namespace auction
 {
 
 //! parser for API text Bid syntax
 
-class MAPIAllocationParser : public MAPIIpApMessageParser
+class MAPIAllocationParser : public IpApMessageParser
 {
 
   private:

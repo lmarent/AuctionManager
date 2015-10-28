@@ -17,7 +17,7 @@
   <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="27">Start</DEF>
   <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="28">Stop</DEF>
   <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="34">Interval</DEF>
-  <DEF LENGTH="4" TYPE="UInt32" ENO="0" FTYPE="43">BidingDuration</DEF>
+  <DEF LENGTH="4" TYPE="UInt32" ENO="0" FTYPE="43">BidDuration</DEF>
   <DEF TYPE="IPAddr" ENO="0" FTYPE="10">SrcIP</DEF>
   <DEF TYPE="IPAddr" ENO="0" FTYPE="12">DstIP</DEF>  
   <DEF TYPE="IP6Addr" ENO="0" FTYPE="14">SrcIP6</DEF>

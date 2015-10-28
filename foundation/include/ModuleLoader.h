@@ -159,7 +159,7 @@ class ModuleLoader
     */
     typeInfo_t* getTypeInfo( string modname );
 
-    /* \short   get version number from module
+    /*! \short   get version number from module
 
       \arg \c modname - name of the evaluation module
       \returns the version number stored inside the module

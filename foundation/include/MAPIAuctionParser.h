@@ -26,7 +26,7 @@
 
 #include "stdincpp.h"
 #include "AuctionFileParser.h"
-#include "MAPIIpApMessageParser.h"
+#include "IpApMessageParser.h"
 #include "anslp_ipap_message_splitter.h"
 
 
@@ -34,7 +34,7 @@ namespace auction
 {
 
 //! parser for API message Auction syntax
-class MAPIAuctionParser : public MAPIIpApMessageParser, public anslp::msg::anslp_ipap_message_splitter
+class MAPIAuctionParser : public IpApMessageParser, public anslp::msg::anslp_ipap_message_splitter
 {
 
   private:
@@ -61,7 +61,7 @@ class MAPIAuctionParser : public MAPIIpApMessageParser, public anslp::msg::anslp
 	void get_ipap_message(fieldDefList_t *fieldDefs, Auction *auctionPtr,
 						  ipap_template_container *templates,
 						  int domainId, bool useIPV6, string sAddressIPV4, 
-						  string sAddressIPV6, uint16_t port, ipap_message *);
+						  string sAddressIPV6, uint16_t port, ipap_message *message);
 	
    /**
     * Verify that templData and templOption are equal to those in the container

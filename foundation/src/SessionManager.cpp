@@ -27,6 +27,7 @@
 
 */
 
+#include "ParserFcts.h"
 #include "SessionManager.h"
 #include "Constants.h"
 

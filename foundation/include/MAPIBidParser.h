@@ -33,15 +33,17 @@
 #include "Logger.h"
 #include "Bid.h"
 #include "IpAp_message.h"
+#include "AuctionFileParser.h"
 #include "BidFileParser.h"
-#include "MAPIIpApMessageParser.h"
+#include "IpApMessageParser.h"
+#include "anslp_ipap_message_splitter.h"
 
 namespace auction
 {
 
 //! parser for API text Bid syntax
 
-class MAPIBidParser : public MAPIIpApMessageParser
+class MAPIBidParser : public IpApMessageParser, public anslp::msg::anslp_ipap_message_splitter
 {
 
   private:
@@ -49,38 +51,34 @@ class MAPIBidParser : public MAPIIpApMessageParser
     Logger *log;
     int ch;
 
-	//! Add the field of all elements into message's template 
-	uint16_t addElementFieldsTemplate(fieldDefList_t *fieldDefs, 
-									  Bid *bidPtr, ipap_message *mes);
+	//! Add the field of a data record
+	void addDataRecord(fieldDefList_t *fieldDefs, string auctionId, string bidId, string recordId, 
+					   fieldList_t &fieldList, uint16_t templateId, ipap_message *mes );	
 
-	//! Add required field for the bid's option template 									 
-	uint16_t addFieldsOptionTemplate(fieldDefList_t *fieldDefs, 
-									 Bid *bidPtr, 
-									 ipap_message *mes);
+	//! Add the field of an option data record
+	void addOptionRecord(fieldDefList_t *fieldDefs, string auctionId, string bidId, string recordId, 
+						 time_t start, time_t stop, fieldList_t &fieldList, uint16_t templateId, 
+						 ipap_message *mes );	
 
-	//! Add the field of all auction relationship into option message's template
-	void addOptionRecord(string bidId, int recordId, bid_auction_t bAuct, 
-						 uint16_t bidTemplateId, ipap_message *mes );
-									  
+
+	auction::fieldList_t readBidRecord( ipap_template *templ, fieldDefList_t *fieldDefs,
+										fieldValList_t *fieldVals, ipap_data_record &record, 
+										string &auctionSet, string &auctionName,
+										string &bidSet, string &bidName, string &recordId );
+
+	void verifyInsertTemplates(ipap_template *templData, ipap_template *templOption, 
+							   ipap_template_container *templatesOut);
 	
-	//! Add all fields of an element to a new record data.
-	void addElementRecord(string bidId, 
-						  string elementId, 
-						  fieldList_t *elemFields, 
-						  fieldDefList_t *fieldDefs, 
-						  uint16_t bidTemplateId, 
-						  ipap_message *mes );
-	
-
-	auction::fieldList_t readBidData( ipap_template *templ, fieldDefList_t *fieldDefs,
-						   fieldValList_t *fieldVals, ipap_data_record &record, 
-						   string &bidSet, string &bidName, string &elementName );
-
-	bid_auction_t readBidOptionData(ipap_template *templ, 
-					  			    fieldDefList_t *fieldDefs,
-									ipap_data_record &record);
+	ipap_template * findTemplate(ipap_template *templData, ipap_template *templOption,
+								 ipap_template_container *templatesOut, uint16_t templId);
 		   				  
-	ipap_message * get_ipap_message(Bid *bidPtr, fieldDefList_t *fieldDefs);
+	void get_ipap_message( fieldDefList_t *fieldDefs, Bid *bidPtr, 
+						   Auction *auctionPtr, ipap_template_container *templates, 
+						   int domainId, ipap_message *message);
+
+	void parseAuctionKey( fieldDefList_t *fields, fieldValList_t *fieldVals,
+						  const anslp::msg::xml_object_key &key,
+						  bidDB_t *bids, ipap_template_container *templates );
 	
   public:
 
@@ -89,16 +87,16 @@ class MAPIBidParser : public MAPIIpApMessageParser
     ~MAPIBidParser() {}
 
     //! parse given bids and add parsed bids to bids
-    void parse(fieldDefList_t *filters, 
-					   fieldValList_t *filterVals,
-					   ipap_message *message,
-					   bidDB_t *bids,
-					   BidIdSource *idSource,
-					   ipap_message *messageOut );
-					   
-	//! get the ipap_message that represents the set of bids.
-	vector<ipap_message *> get_ipap_messages(fieldDefList_t *fieldDefs, 
-											 bidDB_t *auctions);
+    void parse( fieldDefList_t *fieldDefs, fieldValList_t *fieldVals,
+			    ipap_message *message, bidDB_t *bids, 
+			    ipap_template_container *templates );
+
+
+	//! get the ipap_message that represents the set of auctions.
+	ipap_message * get_ipap_message(fieldDefList_t *fieldDefs, 
+									bidDB_t *bids, auctionDB_t *auctions, 
+									ipap_template_container *templates,
+									int domainId );
 
 };
 

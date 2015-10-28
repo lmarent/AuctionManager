@@ -25,6 +25,7 @@
     $Id: EventScheduler.h 748 2015-07-30 19:05:00 amarentes $
 */
 
+#include "ParserFcts.h"
 #include "Error.h"
 #include "EventScheduler.h"
 #include "Timeval.h"

@@ -301,19 +301,15 @@ bidDB_t *BidManager::parseBidsBuffer(char *buf, int len)
 /* -------------------- parseBidsMessage -------------------- */
 
 bidDB_t *
-BidManager::parseBidsMessage(ipap_message *messageIn, ipap_message *messageOut)
+BidManager::parseBidMessage(ipap_message *messageIn, ipap_template_container *templates)
 {
     bidDB_t *new_bids = new bidDB_t();
 
     try {
-        // load the filter def list
-        loadFieldDefs("");
-	
-        // load the filter val list
-        loadFieldVals("");
 			
         MAPIBidParser rfp = MAPIBidParser();
-        rfp.parse(&fieldDefs, &fieldVals, messageIn, new_bids, &idSource, messageOut);
+        
+        rfp.parse(&fieldDefs, &fieldVals, messageIn, new_bids, templates);
 
         return new_bids;
 	
@@ -343,16 +339,16 @@ void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
         Bid *b = (*iter);
         
         try {
-
+			bidIntervalList_t intervalList;
             addBid(b);
-
-            bidAuctionListIter_t auct_iter;
-            for ( auct_iter = (b->getAuctions())->begin(); 
-                    auct_iter != (b->getAuctions())->end(); ++auct_iter ){ 
-				start[(auct_iter->second).start].push_back(b);
-				if ((auct_iter->second).stop) 
+			b->calculateIntervals(now,  &intervalList);
+			
+            bidIntervalListIter_t intervIter;
+            for ( intervIter = intervalList.begin(); intervIter != intervalList.end(); ++intervIter ){ 
+				start[(intervIter->second).start].push_back(b);
+				if ((intervIter->second).stop) 
 				{
-					stop[(auct_iter->second).stop].push_back(b);
+					stop[(intervIter->second).stop].push_back(b);
 				}
 			}
         } catch (Error &e ) {
@@ -370,32 +366,22 @@ void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
     log->dlog(ch, "Start all bids - it is going to activate them");
 #endif      
 
-    // group rules with same start time
+    // group bids with same start time
     for (iter2 = start.begin(); iter2 != start.end(); iter2++) {
 		bidDBIter_t bids_iter;
 		// Iterates over the bids starting.
-		for (bids_iter = (iter2->second).begin(); 
-				bids_iter != (iter2->second).end(); bids_iter++) { 
+		for (bids_iter = (iter2->second).begin(); bids_iter != (iter2->second).end(); bids_iter++) 
+		{ 
 			Bid *bid = (*bids_iter);
-			// Iterates over the auctions configured for the bid.
-			bidAuctionListIter_t auct_iter = (bid->getAuctions())->begin();
-			while ( auct_iter != (bid->getAuctions())->end()){ 
-				// If the starttime for the auction is actually the same.
-				if ((auct_iter->second).start ==  iter2->first)
-				{
 					
 #ifdef DEBUG    
-					log->dlog(ch, "Schedulling new event - set: %s, name:  %s", 
-							  ((auct_iter->second).auctionSet).c_str(), 
-							    ((auct_iter->second).auctionName).c_str());
+			log->dlog(ch, "Schedulling insert bid auction event - set: %s, name:  %s", 
+						bid->getAuctionSet().c_str(), 
+						bid->getAuctionName().c_str());
 #endif 					
-					e->addEvent(
-						new InsertBidAuctionEvent(iter2->first-now, bid, 
-										  (auct_iter->second).auctionSet,
-										  (auct_iter->second).auctionName));
-				}
-				++auct_iter;
-			}
+			e->addEvent( new InsertBidAuctionEvent(iter2->first-now, bid, 
+										  bid->getAuctionSet(),
+										  bid->getAuctionName()));
 		}
     }
     
@@ -403,21 +389,18 @@ void BidManager::addBids(bidDB_t * _bids, EventScheduler *e)
     for (iter2 = stop.begin(); iter2 != stop.end(); iter2++) {
 		bidDBIter_t bids_iter;
 		// Iterates over the bids starting.
-		for (bids_iter = (iter2->second).begin(); 
-				bids_iter != (iter2->second).end(); bids_iter++) {
+		for (bids_iter = (iter2->second).begin(); bids_iter != (iter2->second).end(); bids_iter++) 
+		{
 			Bid *bid = (*bids_iter); 
+#ifdef DEBUG    
+			log->dlog(ch, "Schedulling stop bid auction event - set: %s, name:  %s", 
+						bid->getAuctionSet().c_str(), 
+						bid->getAuctionName().c_str());
+#endif			
 			// Iterates over the auctions configured for the bid.
-			bidAuctionListIter_t auct_iter = (bid->getAuctions())->begin();		
-			while (auct_iter != (bid->getAuctions())->end()) 
-			{
-				if ((auct_iter->second).stop ==  iter2->first){	  
-					e->addEvent(
-						new RemoveBidAuctionEvent(iter2->first-now, bid, 
-									(auct_iter->second).auctionSet,
-									(auct_iter->second).auctionName));
-				}
-				++auct_iter;
-			}
+			e->addEvent( new RemoveBidAuctionEvent(iter2->first-now, bid, 
+									bid->getAuctionSet(),
+									bid->getAuctionName()));
 		}
     }
 
@@ -441,9 +424,9 @@ void BidManager::addBid(Bid *b)
 			  
     // test for presence of bidSource/bidName combination
     // in bidDatabase in particular set
-    if (getBid(b->getSetName(), b->getBidName())) {
+    if (getBid(b->getBidSet(), b->getBidName())) {
         log->elog(ch, "bid %s.%s already installed",
-                  b->getSetName().c_str(), b->getBidName().c_str());
+                  b->getBidSet().c_str(), b->getBidName().c_str());
         throw Error(408, "Bid with this name is already installed");
     }
 
@@ -469,33 +452,29 @@ void BidManager::addBid(Bid *b)
         bidDB[b->getUId()] = b; 	
 
         // add new entry in index
-        bidSetIndex[b->getSetName()][b->getBidName()] = b->getUId();
+        bidSetIndex[b->getBidSet()][b->getBidName()] = b->getUId();
 
-		// add new entry in the auction index.
-		bidAuctionList_t *auctions = b->getAuctions();
-		bidAuctionListIter_t auct_iter;
-		for (auct_iter = auctions->begin(); auct_iter != auctions->end(); ++auct_iter)
+
+		string aSet = b->getAuctionSet();
+		string aName = b->getAuctionName();
+		
+		auctionSetBidIndexIter_t setIter;
+		setIter = bidAuctionSetIndex.find(aSet);
+		if (setIter != bidAuctionSetIndex.end())
 		{
-			string aSet = (auct_iter->second).auctionSet;
-			string aName = (auct_iter->second).auctionName;
-			auctionSetBidIndexIter_t setIter;
-			setIter = bidAuctionSetIndex.find(aSet);
-			if (setIter != bidAuctionSetIndex.end())
-			{
-				auctionBidIndexIter_t actBidIter = (setIter->second).find(aName);
-				if (actBidIter != (setIter->second).end()){
-					(actBidIter->second).push_back(b->getUId());
-				}
-				else{
-					vector<int> listBids;
-					listBids.push_back(b->getUId());
-					bidAuctionSetIndex[aSet][aName] = listBids;
-				}
-			} else {
+			auctionBidIndexIter_t actBidIter = (setIter->second).find(aName);
+			if (actBidIter != (setIter->second).end()){
+				(actBidIter->second).push_back(b->getUId());
+			}
+			else{
 				vector<int> listBids;
 				listBids.push_back(b->getUId());
 				bidAuctionSetIndex[aSet][aName] = listBids;
 			}
+		} else {
+			vector<int> listBids;
+			listBids.push_back(b->getUId());
+			bidAuctionSetIndex[aSet][aName] = listBids;
 		}
         
         bids++;
@@ -509,7 +488,7 @@ void BidManager::addBid(Bid *b)
 
         // adding new bid failed in some component
         // something failed -> remove bid from database
-        delBid(b->getSetName(), b->getBidName(), NULL);
+        delBid(b->getBidSet(), b->getBidName(), NULL);
 	
         throw e;
     }
@@ -578,7 +557,7 @@ string BidManager::getInfo(string sname, string rname)
     if (r == NULL) {
         // check done tasks
         for (bidDoneIter_t i = bidDone.begin(); i != bidDone.end(); i++) {
-            if (((*i)->getBidName() == rname) && ((*i)->getSetName() == sname)) {
+            if (((*i)->getBidName() == rname) && ((*i)->getBidSet() == sname)) {
                 info = (*i)->getInfo();
             }
         }
@@ -703,47 +682,41 @@ void BidManager::delBid(Bid *r, EventScheduler *e)
     // remove bid from database and from index
     storeBidAsDone(r);
     bidDB[r->getUId()] = NULL;
-    bidSetIndex[r->getSetName()].erase(r->getBidName());
+    bidSetIndex[r->getBidSet()].erase(r->getBidName());
     
-    bidAuctionList_t *auction =  r->getAuctions();
-    bidAuctionListIter_t auc_iter;
-    for (auc_iter = auction->begin(); auc_iter != auction->end(); ++auc_iter)
-    {
+    // Find the corresponding nodes in the auction bid index and deletes
+	vector<int>::iterator actBidIter;
+	auctionSetBidIndexIter_t setNode;  
+	auctionBidIndexIter_t auctionNode; 
+	
+	setNode = bidAuctionSetIndex.find(r->getAuctionSet());
+	auctionNode = (setNode->second).find(r->getAuctionName());
 		
-		// Find the corresponding nodes in the auction bid index and deletes
-		vector<int>::iterator actBidIter;
-		auctionSetBidIndexIter_t setNode;  
-		auctionBidIndexIter_t auctionNode; 
-		setNode = bidAuctionSetIndex.find((auc_iter->second).auctionSet);
-		auctionNode = (setNode->second).find((auc_iter->second).auctionName);
-		
-		for (actBidIter = (auctionNode->second).begin(); 
-				actBidIter != (auctionNode->second).end(); ++actBidIter){
+	for (actBidIter = (auctionNode->second).begin(); 
+			actBidIter != (auctionNode->second).end(); ++actBidIter){
 					
-			if (*actBidIter == r->getUId()){
-				(auctionNode->second).erase(actBidIter);
-				break;
-			}
+		if (*actBidIter == r->getUId()){
+			(auctionNode->second).erase(actBidIter);
+			break;
 		}
+	}
 		
-		// delete the auction name if empty.
-		auctionNode = (setNode->second).find((auc_iter->second).auctionName);
-		if ((auctionNode->second).empty()){
-			bidAuctionSetIndex[(auc_iter->second).auctionSet].erase(auctionNode);
-		}
+	// delete the auction name if empty.
+	auctionNode = (setNode->second).find(r->getAuctionName());
+	if ((auctionNode->second).empty()){
+		bidAuctionSetIndex[r->getAuctionSet()].erase(auctionNode);
+	}
 			
-		// delete bid auction set if empty
-		setNode = bidAuctionSetIndex.find((auc_iter->second).auctionSet);
-		if ((setNode->second).empty()) {
-			bidAuctionSetIndex.erase(setNode);
-		}
+	// delete bid auction set if empty
+	setNode = bidAuctionSetIndex.find(r->getAuctionSet());
+	if ((setNode->second).empty()) {
+		bidAuctionSetIndex.erase(setNode);
 	}
 	
     // delete bid set if empty
-    if (bidSetIndex[r->getSetName()].empty()) {
-        bidSetIndex.erase(r->getSetName());
+    if (bidSetIndex[r->getBidSet()].empty()) {
+        bidSetIndex.erase(r->getBidSet());
     }
-    
     
     if (e != NULL) {
         e->delBidEvents(r->getUId());
@@ -780,98 +753,6 @@ void BidManager::storeBidAsDone(Bid *r)
         saveDelete(bidDone.front());
         bidDone.pop_front();
     }
-}
-
-void BidManager::delBidAuction(string auctionSet, 
-							   string auctionName, 
-							   int uid,
-							   EventScheduler *e)
-{
-
-    auctionSetBidIndexIter_t auc_iter;
-    auc_iter = bidAuctionSetIndex.find(auctionSet);
-    if (auc_iter != bidAuctionSetIndex.end())
-    {
-		auctionBidIndexIter_t bidAucIter = (auc_iter->second).find(auctionName);
-		if (bidAucIter != (auc_iter->second).end()){
-			vector<int>::iterator lisBidsIter;
-			for (lisBidsIter = (bidAucIter->second).begin(); 
-					lisBidsIter != (bidAucIter->second).end(); ++lisBidsIter)
-			{
-				// Delete the index to the bid.
-				if (*lisBidsIter == uid){
-					(bidAucIter->second).erase(lisBidsIter);
-					break;
-				}
-			}
-			
-			// Delete the auction if that was the last related bid.
-			if ((bidAucIter->second).empty())
-			{
-				(auc_iter->second).erase(bidAucIter);
-			}	
-		}
-		// Delete the auction set if that was the last related bid for the set.
-		if ((auc_iter->second).empty()){
-			bidAuctionSetIndex.erase(auc_iter);
-		}
-	}
-	
-	// Delete in the bid the auction.
-	Bid * bid = getBid(uid);
-	bid->deleteAuction(auctionSet, auctionName);
-	
-	// remove the bid, if there are no more auctions related to the bid.
-	if (bid->getAuctions()->empty()){
-		 delBid(bid, e);
-	}
-}
-
-
-void BidManager::delBidAuction(string auctionSet, string auctionName, 
-							   string bset, string bname,
-							   EventScheduler *e)
-{
-
-	Bid * bid = getBid(bset, bname);
-	int uid = bid->getUId();
-
-    auctionSetBidIndexIter_t auc_iter;
-    auc_iter = bidAuctionSetIndex.find(auctionSet);
-    if (auc_iter != bidAuctionSetIndex.end())
-    {
-		auctionBidIndexIter_t bidAucIter = (auc_iter->second).find(auctionName);
-		if (bidAucIter != (auc_iter->second).end()){
-			vector<int>::iterator lisBidsIter;
-			for (lisBidsIter = (bidAucIter->second).begin(); 
-					lisBidsIter != (bidAucIter->second).end(); ++lisBidsIter)
-			{
-				// Delete the index to the bid.
-				if (*lisBidsIter == uid){
-					(bidAucIter->second).erase(lisBidsIter);
-					break;
-				}
-			}
-			
-			// Delete the auction if that was the last related bid.
-			if ((bidAucIter->second).empty())
-			{
-				(auc_iter->second).erase(bidAucIter);
-			}	
-		}
-		// Delete the auction set if that was the last related bid for the set.
-		if ((auc_iter->second).empty()){
-			bidAuctionSetIndex.erase(auc_iter);
-		}
-	}
-	
-	// Delete in the bid the auction.
-	bid->deleteAuction(auctionSet, auctionName);
-	
-	// remove the bid, if there are no more auctions related to the bid.
-	if (bid->getAuctions()->empty()){
-		 delBid(bid, e);
-	}
 }
 
 

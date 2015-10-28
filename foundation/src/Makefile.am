@@ -31,7 +31,7 @@ libfoundation_la_SOURCES = AuctionTimer.cpp \
 						  XMLParser.cpp \
 						  FieldDefParser.cpp \
 						  FieldValParser.cpp \
-						  MAPIIpApMessageParser.cpp \
+						  IpApMessageParser.cpp \
 						  TemplateIdSource.cpp \
 						  AllocationIdSource.cpp \
 						  Allocation.cpp \

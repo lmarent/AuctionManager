@@ -25,8 +25,8 @@
     $Id: MAPIIpApMessageParser.h 748 2015-07-23 17:30:00Z amarentes $
 */
 
-#ifndef _MAPI_IPAP_MESSAGE_PARSER_H_
-#define _MAPI_IPAP_MESSAGE_PARSER_H_
+#ifndef _IPAP_MESSAGE_PARSER_H_
+#define _IPAP_MESSAGE_PARSER_H_
 
 #include "ParserFcts.h"
 #include "stdincpp.h"
@@ -38,21 +38,19 @@
 namespace auction
 {
 
-class MAPIIpApMessageParser
+class IpApMessageParser
 {
 
 	public:
-		MAPIIpApMessageParser(){}
+		IpApMessageParser(){}
 		
-		~MAPIIpApMessageParser(){}
+		~IpApMessageParser(){}
 
 	protected:
 
-		//! FIXME document!
+		//! parse a field value
 		void parseFieldValue(fieldValList_t *fieldVals, string value, field_t *f);
 		
-		//! parse time string
-		time_t parseTime(string timestr);
 
 		/*! parse an object name (auction or bid).
 		  \short   parse identifier format 'setname.objectname'
@@ -71,6 +69,7 @@ class MAPIIpApMessageParser
 		//! Find a field by name within the list of fields.
 		fieldDefItem_t findField(fieldDefList_t *fieldDefs, string fname);
 
+		//! lookup field value
 		string lookup(fieldValList_t *fieldVals, string fvalue, field_t *f);
 
 		//! Read a template type from a message.
@@ -82,4 +81,4 @@ class MAPIIpApMessageParser
 
 }
 
-#endif // _MAPI_IPAP_PARSER_H_
+#endif // _IPAP_MESSAGE_PARSER_H_

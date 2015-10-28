@@ -25,6 +25,7 @@
     $Id: ModuleLoader.cpp 748 2015-07-31 12:00:00Z amarentes $
 */
 
+#include "ParserFcts.h"
 #include "Error.h"
 #include "Logger.h"
 #include "ModuleLoader.h"

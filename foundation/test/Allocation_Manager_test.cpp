@@ -4,9 +4,11 @@
  * $Id: Allocation_Manager_test.cpp 2015-08-21 10:50:00 amarentes $
  * $HeadURL: https://./test/Allocation_Manager_test.cpp $
  */
+ 
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "ParserFcts.h"
 #include "AllocationManager.h"
 
 using namespace auction;

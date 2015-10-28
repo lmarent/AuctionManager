@@ -42,7 +42,7 @@ setFieldsList_t AUMProcessor::fieldSets;
 
 AUMProcessor::AUMProcessor(ConfigManager *cnf, string fdname, int threaded, string moduleDir ) 
     : AuctionManagerComponent(cnf, "AUM_PROCESSOR", threaded), 
-	  MAPIIpApMessageParser(), fieldDefFileName(fdname)
+	  IpApMessageParser(), fieldDefFileName(fdname)
 {
     string txt;
     
@@ -436,16 +436,11 @@ void AUMProcessor::delBids(bidDB_t *bids)
 	bidDBIter_t bid_iter;   
 	for (bid_iter = bids->begin(); bid_iter!= bids->end(); ++bid_iter ){
 		Bid *bid = *bid_iter;
-		bidAuctionListIter_t auction_iter;
-		for (auction_iter = (bid->getAuctions())->begin(); 
-			 auction_iter!= (bid->getAuctions())->end(); ++auction_iter){
-			 try{
-			     delBidAuction((auction_iter->second).auctionSet, 
-								  (auction_iter->second).auctionName, bid );
-			 } catch(Error &err){
+		try {
+			 delBidAuction(bid->getAuctionSet(), bid->getAuctionName(), bid );
+		} catch(Error &err){
 				  log->elog( ch, err.getError().c_str() );
-			 }
-		}		 
+		}
 	}
 }
 
@@ -462,7 +457,7 @@ void AUMProcessor::delBidAuction( string auctionSet, string auctionName, Bid *b 
 
     AUTOLOCK(threaded, &maccess);
     
-    string bidSet = b->getSetName();
+    string bidSet = b->getBidSet();
     string bidName = b-> getBidName();
     bool deleted=false;
     bool auctionFound= false;
@@ -473,12 +468,15 @@ void AUMProcessor::delBidAuction( string auctionSet, string auctionName, Bid *b 
     {
         Auction *auction = (iter->second).auction; 
         if ((auctionSet.compare(auction->getSetName()) == 0) && 
-             (auctionName.compare(auction->getAuctionName()) == 0)){
+             (auctionName.compare(auction->getAuctionName()) == 0)) {
+			
 			auctionFound= true;
 			bidDBIter_t bid_iter;
 			bid_iter = ((iter->second).bids).begin();
-			while (bid_iter != ((iter->second).bids).end()) {
-				if ((bidSet.compare((*bid_iter)->getSetName()) == 0) &&
+			
+			while (bid_iter != ((iter->second).bids).end()) 
+			{
+				if ((bidSet.compare((*bid_iter)->getBidSet()) == 0) &&
 					(bidName.compare((*bid_iter)->getBidName()) == 0)){
 					((iter->second).bids).erase(bid_iter);
 					deleted=true;

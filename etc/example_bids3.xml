@@ -1,15 +1,14 @@
 <?xml version ="1.0" encoding="UTF-8"?>
 <!DOCTYPE AGENT SYSTEM "bidfile.dtd"> 
 <AGENT ID="Agent2">
-  <BID ID="1">    
+  <BID AUCTION_ID = "General1.1" BID_ID= "Agent2.Bid1" > 
     <ELEMENT ID="element1">
 		<FIELD NAME="quantity">2</FIELD>
 		<FIELD NAME="unitprice">0.16</FIELD>		
 		<FIELD NAME="unitbudget">0.30</FIELD>		
     </ELEMENT>
-    <!-- This part defines the bid belonging to auction with key: General.1 -->
-    <AUCTION ID="General1.1">
-		<PREF NAME="Duration">100</PREF>
-    </AUCTION>
+    <OPTION ID="General1.1">
+		<PREF NAME="BidDuration">100</PREF>
+    </OPTION>
   </BID>  
 </AGENT>

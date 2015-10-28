@@ -58,7 +58,7 @@ typedef struct
     //! resource request interval stop
     time_t stop;
     
-    //! Session Id to fulfil this interval.
+    //! Session Id to fulfill this interval.
     string sessionId;
     
     //! execution interval
@@ -155,6 +155,11 @@ public:
 								  string destinAddr, uint16_t senderPort, 
 								  uint16_t destinPort, uint8_t protocol,
 								  uint32_t lifetime);
+								  
+	/*! \short This function return the session associated with the interval start
+	 * 	 \returns the session id in string.
+	 */
+	string getSession(time_t start);
 			
 protected:
 	

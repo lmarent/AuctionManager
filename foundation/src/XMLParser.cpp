@@ -218,7 +218,6 @@ void XMLParser::XMLErrorCB(void *ctx, const char *msg, ...)
 
     va_start( argp, msg );
     vsprintf(buf, msg, argp);
-    vfprintf(stderr, msg, argp);
     va_end( argp );
 
     err += buf;

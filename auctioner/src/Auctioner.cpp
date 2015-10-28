@@ -752,13 +752,7 @@ void Auctioner::handleRemoveBidsCntrlComm(Event *e, fd_sets_t *fds)
 				throw Error("no such bid");
             }
                   
-			bidAuctionListIter_t bidauct_iter;
-			for (bidauct_iter = (rptr->getAuctions())->begin(); 
-					bidauct_iter != (rptr->getAuctions())->end(); 
-						++bidauct_iter ){
-				proc->delBidAuction((bidauct_iter->second).auctionSet, 
-									(bidauct_iter->second).auctionName, rptr);
-			}
+			proc->delBidAuction(rptr->getAuctionSet(), rptr->getAuctionName(), rptr);
                   
             bidm->delBid(rptr, evnt.get());
 
@@ -776,13 +770,7 @@ void Auctioner::handleRemoveBidsCntrlComm(Event *e, fd_sets_t *fds)
             for (bidIndexIter_t i = bids->begin(); i != bids->end(); i++) {
 				Bid *rptr = bidm->getBid(i->second);
 
-				bidAuctionListIter_t bidauct_iter;
-				for (bidauct_iter = (rptr->getAuctions())->begin(); 
-					  bidauct_iter != (rptr->getAuctions())->end(); 
-						++bidauct_iter ){
-					proc->delBidAuction((bidauct_iter->second).auctionSet, 
-									   (bidauct_iter->second).auctionName, rptr);
-				}
+				proc->delBidAuction(rptr->getAuctionSet(), rptr->getAuctionName(), rptr);
 
                 bidm->delBid(rptr, evnt.get());
             }
@@ -930,17 +918,17 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 			s->setReceiverPort(atoi(sPort.c_str()));
 			
 			os << "<CreateCheckSession>\n";
-			os << "<NbrAuctions>\n";
+			os << "<NbrAuctions>";
 			os << auctions->size(); 
 			os << "</NbrAuctions>\n";
-			os << "</CreateCheckSession>\n";
+			os << "</CreateCheckSession>";
 
 		} else {
 			os << "<CreateCheckSession>\n";
-			os << "<NbrAuctions>\n";
+			os << "<NbrAuctions>";
 			os << 0; // We can not create the session with data provided.
 			os << "</NbrAuctions>\n";
-			os << "</CreateCheckSession>\n";
+			os << "</CreateCheckSession>";
 		}
 		
 		saveDelete(s);
@@ -1033,6 +1021,13 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 		if (auctions->size() > 0){ 			
 			string sessionId = ((CreateSessionEvent *)e)->getSessionId();
 			s = new auction::Session(sessionId);
+
+			// Bring the id of every auction in the auctionDB.
+			auctionSet_t setAuc; 
+			aucm->getIds(auctions, setAuc);
+
+			// Add a new reference to the auction (there is another session reference it).
+			aucm->incrementReferences(setAuc, sessionId);
 
 			//! Set sender address, which is my own address.
 			if (useIPV6){

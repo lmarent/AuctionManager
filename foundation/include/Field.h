@@ -134,8 +134,17 @@ public:
 	bool operator==(const field_t &param);
 
 	bool operator!=(const field_t &param);
-		
+	
+   /**
+    * Assignment operator. 
+    */
+   field_t &operator=(const field_t &other);
+	
+   void dump(ostream &os);
 };
+
+//! overload for <<, so that a field_t object can be thrown into an iostream
+ostream& operator<< ( ostream &os, field_t &f );
 
 //! field list (only push_back & sequential access)
 typedef vector<field_t>            			fieldList_t;

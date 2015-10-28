@@ -29,9 +29,12 @@
 #define _AGENT_SESSION_H_
 
 #include "Session.h"
+#include "AuctionManager.h"
+
 
 namespace auction
 {
+
 
 class AgentSession : public Session
 {
@@ -48,6 +51,16 @@ public:
 	void setStart(time_t _start);
 	
 	void setStop(time_t s_top);
+
+    void addAuctions(auctionDB_t *auctions);
+	
+	auctionSetIter_t beginAuction(void);
+	
+	auctionSetIter_t endAuction(void);
+	
+	void setAuctions(auctionSet_t &setParam);
+	
+	auctionSet_t & getAuctions(void);
 	
 	string getInfo();
 	
@@ -58,6 +71,16 @@ protected:
 	
 	//! Establish the end time of the session
 	time_t stop;
+	
+	//! Auctions created in this session.
+	auctionSet_t  auctionSet;
+
+
+private:
+
+    Logger *log;
+    int ch; //!< logging channel number used by objects of this class
+
 
 };
 

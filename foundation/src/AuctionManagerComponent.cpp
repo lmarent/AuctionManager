@@ -26,6 +26,7 @@
     $Id: AuctionManagerComponent.cpp 748 2015-03-05 18:25:00 amarentes $
 */
 
+#include "ParserFcts.h"
 #include "AuctionManagerComponent.h"
 
 using namespace auction;
