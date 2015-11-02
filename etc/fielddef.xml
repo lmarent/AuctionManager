@@ -10,14 +10,15 @@
   <DEF LENGTH="4" TYPE="SInt32" ENO="0" FTYPE="5">AuctionDuration</DEF>
   <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="38">Bandwidth</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="24">AuctionID</DEF>
-  <DEF TYPE="String" ENO="0" FTYPE="25">BidID</DEF>
+  <DEF TYPE="String" ENO="0" FTYPE="25">BiddingObjectID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="26">AllocationID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="32">RecordID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="40">ResourceID</DEF>
   <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="27">Start</DEF>
   <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="28">Stop</DEF>
   <DEF LENGTH="8" TYPE="UInt64" ENO="0" FTYPE="34">Interval</DEF>
-  <DEF LENGTH="4" TYPE="UInt32" ENO="0" FTYPE="43">BidDuration</DEF>
+  <DEF LENGTH="4" TYPE="UInt32" ENO="0" FTYPE="43">BiddingDuration</DEF>
+  <DEF LENGTH="2" TYPE="UInt16" ENO="0" FTYPE="50">Status</DEF>  
   <DEF TYPE="IPAddr" ENO="0" FTYPE="10">SrcIP</DEF>
   <DEF TYPE="IPAddr" ENO="0" FTYPE="12">DstIP</DEF>  
   <DEF TYPE="IP6Addr" ENO="0" FTYPE="14">SrcIP6</DEF>

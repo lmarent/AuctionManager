@@ -669,7 +669,22 @@ char *CtrlComm::processAuctionInteraction(parseReq_t *preq )
         throw Error("processAuctionInteraction: missing parameter 'SessionID'" );
     }
     
-    //retEvent = new AuctionInteractionEvent(id->second);
+    paramListIter_t message = preq->params.find("Message");
+
+    if (message == preq->params.end() ) {
+        throw Error("add_Session: missing parameter 'Message'" );
+    }
+
+    try {
+        // assume xml ipap_message def
+        anslp::msg::anslp_ipap_xml_message mess;
+        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(message->second);
+        retEvent = new AuctionInteractionEvent(sessionId->second, ipap_mes->ip_message);
+        
+    } catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		log->elog( ch, e.what() );
+        throw Error(e.what());
+    }
   
     return NULL;
 }

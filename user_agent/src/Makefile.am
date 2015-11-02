@@ -23,10 +23,11 @@ netagent_SOURCES =  @top_srcdir@/foundation/src/Constants.cpp \
 					@top_srcdir@/foundation/src/FieldValue.cpp \
 					@top_srcdir@/foundation/src/FieldDefParser.cpp \
 					@top_srcdir@/foundation/src/FieldValParser.cpp \
+					@top_srcdir@/foundation/src/FieldDefManager.cpp \
 					@top_srcdir@/foundation/src/TemplateIdSource.cpp \
 					@top_srcdir@/foundation/src/IpApMessageParser.cpp \
-					@top_srcdir@/foundation/src/BidIdSource.cpp \
-					@top_srcdir@/foundation/src/AuctionIdSource.cpp \
+					@top_srcdir@/foundation/src/IdSource.cpp \
+					@top_srcdir@/foundation/src/AuctioningObject.cpp \
 					@top_srcdir@/foundation/src/Auction.cpp \
 					@top_srcdir@/foundation/src/AuctionFileParser.cpp \
 					@top_srcdir@/foundation/src/MAPIAuctionParser.cpp \
@@ -43,13 +44,14 @@ netagent_SOURCES =  @top_srcdir@/foundation/src/Constants.cpp \
 					@top_srcdir@/foundation/src/ConfigParser.cpp \
 					@top_srcdir@/foundation/src/Allocation.cpp \
 					@top_srcdir@/foundation/src/AuctionManager.cpp \
-					@top_srcdir@/foundation/src/AllocationIdSource.cpp \
 					@top_srcdir@/foundation/src/MAPIAllocationParser.cpp \
 					@top_srcdir@/foundation/src/AllocationManager.cpp \
 					@top_srcdir@/foundation/src/AnslpClient.cpp \
-					@top_srcdir@/foundation/src/SessionIdSource.cpp \
 					@top_srcdir@/foundation/src/Session.cpp \
 					@top_srcdir@/foundation/src/SessionManager.cpp \
+					@top_srcdir@/foundation/src/ModuleLoader.cpp \
+					@top_srcdir@/foundation/src/Module.cpp \
+					@top_srcdir@/foundation/src/ProcModule.cpp \
 					ResourceRequest.cpp \
 					ResourceRequestIdSource.cpp \
 					ResourceRequestFileParser.cpp \

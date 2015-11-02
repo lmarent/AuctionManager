@@ -1,5 +1,5 @@
 
-/*!  \file   MAPIBidParser.cpp
+/*!  \file   MAPIBiddingObjectParser.cpp
 
     Copyright 2014-2015 Universidad de los Andes, Bogota, Colombia
 
@@ -20,33 +20,35 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     Description:
-    parser for API message bid syntax
+    parser for API message bidding object syntax
 
-    $Id: MAPIBidParser.cpp 2015-07-24 15:14:00 amarentes $
+    $Id: MAPIBiddingObjectParser.cpp 2015-07-24 15:14:00 amarentes $
 */
 
 #include "ParserFcts.h"
 #include "Constants.h"
-#include "MAPIBidParser.h"
+#include "MAPIBiddingObjectParser.h"
 #include "Timeval.h"
 
 using namespace auction;
 
-MAPIBidParser::MAPIBidParser()
-    : IpApMessageParser()
+MAPIBiddingObjectParser::MAPIBiddingObjectParser(int domain)
+    : IpApMessageParser(domain)
 {
     log = Logger::getInstance();
-    ch = log->createChannel("MAPIBidParser" );
+    ch = log->createChannel("MAPIBiddingObjectParser" );
     
 #ifdef DEBUG
-    log->dlog(ch, "Constructor MAPIBidParser");
+    log->dlog(ch, "Constructor MAPIBiddingObjectParser");
 #endif    
 }
 
 												
 
-void MAPIBidParser::addDataRecord(fieldDefList_t *fieldDefs, string auctionId, string bidId, string recordId, 
-							  fieldList_t &fieldList, uint16_t templateId, ipap_message *mes )
+void MAPIBiddingObjectParser::addDataRecord(fieldDefList_t *fieldDefs, 
+											BiddingObject * biddingObjectPtr, string recordId, 
+											fieldList_t &fieldList, uint16_t templateId, 
+											ipap_message *mes )
 {
 
 #ifdef DEBUG
@@ -58,20 +60,42 @@ void MAPIBidParser::addDataRecord(fieldDefList_t *fieldDefs, string auctionId, s
 	// Add the auction Id
 	ipap_field idAuctionF = mes->get_field_definition( 0, IPAP_FT_IDAUCTION );
 	ipap_value_field fvalue3 = idAuctionF.get_ipap_value_field( 
-								strdup(auctionId.c_str()), auctionId.size() );
+									strdup((biddingObjectPtr->getAuctionIpAPId()).c_str()), 
+										( biddingObjectPtr->getAuctionIpAPId()).size() );
+										
 	data.insert_field(0, IPAP_FT_IDAUCTION, fvalue3);
 	
-	// Add the Bid Id
-	ipap_field idBidF = mes->get_field_definition( 0, IPAP_FT_IDBID );
+	// Add the BiddingObject Id
+	ipap_field idBidF = mes->get_field_definition( 0, IPAP_FT_IDBIDDINGOBJECT );
 	ipap_value_field fvalue1 = idBidF.get_ipap_value_field( 
-									strdup(bidId.c_str()), bidId.size() );
-	data.insert_field(0, IPAP_FT_IDBID, fvalue1);
+									strdup((biddingObjectPtr->getIpApId(getDomain())).c_str()), 
+										(biddingObjectPtr->getIpApId(getDomain())).size() );
+	data.insert_field(0, IPAP_FT_IDBIDDINGOBJECT, fvalue1);
 
 	// Add the Record Id
 	ipap_field idRecordIdF = mes->get_field_definition( 0, IPAP_FT_IDRECORD );
 	ipap_value_field fvalue2 = idRecordIdF.get_ipap_value_field( 
 									strdup(recordId.c_str()), recordId.size() );
 	data.insert_field(0, IPAP_FT_IDRECORD, fvalue2);	
+
+	// Add the Status
+	ipap_field idStatusF = mes->get_field_definition( 0, IPAP_FT_AUCTIONINGOBJECTSTATUS );
+	uint16_t state = (uint16_t)  biddingObjectPtr->getState();
+	ipap_value_field fvalStatus = idStatusF.get_ipap_value_field( state );
+	data.insert_field(0, IPAP_FT_AUCTIONINGOBJECTSTATUS, fvalStatus);	
+
+	// Add the object type.
+	ipap_field typeF = mes->get_field_definition( 0, IPAP_FT_BIDDINGOBJECTTYPE );
+	uint8_t type = (uint8_t)  biddingObjectPtr->getType();
+	ipap_value_field fvalType = typeF.get_ipap_value_field( type );
+	data.insert_field(0, IPAP_FT_BIDDINGOBJECTTYPE, fvalType );	
+
+	// Find the option template for this object type
+	ipap_templ_type_t tempType = ipap_template::getTemplateType(biddingObjectPtr->getType(), IPAP_RECORD);
+
+	// Only add other fields not include as mandatory fields.
+	set<ipap_field_key> recordFields = ipap_template::getTemplateTypeMandatoryFields(tempType);
+	set<ipap_field_key>::iterator iter;
 
 	// Add the rest of the field within the record.
 	fieldListIter_t fieldListIter;
@@ -80,15 +104,19 @@ void MAPIBidParser::addDataRecord(fieldDefList_t *fieldDefs, string auctionId, s
 		// Search the field in the list of fields, previously it was verified its existance.
 		fieldDefItem_t fItem = findField(fieldDefs, fieldListIter->name);
 
+		iter = recordFields.find(ipap_field_key(fItem.eno, fItem.ftype));
+		if (iter == recordFields.end()){
+
 #ifdef DEBUG
-		log->dlog(ch, "get_ipap_message - it is going to add %s eno:%d ftype:%d", 
+			log->dlog(ch, "get_ipap_message - it is going to add %s eno:%d ftype:%d", 
 					fieldListIter->name.c_str(), fItem.eno, fItem.ftype);
 #endif
-		ipap_field fieldAct = mes->get_field_definition(fItem.eno, fItem.ftype);
+			ipap_field fieldAct = mes->get_field_definition(fItem.eno, fItem.ftype);
 		
-		//TODO AM: we have to fix to manage more than one value.
-		ipap_value_field actFvalue = fieldAct.parse((fieldListIter->value[0]).getValue());
-		data.insert_field(fItem.eno, fItem.ftype, actFvalue);		
+			//TODO AM: we have to fix to manage more than one value.
+			ipap_value_field actFvalue = fieldAct.parse((fieldListIter->value[0]).getValue());
+			data.insert_field(fItem.eno, fItem.ftype, actFvalue);		
+		}
 	}
 		
 	mes->include_data(templateId, data);
@@ -100,8 +128,8 @@ void MAPIBidParser::addDataRecord(fieldDefList_t *fieldDefs, string auctionId, s
 }
 
 
-void MAPIBidParser::addOptionRecord(fieldDefList_t *fieldDefs, string auctionId, 
-									string bidId, string recordId, time_t start, time_t stop, 
+void MAPIBiddingObjectParser::addOptionRecord(fieldDefList_t *fieldDefs, BiddingObject * biddingObjectPtr, 
+									string recordId, time_t start, time_t stop, 
 									fieldList_t &fieldList, uint16_t templateId, 
 									ipap_message *mes )
 {
@@ -115,14 +143,18 @@ void MAPIBidParser::addOptionRecord(fieldDefList_t *fieldDefs, string auctionId,
 	// Add the auction Id
 	ipap_field idAuctionF = mes->get_field_definition( 0, IPAP_FT_IDAUCTION );
 	ipap_value_field fvalue3 = idAuctionF.get_ipap_value_field( 
-								strdup(auctionId.c_str()), auctionId.size() );
+									strdup((biddingObjectPtr->getAuctionIpAPId()).c_str()), 
+										( biddingObjectPtr->getAuctionIpAPId()).size() );
+
 	data.insert_field(0, IPAP_FT_IDAUCTION, fvalue3);
 	
-	// Add the Bid Id
-	ipap_field idBidF = mes->get_field_definition( 0, IPAP_FT_IDBID );
+	// Add the BiddingObject Id
+	ipap_field idBidF = mes->get_field_definition( 0, IPAP_FT_IDBIDDINGOBJECT );
 	ipap_value_field fvalue1 = idBidF.get_ipap_value_field( 
-									strdup(bidId.c_str()), bidId.size() );
-	data.insert_field(0, IPAP_FT_IDBID, fvalue1);
+									strdup((biddingObjectPtr->getIpApId(getDomain())).c_str()), 
+										(biddingObjectPtr->getIpApId(getDomain())).size() );
+										
+	data.insert_field(0, IPAP_FT_IDBIDDINGOBJECT, fvalue1);
 
 	// Add the Record Id
 	ipap_field idRecordIdF = mes->get_field_definition( 0, IPAP_FT_IDRECORD );
@@ -147,8 +179,11 @@ void MAPIBidParser::addOptionRecord(fieldDefList_t *fieldDefs, string auctionId,
 	ipap_value_field fvalueStop = idStopF.get_ipap_value_field( timeUint64 );
 	data.insert_field(0, IPAP_FT_ENDSECONDS, fvalueStop);
 	
+	// Find the option template for this object type
+	ipap_templ_type_t tempType = ipap_template::getTemplateType(biddingObjectPtr->getType(), IPAP_OPTIONS);
+	
 	// Only add other fields not include as mandatory fields.
-	set<ipap_field_key> optionFields = ipap_template::getTemplateTypeMandatoryFields(IPAP_OPTNS_BID_TEMPLATE);
+	set<ipap_field_key> optionFields = ipap_template::getTemplateTypeMandatoryFields(tempType);
 	set<ipap_field_key>::iterator iter;
 	
 	// Add the rest of the field within the record.
@@ -182,17 +217,15 @@ void MAPIBidParser::addOptionRecord(fieldDefList_t *fieldDefs, string auctionId,
 
 
 auction::fieldList_t 
-MAPIBidParser::readBidRecord( ipap_template *templ, 
-							  fieldDefList_t *fieldDefs,
-							  fieldValList_t *fieldVals,
-							  ipap_data_record &record,
-							  string &auctionSet, string &auctionName,
-							  string &bidSet, string &bidName,
-							  string &recordId )
+MAPIBiddingObjectParser::readRecord( ipap_template *templ, fieldDefList_t *fieldDefs,
+									 fieldValList_t *fieldVals, ipap_data_record &record,
+									 string &auctionSet, string &auctionName,
+									 string &bidSet, string &bidName, 
+									 string &stype, string &status, string &recordId )
 {
 
 #ifdef DEBUG
-    log->dlog(ch, "Starting readBidRecord");
+    log->dlog(ch, "Starting readRecord");
 #endif
 
 	string recordName, bidId, auctionId;
@@ -205,7 +238,7 @@ MAPIBidParser::readBidRecord( ipap_template *templ,
 		fieldDefItem_t fItem = findField(fieldDefs, kField.get_eno() , kField.get_ftype());
 		if ((fItem.name).empty()){
 			ostringstream s;
-			s << "Bid Message Parser: Field eno:" << kField.get_eno();
+			s << "BiddingObject Message Parser: Field eno:" << kField.get_eno();
 			s << "fType:" << kField.get_ftype() << "is not parametrized";
 			throw Error(s.str()); 
 		} else {
@@ -214,8 +247,8 @@ MAPIBidParser::readBidRecord( ipap_template *templ,
 
 			// Search the record name field.
 			if ((kField.get_eno() == 0) && 
-				  (kField.get_ftype()== IPAP_FT_IDBID)){
-				// Parse the bid name if has not done yet.
+				  (kField.get_ftype()== IPAP_FT_IDBIDDINGOBJECT)){
+				// Parse the BiddingObject name if has not done yet.
 				if (bidName.empty()){
 					bidId = field.writeValue(dFieldValue);
 					parseName(bidId, bidSet, bidName);
@@ -223,7 +256,7 @@ MAPIBidParser::readBidRecord( ipap_template *templ,
 			}
 			if ((kField.get_eno() == 0) && 
 				  (kField.get_ftype()== IPAP_FT_IDAUCTION)){
-				// Parse the bid name if has not done yet.
+				// Parse the BiddingObject name if has not done yet.
 				if (auctionName.empty()){
 					auctionId = field.writeValue(dFieldValue);
 					parseName(auctionId, auctionSet, auctionName);
@@ -232,6 +265,18 @@ MAPIBidParser::readBidRecord( ipap_template *templ,
 			else if ((kField.get_eno() == 0) && 
 				  (kField.get_ftype()== IPAP_FT_IDRECORD)){
 				recordId = field.writeValue(dFieldValue);
+			}
+			else if ((kField.get_eno() == 0) && 
+				  (kField.get_ftype()== IPAP_FT_BIDDINGOBJECTTYPE)){
+				if (stype.empty()){	  
+					stype = field.writeValue(dFieldValue);
+				}
+			}
+			else if ((kField.get_eno() == 0) && 
+				  (kField.get_ftype()== IPAP_FT_AUCTIONINGOBJECTSTATUS)){
+				if (status.empty()){	  
+					status = field.writeValue(dFieldValue);
+				}
 			}
 			else {
 				field_t item;
@@ -246,7 +291,7 @@ MAPIBidParser::readBidRecord( ipap_template *templ,
 	}
 	
 #ifdef DEBUG
-    log->dlog(ch, "Ending readBidRecord");
+    log->dlog(ch, "Ending readRecord");
 #endif
 	
 	return fields;
@@ -254,7 +299,7 @@ MAPIBidParser::readBidRecord( ipap_template *templ,
 
 
 void 
-MAPIBidParser::verifyInsertTemplates(ipap_template *templData, ipap_template *templOption, 
+MAPIBiddingObjectParser::verifyInsertTemplates(ipap_template *templData, ipap_template *templOption, 
 									 ipap_template_container *templatesOut)
 {
 	// Verifies that both templates have been included
@@ -273,13 +318,13 @@ MAPIBidParser::verifyInsertTemplates(ipap_template *templData, ipap_template *te
 	try {
 		templData2  = templatesOut->get_template(templData->get_template_id());
 	} catch (Error &e){
-		throw Error("MAPI Bid Parser: Data Template %d given is not stored", templData->get_template_id()); 
+		throw Error("MAPI BiddingObject Parser: Data Template %d given is not stored", templData->get_template_id()); 
 	}
 	
 	try {
 		templOption2 = templatesOut->get_template(templOption->get_template_id());
 	} catch (Error &e){
-		throw Error("MAPI Bid Parser: Data Option Template %d given is not stored", templOption->get_template_id()); 
+		throw Error("MAPI BiddingObject Parser: Data Option Template %d given is not stored", templOption->get_template_id()); 
 	}
 	
 	// Verifies that both templates are equal to those 
@@ -294,49 +339,45 @@ MAPIBidParser::verifyInsertTemplates(ipap_template *templData, ipap_template *te
 
 }
 
+bool 
+MAPIBiddingObjectParser::isTemplateSubtype(ipap_templ_subtype_t sybtype, ipap_templ_type_t type)
+{
+	bool val_return = false;
+	
+	// Verify whether or not the template is a data template
+	set<ipap_templ_type_t> setTempl = ipap_template::getTemplates(sybtype);		
+	set<ipap_templ_type_t>::iterator it = setTempl.find(type);
+	if (it != setTempl.end())
+		val_return =  true;
+	
+	return val_return;
+}
 
 ipap_template * 
-MAPIBidParser::findTemplate(ipap_template *templData, ipap_template *templOption,
-							ipap_template_container *templatesOut, uint16_t templId)
+MAPIBiddingObjectParser::findTemplate(ipap_template_container *templatesOut, 
+									  uint16_t templId)
 {
-	if (templData != NULL){
-		if (templData->get_template_id() == templId){
-			return templData;
-		}
-	}
-
-	if (templOption != NULL){
-		if (templOption->get_template_id() == templId){
-			return templOption;
-		}
-	}
 
 	try {
 		ipap_template *templ = templatesOut->get_template(templId);
-		if (templ->get_type() == IPAP_SETID_BID_TEMPLATE){
-			templData = templ;
-		}
 						
-		if  (templ->get_type() == IPAP_OPTNS_BID_TEMPLATE){
-			templOption = templ;
-		}
-		
 		return templ;
 		
 	} catch (Error &e) {
 		log->elog(ch, e.getError().c_str());
-		throw Error("MAPI Bid Parser: missing template  %d", templId); 
+		throw Error("MAPI BiddingObject Parser: missing template  %d", templId); 
 	}
 
 }
 
 
 
-void MAPIBidParser::parseAuctionKey(fieldDefList_t *fields, 
-									fieldValList_t *fieldVals,
-									const anslp::msg::xml_object_key &key,
-									bidDB_t *bids,
-									ipap_template_container *templates )
+void 
+MAPIBiddingObjectParser::parseAuctionKey(fieldDefList_t *fields, 
+										 fieldValList_t *fieldVals,
+										 const anslp::msg::xml_object_key &key,
+										 biddingObjectDB_t *bids,
+										 ipap_template_container *templates )
 {
 
 #ifdef DEBUG
@@ -344,13 +385,14 @@ void MAPIBidParser::parseAuctionKey(fieldDefList_t *fields,
 #endif
 
     string auctionSet, auctionName;
-    string bidSet, bidName;
+    string bidSet, bidName, stype, status;
     elementList_t elements;
     optionList_t options;
 	ipap_template *templData = NULL;
 	ipap_template *templOption = NULL;
-	Bid *b = NULL;
-    
+	BiddingObject *b = NULL;
+	
+    ipap_object_type_t type;
 
     try {
 
@@ -366,13 +408,14 @@ void MAPIBidParser::parseAuctionKey(fieldDefList_t *fields,
 				for (tmpIntIterator = tempList.begin(); tmpIntIterator != tempList.end(); ++tmpIntIterator){ 
 					ipap_template *templ = (tmplIter->second).get_template(*tmpIntIterator);
 					
-					if (templ->get_type() == IPAP_SETID_BID_TEMPLATE){
-						templData = templ;
-					}
-						
-					if  (templ->get_type() == IPAP_OPTNS_BID_TEMPLATE){
+					
+									
+					set<ipap_templ_type_t> setOpt = ipap_template::getTemplates(IPAP_OPTIONS);
+					set<ipap_templ_type_t>::iterator it2 = setOpt.find(templ->get_type());
+					if (it2 != setOpt.end()){
 						templOption = templ;
 					}
+
 				}
 			}
 		}
@@ -389,63 +432,55 @@ void MAPIBidParser::parseAuctionKey(fieldDefList_t *fields,
 		for (datIter = objectDataRecords.begin(); datIter != objectDataRecords.end(); ++datIter)
 		{
 			if (datIter->first == key){ 
-				
+								
 				dateRecordListIter_t dataRecordIter;
 				for (dataRecordIter = (datIter->second).begin(); 
 						dataRecordIter != (datIter->second).end(); ++dataRecordIter){
 					
 					uint16_t templId = dataRecordIter->get_template_id();
+										
 					// This line is used for updating templData and templOption
-					ipap_template *templ = findTemplate(templData, templOption, templates, templId );
+					ipap_template * templ = findTemplate(templates, templId );
+												
+					string elementName;
+					fieldList_t readFields = readRecord(templ, fields, fieldVals, *dataRecordIter, 
+														 auctionSet, auctionName, bidSet, 
+															bidName, stype, status, elementName );
+					type = parseType(stype);
 					
-					// Read a data record for a data template 
-					if (templData != NULL){
-						if (templId == templData->get_template_id()){
-							
-							string elementName;
-							fieldList_t elemtFields = readBidRecord(templData, fields, fieldVals, *dataRecordIter, 
-											auctionSet, auctionName, bidSet, bidName, elementName );
-											
-							elements[elementName] = elemtFields;
-							
-							++NbrDataRead;
-						}
+					if (isTemplateSubtype(IPAP_RECORD, templ->get_type())){
+						elements[elementName] = readFields;
+						++NbrDataRead;
 					}
 					
-					// Read a data record for an option template 
-					if (templOption != NULL){
-						if (templId == templOption->get_template_id()){
-							
-							string optionId;
-							fieldList_t optionFields = 
-											readBidRecord(templOption, fields, fieldVals, *dataRecordIter, 
-														auctionSet, auctionName, bidSet, bidName, optionId );
-											
-							options.push_back(pair<string, fieldList_t>(optionId, optionFields));
-							
-							NbrOptionRead++;
-						}
+					if (isTemplateSubtype(IPAP_OPTIONS, templ->get_type())){	
+						options.push_back(pair<string, fieldList_t>(elementName, readFields));
+						NbrOptionRead++;
 					}
 				}
 				
 				if (NbrDataRead == 0){
-					throw Error("MAPI Bid Parser: a data template was not given"); 
+					throw Error("MAPI BiddingObject Parser: a data template was not given %s", (key.to_string()).c_str()); 
 				}
 				
 				if (NbrOptionRead == 0){
-					throw Error("MAPI Bid Parser: an option template was not given %s", (key.to_string()).c_str()); 
+					throw Error("MAPI BiddingObject Parser: an option template was not given %s", (key.to_string()).c_str()); 
 				}
 				// data has been read, so we can finish.
 				break;
 			}
 		}    
      
-        b = new Bid(auctionSet, auctionName, bidSet, bidName, elements, options);
+        b = new BiddingObject(auctionSet, auctionName, bidSet, bidName, type, elements, options);
+        
+		int istatus = ParserFcts::parseInt(status, 0, 16);
+		b->setState((AuctioningObjectState_t) istatus);        
+		
         bids->push_back(b);
 
 #ifdef DEBUG
 		// debug info
-		log->dlog(ch, "bid %s.%s - %s", bidSet.c_str(), bidName.c_str(), (b->getInfo()).c_str());
+		log->dlog(ch, "BiddingObject %s.%s - %s", bidSet.c_str(), bidName.c_str(), (b->getInfo()).c_str());
 #endif
             
     } catch (Error &e) {
@@ -459,9 +494,11 @@ void MAPIBidParser::parseAuctionKey(fieldDefList_t *fields,
 
 
 void 
-MAPIBidParser::parse(fieldDefList_t *fieldDefs, fieldValList_t *fieldVals,
-					 ipap_message *message, bidDB_t *bids,
-					 ipap_template_container *templates )
+MAPIBiddingObjectParser::parse(fieldDefList_t *fieldDefs, 
+							   fieldValList_t *fieldVals,
+							   ipap_message *message, 
+							   biddingObjectDB_t *bids,
+							   ipap_template_container *templates )
 {
 	try
 	{
@@ -477,9 +514,7 @@ MAPIBidParser::parse(fieldDefList_t *fieldDefs, fieldValList_t *fieldVals,
 		anslp::msg::xmlDataRecordIterList_t iter;
 		for (iter = objectDataRecords.begin(); iter != objectDataRecords.end();  ++iter)
 		{
-			if ((iter->first).get_object_type() == anslp::msg::IPAP_BID){
-				parseAuctionKey(fieldDefs, fieldVals, iter->first, bids, templates); 
-			}
+			parseAuctionKey(fieldDefs, fieldVals, iter->first, bids, templates); 
 		}
 		
 
@@ -497,27 +532,33 @@ MAPIBidParser::parse(fieldDefList_t *fieldDefs, fieldValList_t *fieldVals,
 
 /* ------------------------- getMessage ------------------------- */
 void 
-MAPIBidParser::get_ipap_message(fieldDefList_t *fieldDefs, Bid *bidPtr, Auction *auctionPtr, 
-								ipap_template_container *templates,
-								int domainId, ipap_message *message)
+MAPIBiddingObjectParser::get_ipap_message(fieldDefList_t *fieldDefs, 
+										  BiddingObject *biddingObjectPtr, 
+										  Auction *auctionPtr, 
+										  ipap_template_container *templates,
+										  ipap_message *message)
 {
 #ifdef DEBUG
     log->dlog(ch, "Starting get_ipap_message");
 #endif	
 
 	time_t now = time(NULL);
+	ipap_templ_type_t tempType;
 
-	// Verifies that the bid is for the auction given.
-	assert((bidPtr->getAuctionSet() == auctionPtr->getSetName()) && 
-			(bidPtr->getAuctionName() == auctionPtr->getAuctionName() ));
+	// Verifies that the BiddingObject is for the auction given.
+	assert((biddingObjectPtr->getAuctionSet() == auctionPtr->getSetName()) && 
+			(biddingObjectPtr->getAuctionName() == auctionPtr->getAuctionName() ));
 
-	// We assume that both templates were already sent to the other part.
 	uint16_t dataTemplateId, optionTemplateId;
 	
-	dataTemplateId = auctionPtr->getDataBidTemplate();
-	optionTemplateId = auctionPtr->getOptionBidTemplate();
+	// Find both templates types for the bidding object.
+	tempType = ipap_template::getTemplateType(biddingObjectPtr->getType(), IPAP_RECORD);
+	dataTemplateId = auctionPtr->getBiddingObjectTemplate(biddingObjectPtr->getType(), tempType);
+								
+	tempType = ipap_template::getTemplateType(biddingObjectPtr->getType(), IPAP_OPTIONS);
+	optionTemplateId = auctionPtr->getBiddingObjectTemplate(biddingObjectPtr->getType(),tempType);
 	
-	// Insert bid's templates.
+	// Insert BiddingObject's templates.
 	ipap_template *bidTempl = templates->get_template(dataTemplateId);
 	message->make_template(bidTempl);
 
@@ -532,39 +573,26 @@ MAPIBidParser::get_ipap_message(fieldDefList_t *fieldDefs, Bid *bidPtr, Auction 
     log->dlog(ch, "Finish inserting option template - NumFields:%d", optTempl->get_numfields());
 #endif		
 
-	// Set auction Id.
-	string idAuctionS = bidPtr->getAuctionSet() + "." + bidPtr->getAuctionName();
-
-
-	// Set bid Id.
-	string idBidS;
-	if ((bidPtr->getBidSet()).empty()){
-		ostringstream ssA;
-		ssA << "Agent_" << domainId;
-		idBidS =  ssA.str() + "." + bidPtr->getBidName();
-	} else {
-		idBidS = bidPtr->getBidSet() + "." + bidPtr->getBidName();
-	}
 
 	// Include data records.
 	elementListIter_t elemIter;
-	for ( elemIter = bidPtr->getElements()->begin(); elemIter != bidPtr->getElements()->end(); ++elemIter)
+	for ( elemIter = biddingObjectPtr->getElements()->begin(); elemIter != biddingObjectPtr->getElements()->end(); ++elemIter)
 	{
-		addDataRecord(fieldDefs, idAuctionS, idBidS, elemIter->first, elemIter->second, 
+		addDataRecord(fieldDefs, biddingObjectPtr, elemIter->first, elemIter->second, 
 				  dataTemplateId, message );
 	}
 	
-	bidIntervalList_t *intervalList = new bidIntervalList_t();
-	bidPtr->calculateIntervals(now, intervalList);
+	biddingObjectIntervalList_t *intervalList = new biddingObjectIntervalList_t();
+	biddingObjectPtr->calculateIntervals(now, intervalList);
 	
 	// Include option records.
 	int i = 0;
 	optionListIter_t optIter;
-	for ( optIter = bidPtr->getOptions()->begin(); optIter != bidPtr->getOptions()->end(); ++optIter)
+	for ( optIter = biddingObjectPtr->getOptions()->begin(); optIter != biddingObjectPtr->getOptions()->end(); ++optIter)
 	{
 		
-		bidInterval_t bidInterval = ((*intervalList)[i]).second;
-		addOptionRecord(fieldDefs, idAuctionS, idBidS, optIter->first, bidInterval.start, 
+		biddingObjectInterval_t bidInterval = ((*intervalList)[i]).second;
+		addOptionRecord(fieldDefs, biddingObjectPtr, optIter->first, bidInterval.start, 
 						bidInterval.stop, optIter->second, optionTemplateId, message );
 		i = i + 1;
 	}
@@ -579,25 +607,25 @@ MAPIBidParser::get_ipap_message(fieldDefList_t *fieldDefs, Bid *bidPtr, Auction 
 }											
 
 ipap_message * 
-MAPIBidParser::get_ipap_message(fieldDefList_t *fieldDefs, 
-								 bidDB_t *bids, auctionDB_t *auctions, 
-								 ipap_template_container *templates, int domainId )
+MAPIBiddingObjectParser::get_ipap_message(fieldDefList_t *fieldDefs, 
+								 biddingObjectDB_t *bids, auctionDB_t *auctions, 
+								 ipap_template_container *templates )
 {
 
 #ifdef DEBUG
     log->dlog(ch, "Starting get_ipap_messages");
 #endif	
 	
-	ipap_message *mes = new ipap_message(domainId, IPAP_VERSION, true);
+	ipap_message *mes = new ipap_message(getDomain(), IPAP_VERSION, true);
 	
-	bidDBIter_t bidIter;
+	biddingObjectDBIter_t bidIter;
 	for (bidIter=bids->begin(); bidIter!=bids->end(); ++bidIter)
 	{
-		Bid *b = *bidIter;
+		BiddingObject *b = *bidIter;
 		
 #ifdef DEBUG
-		log->dlog(ch, "Bid to include %s.%s belonging to auction:%s.%s", 
-				(b->getBidSet()).c_str(), b->getBidName().c_str(), 
+		log->dlog(ch, "BiddingObject to include %s.%s belonging to auction:%s.%s", 
+				(b->getBiddingObjectSet()).c_str(), b->getBiddingObjectName().c_str(), 
 				(b->getAuctionSet()).c_str(), b->getAuctionName().c_str() );
 #endif			
 		auctionDBIter_t auctionIter;
@@ -609,7 +637,7 @@ MAPIBidParser::get_ipap_message(fieldDefList_t *fieldDefs,
 #endif
 			
 			if ( (b->getAuctionSet() == a->getSetName()) && (b->getAuctionName() == a->getAuctionName()) ){
-				get_ipap_message(fieldDefs, b, a, templates, domainId, mes);
+				get_ipap_message(fieldDefs, b, a, templates, mes);
 				break;
 			}
 		}

@@ -1,34 +1,33 @@
 /*
- * Test the Field_Value class.
+ * Test the BiddingObject_test class.
  *
- * $Id: mnslp_fields.cpp 2014-11-28 10:16:00 amarentes $
- * $HeadURL: https://./test/mnslp_fields_test.cpp $
+ * $Id: BiddingObject_test.cpp 2014-11-28 10:16:00 amarentes $
+ * $HeadURL: https://./test/BiddingObject_test.cpp $
  */
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <config.h>
-#include "Bid.h"
+#include "BiddingObject.h"
 #include "FieldValue.h"
 #include "FieldValParser.h"
 #include "FieldDefParser.h"
-#include "BidIdSource.h"
-#include "BidFileParser.h"
+#include "BiddingObjectFileParser.h"
 
 using namespace auction;
 
-class Bid_Test : public CppUnit::TestFixture {
+class BiddingObject_Test : public CppUnit::TestFixture {
 
-	CPPUNIT_TEST_SUITE( Bid_Test );
+	CPPUNIT_TEST_SUITE( BiddingObject_Test );
 
-    CPPUNIT_TEST( testBids );
+    CPPUNIT_TEST( testBiddingObjects );
 	CPPUNIT_TEST_SUITE_END();
 
   public:
 	void setUp();
 	void tearDown();
 
-	void testBids();
+	void testBiddingObjects();
 	void testFieldValues();
 	void loadFieldDefs(fieldDefList_t *fieldList);
 	void loadFieldVals(fieldValList_t *fieldValList);
@@ -36,14 +35,12 @@ class Bid_Test : public CppUnit::TestFixture {
 
   private:
     
-    Bid *ptrBid1;
-    Bid *ptrBid2;
+    BiddingObject *ptrBid1;
+    BiddingObject *ptrBid2;
     FieldDefParser *ptrFieldParsers;
     FieldValParser *ptrFieldValParser;    
-    BidFileParser *ptrBidFileParser;
-    BidIdSource *idSource;
-    
-    
+    BiddingObjectFileParser *ptrBidFileParser;
+        
     //! filter definitions
     fieldDefList_t fieldDefs;
 
@@ -53,18 +50,19 @@ class Bid_Test : public CppUnit::TestFixture {
     
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION( Bid_Test );
+CPPUNIT_TEST_SUITE_REGISTRATION( BiddingObject_Test );
 
 
-void Bid_Test::setUp() 
+void BiddingObject_Test::setUp() 
 {
 		
 	try
 	{
 
+		int domain = 0;
+		
 		const string filename = "../../etc/example_bids1.xml";
-		ptrBidFileParser = new BidFileParser(filename);
-		idSource = new BidIdSource(1);
+		ptrBidFileParser = new BiddingObjectFileParser(domain, filename);
 
 		// load the filter def list
 		loadFieldDefs(&fieldDefs);
@@ -72,17 +70,36 @@ void Bid_Test::setUp()
 		// load the filter val list
 		loadFieldVals(&fieldVals);
 
-		bidDB_t *new_bids = new bidDB_t();
+								
+	}
+	catch(Error &e){
+		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
+	}
+}
 
-		ptrBidFileParser->parse(&fieldDefs, 
-							&fieldVals, 
-							new_bids,
-							idSource );
+void BiddingObject_Test::tearDown() 
+{
+	
+	delete(ptrBidFileParser);
+	delete(ptrFieldParsers);
+	delete(ptrFieldValParser);	
+	delete(ptrBid1);
+	delete(ptrBid2);	
+	
+}
+
+void BiddingObject_Test::testBiddingObjects() 
+{
+	try{
+		biddingObjectDB_t *new_bids = new biddingObjectDB_t();
+
+		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids );
 			
-		Bid *copy = (*new_bids)[0];
+		BiddingObject *copy = (*new_bids)[0];
 				
-		ptrBid1 = new Bid(*copy);
-		ptrBid2 = new Bid(*((*new_bids)[0]));
+		ptrBid1 = new BiddingObject(*copy);
+		ptrBid2 = new BiddingObject(*((*new_bids)[0]));
 				
 		CPPUNIT_ASSERT( (ptrBid1->getInfo()).compare(((*new_bids)[0])->getInfo()) == 0 );
 		
@@ -94,31 +111,16 @@ void Bid_Test::setUp()
 		}
 		new_bids->clear();
 		delete new_bids;
-								
-	}
-	catch(Error &e){
+		
+	} catch (Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
-}
-
-void Bid_Test::tearDown() 
-{
 	
-	delete(idSource);
-	delete(ptrBidFileParser);
-	delete(ptrFieldParsers);
-	delete(ptrFieldValParser);	
-	delete(ptrBid1);
-	delete(ptrBid2);	
 	
 }
 
-void Bid_Test::testBids() 
-{
-
-}
-
-void Bid_Test::loadFieldDefs(fieldDefList_t *fieldList)
+void BiddingObject_Test::loadFieldDefs(fieldDefList_t *fieldList)
 {
 	const string filename = DEF_SYSCONFDIR "/fielddef.xml";
 
@@ -130,11 +132,12 @@ void Bid_Test::loadFieldDefs(fieldDefList_t *fieldList)
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 }
 
-void Bid_Test::loadFieldVals(fieldValList_t *fieldValList)
+void BiddingObject_Test::loadFieldVals(fieldValList_t *fieldValList)
 {
 	const string filename = DEF_SYSCONFDIR "/fieldval.xml";
 	try
@@ -145,6 +148,7 @@ void Bid_Test::loadFieldVals(fieldValList_t *fieldValList)
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 }

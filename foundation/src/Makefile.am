@@ -19,39 +19,36 @@ libfoundation_la_CPPFLAGS = -I$(top_srcdir) \
 							$(LIBANSLP_CFLAGS)
 
 libfoundation_la_SOURCES = AuctionTimer.cpp \
-                          ConfigParser.cpp \
-                          ConfigManager.cpp \
-                          CommandLineArgs.cpp \
-						  Constants.cpp \
-						  ConstantsAum.cpp \
-						  FieldValue.cpp \
-						  Field.cpp \
-						  ParserFcts.cpp \
-						  Timeval.cpp \
-						  XMLParser.cpp \
-						  FieldDefParser.cpp \
-						  FieldValParser.cpp \
-						  IpApMessageParser.cpp \
-						  TemplateIdSource.cpp \
-						  AllocationIdSource.cpp \
-						  Allocation.cpp \
-						  MAPIAllocationParser.cpp \
-						  AllocationManager.cpp \
-						  BidIdSource.cpp \
-						  Bid.cpp \
-						  BidFileParser.cpp \
-						  MAPIBidParser.cpp \
-						  BidManager.cpp \
-						  AuctionIdSource.cpp \
-						  Auction.cpp \
-						  AuctionManager.cpp \
-						  AuctionFileParser.cpp \
-						  MAPIAuctionParser.cpp \
-						  AuctionManagerInfo.cpp \
-						  AuctionManagerComponent.cpp \
-						  Event.cpp \
-						  EventScheduler.cpp \
-						  AnslpClient.cpp					  
+                           ConfigParser.cpp \
+                           ConfigManager.cpp \
+                           CommandLineArgs.cpp \
+						   Constants.cpp \
+						   ConstantsAum.cpp \
+						   FieldValue.cpp \
+						   Field.cpp \
+						   ParserFcts.cpp \
+						   Timeval.cpp \
+						   XMLParser.cpp \
+						   IdSource.cpp \
+						   FieldDefParser.cpp \
+						   FieldValParser.cpp \
+						   FieldDefManager.cpp \
+						   IpApMessageParser.cpp \
+						   AuctioningObject.cpp \
+						   TemplateIdSource.cpp \
+						   BiddingObject.cpp \
+						   BiddingObjectFileParser.cpp \
+						   MAPIBiddingObjectParser.cpp \
+						   BiddingObjectManager.cpp \
+						   Auction.cpp \
+						   AuctionManager.cpp \
+						   AuctionFileParser.cpp \
+						   MAPIAuctionParser.cpp \
+						   AuctionManagerInfo.cpp \
+						   AuctionManagerComponent.cpp \
+						   Event.cpp \
+						   EventScheduler.cpp \
+						   AnslpClient.cpp					  
 						  
 
 libfoundation_la_LDFLAGS = -export-dynamic

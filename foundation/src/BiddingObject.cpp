@@ -1,5 +1,5 @@
 
-/*! \file   Bid.cpp
+/*! \file   BiddingObject.cpp
 
     Copyright 2014-2015 Universidad de los Andes, Bogotá, Colombia
 
@@ -20,52 +20,52 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     Description:
-    Bids in the system - All concrete bids inherit from this class.
+    BiddingObjects in the system - All concrete BiddingObjects inherit from this class.
 
-    $Id: Bid.cpp 748 2015-07-23 15:30:00Z amarentes $
+    $Id: BiddingObject.cpp 748 2015-07-23 15:30:00Z amarentes $
 */
 
 
 #include <sstream>
 #include "ParserFcts.h"
-#include "Bid.h"
+#include "BiddingObject.h"
 #include "Error.h"
 #include "Timeval.h"
 
 using namespace auction;
 
 
-/* ------------------------- Bid ------------------------- */
+/* ------------------------- BiddingObject ------------------------- */
 
-Bid::Bid( string auctionSet, string auctionName, string bidSet, string bidName, 
-		  elementList_t &elements, optionList_t &options)
-  : uid(0), state(BS_NEW), auctionSet(auctionSet), auctionName(auctionName), 
-	bidSet(bidSet), bidName(bidName), elementList(elements), optionList(options)
+BiddingObject::BiddingObject( string auctionSet, string auctionName, string BiddingObjectSet, string BiddingObjectName, 
+		  ipap_object_type_t _type, elementList_t &elements, optionList_t &options)
+  : AuctioningObject("BiddingObject"), auctionSet(auctionSet), auctionName(auctionName), 
+	BiddingObjectSet(BiddingObjectSet), BiddingObjectName(BiddingObjectName), biddingObjectType(_type),
+	elementList(elements), optionList(options)
 {
 
-    log = Logger::getInstance();
-    ch = log->createChannel("Bid");
+	if ((_type < IPAP_BID) || (_type > IPAP_ALLOCATION)){
+		throw Error("An invalid type was given");
+	}
 
 #ifdef DEBUG
-    log->dlog(ch, "Bid constructor");
+    log->dlog(ch, "BiddingObject constructor");
 #endif    
 
 }
 
-Bid::Bid( const Bid &rhs )
-  : uid(0), state(BS_NEW)
+BiddingObject::BiddingObject( const BiddingObject &rhs )
+  : AuctioningObject(rhs)
 {
-
-    log = Logger::getInstance();
-    ch = log->createChannel("Bid");
 
 	uid = rhs.uid;
 	auctionSet = rhs.auctionSet;
 	auctionName = rhs.auctionName;
-	bidSet = rhs.bidSet;
-	bidName = rhs.bidName;
+	BiddingObjectSet = rhs.BiddingObjectSet;
+	BiddingObjectName = rhs.BiddingObjectName;
+	biddingObjectType = rhs.biddingObjectType;
 	
-	// Copy elements part of the bid.
+	// Copy elements part of the BiddingObject.
 	elementListConstIter_t iter;
 	for (iter = (rhs.elementList).begin(); iter != (rhs.elementList).end(); ++iter ){
 		fieldList_t fieldList;
@@ -87,7 +87,7 @@ Bid::Bid( const Bid &rhs )
 				field.value.push_back(fielvalue);
 			}
 
-			// Assign the values from the bid.
+			// Assign the values from the BiddingObject.
 			for (int i=0 ; i< MAX_FIELD_SET_SIZE; ++i) {
 				field.value[i] = FieldValue((*fielditer).value[i]);
 			}
@@ -96,7 +96,7 @@ Bid::Bid( const Bid &rhs )
 		elementList[iter->first] = fieldList;
 	}
 	
-	// Copy options part of the bid.
+	// Copy options part of the BiddingObject.
 	optionListConstIter_t iterOpt;
 	for (iterOpt = (rhs.optionList).begin(); iterOpt != (rhs.optionList).end(); ++iterOpt ){
 		fieldList_t fieldList;
@@ -118,7 +118,7 @@ Bid::Bid( const Bid &rhs )
 				field.value.push_back(fielvalue);
 			}
 
-			// Assign the values from the bid.
+			// Assign the values from the BiddingObject.
 			for (int i=0 ; i< MAX_FIELD_SET_SIZE; ++i) {
 				field.value[i] = FieldValue((*fielditer).value[i]);
 			}
@@ -128,24 +128,28 @@ Bid::Bid( const Bid &rhs )
 	}	
 }
 
-Bid::~Bid()
+BiddingObject::~BiddingObject()
 {
 #ifdef DEBUG
-    log->dlog(ch, "Bid destructor");
+    log->dlog(ch, "BiddingObject destructor");
 #endif    
 
 }
 
-string Bid::getInfo()
+string BiddingObject::getInfo()
 {
 	std::stringstream output;
+
+	output << AuctioningObject::getInfo();
 
 	output << "auctionSet:" << getAuctionSet() 
 		   << " auctionName:" << getAuctionName();
 
-	output << "bidSet:" << getBidSet() 
-		   << " bidName:" << getBidName();
+	output << "BiddingObjectSet:" << getBiddingObjectSet() 
+		   << " BiddingObjectName:" << getBiddingObjectName();
 
+	output << "type:" << getType();
+	
 	output 	<< " NbrElementLists:" << elementList.size()
 			<< std::endl;
 	
@@ -193,7 +197,32 @@ string Bid::getInfo()
 	return output.str();
 }
 
-bool Bid::operator==(const Bid &rhs)
+string BiddingObject::getIpApId(int domain)
+{
+
+	// Set BiddingObject Id.
+	string idBiddingObjectS;
+	if (getBiddingObjectSet().empty()){
+		ostringstream ssA;
+		ssA << BID_DEFAULT_SETNAME << domain;
+		idBiddingObjectS =  ssA.str() + "." + getBiddingObjectName();
+	} else {
+		idBiddingObjectS = getBiddingObjectSet() + "." + getBiddingObjectName();
+	}
+	
+	return idBiddingObjectS;
+}
+
+/*! \short   get the Id for the auction that this BiddingObject belongs for using when transfer the BiddingObject in a ipap_message
+*/	
+string BiddingObject::getAuctionIpAPId()
+{
+	
+	return getAuctionSet() + "." + getAuctionName();	
+
+}
+
+bool BiddingObject::operator==(const BiddingObject &rhs)
 {
 
 #ifdef DEBUG
@@ -206,15 +235,15 @@ bool Bid::operator==(const Bid &rhs)
 	if (auctionName.compare(rhs.auctionName) != 0 )
 		return false;
 
-	if (bidSet.compare(rhs.bidSet) != 0 )
+	if (BiddingObjectSet.compare(rhs.BiddingObjectSet) != 0 )
 		return false;
 
-	if (bidName.compare(rhs.bidName) != 0 )
+	if (BiddingObjectName.compare(rhs.BiddingObjectName) != 0 )
 		return false;
 
 
 #ifdef DEBUG
-    log->dlog(ch, "operator == equal bid general info");
+    log->dlog(ch, "operator == equal BiddingObject general info");
 #endif  
 
 	if (elementList.size() != rhs.elementList.size())
@@ -304,13 +333,13 @@ bool Bid::operator==(const Bid &rhs)
 	return true;
 }
 
-bool Bid::operator!=(const Bid &param)
+bool BiddingObject::operator!=(const BiddingObject &param)
 {
 	return !(operator==(param));
 }
 
 field_t 
-Bid::getElementVal(string elementName, string name)
+BiddingObject::getElementVal(string elementName, string name)
 {
 	field_t field;
 	elementListIter_t iter = elementList.find(elementName);
@@ -330,7 +359,7 @@ Bid::getElementVal(string elementName, string name)
 
 /* functions for accessing the templates */
 field_t
-Bid::getOptionVal(string optionName, string name)
+BiddingObject::getOptionVal(string optionName, string name)
 {
 
 #ifdef DEBUG
@@ -360,7 +389,8 @@ Bid::getOptionVal(string optionName, string name)
 }
 
 
-void Bid::calculateIntervals(time_t now, bidIntervalList_t *list)
+void 
+BiddingObject::calculateIntervals(time_t now, biddingObjectIntervalList_t *list)
 {
 
 #ifdef DEBUG
@@ -375,24 +405,24 @@ void Bid::calculateIntervals(time_t now, bidIntervalList_t *list)
 	for (iter = optionList.begin(); iter != optionList.end(); ++iter)
 	{
 		
-		bidInterval_t bidInterval;
-		bidInterval.start = 0;
-		bidInterval.stop = 0;
+		biddingObjectInterval_t biddingObjectInterval;
+		biddingObjectInterval.start = 0;
+		biddingObjectInterval.stop = 0;
 		
 		
 		field_t fstart = getOptionVal(iter->first, "Start");
 		field_t fstop = getOptionVal(iter->first, "Stop");
-		field_t fduration = getOptionVal(iter->first, "BidDuration");				
+		field_t fduration = getOptionVal(iter->first, "BiddingDuration");				
 
 #ifdef DEBUG
-    log->dlog(ch, "bid: %s.%s - fstart %s", getBidSet().c_str(), 
-					getBidName().c_str(), (fstart.getInfo()).c_str());
+    log->dlog(ch, "BiddingObject: %s.%s - fstart %s", getBiddingObjectSet().c_str(), 
+					getBiddingObjectName().c_str(), (fstart.getInfo()).c_str());
 
-    log->dlog(ch, "bid: %s.%s - fstop %s", getBidSet().c_str(), 
-					getBidName().c_str(), (fstop.getInfo()).c_str());
+    log->dlog(ch, "BiddingObject: %s.%s - fstop %s", getBiddingObjectSet().c_str(), 
+					getBiddingObjectName().c_str(), (fstop.getInfo()).c_str());
 
-    log->dlog(ch, "bid: %s.%s - fduration %s", getBidSet().c_str(), 
-					getBidName().c_str(), (fduration.getInfo()).c_str());
+    log->dlog(ch, "BiddingObject: %s.%s - fduration %s", getBiddingObjectSet().c_str(), 
+					getBiddingObjectName().c_str(), (fduration.getInfo()).c_str());
 					
 #endif
 
@@ -404,16 +434,16 @@ void Bid::calculateIntervals(time_t now, bidIntervalList_t *list)
 
 		if (fstart.mtype != FT_WILD) {
 			string sstart = ((fstart.value)[0]).getString();
-			bidInterval.start = ParserFcts::parseTime(sstart);
-			if(bidInterval.start == 0) {
+			biddingObjectInterval.start = ParserFcts::parseTime(sstart);
+			if(biddingObjectInterval.start == 0) {
 				throw Error(410, "invalid start time %s", sstart.c_str());
 			}
 		}
 
 		if (fstop.mtype != FT_WILD) {
 			string sstop = ((fstop.value)[0]).getString();
-			bidInterval.stop = ParserFcts::parseTime(sstop);
-			if(bidInterval.stop == 0) {
+			biddingObjectInterval.stop = ParserFcts::parseTime(sstop);
+			if(biddingObjectInterval.stop == 0) {
 				throw Error(411, "invalid stop time %s", sstop.c_str());
 			}
 		}
@@ -424,44 +454,44 @@ void Bid::calculateIntervals(time_t now, bidIntervalList_t *list)
 		}
 
 		if ( duration > 0) {
-			if (bidInterval.stop) {
+			if (biddingObjectInterval.stop) {
 				// stop + duration specified
-				bidInterval.start = bidInterval.stop - duration;
+				biddingObjectInterval.start = biddingObjectInterval.stop - duration;
 			} else {
 				// stop [+ start] specified
 				
-				if (bidInterval.start) {
-					bidInterval.stop = bidInterval.start + duration;
+				if (biddingObjectInterval.start) {
+					biddingObjectInterval.stop = biddingObjectInterval.start + duration;
 				} else {
-					bidInterval.start = laststop;
-					bidInterval.stop = bidInterval.start + duration;
+					biddingObjectInterval.start = laststop;
+					biddingObjectInterval.stop = biddingObjectInterval.start + duration;
 				}
 			}
 		}
 
 #ifdef DEBUG
-    log->dlog(ch, "bid: %s.%s - now:%s stop %s", getBidSet().c_str(), 
-					getBidName().c_str(), Timeval::toString(now).c_str(),
-					Timeval::toString(bidInterval.stop).c_str());					
+    log->dlog(ch, "BiddingObject: %s.%s - now:%s stop %s", getBiddingObjectSet().c_str(), 
+					getBiddingObjectName().c_str(), Timeval::toString(now).c_str(),
+					Timeval::toString(biddingObjectInterval.stop).c_str());					
 #endif
 
 		// now start has a defined value, while stop may still be zero 
 		// indicating an infinite rule
 			
 		// do we have a stop time defined that is in the past ?
-		if ((bidInterval.stop != 0) && (bidInterval.stop <= now)) {
-			throw Error(300, "Bid running time is already over");
+		if ((biddingObjectInterval.stop != 0) && (biddingObjectInterval.stop <= now)) {
+			throw Error(300, "BiddingObject running time is already over");
 		}
 		
-		if (bidInterval.start < now) {
+		if (biddingObjectInterval.start < now) {
 			// start late tasks immediately
-			bidInterval.start = now;
+			biddingObjectInterval.start = now;
 		}
 
-		laststart = bidInterval.start;
-		laststop = bidInterval.stop;
+		laststart = biddingObjectInterval.start;
+		laststop = biddingObjectInterval.stop;
 		
-		list->push_back(pair<time_t,bidInterval_t>(bidInterval.start, bidInterval));
+		list->push_back(pair<time_t,biddingObjectInterval_t>(biddingObjectInterval.start, biddingObjectInterval));
     }    
 		
 }

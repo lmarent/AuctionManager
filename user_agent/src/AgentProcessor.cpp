@@ -34,8 +34,9 @@ using namespace auction;
 
 /* ------------------------- AUMProcessor ------------------------- */
 
-AgentProcessor::AgentProcessor(ConfigManager *cnf, string fdname, int threaded ) 
-    : AuctionManagerComponent(cnf, "AGENT_PROCESSOR", threaded), fieldDefFileName(fdname)
+AgentProcessor::AgentProcessor(ConfigManager *cnf, string fdname, string fvname, int threaded, string moduleDir ) 
+    : AuctionManagerComponent(cnf, "AGENT_PROCESSOR", threaded), 
+	  fieldDefManager(fdname, fvname), idSource(0)
 {
     string txt;
     
@@ -43,8 +44,27 @@ AgentProcessor::AgentProcessor(ConfigManager *cnf, string fdname, int threaded )
     log->dlog(ch,"Starting");
 #endif
 
-	loadFieldDefs(fdname);
+    if (moduleDir.empty()) {
+		txt = cnf->getValue("ModuleDir", "AGNT_PROCESSOR");
+        if ( txt != "") {
+            moduleDir = txt;
+        }        
+    }
 
+    try {
+        loader = new ModuleLoader(cnf, moduleDir.c_str() /*module (lib) basedir*/,
+                                  cnf->getValue("Modules", "AGNT_PROCESSOR"),/*modlist*/
+                                  "Proc" /*channel name prefix*/,
+                                  getConfigGroup() /* Configuration group */);
+
+#ifdef DEBUG
+    log->dlog(ch,"End starting");
+#endif
+
+    } catch (Error &e) {
+        throw e;
+    }
+	
 }
 
 
@@ -68,53 +88,192 @@ AgentProcessor::~AgentProcessor()
 		
 }
 
-/* -------------------- isReadableFile -------------------- */
-
-static int isReadableFile( string fileName ) {
-
-    FILE *fp = fopen(fileName.c_str(), "r");
-
-    if (fp != NULL) {
-        fclose(fp);
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-/* -------------------- loadFieldDefs -------------------- */
-
-void AgentProcessor::loadFieldDefs(string fname)
+/* ------------------------ addRequest -------------------------*/
+int AgentProcessor::addRequest( fieldList_t *parameters, auctionDB_t *auctions, EventScheduler *e )
 {
-    if (fieldDefFileName.empty()) {
-        if (fname.empty()) {
-            fname = FIELDDEF_FILE;
-		}
-    } else {
-        fname = fieldDefFileName;
-    }
 
 #ifdef DEBUG
-    log->dlog(ch, "filename %s", fname.c_str());
+    log->dlog(ch,"Start addRequest");
 #endif
 
-    if (isReadableFile(fname)) {
-        if (fieldDefs.empty() && !fname.empty()) {
-            FieldDefParser f = FieldDefParser(fname.c_str());
-            f.parse(&fieldDefs);
-        }
-    
-    }else{
-#ifdef DEBUG
-    log->dlog(ch, "filename %s is not readable", fname.c_str());
-#endif    
+	Module *mod;
+	string sModuleName;
+	int index = -2;
+	map<string, auctionDB_t *> splitByModule;
+	map<string, auctionDB_t *>::iterator splitByModuleIter;
+    bool exThrown = false;	
+
+	// Verifies that auctions must be greater than zero and different from null
+	if (auctions == NULL){
+		throw Error("Auction pointer given for add request function is NULL");
+	}
+	
+	if ( auctions->size() == 0 ){
+		throw Error("Number of auction given for add request function is zero");
+	}
+
+    AUTOLOCK(threaded, &maccess);  
+
+
+	try {
+				
+		// Go through the list of auctions and create groups by their module 
+		auctionDBIter_t auctIter;
+		for (auctIter = auctions->begin(); auctIter != auctions->begin(); ++auctIter)
+		{	
+			// Read the name of the module to load
+			sModuleName = auctIter->getAction()->name;
+			splitByModuleIter = splitByModule.find(sModuleName);
+			if (splitByModuleIter == splitByModule.end()){
+				splitByModule[sModuleName] = new auctionDB_t();
+			}
+			// Insert a pointer to the auction.
+			(splitByModule[sModuleName])->push_back(*auctIter);			
+		} 
+		
+		index = idSource.newId();
+		
+		// Go through the map of modules to load them and create the necessary request processes.
+		for (splitByModuleIter = splitByModule.begin(); splitByModuleIter != splitByModule.end();  ++splitByModuleIter)
+		{
+
+			requestProcess_t reqProcess;
+			
+			// load the module
+			mod = loader->getModule(splitByModuleIter->first); 
+			reqProcess.module = dynamic_cast<ProcModule*> (mod); 
+			if (reqProcess.module != NULL) { // is it a processing kind of module
+				reqProcess.mapi = reqProcess.module->getAPI();
+
+				// init module
+				reqProcess.index = index;
+				reqProcess.parameters = parameters;
+				reqProcess.auctions = splitByModuleIter->second;
+			}
+			
+			// Insert in the list of requests needing processing
+			requests[index] = reqProcess; 	
+		}
+		  
+    catch (Error &e) 
+    { 
+        log->elog(ch, e);
+        errNo = e.getErrorNo();
+        errStr = e.getError();
+		exThrown = true;	
     }
-    
+	
+	catch (ProcError &e)
+	{
+        log->elog(ch, e.getError().c_str());
+        errNo = e.getErrorNo();
+        errStr = e.getError();
+		exThrown = true;		
+	}
+
+	if (exThrown)
+	{
+		        
+        //release modules if some of them have been loaded
+        if (index >= 0) {
+			pair <auctionProcessListIter_t, auctionProcessListIter_t> ret;
+			ret = requests.equal_range(index);	
+			for (auctionProcessListIter_t it=ret.first; it!=ret.second; ++it){
+				loader->releaseModule((it->second).module);
+			}	
+		}
+		        
+    	// Release memory allocated to groups 
+		for (splitByModuleIter = splitByModule.begin(); splitByModuleIter != splitByModule.end();  ++splitByModuleIter)
+		{
+			saveDelete(splitByModuleIter->second);
+		}
+		
+		// Release the used Id
+		idSource.freeId(index);
+		
+        throw Error(errNo, errStr);;
+	}
+
+	return index;
+
+#ifdef DEBUG
+    log->dlog(ch,"Start addRequest");
+#endif
+
+}
+
+/* ------------------------- addAuction ------------------------- */
+
+void AgentProcessor::addAuction( int index, Auction *a, EventScheduler *evs )
+{
+
+	bool inserted = false;
+
+    // Verifies that auction given is not null
+    if (a == NULL){
+		throw Error("The auction given is NULL");
+	}
+
+#ifdef DEBUG
+    log->dlog(ch,"Start addAuction  set:%s, name:%s to request: %d", 
+				a->getSetName().c_str(), a->getAuctionName().c_str(), index);
+#endif
+
+    AUTOLOCK(threaded, &maccess);  
+
+	// first search for the index in the requests,  if not found throw an exception.
+	auctionProcessListIter_t reqIter = requests.equal_range(index);	
+	if (reqIter == requests.end())
+	{
+		throw Error("Request with index %d not found", index);
+	} 
+	
+	// Get a copy of the parameters
+	fieldList_t * parameters = (reqIter->second).parameters;
+		
+	// After search for the module name on those already loaded.
+	sModuleName = a->getAction()->name;
+
+	pair <auctionProcessListIter_t, auctionProcessListIter_t> ret;
+	ret = requests.equal_range(index);	
+	for (auctionProcessListIter_t it=ret.first; it!=ret.second; ++it){
+		if ((it->second).moduleName == sModuleName){
+			((it->second).auctions)->push_back(a);
+			inserted = true;
+			break;
+		}
+	}
+		
+	if (inserted == false) {
+		requestProcess_t reqProcess;
+			
+		// load the module
+		mod = loader->getModule(sModuleName); 
+		reqProcess.module = dynamic_cast<ProcModule*> (mod); 
+		if (reqProcess.module != NULL) { // is it a processing kind of module
+			reqProcess.mapi = reqProcess.module->getAPI();
+
+			// init module
+			reqProcess.index = index;
+			reqProcess.parameters = parameters;
+			reqProcess.auctions = new auctionDB_t();
+			(reqProcess.auctions)->push_back(a);
+		}
+			
+		// Insert in the list of requests needing processing
+		requests[index] = reqProcess; 	
+	}
+
+#ifdef DEBUG
+    log->dlog(ch,"End addAuction");
+#endif
+
 }
 
 
 // add Auctions
-void AgentProcessor::addAuctions( auctionDB_t *auctions, EventScheduler *e )
+void AgentProcessor::addAuctions( int index,  auctionDB_t *auctions, EventScheduler *e )
 {
 
 #ifdef DEBUG
@@ -125,7 +284,7 @@ void AgentProcessor::addAuctions( auctionDB_t *auctions, EventScheduler *e )
    
     for (iter = auctions->begin(); iter != auctions->end(); iter++) 
     {
-        addAuction(*iter, e);
+        addAuction(index, *iter, e);
     }
 
 #ifdef DEBUG
@@ -135,23 +294,113 @@ void AgentProcessor::addAuctions( auctionDB_t *auctions, EventScheduler *e )
 
 }
 
+/* ------------------------- delRequest ------------------------- */
+void AgentProcessor::delRequest( int index, EventScheduler *e )
+{
+
+	// Verifies that the index is valid
+	if (index < 0){
+		throw ("Invalid index:%d given", index);
+	}
+
+    AUTOLOCK(threaded, &maccess);  
+	
+	pair <auctionProcessListIter_t, auctionProcessListIter_t> ret;
+	ret = requests.equal_range(index);	
+	for (auctionProcessListIter_t it=ret.first; it!=ret.second; ++it){
+		loader->releaseModule((it->second).module);
+		saveDelete((it->second).auctions);
+	}	
+		        
+	requests.erase(index);
+	// Release the used Id
+	idSource.freeId(index);
+	
+	// TODO AM: call the delete of all associated events.
+}
+
+
+/* ------------------------- delAuction ------------------------- */
+
+void AgentProcessor::delAuction( int index, Auction *a )
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "deleting Auction #%d", auctionId);
+#endif
+
+	// Verifies that the index is valid
+	if (index < 0){
+		throw ("Invalid index:%d given", index);
+	}
+
+    // Verifies that auction given is not null
+    if (a == NULL){
+		throw Error("The auction given is NULL");
+	}
+
+    AUTOLOCK(threaded, &maccess);
+
+	// After search for the module name on those already loaded.
+	sModuleName = a->getAction()->name;
+
+	pair <auctionProcessListIter_t, auctionProcessListIter_t> ret;
+	ret = requests.equal_range(index);	
+	for (auctionProcessListIter_t it=ret.first; it!=ret.second; ++it){
+		if ((it->second).moduleName == sModuleName){
+			auctionDBIter_t aucIter;
+			for (aucIter = (it->second).auctions)->begin(); aucIter != (it->second).auctions)->end(); ++aucIter)
+			{
+				if ( (aucIter->getSetName() == a->getSetName()) &&
+					 (aucIter->getAuctionName()== a->getAuctionName()) ){
+					(it->second).auctions)->erase(aucIter);
+					break; 
+				}
+			}
+			
+			break;
+		}
+	}
+}
+
 // delete auctions
-void AgentProcessor::delAuctions(auctionDB_t *aucts)
+void AgentProcessor::delAuctions(int index,  auctionDB_t *aucts)
 {
     auctionDBIter_t iter;
 
     for (iter = aucts->begin(); iter != aucts->end(); iter++) {
-        delAuction(*iter);
+        delAuction(index, *iter);
     }
 }
 
 
 /* ------------------------- execute ------------------------- */
 
-int AgentProcessor::executeAuction(int rid, string rname)
+int AgentProcessor::executeRequest( int index, EventScheduler *e )
 {
 
-	// TODO AM: Code to implement.
+	
+	auctionProcess_t *auctionprocess; 
+	
+    AUTOLOCK(threaded, &maccess);  
+
+	pair <auctionProcessListIter_t, auctionProcessListIter_t> ret;
+	ret = requests.equal_range(index);	
+	for (auctionProcessListIter_t it=ret.first; it!=ret.second; ++it){
+		
+		bidDB_t bids;
+		
+		((it->second).mapi)->execute_user( FieldDefManager::getFieldDefs(), 
+										   FieldDefManager::getFieldVals(),
+										   (it->second).parameters,
+										   (it->second).auctions,
+										   &(&bids) );
+		
+		// Add the Bids create to the local container.
+		evnt->addEvent(new AddGeneratedBidsEvent(bids));
+				        
+	}
+
     return 0;
 }
 
@@ -185,39 +434,6 @@ void AgentProcessor::addBidAuction( string auctionSet, string auctionName, Bid *
 		throw Error("Auction not found: set:%s: name:%s", 
 						auctionSet.c_str(), auctionName.c_str());
 	}
-}
-
-/* ------------------------- addAuction ------------------------- */
-
-int AgentProcessor::addAuction( Auction *a, EventScheduler *evs )
-{
-
-#ifdef DEBUG
-    log->dlog(ch,"Start addAuction");
-#endif
-   
-    auctionProcess_t entry;
-    string errStr;
-
-    int auctionId = a->getUId();
-
-#ifdef DEBUG
-    log->dlog(ch, "Adding auction #%d - set:%s, name:%s", 
-				 auctionId, a->getSetName().c_str(), a->getAuctionName().c_str());
-#endif  
-
-    AUTOLOCK(threaded, &maccess);  
-
-	entry.auction = a;
-	auctions[auctionId] = entry;
-
-
-#ifdef DEBUG
-    log->dlog(ch,"End addAuction");
-#endif
-    
-    return 0;
-
 }
 
 
@@ -285,26 +501,6 @@ void AgentProcessor::delBidAuction( string auctionSet, string auctionName, Bid *
 	}
 }
 
-
-/* ------------------------- delAuction ------------------------- */
-
-int AgentProcessor::delAuction( Auction *a )
-{
-    auctionProcess_t *entry;
-    int auctionId; 
-
-#ifdef DEBUG
-    log->dlog(ch, "deleting Auction #%d", auctionId);
-#endif
-
-    AUTOLOCK(threaded, &maccess);
-
-    auctionId = a->getUId();
-        
-    entry = &auctions[auctionId];
-                   
-    return 0;
-}
 
 
 int AgentProcessor::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds)

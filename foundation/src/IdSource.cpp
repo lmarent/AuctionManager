@@ -1,5 +1,5 @@
 
-/*!\file   AuctionIdSource.cpp
+/*!\file   IdSource.cpp
 
     Copyright 2014-2015 Universidad de los Andes, Bogota, Colombia
 
@@ -20,34 +20,35 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 	Description:
-	manage unique numeric auction id space.
+	manage unique numeric bid id space - bid idis the flowid.
 
-    $Id: AuctionIdSource.cpp 2015-08-04 14:52:00Z amarentes $
+    $Id: IdSource.cpp 2015-07-23 13:59:00Z amarentes $
 
 */
 
-#include "AuctionIdSource.h"
+#include "IdSource.h"
 
 using namespace auction;
 
-AuctionIdSource::AuctionIdSource(int _unique)
+IdSource::IdSource(int _unique)
   : num(-1), unique(_unique)
 {
 
 }
 
 
-AuctionIdSource::~AuctionIdSource()
+IdSource::~IdSource()
 {
     // nothing to do
 }
 
 
-unsigned short AuctionIdSource::newId(void)
+unsigned short IdSource::newId(void)
 {
     unsigned short id;
     
     if (freeIds.empty()) {
+		
         num++;
         while (true)
         {
@@ -68,7 +69,7 @@ unsigned short AuctionIdSource::newId(void)
 }
 
 
-void AuctionIdSource::freeId(unsigned short id)
+void IdSource::freeId(unsigned short id)
 {
   if (!unique) {
     freeIds.push_back(id);
@@ -77,15 +78,15 @@ void AuctionIdSource::freeId(unsigned short id)
 }
 
 
-void AuctionIdSource::dump( ostream &os )
+void IdSource::dump( ostream &os )
 {
-    os << "AuctionIdSource dump:" << endl
+    os << "IdSource dump:" << endl
        << "Number of used ids is : " << num - freeIds.size() << endl;
 }
 
 
-ostream& operator<< ( ostream &os, AuctionIdSource &ais )
+ostream& operator<< ( ostream &os, IdSource &rim )
 {
-    ais.dump(os);
+    rim.dump(os);
     return os;
 }

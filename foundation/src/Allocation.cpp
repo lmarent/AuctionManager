@@ -38,7 +38,7 @@ using namespace auction;
 Allocation::Allocation( string aset, string aname, string bset, string bname, 
 						string allset, string allname, fieldList_t &f, 
 						allocationIntervalList_t &alloc_inter )
-	: uid(0), state(AL_NEW), auctionSet(aset), auctionName(aname), bidSet(bset), 
+	: AuctioningObject("ALLOCATION"), auctionSet(aset), auctionName(aname), bidSet(bset), 
       bidName(bname), allocationSet(allset), allocationName(allname),
       fields(f), intervals(alloc_inter) 
 { 
@@ -53,6 +53,8 @@ Allocation::~Allocation()
 string Allocation::getInfo()
 {
 	std::stringstream output;
+	
+	output << AuctioningObject::getInfo();
 
 	output << "AuctionSet:" << getAuctionSet() 
 		   << " AuctionName:" << getAuctionName()
@@ -80,5 +82,35 @@ string Allocation::getInfo()
 	}
 	
 	return output.str();
+}
+
+string 
+Allocation::getAuctionIpApId()
+{
+	return getAuctionSet() + "." + getAuctionName();
+}
+	
+string	
+Allocation::getBidIpApId()
+{
+	return getBidSet() + "." + getBidName();
+}
+	
+string 
+Allocation::getIpApId(int domain)
+{
+
+	// Set bid Id.
+	string idAllocationS;
+	if (getAllocationSet().empty()){
+		ostringstream ssA;
+		ssA << ALL_DEFAULT_SETNAME << domain;
+		idAllocationS =  ssA.str() + "." + getAllocationName();
+	} else {
+		idAllocationS = getAllocationSet() + "." + getAllocationName();
+	}
+	
+	return idAllocationS;
+
 }
 

@@ -75,7 +75,6 @@ protected:
 	//! Auctions created in this session.
 	auctionSet_t  auctionSet;
 
-
 private:
 
     Logger *log;

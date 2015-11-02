@@ -33,16 +33,16 @@
 
 using namespace auction;
 
-AuctionFileParser::AuctionFileParser(string filename)
-    : XMLParser(AUCTIONFILE_DTD, filename, "AUCTIONSET")
+AuctionFileParser::AuctionFileParser(int domain, string filename)
+    : XMLParser(AUCTIONFILE_DTD, filename, "AUCTIONSET") , IpApMessageParser(domain)
 {
     log = Logger::getInstance();
     ch = log->createChannel("AuctionFileParser" );
 }
 
 
-AuctionFileParser::AuctionFileParser(char *buf, int len)
-    : XMLParser(AUCTIONFILE_DTD, buf, len, "AUCTIONSET")
+AuctionFileParser::AuctionFileParser(int domain, char *buf, int len)
+    : XMLParser(AUCTIONFILE_DTD, buf, len, "AUCTIONSET"), IpApMessageParser(domain)
 {
     log = Logger::getInstance();
     ch = log->createChannel("AuctionFileParser" );
@@ -87,64 +87,65 @@ auctionTemplateField_t AuctionFileParser::parseField(xmlNodePtr cur,
     log->dlog(ch, "Starting parseField");
 #endif
 
+    xmlNodePtr cur2;
+    
     
     // check if item can be parsed
     try {
 
 		auctionTemplateField_t fieldTempl;
-		string sBid, sAlloc, sOptBid, name;
-		bool bidTempl = false;
-		bool optBidTempl = false;
-		bool allocTempl = false;
+		string sname, sObjectType, sTemplateType;
 
-		sBid = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"BID_TEMPL"));
-		sOptBid = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"BID_OPT_TEMPL"));
-		sAlloc = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ALLOC_TEMPL"));
-		
-		if (!sBid.empty()){
-			bidTempl = ParserFcts::parseBool(sBid);		
-		}
-		
-		if (!sAlloc.empty()){
-			allocTempl = ParserFcts::parseBool(sAlloc);
-		}
-		
-		if (!sOptBid.empty()){
-			optBidTempl = ParserFcts::parseBool(sOptBid);
-		}
-		
-		name = xmlCharToString(xmlNodeListGetString(XMLDoc, cur->xmlChildrenNode, 1));
-		if (name.empty()) {
-			throw Error("Auction Parser Error: missing field name at line %d", XML_GET_LINE(cur));
-		}
-
-#ifdef DEBUG
-		log->dlog(ch, "Name:%s sBid: %d sOptBid:%d sAlloc:%d", name.c_str(), bidTempl, 
-						optBidTempl, allocTempl);
-#endif		
-
-
+		sname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"NAME"));
 		// use lower case internally
-		transform(name.begin(), name.end(), name.begin(), ToLower());
-    
+		transform(sname.begin(), sname.end(), sname.begin(), ToLower());
+
 		// lookup in field definitions list
 		fieldDefListIter_t iter;
-		iter = fieldDefs->find(name);
+		iter = fieldDefs->find(sname);
 		if (iter != fieldDefs->end()) {
 			// set according to definition
 			ipap_field field = g_ipap_fields.get_field(iter->second.eno, iter->second.ftype);
-				
+
 			fieldTempl.field = iter->second;
 			fieldTempl.length = field.get_field_type().length;
-			fieldTempl.isBidtemplate = bidTempl;
-			fieldTempl.isOptBidTemplate = optBidTempl;
-			fieldTempl.isAllocTemplate = allocTempl;			
+			
 		}
 		else{
 			throw Error("Auction Parser Error: field name %s at \
-							line %d not valid", name.c_str(), XML_GET_LINE(cur));
+							line %d not valid", sname.c_str(), XML_GET_LINE(cur));
         }
 
+		// load the bidding object's templates to which the field belong to
+        cur2 = cur->xmlChildrenNode;
+		set< pair<ipap_object_type_t,ipap_templ_type_t> > _fieldBelonging;
+		
+        while (cur2 != NULL) {
+           // get action specific PREFs
+           if ((!xmlStrcmp(cur2->name, (const xmlChar *)"TEMPLATE_FIELD")) && (cur2->ns == ns)) {
+			   
+			   // Parse object type
+			   sObjectType = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"OBJECT_TYPE"));
+			   
+			   transform(sObjectType.begin(), sObjectType.end(), sObjectType.begin(), ToLower());
+			   ipap_object_type_t objectType = parseType(sObjectType);
+			   
+			   // Parse template type
+			   sTemplateType = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"TEMPLATE_TYPE"));
+			   transform(sTemplateType.begin(), sTemplateType.end(), sTemplateType.begin(), ToLower());
+			   ipap_templ_type_t templateType = parseTemplateType(objectType, sTemplateType);
+			
+			   std::pair<ipap_object_type_t,ipap_templ_type_t> tmp = 
+					std::pair<ipap_object_type_t,ipap_templ_type_t>(objectType, templateType);
+			   _fieldBelonging.insert(tmp);
+           }
+           cur2 = cur2->next;
+        }
+    
+		// Copy data into returning variable.
+		fieldTempl.fieldBelongTo = _fieldBelonging;
+		
+		
 #ifdef DEBUG
 		log->dlog(ch, "Ending parseField");
 #endif
@@ -164,12 +165,11 @@ auctionTemplateField_t AuctionFileParser::parseField(xmlNodePtr cur,
 
 void AuctionFileParser::parse( fieldDefList_t *fieldDefs, 
 							   auctionDB_t *auctions,
-							   AuctionIdSource *idSource,
 							   ipap_template_container *templates )
 {
 
     xmlNodePtr cur, cur2, cur3;
-    string sname;
+    string gset;
     actionList_t globalActionList;
     miscList_t globalMiscList;
     time_t now = time(NULL);
@@ -183,12 +183,12 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
 
     cur = xmlDocGetRootElement(XMLDoc);
 
-    sname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
+    gset = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
     // use lower case internally
-    transform(sname.begin(), sname.end(), sname.begin(), ToLower());
+    transform(gset.begin(), gset.end(), gset.begin(), ToLower());
 
 #ifdef DEBUG
-    log->dlog(ch, "Auction set %s", sname.c_str());
+    log->dlog(ch, "Global Auction set %s", gset.c_str());
 #endif
 
     cur = cur->xmlChildrenNode;
@@ -261,12 +261,20 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
         }
 	
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"AUCTION")) && (cur->ns == ns)) {
-            string rname;
+            string sid, sname, rname, resourceId;
             actionList_t actions = globalActionList;
             miscList_t miscs = globalMiscList;
 			auctionTemplateFieldList_t templFields;
 
-            rname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
+            sid = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
+            transform(sid.begin(), sid.end(), sid.begin(), ToLower());
+            parseName(sid, sname, rname);
+            
+            if (sname.empty())	
+				sname = gset;
+
+            resourceId = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"RESOURCE_ID"));
+            transform(resourceId.begin(), resourceId.end(), resourceId.begin(), ToLower());
 
             cur2 = cur->xmlChildrenNode;
 
@@ -354,7 +362,7 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
 					}
 				}
 				
-                Auction *a = new Auction(now, sname, rname, action, 
+                Auction *a = new Auction(now, sname, rname, resourceId, action, 
 										 miscs, AS_BUILD_TEMPLATE, 
 										 templFields, templates );
                 auctions->push_back(a);

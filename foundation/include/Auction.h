@@ -37,21 +37,11 @@
 #include "IpAp_template_container.h"
 #include "IpAp_message.h"
 #include "Field.h"
+#include "AuctioningObject.h"
 
 namespace auction
 {
 
-
-//! rule states during lifecycle
-typedef enum
-{
-    AS_NEW = 0,
-    AS_VALID,
-    AS_SCHEDULED,
-    AS_ACTIVE,
-    AS_DONE,
-    AS_ERROR
-} AuctionState_t;
 
 //! Algorith to execute for the auction process.
 typedef struct
@@ -78,9 +68,8 @@ typedef struct
 {
 	fieldDefItem_t field;
     ssize_t length;
-	bool isBidtemplate;
-	bool isOptBidTemplate;
-	bool isAllocTemplate;
+    set< pair< ipap_object_type_t, ipap_templ_type_t> > fieldBelongTo;
+
 } auctionTemplateField_t;
 
 //! action list (only push_back & sequential access)
@@ -95,13 +84,13 @@ typedef map<string, auctionTemplateField_t>::const_iterator		auctionTemplateFiel
 typedef set<string> 			sessionList_t;
 typedef set<string>::iterator 	sessionListIter_t;
 
+typedef map<ipap_object_type_t, map<ipap_templ_type_t, uint16_t> >     			 		auctionTemplateList_t;
+typedef map<ipap_object_type_t, map<ipap_templ_type_t, uint16_t> >::iterator     		auctionTemplateListIter_t;
+typedef map<ipap_object_type_t, map<ipap_templ_type_t, uint16_t> >::const_iterator     auctionTemplateListConstIter_t;
 
-class Auction
+
+class Auction : public AuctioningObject
 {
-  private:
-
-    Logger *log; //!< link to global logger object
-    int ch;      //!< logging channel number used by objects of this class
     
     //! define the rules running time properties
     time_t start;
@@ -110,29 +99,21 @@ class Auction
 	//! define the execution intervals.
 	interval_t	mainInterval;
 
-    //! unique auctionID of this auction instance (has to be provided)
-    int uid;
-
-    //! state of this auction
-    AuctionState_t state;
-
     //! name of the auction by convention this must be either: <name> or <resource>.<id>
     string auctionName;
 
     //! parts of auction name for efficiency
     string resource;
-    string id;
-
+    
     //! name of the auction set this auction belongs to
     string setName;
 
 	//! template references
 	uint16_t dataAuctionTemplate;
 	uint16_t optionAuctionTemplate;
-	uint16_t dataBidTemplate;
-	uint16_t optionBidTemplate;
-	uint16_t dataAllocationTemplate;
-	uint16_t optionAllocationTemplate;
+
+	//! references to bidding object templates associated with the auction. 
+	auctionTemplateList_t biddingObjectTemplates;
 	
 	//! Execution method to be called everytime that the auction is timeout.
 	action_t action;
@@ -142,16 +123,6 @@ class Auction
 
 	//! session referencing this auction
 	sessionList_t sessions;
-
-    /*! \short   parse identifier format 'sourcename.rulename'
-
-        recognizes dor (.) in task identifier and saves sourcename and 
-        rulename to the new malloced strings source and rname
-    */
-    void parseAuctionName(string rname);
-
-    //! parse time string
-    time_t parseTime(string timestr);
 
     //! get a value by name from the misc rule attriutes
     string getMiscVal(string name);
@@ -166,85 +137,47 @@ class Auction
 									ipap_field_container g_ipap_fields);
 	
 	//! Calculate the number of fields to be included in the template type.
-	set<ipap_field_key>  calculateTemplateFields(ipap_templ_type_t templType, 
-									  auctionTemplateFieldList_t &templFields);
+	set<ipap_field_key>  calculateTemplateFields( ipap_object_type_t objectType,
+												  ipap_templ_type_t templType, 
+												  auctionTemplateFieldList_t &templFields);
+	
+	//! Create an auction template based on its mandatory fields.
+	ipap_template * 
+	createAuctionTemplate( ipap_field_container g_ipap_fields,
+					       ipap_templ_type_t templType);
+
 	
 	//! Create a template taking as input fields those in templFields.
 	ipap_template * 
-	createTemplate(auctionTemplateFieldList_t &templFields,
-				   ipap_field_container g_ipap_fields,
-				   ipap_templ_type_t templType);
+	createBiddingObjectTemplate(auctionTemplateFieldList_t &templFields,
+								ipap_field_container g_ipap_fields,
+								ipap_object_type_t objectType,
+								ipap_templ_type_t templType );
 		
 	//! Build the templates related to the auction and store them in templateContainer
 	void buildTemplates(auctionTemplateFieldList_t &templFields, 
 							 ipap_template_container *templateContainer);
+							 
 	
-  public:
-    
-    void setState(AuctionState_t s) 
-    { 
-        state = s;
-    }
-
-    AuctionState_t getState()
-    {
-        return state;
-    }
-
-    int getUId() 
-    { 
-        return uid;
-    }
-    
-    void setUId(int nuid)
-    {
-        uid = nuid;
-    }
-    
-    string getSetName()
-    {
-        return setName;
-    }
+  public:    
+  
+    inline string getSetName(){ return setName; }
 	
-	void setSetName(string sname)
-	{
-		setName = sname;
-	}
+	inline void setSetName(string sname){ setName = sname; }
 	
-	void setAuctionName(string aname)
-	{
-		auctionName = aname;
-	}
+	inline void setAuctionName(string aname){ auctionName = aname; }
 	
-    string getAuctionName()
-    {
-        return auctionName;
-    }
-    
-    string getAUctionID()
-    {
-		return id;
-	}
-    
-    string getAuctionResource()
-    {
-        return resource;
-    }
-    
-    time_t getStart()
-    {
-        return start;
-    }
-    
-    time_t getStop()
-    {
-        return stop;
-    }
+    inline string getAuctionName(){ return auctionName; }
         
-    interval_t getInterval()
-    {
-        return mainInterval;
-    }
+    inline string getAuctionResource(){ return resource; }
+    
+    inline time_t getStart(){ return start; }
+    
+    inline time_t getStop(){ return stop; }
+        
+    inline interval_t getInterval(){ return mainInterval; }
+    
+    string getIpApId(int domain);
     
 	/*! 
 	 * \short Get the data auction template associated with the auction
@@ -257,7 +190,8 @@ class Auction
 	 */ 	
     void setDataAuctionTemplate(uint16_t templId);
     
-	/*! \short Get the option auction template associated with the auction
+	/*! 
+	 *	\short Get the option auction template associated with the auction
 	 */ 	
 	uint16_t getOptionAuctionTemplate(void);
 	
@@ -267,46 +201,22 @@ class Auction
 	 */ 	
 	void setOptionAuctionTemplate(uint16_t templId); 
 	
-	/*! \short Get the data bid template associated with the auction
+	/*! 
+	 *	\short Get the data template associated with the auction
+	    \arg   type    bidding object type.
 	 */ 	
-	uint16_t getDataBidTemplate(void);
+	uint16_t getBiddingObjectTemplate(ipap_object_type_t type, ipap_templ_type_t templType);
 	
 	/*! 
 	 * \short Set the data bid template associated with the auction
-        \arg \templId 	System template Id.
+	    \arg  type    	bidding object type.
+	    \arg  templType	Template type.
+        \arg  templId 	System template Id.
 	 */ 	
-	void setDataBidTemplate(uint16_t templId);
-	
-	/*! \short Get the option bid template associated with the auction
-	 */ 	
-	uint16_t getOptionBidTemplate(void);
-	
-	/*! 
-	 * \short Set the option bid template associated with the auction
-        \arg \templId 	System template Id.
-	 */ 	
-	void setOptionBidTemplate(uint16_t templId);
-	
-	/*! \short Get the data allocation template associated with the auction
-	 */ 	
-	uint16_t getDataAllocationTemplate(void);
-	
-	/*! 
-	 * \short Set the data allocation template associated with the auction
-        \arg \templId 	System template Id.
-	 */ 	
-	void setDataAllocationTemplate(uint16_t templId);
-	
-	/*! \short Get the option allocation template associated with the auction
-	 */ 	
-	uint16_t getOptionAllocationTemplate(void);
- 
-	/*! 
-	 * \short Set the option allocation template associated with the auction
-        \arg \templId 	System template Id.
-	 */ 	
-	void setOptionAllocationTemplate(uint16_t templId);
-            
+	void setBiddingObjectTemplate(ipap_object_type_t type, 
+								 ipap_templ_type_t templType,  uint16_t templId);
+		
+	            
     /*! \short   construct and initialize a Auction object
         \arg \c now   		current timestamp
         \arg \c sname   	auction set name
@@ -318,7 +228,7 @@ class Auction
         \arg \c message  	message where we include the new templates. 
         
     */
-    Auction(time_t now, string sname, string aname, action_t &a, miscList_t &m, 
+    Auction(time_t now, string sname, string aname, string resource, action_t &a, miscList_t &m, 
 		    AuctionTemplateMode_t mode, auctionTemplateFieldList_t &templFields,
 		    ipap_template_container *templates );
 
@@ -330,12 +240,14 @@ class Auction
     //! destroy a Auction object
     ~Auction();
    
-    /*! \short   get names and values (parameters) of configured actions
+    /*! 
+	 *	\short   get names and values (parameters) of configured actions
         \returns a pointer (link) to an object that contains the configured action for this auction
     */
     action_t *getAction();
 
-    /*! \short   get names and values (parameters) of misc. attributes
+    /*! 
+	 * \short   get names and values (parameters) of misc. attributes
 
         \returns a pointer (link) to a ParameterSet object that contains the 
                  miscanellenous attributes of a configured auction

@@ -32,10 +32,10 @@
 
 #include "stdincpp.h"
 #include "ProcModuleInterface.h"
-#include "BidFileParser.h"
 #include "AuctionFileParser.h"
 #include "AuctionManagerInfo.h"
 #include "Auction.h"
+#include "BiddingObject.h"
 
 namespace auction
 {
@@ -43,10 +43,12 @@ namespace auction
 //! event numbers
 typedef enum 
 {
-      ADD_BIDS = 0,
-      REMOVE_BIDS,
-      ADD_BID_AUCTION,
-      REMOVE_BID_AUCTION,
+      ADD_BIDDING_OBJECTS = 0,
+      ADD_GENERATED_BIDDING_OBJECTS,
+      REMOVE_BIDDING_OBJECTS,
+      TRANSMIT_BIDDING_OBJECTS,
+      ADD_BIDDING_OBJECT_AUCTION,
+      REMOVE_BIDDING_OBJECT_AUCTION,
       ADD_AUCTIONS,
       REMOVE_AUCTIONS,
       ACTIVATE_AUCTIONS,
@@ -58,8 +60,8 @@ typedef enum
       GET_INFO,
       GET_MODINFO,
       TEST,
-      REMOVE_BIDS_CTRLCOMM,
-      ADD_BIDS_CTRLCOMM,
+      REMOVE_BIDDING_OBJECTS_CTRLCOMM,
+      ADD_BIDDING_OBJECTS_CTRLCOMM,
       REMOVE_AUCTIONS_CTRLCOMM,
       ADD_AUCTIONS_CNTRLCOMM,
       PROC_MODULE_TIMER,
@@ -75,26 +77,35 @@ typedef enum
 //! event names for dump method
 const string eventNames[] = 
 {
-      "Add-bids",
-      "Remove-bids",
-      "Add-Bid-Auction",
-      "Delete-Bid-Auction",
+      "Add-Bidding-Objects",
+      "Add-Generated-Bidding-Objects",
+      "Remove-Bidding-Objects",
+      "Transmit-Bidding-Objects",
+      "Add-Bidding-Object-Auction",
+      "Delete-Bidding-Object-Auction",
       "Add-Auctions",
       "Remove-Auctions",
       "Activate-Auctions",
       "Add-ResourceRequests",
       "Remove-ResourceRequests",
-      "Activate-ResourceRequests",
+      "Activate-ResourceRequests-Interval",
+      "Delete-ResourceRequest-Interval",
       "Push-Execution",
       "Get-info",
       "Get-module-info",
       "Test",
-      "Remove-bids-ctrlcomm",
-      "Add-bids-ctrlcomm",
+      "Remove-Bidding-Objects-ctrlcomm",
+      "Add-Bidding-Objects-ctrlcomm",
       "Remove-Auctions-ctrlcomm",
       "Add-Auctions-ctrlcomm",
       "Proc-module-timer",
-      "Ctrlcomm-timer",      
+      "Ctrlcomm-timer",
+      "Create-Session",
+      "Create-Check-Session",
+      "Response-Create-Session",
+      "Response-Create-Check-Session",
+      "Remove-Session",
+      "Auction-Interaction",
 };
 
 /* ------------------------- Event class ------------------------- */
@@ -197,8 +208,8 @@ class Event {
     
     virtual void dump( ostream &os );
     
-    //! delete bids stored in this event
-    virtual int deleteBid(int uid) 
+    //! delete biddingObjects stored in this event
+    virtual int deleteBiddingObject(int uid) 
     {
 	return 0;
     }
@@ -270,15 +281,15 @@ class TestEvent : public Event
 /* --------------------------------- events ------------------------------ */
 
 
-class AddBidsEvent : public Event
+class AddBiddingObjectsEvent : public Event
 {
   private:
     string fileName;
 
   public:
 
-    AddBidsEvent(string fname, int mapi=0) 
-      : Event(ADD_BIDS), fileName(fname) 
+    AddBiddingObjectsEvent(string fname, int mapi=0) 
+      : Event(ADD_BIDDING_OBJECTS), fileName(fname) 
     {
         
     }
@@ -289,48 +300,124 @@ class AddBidsEvent : public Event
     }
 };
 
-
-class RemoveBidsEvent : public Event
+class AddGeneratedBiddingObjectsEvent : public Event
 {
   private:
-    bidDB_t bids;
+    biddingObjectDB_t biddingObjects;
 
   public:
 
-    RemoveBidsEvent(struct timeval time, bidDB_t &b) 
-      : Event(REMOVE_BIDS, time), bids(b) {}
-
-    RemoveBidsEvent(time_t offs_sec, bidDB_t &b) 
-      : Event(REMOVE_BIDS, offs_sec), bids(b) {}
-    
-    RemoveBidsEvent(bidDB_t &b) 
-      : Event(REMOVE_BIDS), bids(b) {}
-
-    bidDB_t *getBids()
+    AddGeneratedBiddingObjectsEvent( biddingObjectDB_t &biddingObjects ): 
+    Event(ADD_GENERATED_BIDDING_OBJECTS), biddingObjects(biddingObjects) 
     {
-        return &bids;
+        
+    }
+
+    biddingObjectDB_t *getBiddingObjects()
+    {
+        return &biddingObjects;
     }
     
-    int deleteBid(int uid)
+    int deleteBiddingObject(int uid)
     {
         int ret = 0;
-        bidDBIter_t iter;
+        biddingObjectDBIter_t iter;
         
-        for (iter=bids.begin(); iter != bids.end(); iter++) {
+        for (iter=biddingObjects.begin(); iter != biddingObjects.end(); iter++) {
             if ((*iter)->getUId() == uid) {
-                bids.erase(iter);
+                biddingObjects.erase(iter);
                 ret++;
                 break;
             }   
         }
           
-        if (bids.empty()) {
+        if (biddingObjects.empty()) {
             return ++ret;
         }
           
         return ret;
     }
 };
+
+
+class RemoveBidsEvent : public Event
+{
+  private:
+    biddingObjectDB_t biddingObjects;
+
+  public:
+
+    RemoveBidsEvent(struct timeval time, biddingObjectDB_t &b) 
+      : Event(REMOVE_BIDDING_OBJECTS, time), biddingObjects(b) {}
+
+    RemoveBidsEvent(time_t offs_sec, biddingObjectDB_t &b) 
+      : Event(REMOVE_BIDDING_OBJECTS, offs_sec), biddingObjects(b) {}
+    
+    RemoveBidsEvent(biddingObjectDB_t &b) 
+      : Event(REMOVE_BIDDING_OBJECTS), biddingObjects(b) {}
+
+    biddingObjectDB_t *getBiddingObjects()
+    {
+        return &biddingObjects;
+    }
+    
+    int deleteBiddingObject(int uid)
+    {
+        int ret = 0;
+        biddingObjectDBIter_t iter;
+        
+        for (iter=biddingObjects.begin(); iter != biddingObjects.end(); iter++) {
+            if ((*iter)->getUId() == uid) {
+                biddingObjects.erase(iter);
+                ret++;
+                break;
+            }   
+        }
+          
+        if (biddingObjects.empty()) {
+            return ++ret;
+        }
+          
+        return ret;
+    }
+};
+
+class TransmitBiddingObjectsEvent : public Event
+{
+  private:
+    biddingObjectDB_t biddingObjects;
+
+  public:
+    
+    TransmitBiddingObjectsEvent(biddingObjectDB_t &b) 
+      : Event(TRANSMIT_BIDDING_OBJECTS), biddingObjects(b) {}
+
+    biddingObjectDB_t *getBiddingObjects()
+    {
+        return &biddingObjects;
+    }
+    
+    int deleteBiddingObject(int uid)
+    {
+        int ret = 0;
+        biddingObjectDBIter_t iter;
+        
+        for (iter=biddingObjects.begin(); iter != biddingObjects.end(); iter++) {
+            if ((*iter)->getUId() == uid) {
+                biddingObjects.erase(iter);
+                ret++;
+                break;
+            }   
+        }
+          
+        if (biddingObjects.empty()) {
+            return ++ret;
+        }
+          
+        return ret;
+    }
+};
+
 
 class AddAuctionsEvent : public Event
 {
@@ -437,33 +524,38 @@ class RemoveAuctionsEvent : public Event
     }
 };
 
-class InsertBidAuctionEvent : public Event
+class InsertBiddingObjectAuctionEvent : public Event
 {
   private:
-	Bid * bid;
+	BiddingObject * biddingObject;
 	string auctionSet;
 	string auctionName;
 	
   public:
 
-    InsertBidAuctionEvent(struct timeval time, Bid *_bid, 
-							string _auctionSet, string _auctionName) 
-      : Event(ADD_BID_AUCTION, time), bid(_bid), auctionSet(_auctionSet),
+    InsertBiddingObjectAuctionEvent(struct timeval time, 
+									BiddingObject *_biddingObject, 
+									string _auctionSet, 
+									string _auctionName) : 
+		Event(ADD_BIDDING_OBJECT_AUCTION, time), biddingObject(_biddingObject), auctionSet(_auctionSet),
 		auctionName(_auctionName){}
 
-     InsertBidAuctionEvent(time_t offs_sec, Bid *_bid, string _auctionSet, 
-							string _auctionName) 
-      : Event(ADD_BID_AUCTION, offs_sec), bid(_bid), auctionSet(_auctionSet),
+     InsertBiddingObjectAuctionEvent(time_t offs_sec, 
+									 BiddingObject *_biddingObject, 
+									 string _auctionSet, 
+									 string _auctionName) : 
+		Event(ADD_BIDDING_OBJECT_AUCTION, offs_sec), biddingObject(_biddingObject), auctionSet(_auctionSet),
 		auctionName(_auctionName) {}
 
-     InsertBidAuctionEvent(Bid *_bid, string _auctionSet, 
-							string _auctionName ) 
-      : Event(ADD_BID_AUCTION), bid(_bid), auctionSet(_auctionSet),
+     InsertBiddingObjectAuctionEvent(BiddingObject *_biddingObject, 
+									 string _auctionSet, 
+									 string _auctionName ) : 
+		Event(ADD_BIDDING_OBJECT_AUCTION), biddingObject(_biddingObject), auctionSet(_auctionSet),
 		auctionName(_auctionName) {}
 
-	 Bid * getBid()
+	 BiddingObject * getBiddingObject()
 	 {
-	     return bid;
+	     return biddingObject;
 	 }
 	 
 	 string getAuctionSet()
@@ -479,33 +571,38 @@ class InsertBidAuctionEvent : public Event
 };
 
 
-class RemoveBidAuctionEvent : public Event
+class RemoveBiddingObjectAuctionEvent : public Event
 {
   private:
-	Bid * bid;
+	BiddingObject * biddingObject;
 	string auctionSet;
 	string auctionName;
 	
   public:
 
-    RemoveBidAuctionEvent(struct timeval time, Bid *_bid, 
-							string _auctionSet, string _auctionName) 
-      : Event(REMOVE_BID_AUCTION, time), bid(_bid), auctionSet(_auctionSet),
-		auctionName(_auctionName){}
+     RemoveBiddingObjectAuctionEvent(struct timeval time, 
+									 BiddingObject *_biddingObject, 
+									 string _auctionSet, 
+									 string _auctionName) : 
+		Event(REMOVE_BIDDING_OBJECT_AUCTION, time), biddingObject(_biddingObject), 
+			auctionSet(_auctionSet), auctionName(_auctionName){}
 
-     RemoveBidAuctionEvent(time_t offs_sec, Bid *_bid, string _auctionSet, 
-							string _auctionName) 
-      : Event(REMOVE_BID_AUCTION, offs_sec), bid(_bid), auctionSet(_auctionSet),
-		auctionName(_auctionName) {}
+     RemoveBiddingObjectAuctionEvent(time_t offs_sec, 
+									 BiddingObject *_biddingObject, 
+									 string _auctionSet, 
+									 string _auctionName) : 
+		Event(REMOVE_BIDDING_OBJECT_AUCTION, offs_sec), biddingObject(_biddingObject),
+			auctionSet(_auctionSet), auctionName(_auctionName) {}
 
-     RemoveBidAuctionEvent(Bid *_bid, string _auctionSet, 
-							string _auctionName ) 
-      : Event(REMOVE_BID_AUCTION), bid(_bid), auctionSet(_auctionSet),
-		auctionName(_auctionName) {}
+     RemoveBiddingObjectAuctionEvent(BiddingObject *_biddingObject, 
+									 string _auctionSet, 
+									 string _auctionName ) :
+		Event(REMOVE_BIDDING_OBJECT_AUCTION), biddingObject(_biddingObject), 
+			auctionSet(_auctionSet), auctionName(_auctionName) {}
 
-	 Bid * getBid()
+	 BiddingObject * getBiddingObject()
 	 {
-		 return bid;
+		 return biddingObject;
 	 }
 	 
 	 string getAuctionSet()
@@ -531,10 +628,10 @@ class CtrlCommTimerEvent : public Event
 
 
 
-//! add bids flags
+//! add biddingObjects flags
 const int ADD_BIDS_MAPI   = 0x1;
 
-class AddBidsCtrlEvent : public CtrlCommEvent
+class AddBiddingObjectsCtrlEvent : public CtrlCommEvent
 {
   private:
     int type;
@@ -543,15 +640,15 @@ class AddBidsCtrlEvent : public CtrlCommEvent
 
   public:
 
-    AddBidsCtrlEvent(char *b, int l)
-      : CtrlCommEvent(ADD_BIDS_CTRLCOMM), type(0), len(l) 
+    AddBiddingObjectsCtrlEvent(char *b, int l)
+      : CtrlCommEvent(ADD_BIDDING_OBJECTS_CTRLCOMM), type(0), len(l) 
     {
         buf = new char[len+1];
         memcpy(buf, b, len+1);
           
     }
 
-    ~AddBidsCtrlEvent()
+    ~AddBiddingObjectsCtrlEvent()
     {
         saveDeleteArr(buf);
     }
@@ -568,19 +665,19 @@ class AddBidsCtrlEvent : public CtrlCommEvent
 };
 
 
-class RemoveBidsCtrlEvent : public CtrlCommEvent
+class RemoveBiddingObjectsCtrlEvent : public CtrlCommEvent
 {
   private:
-    string bid;
+    string biddingObject;
 
   public:
     
-    RemoveBidsCtrlEvent(string b) 
-      : CtrlCommEvent(REMOVE_BIDS_CTRLCOMM), bid(b) {}
+    RemoveBiddingObjectsCtrlEvent(string b) : 
+		CtrlCommEvent(REMOVE_BIDDING_OBJECTS_CTRLCOMM), biddingObject(b) {}
 
-    string getBid()
+    string getBiddingObject()
     {
-        return bid;
+        return biddingObject;
     }
 };
 

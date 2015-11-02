@@ -32,20 +32,12 @@
 #include "Logger.h"
 #include "ConfigParser.h"
 #include "ProcModuleInterface.h"
+#include "AuctioningObject.h"
 
 namespace auction
 {
 
 
-//! Allocation's states during lifecycle
-typedef enum
-{
-    AL_NEW = 0,
-    AL_VALID,
-    AL_ACTIVE,
-    AL_DONE,
-    AL_ERROR
-} allocationState_t;
 
 //! execution interval definition
 typedef struct 
@@ -64,7 +56,7 @@ typedef std::list<alloc_interval_t>::iterator  	  allocationIntervalListIter_t;
 typedef std::list<alloc_interval_t>::const_iterator  allocationIntervalListConstIter_t;
 
 
-class Allocation
+class Allocation : public AuctioningObject
 {
 
 public:
@@ -78,85 +70,35 @@ public:
 
 	~Allocation();
 
-    int getUId() 
-    { 
-        return uid;
-    }
-    
-    void setUId(int nuid)
-    {
-        uid = nuid;
-    }
+    inline void setAuctionSet(string _set){ auctionSet = _set; }	
 
-    void setState(allocationState_t s) 
-    { 
-        state = s;
-    }
+    inline string getAuctionSet(){ return auctionSet; }
 
-    allocationState_t getState()
-    {
-        return state;
-    }
+    inline void setAuctionName(string _name){ auctionName = _name; }	
 
-    void setAuctionSet(string _set)
-	{
-		auctionSet = _set;
-	}	
+    inline string getAuctionName(){ return auctionName; }
 
-    string getAuctionSet()
-    {
-        return auctionSet;
-    }
+	inline void setBidSet(string _bidSet){ bidSet = _bidSet; }
 
-    void setAuctionName(string _name)
-	{
-		auctionName = _name;
-	}	
+    inline string getBidSet(){ return bidSet; }
 
-    string getAuctionName()
-    {
-        return auctionName;
-    }
+	inline void setBidName(string _bidName){ bidName = _bidName; }
 
-	void setBidSet(string _bidSet)
-	{
-		bidSet = _bidSet;
-	}
-
-    string getBidSet()
-    {
-        return bidSet;
-    }
-
-	void setBidName(string _bidName)
-	{
-		bidName = _bidName;
-	}
-
-    string getBidName()
-    {
-        return bidName;
-    }
+    inline string getBidName(){ return bidName; }
 	
-	void setAllocationSet(string _allocationSet)
-	{
-		allocationSet = _allocationSet;
-	}
+	inline void setAllocationSet(string _allocationSet){ allocationSet = _allocationSet; }
 	
-	string getAllocationSet()
-	{
-		return allocationSet;
-	}
+	inline string getAllocationSet(){ return allocationSet; }
 
-	void setAllocationName(string _allocationName)
-	{
-		allocationName = _allocationName;
-	}
+	inline void setAllocationName(string _allocationName){ 	allocationName = _allocationName; }
 
-	string getAllocationName()
-	{
-		return allocationName;
-	}
+	inline string getAllocationName(){ return allocationName; }
+	
+	string getAuctionIpApId();
+	
+	string getBidIpApId();
+	
+	string getIpApId(int domain);
 	
 	string getInfo();
 		
@@ -176,12 +118,7 @@ public:
 	int getNumFields() { return fields.size(); }
 		
 protected:
-	
-    //! unique bidID of this Rule instance (has to be provided)
-    int uid;
-   
-	//! state of this rule
-    allocationState_t state;
+	   
 
 	//! Auction set associated to this allocation
 	string auctionSet;  

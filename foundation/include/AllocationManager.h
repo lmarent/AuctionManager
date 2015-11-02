@@ -33,10 +33,11 @@
 #include "stdincpp.h"
 #include "Logger.h"
 #include "Error.h"
-#include "AllocationIdSource.h"
+#include "IdSource.h"
 #include "Allocation.h"
 #include "ProcModuleInterface.h"
 #include "EventScheduler.h"
+#include "FieldDefManager.h"
 
 namespace auction
 {
@@ -72,7 +73,7 @@ typedef map<time_t, allocationDB_t>::iterator  allocationTimeIndexIter_t;
   then their respective settings are used to configure sessions. 
 */
 
-class AllocationManager
+class AllocationManager : public FieldDefManager
 {
   private:
 
@@ -97,18 +98,13 @@ class AllocationManager
     //! list with allocations done
     allocationDone_t allocationDone;
 
-	//! field definitions
-    fieldDefList_t fieldDefs;
-
-    //! name of field defs file.
-    string fieldDefFileName;
-
-    //! load field definitions
-    void loadFieldDefs(string fname);
-
     //! pool of unique allocation ids
-    AllocationIdSource idSource;
+    IdSource idSource;
 
+	//! This field identifies uniquely the agent.
+	int domain; 
+
+	//! 
     /*! \short add the allocation to the list of finished allocations
         \arg \a allocation to store.
     */
@@ -116,20 +112,11 @@ class AllocationManager
 
   public:
 
-    int getNumAllocations() // Tested
-    { 
-        return allocations; 
-    }
-
-    string getInfo(int uid) // Ok
-    {
-        return getInfo(getAllocation(uid)); 
-    }
-
     /*! \short   construct and initialize a AllocationManager object
         \arg \c fdname  field definition file name
+        \arg \c fvname  field value definition file name
      */
-    AllocationManager(string fdname);
+    AllocationManager(string fdname, string fvname);
 
     //! destroy a AllocationManager object
     ~AllocationManager();
@@ -159,6 +146,9 @@ class AllocationManager
 
     //! get all allocations
     allocationDB_t getAllocations(); // tested
+
+    //! parse allocations from ipap_message 
+    allocationDB_t *parseMessage(ipap_message *messageIn, ipap_template_container *templates);
 
    
     /*! \short   adds a allocations 
@@ -214,17 +204,19 @@ class AllocationManager
         or all allocations
     */
     string getInfo(void);
+    
+    inline string getInfo(int uid){ return getInfo(getAllocation(uid)); }
+    
     string getInfo(Allocation *r);
     string getInfo(string aset, string aname);
 
+    inline int getNumAllocations(){ return allocations; }
+
+	//! Return the domain
+	inline int getDomain(){ return domain; }
 
     //! dump a AllocationManager object
     void dump( ostream &os );
-    
-    fieldDefList_t *getFieldDef() //ok
-    {
-		return &fieldDefs;
-	}
     
 };
 

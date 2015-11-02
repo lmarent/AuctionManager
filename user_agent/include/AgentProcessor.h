@@ -36,20 +36,27 @@
 #include "Error.h"
 #include "Logger.h"
 #include "EventScheduler.h"
+#include "ProcModule.h"
+#include "ModuleLoader.h"
+#include "FieldDefManager.h"
 
 namespace auction
 {
 
 typedef struct {
 
-    Auction *auction; // auction to start execution.
-    bidDB_t bids;  // Bids posted to the auction. 
+    int index;
+    string moduleName;			 // Name of the module;
+    ProcModule *module; 		 // Module to execute
+    ProcModuleInterface_t *mapi; // Module API
+    fieldList_t *parameters; 	 // Parameters for execution
+    auctionDB_t *auctions;  		 // Auctions to execute 
     
-} auctionProcess_t;
+} requestProcess_t;
 
 //! action list for each auction
-typedef map<int, auctionProcess_t>            auctionProcessList_t;
-typedef map<int, auctionProcess_t>::iterator  auctionProcessListIter_t;
+typedef multimap<int, auctionProcess_t>            auctionProcessList_t;
+typedef multimap<int, auctionProcess_t>::iterator  auctionProcessListIter_t;
 
 
 
@@ -58,24 +65,22 @@ typedef map<int, auctionProcess_t>::iterator  auctionProcessListIter_t;
     the AgentProcessor class allows and agent to bid in auctions.
 */
 
-class AgentProcessor : public AuctionManagerComponent
+class AgentProcessor : public AuctionManagerComponent, public FieldDefManager
 {
   private:
 
-	//! field definitions
-    fieldDefList_t fieldDefs;
-
-    //! name of field defs file.
-    string fieldDefFileName;
+    //! associated module loader 
+    //! these are the algorithms to create bids for the user.
+    ModuleLoader *loader;
     
-    //! load field definitions
-    void loadFieldDefs(string fname);
-
-    //! auction being processed.
-    auctionProcessList_t  auctions;
+    //! requests being processed.
+    requestProcessList_t  requests;
 
     //! add timer events to scheduler
     void addTimerEvents( int auctionID, int actID, EventScheduler &es );
+
+    //! pool of unique request process 
+    IdSource idSource;
 
   public:
 
@@ -83,54 +88,38 @@ class AgentProcessor : public AuctionManagerComponent
 
         \arg \c cnf        config manager
         \arg \c fdname     field definition file name
+        \arg \c fvname     field value definition file name
         \arg \c threaded   run as separate thread
     */
-    AgentProcessor(ConfigManager *cnf, string fdname, int threaded );
+    AgentProcessor(ConfigManager *cnf, string fdname, string fvname, int threaded, string moduleDir = "" );
 
     //!   destroy a Agent Processor object, to be overloaded
     virtual ~AgentProcessor();
 
-    //! add auctions
-    virtual void addAuctions( auctionDB_t *auctions, EventScheduler *e );
+    //! Add a new request to the list of request to execute.
+    int addRequest( fieldList_t *parameters, auctionDB_t *auctions, EventScheduler *e );
 
-    //! delete bids
-    virtual void delAuctions( auctionDB_t *aucts );
-
-    //! delete bids
-    virtual void delBids( bidDB_t *bids );
+    //! delete request
+    void delRequest( int index );
 
     //! execute the algorithm
-    int executeAuction(int rid, string rname);
+    int executeRequest( int index );
 
-    /*! \short   add a Bid to auction bid list
-        \arg \c auctionSet    Auction set
-        \arg \c auctionName   Auction name
-        \arg \c b 			  Pointer to bid to insert
+    //! delete auctions
+    void delAuctions( int index,  auctionsDB_t *auctions );
+
+    /*! \short  add a Auction to auction  list
+     *  \arg \c index 		  Id for the request.
+        \arg \c a 			  Pointer to auction to insert
     */
-    void addBidAuction(string auctionSet, string auctionName, Bid *b );
+    void addAuction(int index, Auction *a );
 
 
-    /*! \short   add a Auction and its associated auction process list
-        \arg \c a   pointer to auction
-        \arg \c e   pointer to event scheduler (timer events)
-        \returns 0 - on success, <0 - else
-    */
-    int addAuction( Auction *a, EventScheduler *e );
-
-
-    /*! \short   delete a Bid to auction bid list
-        \arg \c auctionSet    Auction set
-        \arg \c auctionName   Auction name
-        \arg \c b 			  Pointer to bid to delete
-    */
-    void delBidAuction( string auctionSet, string auctionName, Bid *b );
-
-
-    /*! \short   delete an Auction from the auction process list
+    /*! \short   delete an Auction from the request process list
         \arg \c a  pointer to auction
         \returns 0 - on success, <0 - else
     */
-    int delAuction( Auction *a );
+    void delAuction( int index,  Auction *a );
 
 
     //! handle file descriptor event
@@ -144,8 +133,6 @@ class AgentProcessor : public AuctionManagerComponent
 
     //! dump a AUMProcessor object
     void dump( ostream &os );
-
-	fieldDefList_t * getFieldDefinitions() { return &fieldDefs; }
 
     // handle module timeouts
     void timeout(int rid, int actid, unsigned int tmID);

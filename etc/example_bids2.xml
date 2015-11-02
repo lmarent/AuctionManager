@@ -1,7 +1,7 @@
 <?xml version ="1.0" encoding="UTF-8"?>
-<!DOCTYPE AGENT SYSTEM "bidfile.dtd"> 
-<AGENT ID="Agent1">
-  <BID AUCTION_ID = "General1.1" BID_ID= "Agent1.Bid2" >    
+<!DOCTYPE BIDDING_OBJECT_SET SYSTEM "bidfile.dtd"> 
+<BIDDING_OBJECT_SET ID="Agent1">
+  <BIDDING_OBJECT AUCTION_ID = "General1.1" ID= "Agent1.Bid2" TYPE="BID">    
     <ELEMENT ID="element1">
 		<FIELD NAME="quantity">2</FIELD>
 		<FIELD NAME="unitprice">0.15</FIELD>		
@@ -9,8 +9,8 @@
     </ELEMENT>
     
     <OPTION ID="General1.1">
-		<PREF NAME="BidDuration">100</PREF>
+		<PREF NAME="BiddingDuration">100</PREF>
     </OPTION>
     
-  </BID>  
-</AGENT>
+  </BIDDING_OBJECT>  
+</BIDDING_OBJECT_SET>

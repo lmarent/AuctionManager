@@ -41,35 +41,26 @@ using namespace auction;
 
 /* ------------------------- Auction ------------------------- */
 
-Auction::Auction(time_t now, string sname, string aname, action_t &a, 
+Auction::Auction(time_t now, string sname, string aname, string resource, action_t &a, 
 				 miscList_t &m, AuctionTemplateMode_t mode, 
 				 auctionTemplateFieldList_t &templFields,
 				 ipap_template_container *templates )
-   : state(AS_NEW), auctionName(aname), resource(), setName(sname), 
-   	 dataAuctionTemplate(0), optionAuctionTemplate(0), 	dataBidTemplate(0),
-	 optionBidTemplate(0), dataAllocationTemplate(0), optionAllocationTemplate(0), 
-     action(a), miscList(m)
+   : AuctioningObject("AUCTION"), auctionName(aname), resource(resource), setName(sname), 
+   	 action(a), miscList(m)
 {
 
     unsigned long duration;
 
-    log = Logger::getInstance();
-    ch = log->createChannel("Auction");
     
 #ifdef DEBUG
     log->dlog(ch, "Auction constructor");
 #endif    
 
     try {
-	
-        parseAuctionName(aname);
-	
+		
         if (aname.empty()) {
-            // we tolerate an empty sname but not an empty rname
+            // we tolerate an empty set name but not an empty auction name
             throw Error("missing auction identifier value in rule description");
-        }
-        if (sname.empty()) {
-            sname = DEFAULT_SETNAME;
         }
 		
         /* time stuff */
@@ -98,14 +89,14 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
         }
 	
         if (!sstart.empty()) {
-            start = parseTime(sstart);
+            start = ParserFcts::parseTime(sstart);
             if(start == 0) {
                 throw Error(410, "invalid start time %s", sstart.c_str());
             }
         }
 
         if (!sstop.empty()) {
-            stop = parseTime(sstop);
+            stop = ParserFcts::parseTime(sstop);
             if(stop == 0) {
                 throw Error(411, "invalid stop time %s", sstop.c_str());
             }
@@ -180,19 +171,16 @@ Auction::Auction(time_t now, string sname, string aname, action_t &a,
     } catch(ipap_bad_argument &e){
 		throw Error("Auction %s.%s: %s", sname.c_str(), aname.c_str(), e.what());	
     } catch (Error &e) {    
-        state = AS_ERROR;
+        state = AO_ERROR;
         throw Error("Auction %s.%s: %s", sname.c_str(), aname.c_str(), e.getError().c_str());
     }
 
 }
 
 Auction::Auction(const Auction &rhs): 
-	state(rhs.state), auctionName(rhs.auctionName), setName(rhs.setName), 
+	AuctioningObject(rhs), auctionName(rhs.auctionName), setName(rhs.setName), 
 	 resource(rhs.resource)
 {
-
-    log = Logger::getInstance();
-    ch = log->createChannel("Auction");
 	
 	start = rhs.start;
 	stop = rhs.stop;
@@ -239,6 +227,20 @@ Auction::Auction(const Auction &rhs):
 	
 }
 
+string 
+Auction::getIpApId(int domain)
+{
+	string idAuctionS;
+	if ((getSetName()).empty()){
+		ostringstream ssA;
+		ssA << AUC_DEFAULT_SETNAME << domain;
+		idAuctionS =  ssA.str() + "." + getAuctionName();
+	} else {
+		idAuctionS = getSetName() + "." + getAuctionName();
+	}
+	
+	return idAuctionS;
+}
 
 /* ------------------------- ~Auction ------------------------- */
 
@@ -277,34 +279,30 @@ void Auction::addTemplateMandatoryFields(ipap_template *templ,
 }
 
 set<ipap_field_key> 
-Auction::calculateTemplateFields(ipap_templ_type_t templType, 
-									   auctionTemplateFieldList_t &templFields)
+Auction::calculateTemplateFields( ipap_object_type_t objectType,
+								  ipap_templ_type_t templType, 
+								  auctionTemplateFieldList_t &templFields)
 {
     
-    
+    // 1. insert the template mandatory fields.
     set<ipap_field_key> tFields = ipap_template::getTemplateTypeMandatoryFields(templType);
-    
+        
+    // 2. insert other configurated fields.
     auctionTemplateFieldListIter_t fieldIter;
     for (fieldIter = templFields.begin(); fieldIter != templFields.end();  ++fieldIter)
     {
 		bool include = false;
 		
-		if ( (fieldIter->second).isBidtemplate 
-		     &&  ( templType == IPAP_SETID_BID_TEMPLATE) ){
-			include = true;
+		auctionTemplateField_t field = fieldIter->second;
+		set< pair<ipap_object_type_t,ipap_templ_type_t> >::iterator iter;		
+		for (iter = (field.fieldBelongTo).begin(); iter != (field.fieldBelongTo).end(); ++iter) {
+			if ( (iter->first == objectType) && (iter->second == templType) ) {
+				include = true;
+				break;
+			}
 		}
-
-		if ( (fieldIter->second).isOptBidTemplate 
-		     &&  ( templType == IPAP_OPTNS_BID_TEMPLATE) ){
-			include = true;
-		}
-
-		if ( (fieldIter->second).isAllocTemplate 
-		     &&  ( templType == IPAP_SETID_ALLOCATION_TEMPLATE) ){
-			include = true;
-		}
-
-		if (include){
+		
+		if (include) {
 			ipap_field_key key((fieldIter->second).field.eno, 
 							   (fieldIter->second).field.ftype);
 			// Exclude keys from the number of fields.
@@ -319,14 +317,13 @@ Auction::calculateTemplateFields(ipap_templ_type_t templType,
 }
 
 ipap_template * 
-Auction::createTemplate(auctionTemplateFieldList_t &templFields,
-		  			    ipap_field_container g_ipap_fields,
-						ipap_templ_type_t templType)
+Auction::createAuctionTemplate(ipap_field_container g_ipap_fields,
+							   ipap_templ_type_t templType )
 {
 
 	TemplateIdSource *tId = TemplateIdSource::getInstance();
 
-    set<ipap_field_key> tFields = calculateTemplateFields(templType, templFields);
+    set<ipap_field_key> tFields = ipap_template::getTemplateTypeMandatoryFields(templType);
     		
     // Create the bid template associated with the auction
     ipap_template *templ = new ipap_template();
@@ -343,11 +340,37 @@ Auction::createTemplate(auctionTemplateFieldList_t &templFields,
 	return templ;
 }
 
+ipap_template * 
+Auction::createBiddingObjectTemplate(auctionTemplateFieldList_t &templFields,
+									 ipap_field_container g_ipap_fields,
+									 ipap_object_type_t objectType,
+									 ipap_templ_type_t templType )
+{
+
+	TemplateIdSource *tId = TemplateIdSource::getInstance();
+
+    set<ipap_field_key> tFields = calculateTemplateFields(objectType, templType, templFields);
+    		
+    // Create the bid template associated with the auction
+    ipap_template *templ = new ipap_template();
+	templ->set_id( tId->newId() );
+	templ->set_maxfields( tFields.size() );
+	templ->set_type(templType);
+    	
+    set<ipap_field_key>::iterator fieldIter;
+    for (fieldIter = tFields.begin(); fieldIter != tFields.end(); ++fieldIter)
+    {
+		addTemplateField(templ, g_ipap_fields, fieldIter->get_eno(), fieldIter->get_ftype());
+	} 
+
+	return templ;
+}
+
+
 void Auction::buildTemplates(auctionTemplateFieldList_t &templFields, 
 							 ipap_template_container *templateContainer)
 {
 
-	
 	
 	ipap_field_container g_ipap_fields;
 	
@@ -356,51 +379,40 @@ void Auction::buildTemplates(auctionTemplateFieldList_t &templFields,
     g_ipap_fields.initialize_reverse();
 	
 	// Creates the auction data template
-	ipap_template *auctTemplate = createTemplate(templFields, 
-								g_ipap_fields, IPAP_SETID_AUCTION_TEMPLATE);
+	ipap_template *auctTemplate = createAuctionTemplate(g_ipap_fields, IPAP_SETID_AUCTION_TEMPLATE);
+								
 	setDataAuctionTemplate(auctTemplate->get_template_id());
 	templateContainer->add_template(auctTemplate);
 	
 	// Creates the option auction template
-	ipap_template *optAuctTemplate = createTemplate(templFields, 
-								g_ipap_fields, IPAP_OPTNS_AUCTION_TEMPLATE);
+	ipap_template *optAuctTemplate = createAuctionTemplate(g_ipap_fields, IPAP_OPTNS_AUCTION_TEMPLATE);
+								
 	setOptionAuctionTemplate(optAuctTemplate->get_template_id()); 
 	templateContainer->add_template(optAuctTemplate);
 	
+	// Insert other templates related to bidding objects.
+	int i = 0;
+	for ( i = 1; i < IPAP_MAX_OBJECT_TYPE; i++ ){
+		
+		
+		set<ipap_templ_type_t> templSet = ipap_template::getObjectTemplateTypes((ipap_object_type_t) i);
+		set<ipap_templ_type_t>::iterator iter;
+		for (iter = templSet.begin(); iter != templSet.end(); ++iter ){
+		
+			ipap_template *templ = 
+				createBiddingObjectTemplate(templFields, g_ipap_fields,
+											 (ipap_object_type_t) i, *iter );
+											 
+			// Add a local reference to the template.
+			setBiddingObjectTemplate((ipap_object_type_t) i, *iter, templ->get_template_id());
 	
-	ipap_template *bidTemplate = createTemplate(templFields, 
-								g_ipap_fields, IPAP_SETID_BID_TEMPLATE);
-
-	// Add a local reference to the template.
-	setDataBidTemplate(bidTemplate->get_template_id());
-	
-	// Insert the template in the general container.
-	templateContainer->add_template(bidTemplate);
-
-	ipap_template *OptBidTemplate = createTemplate(templFields, 
-								g_ipap_fields, IPAP_OPTNS_BID_TEMPLATE);
-
-	// Add a local reference to the template.
-	setOptionBidTemplate(OptBidTemplate->get_template_id());
-	
-	// Insert the template in the general container.
-	templateContainer->add_template(OptBidTemplate);
-
-
-	ipap_template *allocTemplate = createTemplate(templFields, 
-								g_ipap_fields, IPAP_SETID_ALLOCATION_TEMPLATE);
-
-	// Add a local reference to the template.
-	setDataAllocationTemplate(allocTemplate->get_template_id());
-	
-	// Insert the template in the general container.
-	templateContainer->add_template(allocTemplate);
+			// Insert the template in the general container.
+			templateContainer->add_template(templ);
+		}
+	}
 	
 #ifdef DEBUG
-	log->dlog(ch, "templates: bidId:%d, optBidId:%d, allocId:%d", 
-					bidTemplate->get_template_id(),
-					OptBidTemplate->get_template_id(),
-					allocTemplate->get_template_id());
+	log->dlog(ch, "Nbr templates :%d", ((i-1)*2));
 #endif  
 
 
@@ -419,65 +431,6 @@ string Auction::getMiscVal(string name)
     }
 }
 
-
-void Auction::parseAuctionName(string rname)
-{
-    int n;
-
-    if (rname.empty()) {
-        throw Error("malformed auction identifier %s, "
-                    "use <identifier> or <source>.<identifier> ",
-                    rname.c_str());
-    }
-
-    if ((n = rname.find(".")) > 0) {
-        resource = rname.substr(0,n);
-        id = rname.substr(n+1, rname.length()-n);
-    } else {
-        // no dot so everything is recognized as id
-        id = rname;
-    }
-
-}
-
-
-/* ------------------------- parseTime ------------------------- */
-
-time_t Auction::parseTime(string timestr)
-{
-#ifdef DEBUG
-    log->dlog(ch, "Starting parseTime - value given: %s", timestr.c_str());
-#endif 	
-	
-    
-  
-    if (timestr[0] == '+') {
-        // relative time in secs to start
-        try {
-			struct tm tm;
-            int secs = ParserFcts::parseInt(timestr.substr(1,timestr.length()));
-            time_t start = time(NULL) + secs;
-            return mktime(localtime_r(&start,&tm));
-        } catch (Error &e) {
-            throw Error("Incorrect relative time value '%s'", timestr.c_str());
-        }
-    } else {
-        // absolute time
-        
-        struct tm  t;
-        
-        if (timestr.empty()){
-           return 0;
-        } else if (timestr.find_first_not_of("0123456789") == string::npos){
-			return (time_t) ParserFcts::parseULLong(timestr);
-		} else if (strptime(timestr.c_str(), TIME_FORMAT.c_str(), &t) != NULL){
-			return mktime(&t);
-        } else{
-			return 0;
-		}
-    }
-    
-}
 
 /* ------------------------- getActions ------------------------- */
 
@@ -521,54 +474,34 @@ void Auction::setOptionAuctionTemplate(uint16_t templId)
 	optionAuctionTemplate = templId;
 }
 	
-/* ------------------- getDataBidTemplate ---------------------- */
-uint16_t Auction::getDataBidTemplate(void)
+/* ------------------- getDataBiddingObjectTemplate ---------------------- */
+uint16_t Auction::getBiddingObjectTemplate(ipap_object_type_t type, ipap_templ_type_t templType)
 {
-	return dataBidTemplate;
+	auctionTemplateListIter_t ret = biddingObjectTemplates.find(type);
+	
+	if (ret != biddingObjectTemplates.end()) {
+		map<ipap_templ_type_t, uint16_t>::iterator iter;
+		iter = (ret->second).find(templType);
+		if ( iter != (ret->second).end() ) {
+			return iter->second;
+		} 
+		else {
+			return 0;
+		}
+	}
+	return 0;
+	
 }
 	
 /* ------------------- setDataBidTemplate ---------------------- */
-void Auction::setDataBidTemplate(uint16_t templId)
+void Auction::setBiddingObjectTemplate(ipap_object_type_t type, 
+						ipap_templ_type_t templType, uint16_t templId)
 {
-	dataBidTemplate = templId;
+		
+	biddingObjectTemplates[type][templType] = templId;
+	
 }
 	
-/* ------------------- getOptionBidTemplate ---------------------- */
-uint16_t Auction::getOptionBidTemplate(void)
-{
-	return optionBidTemplate;
-}
-	
-/* ------------------- setOptionBidTemplate ---------------------- */
-void Auction::setOptionBidTemplate(uint16_t templId)
-{
-	optionBidTemplate = templId;
-}
-	
-/* ------------------- getDataAllocationTemplate ------------------ */
-uint16_t Auction::getDataAllocationTemplate(void)
-{
-	return dataAllocationTemplate;
-}
-	
-/* ------------------- setDataAllocationTemplate ------------------ */
-void Auction::setDataAllocationTemplate(uint16_t templId)
-{
-	dataAllocationTemplate = templId;
-}
-	
-/* ------------------- getOptionAllocationTemplate ------------------ */
-uint16_t Auction::getOptionAllocationTemplate(void)
-{
-	return optionAllocationTemplate;
-}
- 
-/* ------------------- setOptionAllocationTemplate ------------------ */
-void Auction::setOptionAllocationTemplate(uint16_t templId)
-{
-	optionAllocationTemplate = templId;
-}
-
 /* ------------------------- dump ------------------------- */
 
 void Auction::dump( ostream &os )
@@ -584,32 +517,12 @@ string Auction::getInfo(void)
 {
     ostringstream s;
 
+	s << AuctioningObject::getInfo();
+
     s << getSetName() << "." << getAuctionName() << " ";
 
 	s << getStart() << " & " << getStop() << " ";
 
-    switch (getState()) {
-    case AS_NEW:
-        s << "new";
-        break;
-    case AS_VALID:
-        s << "validated";
-        break;
-    case AS_SCHEDULED:
-        s << "scheduled";
-        break;
-    case AS_ACTIVE:
-        s << "active";
-        break;
-    case AS_DONE:
-        s << "done";
-        break;
-    case AS_ERROR:
-        s << "error";
-        break;
-    default:
-        s << "unknown";
-    }
 
     s << ": ";
 	

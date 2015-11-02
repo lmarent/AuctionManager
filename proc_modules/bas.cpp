@@ -3,6 +3,8 @@
 #include <iostream>
 #include <map>
 #include <stdio.h>
+#include "config.h"
+#include "stdincpp.h"
 #include "ProcError.h"
 #include "ProcModule.h"
 
@@ -102,30 +104,6 @@ void auction::destroyModule( auction::configParam_t *params )
 
 }
 
-double getDoubleField(auction::fieldList_t *fields, string name)
-{
-	cout << "starting getDoubleField" << name << "num fields:" << fields->size() << endl;
-	
-	auction::fieldListIter_t field_iter;
-		
-	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
-	{
-	
-		if ((field_iter->name).compare(name) == 0 ){
-			return parseDouble( ((field_iter->value)[0]).getValue());
-		}
-	}
-	
-	throw auction::ProcError(AUM_FIELD_NOT_FOUND_ERROR, 
-					"bas init module - The given field was not included");
-}
-
-string double_to_string (double value)
-{
-	std::ostringstream s;
-	s << value;
-	return s.str();
-}
 
 string makeKey(string auctionSet, string auctionName, 
 				  string bidSet, string bidName)
@@ -133,10 +111,10 @@ string makeKey(string auctionSet, string auctionName,
 	return auctionSet + auctionName + bidSet + bidName;
 }
 
-auction::Allocation *createAllocation(string auctionSet, string auctionName, 
-							  string bidSet, string bidName, 
-							  auction::fieldDefList_t *fieldDefs, 
-							  double quantity, double price)
+auction::Allocation *
+createAllocation( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
+				  string auctionSet, string auctionName, string bidSet, string bidName, 
+				  double quantity, double price )
 {										  		
 	auction::fieldList_t fields;
 	
@@ -151,8 +129,8 @@ auction::Allocation *createAllocation(string auctionSet, string auctionName,
 	field1.name = iter->second.name;
 	field1.len = iter->second.len;
 	field1.type = iter->second.type;
-	string fvalue =double_to_string(quantity);
-	field1.parseFieldValue(fvalue);
+	string fvalue =doubleToString(quantity);
+	auction::IpApMessageParser::parseFieldValue(fieldVals, fvalue, &field1);
 						
 	auction::field_t field2;
 
@@ -160,8 +138,8 @@ auction::Allocation *createAllocation(string auctionSet, string auctionName,
 	field2.name = iter->second.name;
 	field2.len = iter->second.len;
 	field2.type = iter->second.type;
-	string fvalue2 = double_to_string(price);
-	field2.parseFieldValue(fvalue2);
+	string fvalue2 = doubleToString(price);
+	auction::IpApMessageParser::parseFieldValue(fieldVals, fvalue2, &field2);
 		
 	fields.push_back(field1);
 	fields.push_back(field2);
@@ -187,7 +165,7 @@ void incrementQuantityAllocation(auction::Allocation *allocation, double quantit
 			auction::field_t field = *field_iter;
 			double temp_qty = parseDouble( ((field.value)[0]).getValue());
 			temp_qty += quantity;
-			string fvalue = double_to_string(temp_qty);
+			string fvalue = doubleToString(temp_qty);
 			field_iter->parseFieldValue(fvalue);
 			break;
 		}
@@ -195,9 +173,9 @@ void incrementQuantityAllocation(auction::Allocation *allocation, double quantit
 	
 }
 
-void auction::execute( auction::configParam_t *params, string aset, string aname, 
-			  auction::fieldDefList_t *fieldDefs,  auction::bidDB_t *bids, 
-			  auction::allocationDB_t **allocationdata )
+void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,  
+					   auction::configParam_t *params, string aset, string aname, auction::bidDB_t *bids, 
+					   auction::allocationDB_t **allocationdata )
 {
 
 	cout << "bas module: start execute" << (int) bids->size() << endl;
@@ -271,10 +249,11 @@ void auction::execute( auction::configParam_t *params, string aset, string aname
 			incrementQuantityAllocation(alloc_iter->second, (it->second).quantity); 					
 		}
 		else{
-			auction::Allocation *alloc = createAllocation(aset, aname, 
-												   (it->second).bidSet, (it->second).bidName, 
-													fieldDefs, 
-													(it->second).quantity, sellPrice);
+			auction::Allocation *alloc = 
+				createAllocation(fieldDefs, fieldVals, aset, aname, 
+								  (it->second).bidSet, (it->second).bidName, 
+									(it->second).quantity, sellPrice);
+									
 			allocations[makeKey(aset, aname,
 								(it->second).bidSet, (it->second).bidName)] = alloc;
 		}
@@ -292,22 +271,22 @@ void auction::execute( auction::configParam_t *params, string aset, string aname
 	cout << "bas module: end execute" <<  endl;
 }
 
-auction::timers_t* auction::getTimers( )
+void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
+							auction::fieldList_t *requestparams, auction::auctionDB_t *auctions, 
+							auction::bidDB_t **biddata )
 {
+#ifdef DEBUG
+	fprintf( stdout, "bas module: start execute_user \n");
+#endif
+	// Nothing to do
 
 #ifdef DEBUG
-	fprintf( stdout, "bas module: start getTimers \n");
+	fprintf( stdout, "bas module: end execute_user \n");
 #endif
-
-	return NULL;
-
-#ifdef DEBUG
-	fprintf( stdout, "bas module: end getTimers \n");
-#endif
-
+	
 }
 
-void auction::destroy( auction::configParam_t *params, auction::allocationDB_t *allocationdata )
+void auction::destroy( auction::configParam_t *params )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start destroy \n");
@@ -326,17 +305,6 @@ void auction::reset( auction::configParam_t *params )
 
 #ifdef DEBUG
 	fprintf( stdout, "bas module: end reset \n");
-#endif
-}
-
-int auction::timeout( int timerID )
-{
-#ifdef DEBUG
-	fprintf( stdout, "bas module: start timeout \n");
-#endif
-	return 0;
-#ifdef DEBUG
-	fprintf( stdout, "bas module: end timeout \n");
 #endif
 }
 
@@ -376,6 +344,8 @@ char* auction::getErrorMsg( int code )
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start getErrorMsg \n");
 #endif
+	
+	return NULL;
 
 #ifdef DEBUG
 	fprintf( stdout, "bas module: end getErrorMsg \n");

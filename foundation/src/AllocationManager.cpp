@@ -29,14 +29,15 @@
 
 #include "ParserFcts.h"
 #include "AllocationManager.h"
+#include "MAPIAllocationParser.h"
 #include "Constants.h"
 
 using namespace auction;
 
 /* ------------------------- AllocationManager ------------------------- */
 
-AllocationManager::AllocationManager( string fdname) 
-    : allocations(0), fieldDefFileName(fdname), idSource(1)
+AllocationManager::AllocationManager( string fdname, string fvname) 
+    : FieldDefManager(fdname, fvname), allocations(0), idSource(1)
 {
     log = Logger::getInstance();
     ch = log->createChannel("AllocationManager");
@@ -44,7 +45,7 @@ AllocationManager::AllocationManager( string fdname)
 #ifdef DEBUG
     log->dlog(ch,"Starting");
 #endif
-	loadFieldDefs(fdname);
+
 }
 
 
@@ -70,50 +71,6 @@ AllocationManager::~AllocationManager()
     }
 }
 
-
-/* -------------------- isReadableFile -------------------- */
-
-static int isReadableFile( string fileName ) {
-
-    FILE *fp = fopen(fileName.c_str(), "r");
-
-    if (fp != NULL) {
-        fclose(fp);
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-/* -------------------- loadFieldDefs -------------------- */
-
-void AllocationManager::loadFieldDefs(string fname)
-{
-    if (fieldDefFileName.empty()) {
-        if (fname.empty()) {
-            fname = FIELDDEF_FILE;
-		}
-    } else {
-        fname = fieldDefFileName;
-    }
-
-#ifdef DEBUG
-    log->dlog(ch, "filename %s", fname.c_str());
-#endif
-
-    if (isReadableFile(fname)) {
-        if (fieldDefs.empty() && !fname.empty()) {
-            FieldDefParser f = FieldDefParser(fname.c_str());
-            f.parse(&fieldDefs);
-        }
-    
-    }else{
-#ifdef DEBUG
-    log->dlog(ch, "filename %s is not readable", fname.c_str());
-#endif    
-    }
-    
-}
 
 /* -------------------------- getAllocation ----------------------------- */
 
@@ -188,7 +145,37 @@ allocationDB_t AllocationManager::getAllocations()
     return ret;
 }
 
-/* ---------------------------------- addBids ----------------------------- */
+
+/* -------------------- parseMessage -------------------- */
+
+allocationDB_t *
+AllocationManager::parseMessage(ipap_message *messageIn, ipap_template_container *templates)
+{
+    allocationDB_t *new_allocations = new allocationDB_t();
+
+    try {
+			
+        MAPIAllocationParser afp = MAPIAllocationParser(getDomain());
+        
+        afp.parse(FieldDefManager::getFieldDefs(), 
+					FieldDefManager::getFieldVals(), 
+						messageIn, new_allocations, templates);
+
+        return new_allocations;
+	
+    } catch (Error &e) {
+
+        for(allocationDBIter_t i=new_allocations->begin(); i != new_allocations->end(); i++) {
+            saveDelete(*i);
+        }
+        saveDelete(new_allocations);
+        throw e;
+    }
+}
+
+
+
+/* ---------------------------- addAllocations ----------------------------- */
 
 void AllocationManager::addAllocations(allocationDB_t * _allocations, EventScheduler *e)
 {
@@ -295,7 +282,7 @@ void AllocationManager::addAllocation(Allocation *a)
 		a->setUId(idSource.newId());
 
         // could do some more checks here
-        a->setState(AL_VALID);
+        a->setState(AO_VALID);
 
 #ifdef DEBUG    
 		log->dlog(ch, "Allocation Id = %d", a->getUId());
@@ -367,7 +354,7 @@ void AllocationManager::activateAllocations(allocationDB_t *allocations, EventSc
         Allocation *a = (*iter);
         log->dlog(ch, "activate allocation with name = %s.%s", a->getAllocationSet().c_str(), 
 					a->getAllocationName().c_str());
-        a->setState(AL_ACTIVE);
+        a->setState(AO_ACTIVE);
 	 
         /* TODO AM: Create code to activate sessions */
     }
@@ -691,7 +678,7 @@ void AllocationManager::delAllocations(allocationDB_t *allocations, EventSchedul
 void AllocationManager::storeAllocationAsDone(Allocation *a)
 {
     
-    a->setState(AL_DONE);
+    a->setState(AO_DONE);
     allocationDone.push_back(a);
 
     if (allocationDone.size() > DONE_LIST_SIZE) {

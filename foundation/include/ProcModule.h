@@ -35,7 +35,7 @@
 #include "Logger.h"
 #include "Module.h"
 #include "ConfigManager.h"
-#include "EventSchedulerAuctioner.h"
+#include "EventScheduler.h"
 
 namespace auction
 {
@@ -138,12 +138,6 @@ class ProcModule : public Module
             return INFOLABEL[i];
         }
     }
-
-    /*! \short  add timers of this module as new events to the event 
-                scheduler component (but only once per module!)
-        \arg \c evs - the meter's event scheduler component
-    */
-    void addTimerEvents( EventScheduler &evs );
 
     //! get text label for type property i
     static string typeLabel( int i );

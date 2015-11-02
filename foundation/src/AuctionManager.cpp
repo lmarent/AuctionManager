@@ -37,21 +37,13 @@ using namespace auction;
 /* ------------------------- AuctionManager ------------------------- */
 
 AuctionManager::AuctionManager( string fdname, string fvname) 
-    : auctions(0), fieldDefFileName(fdname), fieldValFileName(fvname),
-	  idSource(1)
+    : FieldDefManager(fdname, fvname),  auctions(0), idSource(1)
 {
     log = Logger::getInstance();
     ch = log->createChannel("AuctionManager");
 #ifdef DEBUG
     log->dlog(ch,"Starting");
 #endif
-
-    // load the field def list
-    loadFieldDefs(fieldDefFileName);
-       
-    // load the field val list
-    loadFieldVals(fieldValFileName);
-
 	
 }
 
@@ -81,72 +73,6 @@ AuctionManager::~AuctionManager()
     log->dlog(ch,"Finish shutdown");
 #endif
 
-}
-
-/* -------------------- isReadableFile -------------------- */
-
-static int isReadableFile( string fileName ) {
-
-    FILE *fp = fopen(fileName.c_str(), "r");
-
-    if (fp != NULL) {
-        fclose(fp);
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-
-/* -------------------- loadFieldDefs -------------------- */
-
-void AuctionManager::loadFieldDefs(string fname)
-{
-    if (fieldDefFileName.empty()) {
-        if (fname.empty()) {
-            fname = FIELDDEF_FILE;
-		}
-    } else {
-        fname = fieldDefFileName;
-    }
-
-#ifdef DEBUG
-    log->dlog(ch, "filename %s", fname.c_str());
-#endif
-
-    if (isReadableFile(fname)) {
-        if (fieldDefs.empty() && !fname.empty()) {
-            FieldDefParser f = FieldDefParser(fname.c_str());
-            f.parse(&fieldDefs);
-        }
-    
-    }else{
-#ifdef DEBUG
-    log->dlog(ch, "filename %s is not readable", fname.c_str());
-#endif    
-    }
-    
-}
-
-
-/* -------------------- loadFieldVals -------------------- */
-
-void AuctionManager::loadFieldVals( string fname )
-{
-    if (fieldValFileName.empty()) {
-        if (fname.empty()) {
-            fname = FIELDVAL_FILE;
-        }
-    } else {
-        fname = fieldValFileName;
-    }
-
-    if (isReadableFile(fname)) {
-        if (fieldVals.empty() && !fname.empty()) {
-            FieldValParser f = FieldValParser(fname.c_str());
-            f.parse(&fieldVals);
-        }
-    }
 }
 
 
@@ -235,9 +161,9 @@ auctionDB_t *AuctionManager::parseAuctions(string fname, ipap_template_container
 
     try {	
 	
-        AuctionFileParser afp = AuctionFileParser(fname);
+        AuctionFileParser afp = AuctionFileParser(getDomain(), fname);
 
-        afp.parse(&fieldDefs, new_auctions, &idSource, templates);
+        afp.parse(FieldDefManager::getFieldDefs(), new_auctions, templates);
 
 #ifdef DEBUG
     log->dlog(ch, "Auctions parsed");
@@ -265,9 +191,9 @@ auctionDB_t *AuctionManager::parseAuctionsBuffer(char *buf, int len,
 
     try {
 			
-        AuctionFileParser afp = AuctionFileParser(buf, len);
+        AuctionFileParser afp = AuctionFileParser(getDomain(), buf, len);
         
-        afp.parse(&fieldDefs, new_auctions, &idSource, templates);
+        afp.parse(FieldDefManager::getFieldDefs(), new_auctions, templates);
 
         return new_auctions;
 	
@@ -283,16 +209,15 @@ auctionDB_t *AuctionManager::parseAuctionsBuffer(char *buf, int len,
 
 
 auctionDB_t *
-AuctionManager::parseAuctionsMessage(ipap_message *messageIn, 
-									 ipap_template_container *templates)
+AuctionManager::parseMessage(ipap_message *messageIn, ipap_template_container *templates)
 {
     auctionDB_t *new_auctions = new auctionDB_t();
 
     try {
 			       
-       	MAPIAuctionParser mpap = MAPIAuctionParser();
+       	MAPIAuctionParser mpap = MAPIAuctionParser(getDomain());
         
-        mpap.parse(&fieldDefs, messageIn, new_auctions, templates);
+        mpap.parse(FieldDefManager::getFieldDefs(), messageIn, new_auctions, templates);
 		
         return new_auctions;
 	
@@ -359,6 +284,16 @@ void AuctionManager::addAuctions(auctionDB_t * _auctions, EventScheduler *e)
 
 }
 
+void AuctionManager::activateAuctions(auctionDB_t *auctions, EventScheduler *e)
+{
+    auctionDBIter_t             iter;
+
+    for (iter = auctions->begin(); iter != auctions->end(); iter++) {
+        Auction *a = (*iter);
+        log->dlog(ch, "activate auction with name = '%s'", a->getAuctionName().c_str());
+        a->setState(AO_ACTIVE);
+    }
+}
 
 /* -------------------- addAuction -------------------- */
 
@@ -385,7 +320,7 @@ void AuctionManager::addAuction(Auction *a)
 		a->setUId(idSource.newId());
 
         // could do some more checks here
-        a->setState(AS_VALID);
+        a->setState(AO_VALID);
 
 #ifdef DEBUG    
 		log->dlog(ch, "Auction Id = #%d ", a->getUId());
@@ -427,9 +362,9 @@ ipap_message * AuctionManager::get_ipap_message(auctionDB_t *auctions,
 												string sAddressIPV6, uint16_t port)
 {
 
-	MAPIAuctionParser mpap = MAPIAuctionParser();
+	MAPIAuctionParser mpap = MAPIAuctionParser(getDomain());
 
-	return mpap.get_ipap_message(&fieldDefs, auctions,templates, 
+	return mpap.get_ipap_message(FieldDefManager::getFieldDefs(), auctions,templates, 
 									domainId, useIPV6, sAddressIPV4, sAddressIPV6, port);
 }
 
@@ -622,7 +557,7 @@ void AuctionManager::delAuctions(auctionDB_t *_auctions, EventScheduler *e)
 void AuctionManager::storeAuctionAsDone(Auction *a)
 {
     
-    a->setState(AS_DONE);
+    a->setState(AO_DONE);
     auctionDone.push_back(a);
 
     if (auctionDone.size() > DONE_LIST_SIZE) {

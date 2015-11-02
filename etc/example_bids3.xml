@@ -1,14 +1,14 @@
 <?xml version ="1.0" encoding="UTF-8"?>
-<!DOCTYPE AGENT SYSTEM "bidfile.dtd"> 
-<AGENT ID="Agent2">
-  <BID AUCTION_ID = "General1.1" BID_ID= "Agent2.Bid1" > 
+<!DOCTYPE BIDDING_OBJECT_SET SYSTEM "bidfile.dtd"> 
+<BIDDING_OBJECT_SET ID="Agent2">
+  <BIDDING_OBJECT AUCTION_ID = "General1.1" ID= "Agent2.Bid1" TYPE="BID"> 
     <ELEMENT ID="element1">
 		<FIELD NAME="quantity">2</FIELD>
 		<FIELD NAME="unitprice">0.16</FIELD>		
 		<FIELD NAME="unitbudget">0.30</FIELD>		
     </ELEMENT>
     <OPTION ID="General1.1">
-		<PREF NAME="BidDuration">100</PREF>
+		<PREF NAME="BiddingDuration">100</PREF>
     </OPTION>
-  </BID>  
-</AGENT>
+  </BIDDING_OBJECT>  
+</BIDDING_OBJECT_SET>

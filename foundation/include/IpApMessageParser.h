@@ -34,23 +34,39 @@
 #include "ConfigParser.h"
 #include "Constants.h"
 #include "IpAp_message.h"
+#include "AuctioningObject.h"
 
 namespace auction
 {
 
 class IpApMessageParser
 {
-
+	
+	
 	public:
-		IpApMessageParser(){}
+		
+		//! This field help to define uniquelly an agent with the auction. 
+		int domain;
+		
+		IpApMessageParser(int domain): domain(domain){}
 		
 		~IpApMessageParser(){}
 
-	protected:
-
 		//! parse a field value
-		void parseFieldValue(fieldValList_t *fieldVals, string value, field_t *f);
+		static void parseFieldValue(fieldValList_t *fieldVals, string value, field_t *f);
+
+		//! Find a field by eno and ftype within the list of fields.
+		static fieldDefItem_t findField(fieldDefList_t *fieldDefs, int eno, int ftype);
+
+		//! Find a field by name within the list of fields.
+		static fieldDefItem_t findField(fieldDefList_t *fieldDefs, string fname);
+
+		//! lookup field value
+		static string lookup(fieldValList_t *fieldVals, string fvalue, field_t *f);
 		
+		inline int getDomain(){ return domain; }
+
+	protected:
 
 		/*! parse an object name (auction or bid).
 		  \short   parse identifier format 'setname.objectname'
@@ -60,17 +76,14 @@ class IpApMessageParser
 		*/	
 		void parseName(string id, string &set, string &name);
 
+		//! parse the type of bidding object
+		ipap_object_type_t parseType(string stype);
+		
+		//! parse the template type
+		ipap_templ_type_t parseTemplateType(ipap_object_type_t objectType, string sTemplateType);
+
 		//! get a value by name from the misc rule attributes
 		string getMiscVal(miscList_t *miscList, string name);    
-
-		//! Find a field by eno and ftype within the list of fields.
-		fieldDefItem_t findField(fieldDefList_t *fieldDefs, int eno, int ftype);
-
-		//! Find a field by name within the list of fields.
-		fieldDefItem_t findField(fieldDefList_t *fieldDefs, string fname);
-
-		//! lookup field value
-		string lookup(fieldValList_t *fieldVals, string fvalue, field_t *f);
 
 		//! Read a template type from a message.
 		ipap_template * readTemplate(ipap_message * message, ipap_templ_type_t type);

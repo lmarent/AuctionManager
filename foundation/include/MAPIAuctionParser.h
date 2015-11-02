@@ -46,7 +46,9 @@ class MAPIAuctionParser : public IpApMessageParser, public anslp::msg::anslp_ipa
 	miscList_t readAuctionData(ipap_template *templ, 
 							   fieldDefList_t *fieldDefs,
 							   ipap_data_record &record,
-							   string &auctionName);
+							   string &auctionName,
+							   string &resourceId,
+							   string &status);
     
 	//! Read the action data associated with the auction.
 	configItemList_t readMiscAuctionData(ipap_template *templ, 
@@ -97,7 +99,7 @@ class MAPIAuctionParser : public IpApMessageParser, public anslp::msg::anslp_ipa
     //! Constructor for MAPIAuctionParser. 
     //! It takes as a parameter a message object and then it is built
     //! the auction.  
-    MAPIAuctionParser();
+    MAPIAuctionParser(int domain);
 
     //! Destructor for MAPIAuctionParser. 
     virtual ~MAPIAuctionParser() {}

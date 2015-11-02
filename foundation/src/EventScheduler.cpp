@@ -92,7 +92,7 @@ void EventScheduler::addEvent(Event *ev)
 }
 
 
-void EventScheduler::delBidEvents(int uid)
+void EventScheduler::delBiddingObjectEvents(int uid)
 {
     int ret = 0;
     eventListIter_t iter, tmp;
@@ -103,9 +103,9 @@ void EventScheduler::delBidEvents(int uid)
         tmp = iter;
         iter++;
         
-        ret = tmp->second->deleteBid(uid);
+        ret = tmp->second->deleteBiddingObject(uid);
         if (ret == 1) {
-            // ret = 1 means rule was present in event but other rules are still in
+            // ret = 1 means bidding object was present in event but other bidding objects are still in
             // the event
 #ifdef DEBUG
             log->dlog(ch,"remove bid %d from event %s", uid, 

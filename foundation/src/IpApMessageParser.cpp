@@ -109,6 +109,65 @@ IpApMessageParser::parseName(string id, string &set, string &name)
 	}
 }
 
+ipap_object_type_t 
+IpApMessageParser::parseType(string stype)
+{
+	ipap_object_type_t type = IPAP_INVALID;
+	
+	if ((stype == "auction") || (stype == "0")){
+		type = IPAP_AUCTION;
+	}
+	else if ((stype == "bid") || (stype == "1")){
+		type = IPAP_BID;
+	}
+	else if ((stype == "ask") || (stype == "2")){
+		type = IPAP_ASK;
+	}
+	else if ((stype == "allocation") || (stype == "3")){
+		type = IPAP_ALLOCATION;
+	}
+	else
+		throw Error("Bidding Object Parser Error: invalid bidding object type %s", stype.c_str());
+	
+	return 	type;
+		
+}
+
+
+ipap_templ_type_t 
+IpApMessageParser::parseTemplateType(ipap_object_type_t objectType, string sTemplateType)
+{
+	
+	if (objectType == IPAP_BID){
+			
+		if (sTemplateType == "data"){
+			return IPAP_SETID_BID_OBJECT_TEMPLATE;
+		}
+		else if (sTemplateType == "option"){
+			return IPAP_OPTNS_BID_OBJECT_TEMPLATE;
+		}
+			
+	} else if (objectType == IPAP_ASK) {
+				
+		if (sTemplateType == "data"){
+			return IPAP_SETID_ASK_OBJECT_TEMPLATE;
+		} else if (sTemplateType == "option"){
+			return IPAP_OPTNS_ASK_OBJECT_TEMPLATE;
+		}
+	} else if (objectType == IPAP_ALLOCATION) {
+		
+		if (sTemplateType == "data"){
+			return IPAP_SETID_ALLOC_OBJECT_TEMPLATE;
+		} else if (sTemplateType == "option"){
+			return IPAP_OPTNS_ALLOC_OBJECT_TEMPLATE;
+		}
+	}
+	
+	throw Error("Bidding Object Parser Error: invalid template type");
+	
+		
+}
+
 /* ------------------------- getMiscVal ------------------------- */
 string 
 IpApMessageParser::getMiscVal(miscList_t *_miscList, string name)

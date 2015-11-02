@@ -1,5 +1,5 @@
 
-/*!  \file   BidFileParser.h
+/*!  \file   BiddingObjectFileParser.h
 
     Copyright 2014-2015 Universidad de los Andes, Bogotá, Colombia
 
@@ -23,11 +23,11 @@
     parse bids files
     Code based on Netmate Implementation
 
-    $Id: BidFileParser.h 748 2015-07-23 16:09:00 amarentes $
+    $Id: BiddingObjectFileParser.h 748 2015-07-23 16:09:00 amarentes $
 */
 
-#ifndef _BIDFILEPARSER_H_
-#define _BIDFILEPARSER_H_
+#ifndef _BIDDING_OBJECT_FILEPARSER_H_
+#define _BIDDING_OBJECT_FILEPARSER_H_
 
 
 #include "stdincpp.h"
@@ -37,14 +37,13 @@
 #include "ProcModuleInterface.h"
 #include "FieldDefParser.h"
 #include "FieldValParser.h"
-#include "BidIdSource.h"
-#include "Bid.h"
+#include "BiddingObject.h"
 #include "IpApMessageParser.h"
 
 namespace auction
 {
 
-class BidFileParser : public XMLParser, public IpApMessageParser
+class BiddingObjectFileParser : public XMLParser, public IpApMessageParser
 {
   private:
 
@@ -53,22 +52,19 @@ class BidFileParser : public XMLParser, public IpApMessageParser
 
     //! parse a config item
     configItem_t parsePref(xmlNodePtr cur);
-		  
+    		  
   public:
 
-    BidFileParser( string fname );
+    BiddingObjectFileParser( int domain, string fname );
 
-    BidFileParser( char *buf, int len );
+    BiddingObjectFileParser( int domain, char *buf, int len );
 
-    virtual ~BidFileParser() {}
+    virtual ~BiddingObjectFileParser() {}
 
     //! parse rules and add parsed rules to the list of rules
-    virtual void parse(fieldDefList_t *fields, 
-					   fieldValList_t *fieldVals, 
-					   bidDB_t *bids,
-					   BidIdSource *idSource );
+    virtual void parse(fieldDefList_t *fields, fieldValList_t *fieldVals, biddingObjectDB_t *bids );
 };
 
 }; // namespace auction
 
-#endif // _RULEFILEPARSER_H_
+#endif // _BIDDING_OBJECT_FILEPARSER_H_

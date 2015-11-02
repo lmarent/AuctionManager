@@ -12,7 +12,6 @@
 #include "FieldValue.h"
 #include "FieldValParser.h"
 #include "FieldDefParser.h"
-#include "BidIdSource.h"
 
 using namespace auction;
 
@@ -152,6 +151,7 @@ void Allocation_Test::testAllocations()
 	}
 	catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 }
@@ -183,6 +183,7 @@ void Allocation_Test::loadFieldVals(fieldValList_t *fieldValList)
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 }

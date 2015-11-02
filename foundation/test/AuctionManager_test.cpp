@@ -53,6 +53,7 @@ void AuctionManager_Test::setUp()
 	}
 	catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 }
 
@@ -77,9 +78,7 @@ void AuctionManager_Test::test()
 		templates = new ipap_template_container();
 		
 		auctionDB_t * auctions = auctionManagerPtr->parseAuctions(filename, templates);
-		
-		cout << "Num templates: " << templates->get_num_templates() << endl;
-		
+				
 		saveDelete(templates);
 				
 		auctionManagerPtr->addAuctions(auctions, evnt.get());
@@ -207,6 +206,7 @@ void AuctionManager_Test::test()
 		
 	} catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 

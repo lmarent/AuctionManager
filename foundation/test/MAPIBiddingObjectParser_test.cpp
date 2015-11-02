@@ -1,20 +1,19 @@
 /*
- * Test the MAPIBidParser_Test class.
+ * Test the MAPIBiddingObjectParser_Test class.
  *
- * $Id: MAPIBidParser_Test.cpp 2015-09-30 10:25:00 amarentes $
- * $HeadURL: https://./test/MAPIBidParser_Test.cpp $
+ * $Id: MAPIBiddingObjectParser_Test.cpp 2015-09-30 10:25:00 amarentes $
+ * $HeadURL: https://./test/MAPIBiddingObjectParser_Test.cpp $
  */
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "ParserFcts.h"
-#include "Bid.h"
+#include "BiddingObject.h"
 #include "FieldValue.h"
 #include "FieldValParser.h"
 #include "FieldDefParser.h"
-#include "BidIdSource.h"
-#include "BidFileParser.h"
-#include "MAPIBidParser.h"
+#include "BiddingObjectFileParser.h"
+#include "MAPIBiddingObjectParser.h"
 #include "anslp_ipap_message.h"
 #include "anslp_ipap_xml_message.h"
 
@@ -22,29 +21,29 @@
 
 using namespace auction;
 
-class MAPIBidParser_Test : public CppUnit::TestFixture {
+class MAPIBiddingObjectParser_Test : public CppUnit::TestFixture {
 
-	CPPUNIT_TEST_SUITE( MAPIBidParser_Test );
+	CPPUNIT_TEST_SUITE( MAPIBiddingObjectParser_Test );
 
-    CPPUNIT_TEST( testMAPIBidParser );
+    CPPUNIT_TEST( testMAPIBiddingObjectParser );
 	CPPUNIT_TEST_SUITE_END();
 
   public:
 	void setUp();
 	void tearDown();
 
-	void testMAPIBidParser();
+	void testMAPIBiddingObjectParser();
 	void loadFieldDefs(fieldDefList_t *fieldList);
 	void loadFieldVals(fieldValList_t *fieldValList);
 	auctionDB_t * loadAuctions();
-	bidDB_t * loadBidsFromFile();
+	biddingObjectDB_t * loadBidsFromFile();
 	
 
   private:
         
     FieldDefParser *ptrFieldParsers;
     FieldValParser *ptrFieldValParser;    
-    MAPIBidParser * ptrMAPIBidParser;    
+    MAPIBiddingObjectParser * ptrMAPIBidParser;    
     
     ipap_template_container *templates;
     
@@ -57,26 +56,26 @@ class MAPIBidParser_Test : public CppUnit::TestFixture {
     
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION( MAPIBidParser_Test );
+CPPUNIT_TEST_SUITE_REGISTRATION( MAPIBiddingObjectParser_Test );
 
 
 auctionDB_t * 
-MAPIBidParser_Test::loadAuctions()
+MAPIBiddingObjectParser_Test::loadAuctions()
 {
 	
-	const string filename = DEF_SYSCONFDIR "/example_auctions2.xml";
+	const string filename = "../../etc/example_auctions2.xml";
 	auctionDB_t *new_auctions = NULL;
 	AuctionFileParser *ptrAuctionFileParser = NULL; 
-	AuctionIdSource *idSource = NULL; 
+
 	try {
 		
+		int domain = 4;
+		
 		new_auctions = new auctionDB_t();
-		ptrAuctionFileParser = new AuctionFileParser(filename);
-		idSource = new AuctionIdSource(1); // Unique.
-		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, idSource, templates );
+		ptrAuctionFileParser = new AuctionFileParser(domain, filename);
+		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, templates );
 		
 		saveDelete(ptrAuctionFileParser);
-		saveDelete(idSource);
 		
 		return new_auctions;
 
@@ -85,9 +84,6 @@ MAPIBidParser_Test::loadAuctions()
 		if (ptrAuctionFileParser!= NULL)
 			saveDelete(ptrAuctionFileParser);
 			
-		if (idSource != NULL)
-			saveDelete(idSource);
-		
 		for(auctionDBIter_t i=new_auctions->begin(); i != new_auctions->end(); i++) {
             saveDelete(*i);
         }
@@ -98,48 +94,47 @@ MAPIBidParser_Test::loadAuctions()
 	}
 }
 
-bidDB_t * 
-MAPIBidParser_Test::loadBidsFromFile()
+biddingObjectDB_t * 
+MAPIBiddingObjectParser_Test::loadBidsFromFile()
 {
 
-    bidDB_t *new_bids = NULL;
-    BidFileParser *ptrBidFileParser = NULL; 
-    BidIdSource *idSource = NULL; 
+    biddingObjectDB_t *new_bids = NULL;
+    BiddingObjectFileParser *ptrBidFileParser = NULL; 
+	int domain = 3;
 	
 	try {
 		
-		new_bids = new bidDB_t();
-		idSource = new BidIdSource(1); // Unique.
 		
+		new_bids = new biddingObjectDB_t();
+
 		const string filename1 =  "../../etc/example_bids1.xml";
-		ptrBidFileParser = new BidFileParser(filename1);
+		ptrBidFileParser = new BiddingObjectFileParser(domain,filename1);
 			
-		bidDB_t *new_bids1 = new bidDB_t();		
-		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids1,idSource );
+		biddingObjectDB_t *new_bids1 = new biddingObjectDB_t();		
+		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids1 );
 		new_bids->push_back((*new_bids1)[0]);
 		
 		saveDelete(new_bids1);
 		saveDelete(ptrBidFileParser);
 			
 		const string filename2 = "../../etc/example_bids2.xml";	
-		ptrBidFileParser = new BidFileParser(filename2);
+		ptrBidFileParser = new BiddingObjectFileParser(domain,filename2);
 			
-		bidDB_t *new_bids2 = new bidDB_t();		
-		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids2, idSource );
+		biddingObjectDB_t *new_bids2 = new biddingObjectDB_t();		
+		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids2 );
 		new_bids->push_back((*new_bids2)[0]);	
 		saveDelete(new_bids2);
 		saveDelete(ptrBidFileParser);
 
 		const string filename3 = "../../etc/example_bids3.xml";	
-		ptrBidFileParser = new BidFileParser(filename3);
+		ptrBidFileParser = new BiddingObjectFileParser(domain,filename3);
 			
-		bidDB_t *new_bids3 = new bidDB_t();		
-		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids3, idSource );
+		biddingObjectDB_t *new_bids3 = new biddingObjectDB_t();		
+		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids3 );
 		new_bids->push_back((*new_bids3)[0]);	
 		
 		saveDelete(new_bids3);
 		saveDelete(ptrBidFileParser);
-		saveDelete(idSource);
 		
 		return new_bids;
 		
@@ -147,10 +142,7 @@ MAPIBidParser_Test::loadBidsFromFile()
 		if (ptrBidFileParser!= NULL)
 			saveDelete(ptrBidFileParser);
 		
-		if (idSource != NULL)
-			saveDelete(idSource);
-
-		for(bidDBIter_t i=new_bids->begin(); i != new_bids->end(); i++) {
+		for(biddingObjectDBIter_t i=new_bids->begin(); i != new_bids->end(); i++) {
             saveDelete(*i);
         }
         saveDelete(new_bids);
@@ -161,12 +153,14 @@ MAPIBidParser_Test::loadBidsFromFile()
 	
 }
 
-void MAPIBidParser_Test::setUp() 
+void MAPIBiddingObjectParser_Test::setUp() 
 {
 		
 	try
 	{
 
+		int domain = 5;
+		
 		const string fieldname = DEF_SYSCONFDIR "/fielddef.xml";
 		const string fieldValuename = DEF_SYSCONFDIR "/fieldval.xml";
 		
@@ -179,7 +173,7 @@ void MAPIBidParser_Test::setUp()
 		// templates
 		templates = new ipap_template_container();
 				
-		ptrMAPIBidParser = new MAPIBidParser();
+		ptrMAPIBidParser = new MAPIBiddingObjectParser(domain);
 		        		
 	}
 	catch(Error &e){
@@ -187,7 +181,7 @@ void MAPIBidParser_Test::setUp()
 	}
 }
 
-void MAPIBidParser_Test::tearDown() 
+void MAPIBiddingObjectParser_Test::tearDown() 
 {
 	saveDelete(ptrFieldParsers);
     saveDelete(ptrFieldValParser);
@@ -196,38 +190,37 @@ void MAPIBidParser_Test::tearDown()
 	
 }
 
-void MAPIBidParser_Test::testMAPIBidParser() 
+void MAPIBiddingObjectParser_Test::testMAPIBiddingObjectParser() 
 {
 
 	try
 	{
 		
-		int domain = 7;
-		Bid *ptrBidTmp1, *ptrBidTmp2, *ptrBidTmp3, *ptrBidTmp4, *ptrBidTmp5, *ptrBidTmp6;
+		BiddingObject *ptrBidTmp1, *ptrBidTmp2, *ptrBidTmp3, *ptrBidTmp4, *ptrBidTmp5, *ptrBidTmp6;
 
 		auctionDB_t * auctions = loadAuctions();
-		bidDB_t *bids = loadBidsFromFile();
+		biddingObjectDB_t *bids = loadBidsFromFile();
 		
-		cout << "number of templates:" << templates->get_num_templates() << endl;
-		
-		ipap_message * message = ptrMAPIBidParser->get_ipap_message(&fieldDefs, bids, auctions, templates, domain );
+		CPPUNIT_ASSERT( bids->size() == 3 );
+				
+		ipap_message * message = ptrMAPIBidParser->get_ipap_message(&fieldDefs, bids, auctions, templates);
 		
 		anslp::msg::anslp_ipap_message mes(*message);
 		
 		anslp::msg::anslp_ipap_xml_message xmlmes;
 	
 		string xmlMessage = xmlmes.get_message(mes);	
-		
-		cout << "message:" << xmlMessage << endl;
-						
-		bidDB_t *bids2 = new bidDB_t();	
+	
+		// Activate to see the message 
+		cout << "Message:" << xmlMessage << endl;
+								
+		biddingObjectDB_t *bids2 = new biddingObjectDB_t();	
 		
 		ptrMAPIBidParser->parse(&fieldDefs, &fieldVals, message, bids2, templates );
-		
-		cout << "Bids able to read:" << bids2->size() << endl;
+				
+		cout << "Bid size:" << bids2->size() << endl;
 		
 		CPPUNIT_ASSERT( bids2->size() == 3 );
-		
 		
 		ptrBidTmp1 = (*bids)[0];
 		ptrBidTmp2 = (*bids2)[0];
@@ -252,12 +245,12 @@ void MAPIBidParser_Test::testMAPIBidParser()
         saveDelete(auctions);
 
 
-		for(bidDBIter_t i=bids->begin(); i != bids->end(); i++) {
+		for(biddingObjectDBIter_t i=bids->begin(); i != bids->end(); i++) {
             saveDelete(*i);
         }
         saveDelete(bids);
 
-		for(bidDBIter_t i=bids2->begin(); i != bids2->end(); i++) {
+		for(biddingObjectDBIter_t i=bids2->begin(); i != bids2->end(); i++) {
             saveDelete(*i);
         }
         saveDelete(bids2);		
@@ -271,7 +264,7 @@ void MAPIBidParser_Test::testMAPIBidParser()
 }
 
 
-void MAPIBidParser_Test::loadFieldDefs(fieldDefList_t *fieldList)
+void MAPIBiddingObjectParser_Test::loadFieldDefs(fieldDefList_t *fieldList)
 {
 	const string filename = DEF_SYSCONFDIR "/fielddef.xml";
 
@@ -288,7 +281,7 @@ void MAPIBidParser_Test::loadFieldDefs(fieldDefList_t *fieldList)
 
 }
 
-void MAPIBidParser_Test::loadFieldVals(fieldValList_t *fieldValList)
+void MAPIBiddingObjectParser_Test::loadFieldVals(fieldValList_t *fieldValList)
 {
 	const string filename = DEF_SYSCONFDIR "/fieldval.xml";
 	try

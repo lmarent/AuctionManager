@@ -33,6 +33,7 @@
 #include "ConfigParser.h"
 #include "address.h"
 #include "session_id.h"
+#include "MessageIdSource.h"
 
 namespace auction
 {
@@ -136,6 +137,8 @@ public:
 	//! Get lifetime
 	uint32_t getLifetime();
 	
+	uint32_t getNextMessageId();
+	
 	//! Set a-nslp application sessionId 
 	void setAnlspSession(anslp::session_id _sid);	
 	
@@ -176,6 +179,8 @@ protected:
 	//! lifetime by default.
 	uint32_t lifetime;
 
+	//! Sequence number for messages being transfered from this session.
+	MessageIdSource mId;
 
 };
 

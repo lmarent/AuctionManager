@@ -33,11 +33,12 @@
 #include "stdincpp.h"
 #include "Logger.h"
 #include "Error.h"
-#include "AuctionIdSource.h"
+#include "IdSource.h"
 #include "Auction.h"
 #include "AuctionFileParser.h"
 #include "EventScheduler.h"
 #include "MAPIAuctionParser.h"
+#include "FieldDefManager.h"
 
 namespace auction
 {
@@ -90,7 +91,7 @@ typedef set<int>::iterator  auctionSetIter_t;
   The Auction will then be stored in the AuctionDatabase inside the AuctionManager
 */
 
-class AuctionManager
+class AuctionManager : public FieldDefManager
 {
   private:
 
@@ -108,51 +109,29 @@ class AuctionManager
 
     //! list with auctions done
     auctionDone_t auctionDone;
-
-	//! field definitions
-    fieldDefList_t fieldDefs;
-
-    //! field values
-    fieldValList_t fieldVals;
-
-    // name of field def and field vals files
-    string fieldDefFileName, fieldValFileName;
 		
-    // pool of unique bid ids
-    AuctionIdSource idSource;
+    //! pool of unique auction ids
+    IdSource idSource;
 
-    /* \short add the auction name to the list of finished bids
+	//! This field identifies uniquely the agent.
+	int domain; 
+
+
+    /*! \short add the auction name to the list of finished bids
 
        \arg \c auctionname - name of the finished auction (source.name)
     */
     void storeAuctionAsDone(Auction *a);
 
 
-    //! load field definitions
-    void loadFieldDefs(string fname);
-
-	//! load field value definitions
-    void loadFieldVals(string fname);
-
-
   public:
-
-    int getNumAuctions() //Ok
-    { 
-        return auctions; 
-    }
-
-    string getInfo(int uid) // Ok
-    {
-        return getInfo(getAuction(uid)); 
-    }
 
     /*! \short   construct and initialize a AuctionManager object
      */
-    AuctionManager( string fdname, string fvname); // Ok
+    AuctionManager( string fdname, string fvname);
 
     //! destroy a AuctionManager object
-    ~AuctionManager(); //Ok
+    ~AuctionManager(); 
 
      /*! \short   lookup the auction info data for a given auctionId or name
 
@@ -163,7 +142,7 @@ class AuctionManager
     
         \arg \c uId - unique auction id
     */
-    Auction *getAuction(int uid); // Ok
+    Auction *getAuction(int uid);
 
     //! get auction rname from auctionset sname 
     Auction *getAuction(string sname, string rname); 
@@ -173,16 +152,16 @@ class AuctionManager
 
     //! get all bids, creates a nuew vector with the same pointers to auctions,
 	//! so it does not require to free memory. 
-    auctionDB_t getAuctions(); //Ok
+    auctionDB_t getAuctions();
 
     //! parse XML auctions from file 
-    auctionDB_t *parseAuctions(string fname, ipap_template_container *templates);  // Ok
+    auctionDB_t *parseAuctions(string fname, ipap_template_container *templates); 
 
     //! parse XML or Auction API bids from buffer
     auctionDB_t *parseAuctionsBuffer(char *buf, int len, ipap_template_container *templates);
    
     //! parse auctions from ipap_message 
-    auctionDB_t *parseAuctionsMessage(ipap_message *messageIn, ipap_template_container *templates);
+    auctionDB_t *parseMessage(ipap_message *messageIn, ipap_template_container *templates);
    
     /*! \short   add a auction description 
 
@@ -195,10 +174,14 @@ class AuctionManager
         syntactically correct or does not contain the mandatory fields
         or if a auction with the given identification is already present in the AuctionDatabase
     */
-    void addAuctions(auctionDB_t *auctions, EventScheduler *e);  //Ok
+    void addAuctions(auctionDB_t *auctions, EventScheduler *e); 
 
     //! add a single auction, the methods assigns the UID for the auction.
-    void addAuction(Auction *b); // Ok
+    void addAuction(Auction *b); 
+
+    //! activate/execute bids
+    void activateAuctions(auctionDB_t *auctions, EventScheduler *e);
+
 
     /*! \short   delete a Auction description 
 
@@ -211,11 +194,11 @@ class AuctionManager
         if a auction with the given identification is currently not present 
         in the auctionDatabase
     */
-    void delAuction(int uid, EventScheduler *e); // Ok
-    void delAuction(string sname, string rname, EventScheduler *e); // Ok
-    void delAuctions(string sname, EventScheduler *e); // Ok
-    void delAuction(Auction *a, EventScheduler *e); // Ok
-    void delAuctions(auctionDB_t *auctions, EventScheduler *e); //Ok
+    void delAuction(int uid, EventScheduler *e); 
+    void delAuction(string sname, string rname, EventScheduler *e); 
+    void delAuctions(string sname, EventScheduler *e); 
+    void delAuction(Auction *a, EventScheduler *e); 
+    void delAuctions(auctionDB_t *auctions, EventScheduler *e); 
    
     /*! \short   get information from the auction manager
 
@@ -223,9 +206,18 @@ class AuctionManager
         or a set of auctions or all auctions
     */
     string getInfo(void);
+
+    inline string getInfo(int uid){ return getInfo(getAuction(uid)); }
+
     string getInfo(Auction *a);
     string getInfo(string sname, string rname);
     string getInfo(string sname);
+
+    //! Return the number of auctions in the container.
+    inline int getNumAuctions() { return auctions; }
+
+	//! Return the domain
+	inline int getDomain(){ return domain; }
 
     /*! \short   get the ipap_message that contains all the auctions within
      * 			  the container. 

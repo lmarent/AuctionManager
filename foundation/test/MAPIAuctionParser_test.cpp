@@ -9,7 +9,6 @@
 
 #include "ParserFcts.h"
 #include "MAPIAuctionParser.h"
-#include "AuctionIdSource.h"
 #include "FieldDefParser.h"
 #include "IpAp_message.h"
 #include "anslp_ipap_xml_message.h"
@@ -32,7 +31,6 @@ class MAPIAuctionParser_Test : public CppUnit::TestFixture {
   private:
     
     AuctionFileParser *ptrAuctionFileParser;
-    AuctionIdSource *idSource;
     ipap_template_container *templates;
     FieldDefParser *ptrFieldParsers;
     MAPIAuctionParser *ptrMAPIAuctionParser;
@@ -51,12 +49,12 @@ void MAPIAuctionParser_Test::setUp()
 
 	try
 	{
-		ptrAuctionFileParser = new AuctionFileParser(filename);
+		int domain = 0;
 		
-		ptrMAPIAuctionParser = new MAPIAuctionParser();
-				
-		idSource = new AuctionIdSource(1); // Unique.
+		ptrAuctionFileParser = new AuctionFileParser(domain, filename);
 		
+		ptrMAPIAuctionParser = new MAPIAuctionParser(domain);
+						
 		templates = new ipap_template_container();
 
 		// load the filter def list
@@ -66,13 +64,13 @@ void MAPIAuctionParser_Test::setUp()
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 }
 
 void MAPIAuctionParser_Test::tearDown() 
 {
 	delete(ptrAuctionFileParser);
-	delete(idSource);
     delete(ptrFieldParsers);
 	delete(templates);
 	delete(ptrMAPIAuctionParser);
@@ -95,16 +93,31 @@ void MAPIAuctionParser_Test::testParser()
 		uint16_t port = 12246;
 		
 		
-		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, idSource, templates );
-				
-		cout << (*new_auctions)[0]->getInfo() << endl;
+		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, templates );
 		
+		// Change the status of auctions in order to see that it send the correct 
+		// information in the xml message.
+		auctionDBIter_t iter;
+		for (iter = new_auctions->begin(); iter != new_auctions->end(); ++iter)
+		{
+			(*iter)->setState(AO_ACTIVE);
+		}
+						
 		// Build the message from auctions in the vector
 				
 		ipap_message * messages2 = ptrMAPIAuctionParser->
 						get_ipap_message(&fieldDefs, new_auctions, 
 										  templates, domainId, useIPV6, 
 										  sAddressIPV4, sAddressIPV6, port );
+
+		anslp::msg::anslp_ipap_message msgb (*messages2);	
+		
+		anslp::msg::anslp_ipap_xml_message xmlMes;
+		
+		string sxmlMes = xmlMes.get_message(msgb);
+		
+		// Please activate to print the message. 
+		// cout << "Message:" << sxmlMes << endl;
 
 		saveDelete(messages2);
 
@@ -120,8 +133,6 @@ void MAPIAuctionParser_Test::testParser()
 		
 		const string resourceRequestFilename = "../../etc/ResponseRequestMessage.xml";
 		
-		cout << resourceRequestFilename << endl;
-		
 		std::ifstream in(resourceRequestFilename.c_str());
 		std::stringstream buffer;
 		buffer << in.rdbuf();
@@ -129,22 +140,16 @@ void MAPIAuctionParser_Test::testParser()
 		
 		anslp::msg::anslp_ipap_xml_message mess;
 		anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(test);
-				
+						
 		ptrMAPIAuctionParser->parse( &fieldDefs,
 									 &(ipap_mes->ip_message),
 									 new_auctions2,
 									 templates );
-		
+				
 		CPPUNIT_ASSERT( new_auctions2->size() == 1 );
 		
 		saveDelete(new_auctions2);
-		
-		list<int> templList = templates->get_template_list();
-		
-		for (list<int>::iterator i = templList.begin(); i != templList.end(); ++i ){
-			cout << "template id: " << *i << endl;
-		}
-		
+				
 	}
 	catch (Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;

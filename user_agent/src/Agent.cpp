@@ -221,8 +221,8 @@ Agent::Agent( int argc, char *argv[])
         auto_ptr<MAPIResourceRequestParser> _mrrp(new MAPIResourceRequestParser());
         mrrp = _mrrp;
 
-        auto_ptr<SessionManager> _ssmp(new SessionManager());
-        ssmp = _ssmp;
+        auto_ptr<AgentSessionManager> _asmp(new AgentSessionManager());
+        asmp = _asmp;
         
         auto_ptr<EventSchedulerAgent> _evnt(new EventSchedulerAgent());
         evnt = _evnt;
@@ -589,6 +589,7 @@ void Agent::handleAddBidsAuction(Event *e)
 #ifdef DEBUG
 	log->dlog(ch,"processing event add bid auction" );
 #endif		  
+
 	try
 	{
 
@@ -604,6 +605,51 @@ void Agent::handleAddBidsAuction(Event *e)
 	}
 }
 
+void Agent::handleAddGeneratedBids(Event *e, fd_sets_t *fds)
+{
+
+#ifdef DEBUG
+       log->dlog(ch,"processing event addi generated bids" );
+#endif
+
+	bidDB_t *new_bids = NULL;
+
+   try {
+
+       // support only XML rules from file
+       new_bids = ((AddGeneratedBidsEvent *)e)->getBids());
+             
+       // TODO AM : test bid spec 
+       //proc->checkRules(new_rules);
+
+#ifdef DEBUG
+       log->dlog(ch,"Bids sucessfully checked " );
+#endif
+
+       // no error so lets add the rules and schedule for activation
+       // and removal
+       bidm->addBids(new_bids, evnt.get());
+
+	   evnt.get()->addEvent(new TransmitBidsEvent(*bids));
+
+       saveDelete(new_bids);
+
+
+#ifdef DEBUG
+       log->dlog(ch,"Bids sucessfully added " );
+#endif
+
+
+    } catch (Error &e) {
+       // error in bid(s)
+       if (new_bids) {
+            saveDelete(new_bids);
+       }
+       throw e;
+    }	
+	
+}
+
 void Agent::handleRemoveBids(Event *e)
 {
 #ifdef DEBUG
@@ -614,10 +660,67 @@ void Agent::handleRemoveBids(Event *e)
     // now get rid of the expired bid
     proc->delBids(bids);
     bidm->delBids(bids, evnt.get());
-    
+        
 #ifdef DEBUG
 	log->dlog(ch,"Ending event remove bids" );
 #endif
+}
+
+void Agent::handleTransmitBids(Event *e, fd_sets_t *fds)
+{
+
+	bidDB_t *bids = ((TransmitBidsEvent *)e)->getBids();
+	
+	// get the request 
+	string reqSet = ((TransmitBidsEvent *)e)->getRequestSet();
+	string reqName = ((TransmitBidsEvent *)e)->getRequestName();
+	
+	// get the request interval start
+	time_t start = ((TransmitBidsEvent *)e)->getStart();
+	time_t stop = ((TransmitBidsEvent *)e)->getStop();
+
+	// Look for the session associated with the request.
+	resourceReq_interval_t reqInterval = 
+			rrmp->getResourceRequest(reqSet, reqName)->getIntervalByStart();
+	
+	string sessionId = reqInterval.sessionId;
+	
+	bidDBIter_t iter;
+	for (iter = bids->begin(); iter != bids->end(); ++iter)
+	{
+		// We find the auction for the bid
+		Auction *a = aucm->getAuction((*iter)->getAuctionSet(), (*iter)->getAuctionName());
+		
+		// We obtain from the auction the connection settings for auctioning ( Ip address, port, Ip_version )
+		
+		if (ipVersion = 4)
+			destinAddr = destinIPv4Addr;
+		else 	
+			destinAddr = destinIpv6Addr;
+			
+		// Search for the corresponding session for this connection
+		AgentSession *session = 
+				asmp->getSession(sessionId, defaultSourceAddr, defaultSourcePort, destinAddr, destinPort );
+										
+		if (session == NULL){ 
+			session = asmp->createAgentSession(sessionId, defaultSourceAddr, defaultSourceAddr, 
+									   destinAddr, defaultSourcePort, destinPort, 
+										  defaultProtocol, defaultLifetime );
+			asmp->addSession(session);
+		}
+		
+		uint32_t mid = session->getNextMessageId();
+		
+		// Save the message within the pending messages.
+		pendingMessages[mid] = *mes; 
+		
+		// Finally send the message through the anslp client application.
+		anslpc->tg_bidding( session->getSenderAddress(), session->getReceiverAddress(), 
+							session->getSenderPort(), session->getReceiverPort(),
+							session->getProtocol(), mes );
+		
+		
+	}
 }
 
 void Agent::handleRemoveBidFromAuction(Event *e)
@@ -867,11 +970,10 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 			
 			// Add to the index of sessions to resource request intervals.
 			
-			session = req->getSession( interval.start, interval.stop, 
-									   defaultSourceAddr, defaultSourceAddr, 
-									   defaultDestinAddr, defaultSourcePort, 
-									   defaultDestinPort, defaultProtocol,
-									   defaultLifeTime  );
+			session = asmp->createAgentSession( defaultSourceAddr, defaultSourceAddr, 
+												defaultDestinAddr, defaultSourcePort, 
+												defaultDestinPort, defaultProtocol,
+												defaultLifeTime  );
 			
 			// Convert the request to xml
 			anslp::msg::anslp_ipap_message message(*mes);
@@ -880,9 +982,6 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 #ifdef DEBUG
 			log->dlog(ch,xmlMessage3.c_str() );
 #endif
-
-
-			
 			
 			// Call the anslp client for sending the message.
 			
@@ -1082,7 +1181,13 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
     case ADD_BIDS:
 		handleAddBids(e,fds);
       break;
+	
+	case ADD_GENERATED_BIDS:
+		handleAddGeneratedBids(e,fds);
       
+	case TRANSMIT_BIDS:
+		handleTransmitBids(e,fds);
+
 	case ADD_BID_AUCTION:
 		handleAddBidsAuction(e);
 	  break;

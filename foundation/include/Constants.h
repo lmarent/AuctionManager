@@ -40,8 +40,9 @@ namespace auction
 extern const string DEFAULT_CONFIG_FILE;
 extern const string NETAUM_LOCK_FILE;
 extern const int    DEF_SNAPSIZE;
+extern const string AUC_DEFAULT_SETNAME;
 
-// RuleManager.cpp
+// AuctionManager.cpp
 extern const unsigned int  DONE_LIST_SIZE;
 extern const string        FIELDVAL_FILE;
 extern const string        FILTERDEF_FILE;
@@ -58,7 +59,7 @@ extern const string AUCTIONFILE_DTD;
 
 // Bid.cpp
 extern const string TIME_FORMAT;
-extern const string DEFAULT_SETNAME;
+extern const string BID_DEFAULT_SETNAME;
 
 // FieldDefParser.cpp
 extern const string FIELDDEF_FILE;
@@ -93,6 +94,9 @@ extern const string CERT_FILE;
 
 // MAPIResourceRequestParser.cpp
 extern const string NO_AUCTION_VALUE; 
+
+// Allocation.cpp
+extern const string ALL_DEFAULT_SETNAME;
 
 };
 

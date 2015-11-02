@@ -1,0 +1,292 @@
+#include <sys/types.h>
+#include <time.h>     
+#include <iostream>
+#include <map>
+#include <stdio.h>
+#include "config.h"
+#include "stdincpp.h"
+#include "IpAp_template.h"
+#include "ProcError.h"
+#include "ProcModule.h"
+
+const int MOD_INIT_REQUIRED_PARAMS = 2;
+
+int lastBidGenerated = 0;
+int domainId = 0;
+
+void auction::initModule( auction::configParam_t *params )
+{
+
+#ifdef DEBUG
+	fprintf( stdout,  "bas module: start init module \n");
+#endif
+	
+	// Require the lastBidGenerated and domainId.
+	lastBidGenerated = 5;
+	domainId = 7;
+		
+#ifdef DEBUG
+	fprintf( stdout,  "bas module: end init module \n");
+#endif
+
+}
+
+void auction::destroyModule( auction::configParam_t *params )
+{
+#ifdef DEBUG
+	fprintf( stdout, "bas module: start destroy module \n");
+#endif
+	
+	// Return the lastBid generated. 
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: end destroy module \n");
+#endif
+
+}
+
+/*-- Return 1 if Ok, 0 otherwise. */
+int check(auction::fieldDefList_t *fieldDefs, auction::fieldList_t *requestparams)
+{
+	set<ipap_field_key>requiredFields;
+	requiredFields.insert(ipap_field_key(0,IPAP_FT_QUANTITY));
+	requiredFields.insert(ipap_field_key(0,IPAP_FT_TOTALBUDGET));
+	requiredFields.insert(ipap_field_key(0,IPAP_FT_MAXUNITVALUATION));
+	requiredFields.insert(ipap_field_key(0,IPAP_FT_STARTSECONDS));
+	requiredFields.insert(ipap_field_key(0,IPAP_FT_ENDSECONDS));
+	
+	set<ipap_field_key>::iterator iter;
+	
+	for (iter = requiredFields.begin(); iter != requiredFields.begin(); ++iter)
+	{
+		 auction::fieldDefItem_t fieldItem = 
+				auction::IpApMessageParser::findField(fieldDefs, iter->get_eno(), iter->get_ftype());
+		 if ((fieldItem.name).empty())
+			return 0;
+	}
+	
+	return 1;
+}
+
+void fillField(auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
+			   int eno, int ftype, string value, auction::fieldList_t *fields)
+{
+	auction::fieldDefItem_t iter;
+	auction::field_t field;
+	initializeField(&field);
+	
+	iter = auction::IpApMessageParser::findField(fieldDefs, eno, ftype);
+	field.name = iter.name;
+	field.len = iter.len;
+	field.type = iter.type;
+	auction::IpApMessageParser::parseFieldValue(fieldVals, value, &field);
+	
+	fields->push_back(field);
+
+}
+ 
+
+auction::Bid *
+createBid( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
+		   auction::Auction *auct, float quantity, double unitbudget, 
+		   double unitprice, string start, string stop )
+{										  		
+	uint64_t timeUint64;
+	auction::Bid *bid = NULL;
+
+	// Bring fields defined for ipap_messages;
+	ipap_field_container g_ipap_fields;
+	g_ipap_fields.initialize_forward();
+    g_ipap_fields.initialize_reverse();
+	
+	auction::elementList_t elements;
+    auction::optionList_t options;
+	
+	// Insert elements that belong to the bid
+	
+	auction::fieldList_t elementFields;
+	
+	// Insert Record Id.
+	string recordId = "Unique";
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_IDRECORD, recordId, &elementFields);
+	
+	// Insert quantity
+	ipap_field fQuantity = g_ipap_fields.get_field(0, IPAP_FT_QUANTITY);	
+	ipap_value_field fVQuantity = fQuantity.get_ipap_value_field( quantity );
+	string squantity = fQuantity.writeValue(fVQuantity);
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_QUANTITY, squantity, &elementFields);
+
+	// Insert unit budget
+	ipap_field fUnitBudget = g_ipap_fields.get_field(0, IPAP_FT_UNITBUDGET);	
+	ipap_value_field fVUnitBudget = fUnitBudget.get_ipap_value_field( unitbudget );
+	string sunitbudget = fUnitBudget.writeValue(fVUnitBudget);
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_UNITBUDGET, sunitbudget, &elementFields);
+	
+	// Insert unit price
+	ipap_field fUnitPrice = g_ipap_fields.get_field(0, IPAP_FT_UNITVALUE);	
+	ipap_value_field fVUnitPrice = fUnitPrice.get_ipap_value_field( unitprice );
+	string sunitprice = fUnitPrice.writeValue(fVUnitPrice);
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_UNITVALUE, sunitprice, &elementFields);
+	
+	elements[recordId] = elementFields;
+	
+	// Insert options that belong to the bid.
+	string optionId = "Unique";
+	auction::fieldList_t optionFields;
+
+	// Insert start
+	ipap_field fStart = g_ipap_fields.get_field(0, IPAP_FT_STARTSECONDS);	
+	timeUint64 = *reinterpret_cast<uint64_t*>(&start);
+	ipap_value_field fVStart = fStart.get_ipap_value_field( timeUint64 );
+	string sstart = fStart.writeValue(fVStart);
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_STARTSECONDS, sstart, &optionFields);
+	
+	// Insert stop
+	ipap_field fStop = g_ipap_fields.get_field(0, IPAP_FT_ENDSECONDS);
+	timeUint64 = *reinterpret_cast<uint64_t*>(&stop);	
+	ipap_value_field fVStop = fStop.get_ipap_value_field( timeUint64 );
+	string sstop = fStop.writeValue(fVStop);
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_ENDSECONDS, sstop, &optionFields);
+	
+	options.push_back(pair<string,auction::fieldList_t>(optionId, optionFields));
+
+
+	// Bid Set and name
+	string bidSet = "Agent_" + intToString(domainId);
+	lastBidGenerated ++;
+	string bidName = "Bid_" + intToString(lastBidGenerated);
+
+    bid = new auction::Bid(auct->getSetName(), auct->getAuctionName(), 
+							bidSet, bidName, elements, options);
+    
+	return bid;
+
+}
+
+void auction::execute (auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,  
+					   auction::configParam_t *params, string aset, string aname, auction::bidDB_t *bids, 
+					   auction::allocationDB_t **allocationdata )
+{
+
+}
+
+void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
+							auction::fieldList_t *requestparams, auction::auctionDB_t *auctions, 
+							auction::bidDB_t **biddata )
+{
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: start execute %d \n",  (int) auctions->size() );
+#endif
+
+	auction::fieldDefItem_t fieldItem;
+	double budget, valuation;
+	double budgetByAuction, valuationByAuction;
+	float quantity;
+	string start, stop;
+	
+	int check_ret = check(fieldDefs, requestparams);
+	
+	if ((check_ret > 0) && (auctions->size() > 0) ){
+		
+		// Get the total money and budget and divide them by the number of auctions
+		fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_TOTALBUDGET);
+		budget = getDoubleField(requestparams, fieldItem.name);
+		
+		fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_MAXUNITVALUATION);
+		valuation = getDoubleField(requestparams, fieldItem.name);
+
+		fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_QUANTITY);
+		quantity = getFloatField(requestparams, fieldItem.name);
+
+		fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_STARTSECONDS);
+		start = getStringField(requestparams, fieldItem.name);
+
+		fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_ENDSECONDS);
+		stop = getStringField(requestparams, fieldItem.name);
+		
+		budgetByAuction = budget / (int) auctions->size();
+		valuationByAuction = valuation / (int) auctions->size();
+		
+		auctionDBIter_t auctIter;
+		for (auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter)
+		{
+			auction::Bid * bid = createBid( fieldDefs, fieldVals, *auctIter, quantity, 
+											budgetByAuction, valuationByAuction, 
+												start, stop );
+			(*biddata)->push_back(bid);
+		}
+		
+	}
+		
+#ifdef DEBUG
+	fprintf( stdout, "bas module: end execute \n" );
+#endif
+
+}
+
+void auction::destroy( auction::configParam_t *params )
+{
+#ifdef DEBUG
+	fprintf( stdout, "bas module: start destroy \n");
+#endif
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: end destroy \n");
+#endif
+}
+
+void auction::reset( auction::configParam_t *params )
+{
+#ifdef DEBUG
+	fprintf( stdout, "bas module: start reset \n");
+#endif
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: end reset \n");
+#endif
+}
+
+const char* auction::getModuleInfo( int i )
+{
+#ifdef DEBUG
+	fprintf( stdout, "bas module: start getModuleInfo \n");
+#endif
+
+    /* fprintf( stderr, "count : getModuleInfo(%d)\n",i ); */
+
+    switch(i) {
+    case auction::I_MODNAME:    return "Basic User Auction procedure";
+    case auction::I_ID:		   return "bas_user";
+    case auction::I_VERSION:    return "0.1";
+    case auction::I_CREATED:    return "2015/10/28";
+    case auction::I_MODIFIED:   return "2015/10/28";
+    case auction::I_BRIEF:      return "Bid process to verify general functionality of the auction manager";
+    case auction::I_VERBOSE:    return "The auction just choose put the budget and unit price given as parameters"; 
+    case auction::I_HTMLDOCS:   return "http://www.uniandes.edu.co/... ";
+    case auction::I_PARAMS:     return "None";
+    case auction::I_RESULTS:    return "The set of assigments";
+    case auction::I_AUTHOR:     return "Andres Marentes";
+    case auction::I_AFFILI:     return "Universidad de los Andes, Colombia";
+    case auction::I_EMAIL:      return "la.marentes455@uniandes.edu.co";
+    case auction::I_HOMEPAGE:   return "http://homepage";
+    default: return NULL;
+    }
+
+#ifdef DEBUG
+	fprintf( stdout, "bas user module: end getModuleInfo \n");
+#endif
+}
+
+char* auction::getErrorMsg( int code )
+{
+#ifdef DEBUG
+	fprintf( stdout, "bas user module: start getErrorMsg \n");
+#endif
+	
+	return NULL;
+
+#ifdef DEBUG
+	fprintf( stdout, "bas user module: end getErrorMsg \n");
+#endif
+}

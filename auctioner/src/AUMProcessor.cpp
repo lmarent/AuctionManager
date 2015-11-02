@@ -40,17 +40,15 @@ setFieldsList_t AUMProcessor::fieldSets;
 
 /* ------------------------- AUMProcessor ------------------------- */
 
-AUMProcessor::AUMProcessor(ConfigManager *cnf, string fdname, int threaded, string moduleDir ) 
+AUMProcessor::AUMProcessor(ConfigManager *cnf, string fdname, string fvname, int threaded, string moduleDir ) 
     : AuctionManagerComponent(cnf, "AUM_PROCESSOR", threaded), 
-	  IpApMessageParser(), fieldDefFileName(fdname)
+	  IpApMessageParser(), FieldDefManager(fdname, fvname)
 {
     string txt;
     
 #ifdef DEBUG
     log->dlog(ch,"Starting");
 #endif
-
-	loadFieldDefs(fdname);
 
     if (moduleDir.empty()) {
 		txt = cnf->getValue("ModuleDir", "AUM_PROCESSOR");
@@ -98,51 +96,6 @@ AUMProcessor::~AUMProcessor()
 
 }
 
-/* -------------------- isReadableFile -------------------- */
-
-static int isReadableFile( string fileName ) {
-
-    FILE *fp = fopen(fileName.c_str(), "r");
-
-    if (fp != NULL) {
-        fclose(fp);
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-/* -------------------- loadFieldDefs -------------------- */
-
-void AUMProcessor::loadFieldDefs(string fname)
-{
-    if (fieldDefFileName.empty()) {
-        if (fname.empty()) {
-            fname = FIELDDEF_FILE;
-		}
-    } else {
-        fname = fieldDefFileName;
-    }
-
-#ifdef DEBUG
-    log->dlog(ch, "filename %s", fname.c_str());
-#endif
-
-    if (isReadableFile(fname)) {
-        if (fieldDefs.empty() && !fname.empty()) {
-            FieldDefParser f = FieldDefParser(fname.c_str());
-            f.parse(&fieldDefs);
-        }
-    
-    }else{
-#ifdef DEBUG
-    log->dlog(ch, "filename %s is not readable", fname.c_str());
-#endif    
-    }
-    
-}
-
-
 miscList_t 
 AUMProcessor::readMiscData( ipap_template *templ, ipap_data_record &record)
 {
@@ -159,7 +112,8 @@ AUMProcessor::readMiscData( ipap_template *templ, ipap_data_record &record)
 		ipap_value_field dFieldValue = fieldIter->second;
 		
 		fieldDefItem_t fItem = 
-			findField(&fieldDefs, kField.get_eno() , kField.get_ftype());
+			findField(FieldDefManager::getFieldDefs(), 
+						 kField.get_eno() , kField.get_ftype());
 			
 		if ((fItem.name).empty()){
 			ostringstream s;
@@ -285,10 +239,11 @@ int AUMProcessor::executeAuction(int rid, string rname)
     
     cout << "Allocation Size:" << allocations->size() << endl;
         
-	(auctionprocess->action.mapi)->execute( (auctionprocess->action).params, 
+	(auctionprocess->action.mapi)->execute( FieldDefManager::getFieldDefs(),
+									FieldDefManager::getFieldVals(),
+									(auctionprocess->action).params, 
 									(auctionprocess->auction)->getSetName(),
 									(auctionprocess->auction)->getAuctionName(),
-									&fieldDefs, 
 									&(auctionprocess->bids), 
 									&(allocations) );
 	
@@ -386,10 +341,7 @@ int AUMProcessor::addAuction( Auction *a, EventScheduler *evs )
 			 // init module
 			 cout << "Num parameters:"  << (action->conf).size() << endl;
 			 entry.action.params = ConfigManager::getParamList( action->conf );
-			
-            // add timer events once (only adds events on first module use)
-            entry.action.module->addTimerEvents( *evs );
-		
+					
 		}
 		// success ->enter struct into internal map
 		auctions[auctionId] = entry;

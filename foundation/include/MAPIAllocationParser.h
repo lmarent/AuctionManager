@@ -31,7 +31,6 @@
 
 #include "stdincpp.h"
 #include "IpAp_message.h"
-#include "AllocationIdSource.h"
 #include "Allocation.h"
 #include "IpApMessageParser.h"
 
@@ -40,7 +39,7 @@ namespace auction
 
 //! parser for API text Bid syntax
 
-class MAPIAllocationParser : public IpApMessageParser
+class MAPIAllocationParser : public IpApMessageParser, public anslp::msg::anslp_ipap_message_splitter
 {
 
   private:
@@ -79,10 +78,16 @@ class MAPIAllocationParser : public IpApMessageParser
 		   				  
 	ipap_message * get_ipap_message(Allocation *bidPtr, 
 									fieldDefList_t *fieldDefs);
+
+	void parseAuctionKey( fieldDefList_t *fieldDefs, 
+						  fieldValList_t *filterVals, 
+						  const anslp::msg::xml_object_key &key, 
+						  allocationDB_t *allocations, 
+						  ipap_template_container *templatesOut );
 	
   public:
 
-    MAPIAllocationParser();
+    MAPIAllocationParser(int domain);
 
     ~MAPIAllocationParser() {}
 
@@ -91,8 +96,7 @@ class MAPIAllocationParser : public IpApMessageParser
 			   fieldValList_t *filterVals,
 			   ipap_message *message,
 			   allocationDB_t *allocations,
-			   AllocationIdSource *idSource,
-			   ipap_message *messageOut );
+			   ipap_template_container *templatesOut );
 					   
 	//! get the ipap_message that represents the set of bids.
 	vector<ipap_message *> get_ipap_messages(fieldDefList_t *fieldDefs, 

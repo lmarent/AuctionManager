@@ -75,14 +75,14 @@ void Allocation_Manager_Test::createAllocations()
 		field_t field1;
 		
 		auction::fieldDefListIter_t iter; 
-		iter = manager->getFieldDef()->find("quantity");
+		iter = manager->getFieldDefs()->find("quantity");
 		field1.len = iter->second.len;
 		field1.type = iter->second.type;
 		string fvalue = "2";
 		field1.parseFieldValue(fvalue);
 				
 		field_t field2;
-		iter = manager->getFieldDef()->find("unitprice");
+		iter = manager->getFieldDefs()->find("unitprice");
 		field2.len = iter->second.len;
 		field2.type = iter->second.type;
 		string fvalue2 = "0.015";
@@ -127,7 +127,9 @@ void Allocation_Manager_Test::setUp()
 
 		const string fieldname = DEF_SYSCONFDIR "/fielddef.xml";
 		
-		manager = new AllocationManager(fieldname);
+		const string fieldvalname = DEF_SYSCONFDIR "/fieldval.xml";
+		
+		manager = new AllocationManager(fieldname, fieldvalname);
 		
 		auto_ptr<EventScheduler> _evnt(new EventScheduler());
         evnt = _evnt;
@@ -150,6 +152,7 @@ void Allocation_Manager_Test::testAllocationManager()
 	try
 	{
 		const string fieldname = DEF_SYSCONFDIR "/fielddef.xml";
+		const string fieldvalname = DEF_SYSCONFDIR "/fieldval.xml";
 
 		createAllocations();
 		// Add both allocations in the manager
@@ -176,7 +179,7 @@ void Allocation_Manager_Test::testAllocationManager()
 		// Release all allocations.
 		saveDelete(manager);
 				
-		manager = new AllocationManager(fieldname);
+		manager = new AllocationManager(fieldname, fieldvalname);
 		
 		createAllocations();
 
@@ -196,7 +199,7 @@ void Allocation_Manager_Test::testAllocationManager()
 		// Release all allocations.
 		saveDelete(manager);
 				
-		manager = new AllocationManager(fieldname);
+		manager = new AllocationManager(fieldname, fieldvalname);
 		
 		createAllocations();
 
@@ -210,7 +213,7 @@ void Allocation_Manager_Test::testAllocationManager()
 		// Release all allocations.
 		saveDelete(manager);
 				
-		manager = new AllocationManager(fieldname);
+		manager = new AllocationManager(fieldname, fieldvalname);
 		
 		createAllocations();
 		

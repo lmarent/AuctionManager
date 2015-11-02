@@ -278,7 +278,7 @@ ParserFcts::parseTime(string timestr)
     if (timestr[0] == '+') {
         // relative time in secs to start
         try {
-	    struct tm tm;
+			struct tm tm;
             int secs = parseInt(timestr.substr(1,timestr.length()));
             time_t start = time(NULL) + secs;
             return mktime(localtime_r(&start,&tm));
@@ -286,9 +286,20 @@ ParserFcts::parseTime(string timestr)
             throw Error("Incorrect relative time value '%s'", timestr.c_str());
         }
     } else {
-        // absolute time
-        if (timestr.empty() || (strptime(timestr.c_str(), TIME_FORMAT.c_str(), &t) == NULL)) {
+        // absolute time in the time format 
+        if (timestr.empty()) {
             return 0;
+        } else if (timestr.find_first_not_of("0123456789") == std::string::npos) {
+			try{
+				uint64_t secs = parseULong(timestr);
+				time_t start = secs;
+				return mktime(localtime_r(&start,&t));
+			} catch (Error &e) {
+				throw Error("Incorrect absolute time value '%s'", timestr.c_str());
+			}
+		}
+        else if ((strptime(timestr.c_str(), TIME_FORMAT.c_str(), &t) == NULL)){
+			return 0;
         }
     }
     return mktime(&t);

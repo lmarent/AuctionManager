@@ -142,20 +142,20 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 						const hostaddress &destination_addr,
 					    uint16_t source_port, uint16_t dest_port, 
 						uint8_t protocol, uint32_t session_lifetime, 
-						ipap_message *message )
+						ipap_message &message )
 {
 #ifdef DEBUG
     log->dlog(ch,"Starting tg_create");
 #endif
 	
 
-	anslp_ipap_message *mess = new anslp_ipap_message(*message);    
+	anslp_ipap_message mess(message);    
          
     FastQueue ret;
 	    
     // Build the vector of objects to be configured.
     vector<msg::anslp_mspec_object *> mspec_objects;
-    mspec_objects.push_back(mess->copy());
+    mspec_objects.push_back(mess.copy());
 
     // Create a new event for launching the configure event.
     event *e = new api_create_event(source_addr, destination_addr, source_port, 
@@ -189,7 +189,6 @@ AnslpClient::tg_create( const hostaddress &source_addr,
     anslp::session_id sid = r->get_session_id();
         
     saveDelete(r);
-    saveDelete(mess);
 
 #ifdef DEBUG
     log->dlog(ch,"Ending tg_create -Session configured");
@@ -222,7 +221,10 @@ AnslpClient::tg_teardown(session_id id)
 }
 
 void 
-AnslpClient::tg_bidding(anslp::session_id, ipap_message *message)
+AnslpClient::tg_bidding(session_id sid, const hostaddress &source_addr, 
+						const hostaddress &destination_addr,
+					    uint16_t source_port, uint16_t dest_port, 
+						uint8_t protocol, ipap_message &message)
 {
 
 #ifdef DEBUG
@@ -232,9 +234,43 @@ AnslpClient::tg_bidding(anslp::session_id, ipap_message *message)
     // Build an ipap_message for a create session, which only has 
     // auction template options.
 	// Build the request message 
-	anslp_ipap_message *mess = new anslp_ipap_message();    
-             
-    saveDelete(mess);
+
+	anslp_ipap_message mess(message);    
+         
+    FastQueue ret;
+	    
+    // Build the vector of objects to be configured.
+    vector<msg::anslp_mspec_object *> mspec_objects;
+    mspec_objects.push_back(mess.copy());
+
+    // Create a new event for launching the configure event.
+    event *e = new api_bidding_event(sid, source_addr, destination_addr, source_port, 
+   				       dest_port, protocol, mspec_objects, &ret);
+
+    anslp_event_msg *msg = new anslp_event_msg(session_id(), e);
+
+	anslp_daemon *anslpd = starter->get_thread_object();
+
+    anslpd->get_fqueue()->enqueue(msg);
+	
+    protlib::message *ret_msg = ret.dequeue_timedwait(10000);
+
+    anslp_event_msg *r = dynamic_cast<anslp_event_msg *>(ret_msg);
+
+	time_t now;
+	struct tm *current;
+	now = time(0);
+	current = localtime(&now);
+	struct timeval detail_time;
+	gettimeofday(&detail_time,NULL);
+
+	cout << "hour: " << current->tm_hour 
+		 << "mins: " << current->tm_min
+		 << "sec: " << current->tm_sec 
+		 << "milli: " << detail_time.tv_usec/1000 << endl;	
+	
+    saveDelete(r);
+
         
 #ifdef DEBUG
     log->dlog(ch,"Ending tg_bidding ");

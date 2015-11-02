@@ -37,7 +37,7 @@ using namespace auction;
  *
  */
 Session::Session(string _sessionId):
-	sessionId(_sessionId)
+	sessionId(_sessionId), mId()
 {
 	
 }
@@ -162,6 +162,13 @@ Session::getLifetime()
 	return lifetime;
 }
 
+/* ------------------------ getMessageId -----------------------*/
+
+uint32_t 
+Session::getNextMessageId()
+{
+	return mId.newId();
+}
 
 void 
 Session::setAnlspSession(anslp::session_id _sid)
@@ -187,7 +194,9 @@ string Session::getInfo()
 	
 	os << " protocol:" << getProtocol() << " lifetime:" << getLifetime() << endl;
 	
-	os << " anslp-session:" <<  getAnlspSession() ;
+	os << " anslp-session:" <<  getAnlspSession() << endl;
+	
+	os << "last Message Nbr:" << mId << endl;
 	
 	return os.str();
 }

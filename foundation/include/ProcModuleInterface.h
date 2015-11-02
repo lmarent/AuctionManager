@@ -32,13 +32,14 @@
 #include "stdinc.h"
 #include "metadata.h"
 #include "FieldDefParser.h"
+#include "FieldValParser.h"
 #include "Field.h"
 
 namespace auction
 {
 
-class Allocation;
-class Bid;
+class Auction;
+class BiddingObject;
 
 
 // configuration parameter passed to the module
@@ -103,16 +104,13 @@ static const int offset_refer[] = {
     ( 0 )
 };
 
+//! auction list
+typedef vector<Auction*>            auctionDB_t;
+typedef vector<Auction*>::iterator  auctionDBIter_t;
 
 //! Bid list
-typedef vector<Bid*>            bidDB_t;
-typedef vector<Bid*>::iterator  bidDBIter_t;
-
-
-//! Allocation list
-typedef vector<Allocation*>            allocationDB_t;
-typedef vector<Allocation*>::iterator  allocationDBIter_t;
-
+typedef vector<BiddingObject*>            	biddingObjectDB_t;
+typedef vector<BiddingObject*>::iterator   biddingObjectDBIter_t;
 
 typedef int (*proc_timeout_func_t)( int timerID, void *flowdata );
 
@@ -129,21 +127,33 @@ void initModule( configParam_t *params );
 void destroyModule( configParam_t *params );
 
 
-/*! \short   execute the the auction for the list of bids given as parameter
+/*! \short   execute the auction for the list of bids given as parameter
 
-    \arg \c  params - module parameter text from inside '( )'
-    \arg \c  bids   - bids to include in the execution process.
-    \arg \c  allocationdata  - allocationData returned by the auction process.
-    \returns 0 - on success (parameters are valid), <0 - else
+    \arg \c  params 			- module parameter text from inside '( )'
+    \arg \c  bids   			- bids to include in the execution process.
+    \arg \c  allocationdata 	- allocationData returned by the auction process.
+    
+    Memory allocated within the method and returned in allocationdata should be
+    freed by caller. 
 */
-void execute( configParam_t *params, string aset, string aname, 
-			  fieldDefList_t *fieldDefs, bidDB_t *bids, allocationDB_t **allocationdata );
+void execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
+			  configParam_t *params, string aset, string aname, biddingObjectDB_t *bids, 
+			  biddingObjectDB_t **allocationdata );
 
+/*! \short   execute the bidding process for the list of auctions given 
+ * 			 that are required to support a resource request interval.
 
-/*! \short   get list of default timers for this proc module
-    \returns   list of timer structs
+    \arg \c	 fieldDefs  - definition of fields specified for auctioning. 
+    \arg \c  request 	- request object given 
+    \arg \c  auctions   - auctions that must be executed. 
+    \arg \c  biddata 	- bid created  by the auction process.
+
+    Memory allocated within the method and returned in biddata should be
+    freed by caller. 
+
 */
-timers_t* getTimers( );
+void execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
+				   fieldList_t *requestparams, auctionDB_t *auctions, biddingObjectDB_t **biddata );
 
 
 /*! \short   dismantle the module
@@ -152,7 +162,7 @@ timers_t* getTimers( );
     \arg \c  Configured parameters given to the module.
     \returns 0 - on success, <0 - else
 */
-void destroy( configParam_t *params, allocationDB_t *flowdata );
+void destroy( configParam_t *params );
 
 
 /*! \short   reset flow data record for a rule
@@ -191,14 +201,6 @@ void reset( configParam_t *params );
 */
 const char* getModuleInfo( int i );
 
-
-/*! \short   this function is called if the module supports a timeout callback 
- * 			 function every x seconds and its invocation is configured 
- * 			 to make use of the timeout feature
- */
-int timeout( int timerID );
-
-
 /*! \short   return error message for last failed function
 
     \arg \c    - error number (return value from failed function)
@@ -221,18 +223,22 @@ typedef struct {
     int version;
 
     void (*initModule)( configParam_t *params );
+    
     void (*destroyModule)( configParam_t *params );
 
-    void (*execute)( configParam_t *params, string aset, string aname, 
-					 fieldDefList_t *fieldDefs, bidDB_t *bids, allocationDB_t **allocationdata );
+    void (*execute)( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
+					 configParam_t *params, string aset, string aname, biddingObjectDB_t *bids, 
+					 biddingObjectDB_t **allocationdata );
+
+	void (*execute_user)( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
+						  fieldList_t *requestparams, auctionDB_t *auctions, biddingObjectDB_t **biddata );	
 					 
-    timers_t* (*getTimers)( );
-    void (*destroy)( configParam_t *params, allocationDB_t *allocationdata );
+    void (*destroy)( configParam_t *params );
 
     void (*reset)( configParam_t *params );
-    int (*timeout)(int);
-
+    
     const char* (*getModuleInfo)(int i);
+
     char* (*getErrorMsg)( int code );
 
 } ProcModuleInterface_t;

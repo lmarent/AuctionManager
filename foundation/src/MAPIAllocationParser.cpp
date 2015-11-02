@@ -32,8 +32,8 @@
 
 using namespace auction;
 
-MAPIAllocationParser::MAPIAllocationParser()
-    : IpApMessageParser()
+MAPIAllocationParser::MAPIAllocationParser(int domain)
+    : IpApMessageParser(domain), anslp_ipap_message_splitter()
 {
     log = Logger::getInstance();
     ch = log->createChannel("MAPIAllocationParser" );
@@ -424,11 +424,10 @@ MAPIAllocationParser::readOptionData(ipap_template *templ,
 
 
 void MAPIAllocationParser::parse(fieldDefList_t *fields, 
-						  fieldValList_t *fieldVals,
-						  ipap_message *message,
-						  allocationDB_t *allocations,
-						  AllocationIdSource *idSource,
-						  ipap_message *messageOut )
+								 fieldValList_t *fieldVals,
+								 ipap_message *message,
+								 allocationDB_t *allocations,
+							     ipap_template_container *templatesOut )
 {
 	
 #ifdef DEBUG

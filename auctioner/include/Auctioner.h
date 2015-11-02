@@ -159,6 +159,8 @@ class Auctioner
 	
 	void handleCreateSession(Event *e, fd_sets_t *fds);
 
+	void handleAuctioningInteraction(Event *e, fd_sets_t *fds);
+
     
   public:
 

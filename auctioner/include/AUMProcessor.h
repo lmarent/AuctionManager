@@ -39,6 +39,7 @@
 #include "Logger.h"
 #include "EventScheduler.h"
 #include "IpApMessageParser.h"
+#include "FieldDefManager.h"
 
 namespace auction
 {
@@ -79,22 +80,13 @@ typedef map< agentFieldSet_t, set<ipap_field_key> >::iterator  setFieldsListIter
     the AuctionProcessor class allows auctioning between bids 
 */
 
-class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser
+class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser, public FieldDefManager
 {
   private:
 
     //! associated module loader 
     //! this is the algorithm to execute for the bid
     ModuleLoader *loader;
-
-	//! field definitions
-    fieldDefList_t fieldDefs;
-
-    //! name of field defs file.
-    string fieldDefFileName;
-    
-    //! load field definitions
-    void loadFieldDefs(string fname);
 
     //! action of every auction being processed.
     auctionProcessList_t  auctions;
@@ -117,10 +109,11 @@ class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser
 
         \arg \c cnf        config manager
         \arg \c fdname     field definition file name
+        \arg \c fvname     field value definition file name
         \arg \c threaded   run as separate thread
         \arg \c moduleDir  action module directory
     */
-    AUMProcessor(ConfigManager *cnf, string fdname, int threaded, string moduleDir = "" );
+    AUMProcessor(ConfigManager *cnf, string fdname, string fvname, int threaded, string moduleDir = "" );
 
     //!   destroy a Auction Processor object, to be overloaded
     virtual ~AUMProcessor();
@@ -192,8 +185,6 @@ class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser
     //! dump a AUMProcessor object
     void dump( ostream &os );
 	
-	fieldDefList_t * getFieldDefinitions() { return &fieldDefs; }
-
     //! get the number of action modules currently in use
     int numModules() 
     { 

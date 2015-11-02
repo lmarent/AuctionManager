@@ -297,6 +297,11 @@ AM_CONDITIONAL(CURL, test -n "$CURL_LIBS")
 AC_SUBST(CURL_CFLAGS)
 AC_SUBST(CURL_LIBS)
 
+PKG_CHECK_MODULES(OPENSSL, openssl,
+        CXXFLAGS="$CXXFLAGS `pkg-config --cflags openssl`";
+        LIBS="$LIBS -lcrypto `pkg-config --libs-only-L --libs-only-other openssl`")
+        
+
 PKG_CHECK_MODULES([LIBUUID], [libuuid],
    [LIBUUID_FOUND=yes], [LIBUUID_FOUND=no])
    if test "$LIBUUID_FOUND" = "no" ; then

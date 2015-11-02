@@ -32,7 +32,6 @@
 
 #include "stdincpp.h"
 #include "Logger.h"
-#include "Bid.h"
 #include "Event.h"
 #include "Timeval.h"
 
@@ -91,13 +90,13 @@ class EventScheduler
     void addEvent(Event *ev);
 
 
-    /*! \short   delete all events for a given bid
+    /*! \short   delete all events for a given bidding object
 
         delete all Events related to the specified bid from the list of events
 
         \arg \c uid  - the unique identification number of the bid
     */
-    void delBidEvents(int uid);
+    void delBiddingObjectEvents(int uid);
 
     /*! \short   delete all events for a given auction
 

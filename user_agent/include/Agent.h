@@ -53,7 +53,12 @@ namespace auction
 
 typedef map<int, ipap_template_container* >   		  			agentTemplateList_t;
 typedef map<int, ipap_template_container* >::iterator   		agentTemplateListIter_t;
-typedef map<int, ipap_template_container* >::const_iterator    agentTemplateListConstIter_t;
+typedef map<int, ipap_template_container* >::const_iterator    	agentTemplateListConstIter_t;
+
+typedef map<uint32_t, ipap_message> 					pendingMessageList_t;
+typedef map<uint32_t, ipap_message>::iterator 			pendingMessageListIter_t;
+typedef map<uint32_t, ipap_message>::const_iterator 	pendingMessageListConstIter_t;
+
 
 
 /*! \short   Agent class description
@@ -86,13 +91,14 @@ class Agent
     auto_ptr<ResourceRequestManager>   				rreqm;
     auto_ptr<BidManager>     						bidm;
     auto_ptr<AuctionManager>   						aucm;
-    auto_ptr<SessionManager>   						ssmp;
+    auto_ptr<AgentSessionManager>   				asmp;
     auto_ptr<EventSchedulerAgent>  					evnt;
     auto_ptr<MAPIResourceRequestParser>				mrrp;
     auto_ptr<AnslpClient>							anslpc;
     
     auto_ptr<AgentProcessor> 						proc;    
     auto_ptr<CtrlComm>        						comm;
+    
 
     
     //! logging channel number used by objects of this class
@@ -108,9 +114,10 @@ class Agent
     static int enableCtrl;
 
     //! List of templates exchanged with different domains.
-    agentTemplateList_t 							agentTemplates;
+    agentTemplateList_t agentTemplates;
 
-	
+	//! List of messages pending for confirmation.
+	pendingMessageList_t pendingMessages;
 
 	// defaults values from the configuration file.
 	string defaultSourceAddr;

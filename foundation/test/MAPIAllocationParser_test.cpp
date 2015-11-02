@@ -121,6 +121,7 @@ void MAPIAllocationParser_Test::createAllocations(fieldDefList_t *fieldDefs)
 	}
 	catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 }
@@ -130,6 +131,7 @@ void MAPIAllocationParser_Test::setUp()
 		
 	try
 	{
+		int domain = 0;
 		
 		// load the filter def list
 		loadFieldDefs(&fieldDefs);
@@ -137,12 +139,13 @@ void MAPIAllocationParser_Test::setUp()
 		// load the filter val list
 		loadFieldVals(&fieldVals);
 		
-		ptrMapiAllocationParser = new MAPIAllocationParser();
+		ptrMapiAllocationParser = new MAPIAllocationParser(domain);
 		
 		
 	}
 	catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 }
 
@@ -158,8 +161,6 @@ void MAPIAllocationParser_Test::testMapiAllocationParser()
 {
 	try
 	{
-
-		AllocationIdSource *idSource = new AllocationIdSource(1);
 
 		ipap_message *messageOut = new ipap_message();
 
@@ -177,7 +178,7 @@ void MAPIAllocationParser_Test::testMapiAllocationParser()
 		
 		allocationDB_t *allocations1 = new allocationDB_t();
 		ptrMapiAllocationParser->parse(&fieldDefs, &fieldVals,
-									   vct_message[0],allocations1, idSource, messageOut );
+									   vct_message[0],allocations1, messageOut );
 											   
 		CPPUNIT_ASSERT( allocations1->size() == 1 );
 		ptrAllocation3 = new Allocation(*((*allocations1)[0]));
@@ -185,7 +186,7 @@ void MAPIAllocationParser_Test::testMapiAllocationParser()
 															
 		allocationDB_t *allocations2 = new allocationDB_t();
 		ptrMapiAllocationParser->parse(&fieldDefs, &fieldVals,
-									   vct_message[1],allocations2, idSource, messageOut );
+									   vct_message[1],allocations2, messageOut );
 											   
 		CPPUNIT_ASSERT( allocations2->size() == 1 );
 		ptrAllocation4 = new Allocation(*((*allocations2)[0]));
@@ -212,6 +213,7 @@ void MAPIAllocationParser_Test::loadFieldDefs(fieldDefList_t *fieldList)
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 }
@@ -227,6 +229,7 @@ void MAPIAllocationParser_Test::loadFieldVals(fieldValList_t *fieldValList)
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 }

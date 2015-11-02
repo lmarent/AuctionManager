@@ -40,6 +40,7 @@ SessionManager::SessionManager( )
 {
     log = Logger::getInstance();
     ch = log->createChannel("SessionManager");
+    
 #ifdef DEBUG
     log->dlog(ch,"Starting");
 #endif

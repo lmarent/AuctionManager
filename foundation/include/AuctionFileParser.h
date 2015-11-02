@@ -34,19 +34,17 @@
 #include "libxml/parser.h"
 #include "Logger.h"
 #include "XMLParser.h"
+#include "ProcModuleInterface.h"
 #include "Auction.h"
 #include "ConfigParser.h"
-#include "AuctionIdSource.h"
 #include "IpAp_message.h"
+#include "IpApMessageParser.h"
 
 namespace auction
 {
 
-//! auction list
-typedef vector<Auction*>            auctionDB_t;
-typedef vector<Auction*>::iterator  auctionDBIter_t;
 
-class AuctionFileParser : public XMLParser
+class AuctionFileParser : public XMLParser, IpApMessageParser
 {
   private:
 
@@ -64,9 +62,9 @@ class AuctionFileParser : public XMLParser
 
   public:
 
-    AuctionFileParser( string fname );
+    AuctionFileParser( int domain, string fname );
 
-    AuctionFileParser( char *buf, int len );
+    AuctionFileParser( int domain, char *buf, int len );
 
     virtual ~AuctionFileParser() {}
 
@@ -74,7 +72,6 @@ class AuctionFileParser : public XMLParser
     //! put new templates in message.
     virtual void parse( fieldDefList_t *fieldDefs, 
 						auctionDB_t *bids,
-					    AuctionIdSource *idSource,
 					    ipap_template_container *templates );
 };
 

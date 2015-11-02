@@ -32,7 +32,6 @@ class AuctionFileParser_Test : public CppUnit::TestFixture {
   private:
     
     AuctionFileParser *ptrAuctionFileParser;
-    AuctionIdSource *idSource;
     ipap_template_container *templates;
     FieldDefParser *ptrFieldParsers;
     
@@ -52,10 +51,10 @@ void AuctionFileParser_Test::setUp()
 
 	try
 	{
-		ptrAuctionFileParser = new AuctionFileParser(filename);
-				
-		idSource = new AuctionIdSource(1); // Unique.
+		int domain = 0;
 		
+		ptrAuctionFileParser = new AuctionFileParser(domain, filename);
+						
 		templates = new ipap_template_container();
 
 		// load the filter def list
@@ -65,13 +64,13 @@ void AuctionFileParser_Test::setUp()
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 }
 
 void AuctionFileParser_Test::tearDown() 
 {
 	delete(ptrAuctionFileParser);
-	delete(idSource);
     delete(ptrFieldParsers);
 	delete(templates);
 	
@@ -84,15 +83,13 @@ void AuctionFileParser_Test::testParser()
 	try
 	{
 		
-		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, idSource, templates );
-				
-		cout << (*new_auctions)[0]->getInfo() << endl;
-		
+		ptrAuctionFileParser->parse( &fieldDefs, new_auctions, templates );
 		CPPUNIT_ASSERT( new_auctions->size() == 1 );
 		
 	}
 	catch (Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 }
 
@@ -108,6 +105,7 @@ void AuctionFileParser_Test::loadFieldDefs(fieldDefList_t *fieldList)
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 }

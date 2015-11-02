@@ -40,10 +40,9 @@ auction::ProcModuleInterface_t func =
     auction::initModule, 
     auction::destroyModule, 
     auction::execute, 
-    auction::getTimers, 
+    auction::execute_user, 
     auction::destroy,
     auction::reset, 
-    auction::timeout, 
     auction::getModuleInfo, 
     auction::getErrorMsg 
 };
@@ -69,6 +68,7 @@ void initializeField(auction::field_t *f)
 	}
 
 }
+
 
 /*! Parse parameter functions */
 
@@ -203,4 +203,70 @@ double parseDouble(string s)
 
     return n;
 
+}
+
+
+double getDoubleField(auction::fieldList_t *fields, string name)
+{
+	
+	auction::fieldListIter_t field_iter;
+		
+	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
+	{
+	
+		if ((field_iter->name).compare(name) == 0 ){
+			return parseDouble( ((field_iter->value)[0]).getValue());
+		}
+	}
+	
+	throw auction::ProcError(AUM_FIELD_NOT_FOUND_ERROR, 
+					"Proc module - The given field was not included");
+}
+
+float getFloatField(auction::fieldList_t *fields, string name)
+{
+	
+	auction::fieldListIter_t field_iter;
+		
+	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
+	{
+	
+		if ((field_iter->name).compare(name) == 0 ){
+			return parseFloat( ((field_iter->value)[0]).getValue());
+		}
+	}
+	
+	throw auction::ProcError(AUM_FIELD_NOT_FOUND_ERROR, 
+					"Proc module - The given field was not included");
+}
+
+string getStringField(auction::fieldList_t *fields, string name)
+{
+	
+	auction::fieldListIter_t field_iter;
+		
+	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
+	{
+	
+		if ((field_iter->name).compare(name) == 0 ){
+			return ((field_iter->value)[0]).getValue();
+		}
+	}
+	
+	throw auction::ProcError(AUM_FIELD_NOT_FOUND_ERROR, 
+					"Proc module - The given field was not included");
+}
+
+string doubleToString (double value)
+{
+	std::ostringstream s;
+	s << value;
+	return s.str();
+}
+
+string intToString (int value)
+{
+	std::ostringstream s;
+	s << value;
+	return s.str();
 }

@@ -150,11 +150,10 @@ public:
 
     resourceReq_interval_t getIntervalByEnd(time_t stop);
     
-    auction::AgentSession * getSession(time_t start, time_t stop,  
-								  string sourceAddr, string senderAddr, 
-								  string destinAddr, uint16_t senderPort, 
-								  uint16_t destinPort, uint8_t protocol,
-								  uint32_t lifetime);
+    /*! \short   Assign the session created for the interval.
+     * 
+    */
+    void assignSession(time_t start, time_t stop, string sessionId);
 								  
 	/*! \short This function return the session associated with the interval start
 	 * 	 \returns the session id in string.

@@ -35,9 +35,11 @@ namespace auction
 
 
 // Auction.h
-const string DEFAULT_CONFIG_FILE = DEF_SYSCONFDIR "/netaum.conf.xml";
-const string NETAUM_LOCK_FILE   = DEF_STATEDIR "/run/netaum.pid";
-const int    DEF_SNAPSIZE        = 65536;
+const string DEFAULT_CONFIG_FILE 	= DEF_SYSCONFDIR "/netaum.conf.xml";
+const string NETAUM_LOCK_FILE   	= DEF_STATEDIR "/run/netaum.pid";
+const int    DEF_SNAPSIZE        	= 65536;
+const string AUC_DEFAULT_SETNAME  	= "ActServer_";
+
 
 // BidManager.cpp
 const unsigned int  DONE_LIST_SIZE = 50;
@@ -56,7 +58,7 @@ const string AUCTIONFILE_DTD     = DEF_SYSCONFDIR "/auctionfile.dtd";
 
 // Bid.cpp
 const string TIME_FORMAT      = "%Y-%m-%d %T";
-const string DEFAULT_SETNAME  = "default";
+const string BID_DEFAULT_SETNAME  = "Agent_";
 
 // FieldDefParser.cpp
 const string FIELDDEF_DTD   = DEF_SYSCONFDIR "/fielddef.dtd";
@@ -103,5 +105,9 @@ const string HELP =  "" \
 
 // ResourceRequestFileParser.cpp
 const string NO_AUCTION_VALUE = "ANY"; 
+
+// Allocation.cpp
+const string ALL_DEFAULT_SETNAME = "Alloc_"; 
+
 
 };

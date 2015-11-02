@@ -1099,6 +1099,36 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 	}
 }
 
+void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
+{
+
+	ipap_message *message = NULL;
+	auctionDB_t *auctions = NULL;
+	bidDB_t *bids = NULL;
+	allocationDB_t *allocations = NULL;
+	auction::Session *s = NULL;
+	
+	try {
+
+		string sessionId = ((AuctionInteractionEvent *)e)->getSessionId();
+		
+		// Search for the session that is involved.
+		s = sesm->getSession(string _sessionId);
+		if (s == NULL)
+			throw Error("Session %s not found", sessionId.c_str());
+
+		message = ((AuctionInteractionEvent *)e)->getMessage();
+		auctions = aucm->getAuctions(message);
+		bids = bidm->getAuctions(message);
+		allocations = allm->getAuctions(message);
+		
+		
+	
+	} catch (){
+	
+	}
+
+}
 
 
 /* -------------------- handleEvent -------------------- */
@@ -1173,6 +1203,10 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 
     case CREATE_CHECK_SESSION:
 		handleCreateCheckSession(e,fds);
+		break;
+
+	case AUCTION_INTERACTION:
+		handleAuctioningInteraction(e,fds);
 		break;
 		
     default:
@@ -1451,7 +1485,6 @@ void Auctioner::activateAuctions(auctionDB_t *auctions, EventScheduler *e)
     for (iter = auctions->begin(); iter != auctions->end(); iter++) {
         Auction *a = (*iter);
         log->dlog(ch, "activate auction with name = '%s'", a->getAuctionName().c_str());
-        a->setState(AS_ACTIVE);
 		
 		// Create the execution intervals
 		interval_t inter = a->getInterval();
@@ -1468,6 +1501,9 @@ void Auctioner::activateAuctions(auctionDB_t *auctions, EventScheduler *e)
 #ifdef DEBUG    
     log->dlog(ch, "Activate auctions - Execution interval: %lu", i );
 #endif  
+	
+	// Change the state of the auctions to active.
+	aucm->activateAuctions(auctions, e);
         
         //e->addEvent(new PushExecutionEvent(i, iter2->second, iter2->first.procname,
         //                                i * 1000, iter2->first.interval.align));

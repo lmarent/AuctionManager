@@ -1,5 +1,5 @@
 
-/*!  \file   BidFileParser.cpp
+/*!  \file   BiddingObjectFileParser.cpp
 
     Copyright 2014-2015 Universidad de los Andes, Bogotá, Colombia
 
@@ -20,57 +20,57 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     Description:
-    parse bid files
+    parse BiddingObject files
     Code based on Netmate Implementation
 
-    $Id: BidFileParser.cpp 748 2015-07-23 17:00:00 amarentes $
+    $Id: BiddingObjectFileParser.cpp 748 2015-07-23 17:00:00 amarentes $
 
 */
 
 #include "ParserFcts.h" 
-#include "BidFileParser.h"
+#include "BiddingObjectFileParser.h"
 #include "Constants.h"
 #include "Timeval.h"
 
 using namespace auction;
 
-BidFileParser::BidFileParser(string filename)
-    : XMLParser(BIDFILE_DTD, filename, "AGENT"), IpApMessageParser()
+BiddingObjectFileParser::BiddingObjectFileParser(int domain, string filename)
+    : XMLParser(BIDFILE_DTD, filename, "BIDDING_OBJECT_SET"), IpApMessageParser(domain)
 {
     log = Logger::getInstance();
-    ch = log->createChannel("BidFileParser" );
+    ch = log->createChannel("BiddingObjectFileParser" );
 
 #ifdef DEBUG
-    log->dlog(ch, "BidFileParser Constructor with filename");
+    log->dlog(ch, "BiddingObjectFileParser Constructor with filename");
 #endif
 
 }
 
 
-BidFileParser::BidFileParser(char *buf, int len)
-    : XMLParser(BIDFILE_DTD, buf, len, "AGENT"), IpApMessageParser()
+BiddingObjectFileParser::BiddingObjectFileParser(int domain, char *buf, int len)
+    : XMLParser(BIDFILE_DTD, buf, len, "BIDDING_OBJECT_SET"), IpApMessageParser(domain)
 {
     log = Logger::getInstance();
-    ch = log->createChannel("BidFileParser" );
+    ch = log->createChannel("BiddingObjectFileParser" );
 
 #ifdef DEBUG
-    log->dlog(ch, "BidFileParser Constructor with buffer");
+    log->dlog(ch, "BiddingObjectFileParser Constructor with buffer");
 #endif
 
 }
 
 
-configItem_t BidFileParser::parsePref(xmlNodePtr cur)
+configItem_t BiddingObjectFileParser::parsePref(xmlNodePtr cur)
 {
     configItem_t item;
 
     item.name = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"NAME"));
     if (item.name.empty()) {
-        throw Error("Bid Parser Error: missing name at line %d", XML_GET_LINE(cur));
+        throw Error("Bidding Object Parser Error: missing name at line %d", XML_GET_LINE(cur));
     }
     item.value = xmlCharToString(xmlNodeListGetString(XMLDoc, cur->xmlChildrenNode, 1));
     if (item.value.empty()) {
-        throw Error("Bid Parser Error: missing value at line %d", XML_GET_LINE(cur));
+        throw Error("Bidding Object Error: missing value at line %d", XML_GET_LINE(cur));
     }
     item.type = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"TYPE"));
 
@@ -78,7 +78,7 @@ configItem_t BidFileParser::parsePref(xmlNodePtr cur)
     try {
         ParserFcts::parseItem(item.type, item.value);
     } catch (Error &e) {    
-        throw Error("Bid Parser Error: parse value error at line %d: %s", XML_GET_LINE(cur), 
+        throw Error("Bidding Object Error: parse value error at line %d: %s", XML_GET_LINE(cur), 
                     e.getError().c_str());
     }
 
@@ -86,15 +86,13 @@ configItem_t BidFileParser::parsePref(xmlNodePtr cur)
 }
 
 
-void BidFileParser::parse(fieldDefList_t *fieldDefs, 
-						  fieldValList_t *fieldVals, 
-						  bidDB_t *bids,
-						  BidIdSource *idSource )
+void BiddingObjectFileParser::parse(fieldDefList_t *fieldDefs, fieldValList_t *fieldVals, biddingObjectDB_t *bidingObjects )
 {
     xmlNodePtr cur, cur2, cur3;
-    string sname, aset, aname, bset, bname;
+    string sname, aset, aname, bset, bname, stype;
     cur = xmlDocGetRootElement(XMLDoc);
-    time_t now = time(NULL);    
+    time_t now = time(NULL);
+    ipap_object_type_t type;
 
 #ifdef DEBUG
     log->dlog(ch, "Starting parse");
@@ -107,14 +105,14 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
     
 
 #ifdef DEBUG
-    log->dlog(ch, "agent %s", sname.c_str());
+    log->dlog(ch, "BIDDING_OBJECT_SET %s", sname.c_str());
 #endif
 
     cur = cur->xmlChildrenNode;
 
     while (cur != NULL) {
 	
-        if ((!xmlStrcmp(cur->name, (const xmlChar *)"BID")) && (cur->ns == ns)) {
+        if ((!xmlStrcmp(cur->name, (const xmlChar *)"BIDDING_OBJECT")) && (cur->ns == ns)) {
             string bname;
             elementList_t elements;
             optionList_t options;
@@ -126,11 +124,20 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 			// divide the auction name in set and name
 			parseName(aname, aset, aname);
 
-            bname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"BID_ID"));
+            stype = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"TYPE"));
+			// use lower case internally
+			transform(stype.begin(), stype.end(), stype.begin(), ToLower());
+			try{ 
+				type = parseType(stype);
+			} catch (Error &e) {
+				throw Error("%s at line %d", (e.getError()).c_str(), XML_GET_LINE(cur));
+			}
+
+            bname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
 			// use lower case internally
 			transform(bname.begin(), bname.end(), bname.begin(), ToLower());
 			
-			// divide the bid name in set and name
+			// divide the BiddingObject name in set and name
 			parseName(bname, bset, bname);
 
             cur2 = cur->xmlChildrenNode;
@@ -143,7 +150,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
                     string elemtName = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"ID"));
 
                     if (elemtName.empty()) {
-                        throw Error("Bid Parser Error: missing name at line %d", XML_GET_LINE(cur2));
+                        throw Error("Bidding Object Parser Error: missing name at line %d", XML_GET_LINE(cur2));
                     }
                     // use lower case internally
                     transform(elemtName.begin(), elemtName.end(), elemtName.begin(), 
@@ -175,7 +182,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 								// lookup in filter var list
 								string fvalue = xmlCharToString(xmlNodeListGetString(XMLDoc, cur3->xmlChildrenNode, 1));
 								if (fvalue.empty()) {
-									throw Error("Bid Parser Error: missing value at line %d", XML_GET_LINE(cur3));
+									throw Error("Bidding Parser Error: missing value at line %d", XML_GET_LINE(cur3));
 								}
 							
 								// parse and set value
@@ -184,13 +191,13 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 									
 									
 								} catch(Error &e) {
-									throw Error("Bid Parser Error: field value parse error at line %d: %s", 
+									throw Error("Bidding Parser Error: field value parse error at line %d: %s", 
 												XML_GET_LINE(cur3), e.getError().c_str());
 								}
 
 								elemFields.push_back(f);
 							} else {
-									throw Error("Bid Parser Error: no field definition found at line %d: %s", 
+									throw Error("Bidding Parser Error: no field definition found at line %d: %s", 
 												XML_GET_LINE(cur3), f.name.c_str());
 							}
                         }
@@ -206,7 +213,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
                     string optionName = xmlCharToString(xmlGetProp(cur2, (const xmlChar *)"ID"));
 
                     if (optionName.empty()) {
-                        throw Error("Bid Parser Error: missing name at line %d", XML_GET_LINE(cur2));
+                        throw Error("Bidding Parser Error: missing name at line %d", XML_GET_LINE(cur2));
                     }
                     // use lower case internally
                     transform(optionName.begin(), optionName.end(), optionName.begin(), 
@@ -238,14 +245,14 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 								// lookup in filter var list
 								string fvalue = xmlCharToString(xmlNodeListGetString(XMLDoc, cur3->xmlChildrenNode, 1));
 								if (fvalue.empty()) {
-									throw Error("Bid Parser Error: missing value at line %d", XML_GET_LINE(cur3));
+									throw Error("Bidding Parser Error: missing value at line %d", XML_GET_LINE(cur3));
 								}
 							
 								// parse and set value
 								try {
 									parseFieldValue(fieldVals, fvalue, &f);
 								} catch(Error &e) {
-									throw Error("Bid Parser Error: field value parse error at line %d: %s", 
+									throw Error("Bidding Parser Error: field value parse error at line %d: %s", 
 												XML_GET_LINE(cur3), e.getError().c_str());
 								}
 #ifdef DEBUG
@@ -253,7 +260,7 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 #endif								
 								optionFields.push_back(f);
 							} else {
-									throw Error("Bid Parser Error: no field definition found at line %d: %s", 
+									throw Error("Bidding Parser Error: no field definition found at line %d: %s", 
 												XML_GET_LINE(cur3), f.name.c_str());
 							}
                         }
@@ -266,15 +273,15 @@ void BidFileParser::parse(fieldDefList_t *fieldDefs,
 				cur2 = cur2->next;
             }
 
-            // add bid
+            // add BiddingObject
             try {
                 
-                Bid *b = new Bid(aset, aname, bset, bname, elements, options);
+                BiddingObject *b = new BiddingObject(aset, aname, bset, bname, type, elements, options);
 #ifdef DEBUG
 				// debug info
-				log->dlog(ch, "parsed bid %s.%s", bset.c_str(), bname.c_str());
+				log->dlog(ch, "parsed BiddingObject %s.%s", bset.c_str(), bname.c_str());
 #endif
-                bids->push_back(b);
+                bidingObjects->push_back(b);
             } catch (Error &e) {
                 log->elog(ch, e);
                 

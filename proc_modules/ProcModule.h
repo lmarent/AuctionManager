@@ -32,11 +32,15 @@
 
 
 #include "ProcModuleInterface.h"
+#include "IpApMessageParser.h"
 #include "Allocation.h"
+#include "Auction.h"
 #include "Field.h"
 #include "FieldValue.h"
 #include "Bid.h"
-#include "stdincpp.h" 
+#include "IpAp_field_container.h"
+#include "IpAp_template.h"
+
 
 /*! Functions for reading parameters and filters, 
  *  It is assumed that data is already verified. */
@@ -73,6 +77,16 @@ int parseBool( string s);
 float parseFloat( string s);
 
 double parseDouble( string s);
+
+double getDoubleField(auction::fieldList_t *fields, string name);
+
+float getFloatField(auction::fieldList_t *fields, string name);
+
+string getStringField(auction::fieldList_t *fields, string name);
+
+string doubleToString(double value);
+
+string intToString(int value);
 
 /*! \short   declaration of struct containing all function pointers of a module */
 extern auction::ProcModuleInterface_t func;

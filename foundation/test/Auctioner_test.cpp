@@ -72,10 +72,8 @@ void Auctioner_Test::setUp()
         // start up the netmate (this blocks until Ctrl-C !)
         auctionerPtr = new auctioner_test(argc, argv);
         
-        cout << "We are going to load bids" << endl;
         string filename = DEF_SYSCONFDIR "/example_bids1.xml";
 		auctionerPtr->evnt->addEvent(new AddBidsEvent(filename));
-		cout << "Bid loaded" << endl;
 
     } catch (Error &e) {
         cout << "Terminating Auctioner on error: " << e.getError() << endl;
@@ -96,7 +94,6 @@ void Auctioner_Test::test()
 	try
 	{
 
-        cout << "We are going to execute the algorith" << endl;
         // going into main loop
         auctionerPtr->run();
 

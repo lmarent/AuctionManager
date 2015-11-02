@@ -34,7 +34,7 @@
 #include "Logger.h"
 #include "Error.h"
 #include "Session.h"
-#include "SessionIdSource.h"
+#include "IdSource.h"
 #include "EventScheduler.h"
 
 namespace auction
@@ -81,7 +81,7 @@ class SessionManager
     sessionDone_t sessionsDone;
 
     //! pool of unique sessions ids
-    SessionIdSource idSource;
+    IdSource idSource;
 
     /*! 
 	  \short add the session name to the list of finished sessions
@@ -91,15 +91,6 @@ class SessionManager
 
   public:
 
-    int getNumSessions() 
-    { 
-        return sessions; 
-    }
-
-    string getInfo(int uid)
-    {
-        return getInfo(getSession(uid)); 
-    }
 
     /*! 
 		\short   construct and initialize a SessionManager object
@@ -155,8 +146,15 @@ class SessionManager
         or a set of Sessions or all Sessions
     */
     string getInfo(void);
+
+    inline string getInfo(int uid){ return getInfo(getSession(uid)); }
+
     string getInfo(Session *s);
     string getInfo(string _sessionId);
+
+    //! Get the total number of sessions in the system.
+    inline int getNumSessions(){ return sessions; }
+
 
     //! dump a SessionManager object
     void dump( ostream &os );
