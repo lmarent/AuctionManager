@@ -35,7 +35,7 @@ using namespace auction;
 
 ResourceRequest::ResourceRequest( string rset, string rname, fieldList_t &f, 
 								resourceReqIntervalList_t &resReqInter )
-	: uid(0), state(RR_NEW), set(rset), name(rname), fields(f), intervals(resReqInter) 
+	: AuctioningObject("RESOURCE_REQUEST"), set(rset), name(rname), fields(f), intervals(resReqInter) 
 { 
 
 }
@@ -45,12 +45,30 @@ ResourceRequest::~ResourceRequest()
 	
 } 
 
+string 
+ResourceRequest::getIpApId(int domain)
+{
+	string idResourceRequestS;
+	if ((getResourceRequestSet()).empty()){
+		ostringstream ssA;
+		ssA << domain;
+		idResourceRequestS =  ssA.str() + "." + getResourceRequestName();
+	} else {
+		idResourceRequestS = getResourceRequestSet() + "." + getResourceRequestName();
+	}
+	
+	return idResourceRequestS;
+}
+
+
 
 string ResourceRequest::getInfo()
 {
 	std::stringstream output;
-
-	output << "set:" << getResourceRequestSet() 
+	
+	output << AuctioningObject::getInfo();
+	
+	output << " Set:" << getResourceRequestSet() 
 		   << " Name:" << getResourceRequestName() << endl;
 	
 	resourceReqIntervalListIter_t inter_iter;
@@ -85,45 +103,35 @@ resourceReqIntervalList_t * ResourceRequest::getIntervals()
 	return &intervals;
 }
 
-resourceReq_interval_t ResourceRequest::getIntervalByStart(time_t start)
+resourceReqIntervalListIter_t
+ResourceRequest::getIntervalByStart(time_t start)
 {
-	
-	resourceReq_interval_t inter_return;
-	inter_return.start = 0;
-	inter_return.stop = 0;
-	inter_return.interval = 0;
-	inter_return.align = 0;
-	
+		
 	resourceReqIntervalListIter_t inter_iter;
 	for (inter_iter = intervals.begin(); inter_iter != intervals.end(); ++inter_iter)
 	{
 		if (inter_iter->start == start) {
-			inter_return = *inter_iter;
+			return inter_iter;
 		}
 	}	
 	
-	return inter_return;
+	return intervals.end();
 }
 
 
-resourceReq_interval_t ResourceRequest::getIntervalByEnd(time_t stop)
+resourceReqIntervalListIter_t 
+ResourceRequest::getIntervalByEnd(time_t stop)
 {
-	
-	resourceReq_interval_t inter_return;
-	inter_return.start = 0;
-	inter_return.stop = 0;
-	inter_return.interval = 0;
-	inter_return.align = 0;
 	
 	resourceReqIntervalListIter_t inter_iter;
 	for (inter_iter = intervals.begin(); inter_iter != intervals.end(); ++inter_iter)
 	{
 		if (inter_iter->stop == stop) {
-			inter_return = *inter_iter;
+			return inter_iter;
 		}
 	}	
 	
-	return inter_return;
+	return intervals.end();
 }
 
 field_t *
@@ -140,7 +148,7 @@ ResourceRequest::getField(string name)
 }
 
 void
-ResourceRequest::assignSession( time_t start, time_t stop string sessionId )
+ResourceRequest::assignSession( time_t start, time_t stop, string sessionId )
 {
 
 	

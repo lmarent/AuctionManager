@@ -33,6 +33,8 @@
     _N_et_M_ate _P_rocessing Module */
 int magic = PROC_MAGIC;
 
+const string TIME_FORMAT      = "%Y-%m-%d %T";
+
 /*! \short   declaration of struct containing all function pointers of a module */
 auction::ProcModuleInterface_t func = 
 { 
@@ -86,9 +88,15 @@ long parseLong( string s )
 	
 }
 
-uint8_t parseUInt8(unsigned char *val)
+uint8_t parseUInt8(char *val)
 {
-	uint8_t val_return = val[0];
+	
+	unsigned char uval[2];
+	
+	memcpy(uval, val, sizeof(char) + 1);
+	
+	uint8_t val_return = uval[0];
+	
 	return val_return;
 }
 
@@ -107,10 +115,16 @@ unsigned long parseULong( string s )
     return n;	
 }
 
-uint16_t parseUInt16( unsigned char *val )
+uint16_t parseUInt16( char *val )
 {
+
+	unsigned char uval[3];
+	
+	memcpy(uval, val, 2*sizeof(char) + 1);
+
 	uint16_t val_return;
-	val_return = (uint16_t)val[0] << 8 | (uint16_t)val[1];
+	val_return = (uint16_t)uval[0] << 8 | (uint16_t)uval[1];
+	
 	return val_return;
 }
 
@@ -127,13 +141,20 @@ long long parseLLong( string s )
     return n;	
 }
 
-uint32_t parseUInt32( unsigned char *val )
+uint32_t parseUInt32( char *val )
 {
+
+	unsigned char uval[5];
+	
+	memcpy(uval, val, 4*sizeof(char) + 1);
+
+
 	uint32_t val_return;
-	val_return = (uint32_t)val[0] << 24 |
-				 (uint32_t)val[1] << 16 |
-				 (uint32_t)val[2] << 8  |
-				 (uint32_t)val[3];
+	val_return = (uint32_t)uval[0] << 24 |
+				 (uint32_t)uval[1] << 16 |
+				 (uint32_t)uval[2] << 8  |
+				 (uint32_t)uval[3];
+				 
 	return val_return;
 }
 
@@ -240,6 +261,44 @@ float getFloatField(auction::fieldList_t *fields, string name)
 					"Proc module - The given field was not included");
 }
 
+/* ------------------------- parseTime ------------------------- */
+time_t 
+parseTime(string timestr)
+{
+    struct tm  t;
+  
+    if (timestr[0] == '+') {
+        // relative time in secs to start
+        try {
+			struct tm tm;
+            int secs = parseInt(timestr.substr(1,timestr.length()));
+            time_t start = time(NULL) + secs;
+            return mktime(localtime_r(&start,&tm));
+        } catch (Error &e) {
+            throw Error("Incorrect relative time value '%s'", timestr.c_str());
+        }
+    } else {
+        // absolute time in the time format 
+        if (timestr.empty()) {
+            return 0;
+        } else if (timestr.find_first_not_of("0123456789") == std::string::npos) {
+			try{
+				uint64_t secs = parseULong(timestr);
+				time_t start = secs;
+				return mktime(localtime_r(&start,&t));
+			} catch (Error &e) {
+				throw Error("Incorrect absolute time value '%s'", timestr.c_str());
+			}
+		}
+        else if ((strptime(timestr.c_str(), TIME_FORMAT.c_str(), &t) == NULL)){
+			return 0;
+        }
+    }
+    return mktime(&t);
+}
+
+
+
 string getStringField(auction::fieldList_t *fields, string name)
 {
 	
@@ -257,12 +316,44 @@ string getStringField(auction::fieldList_t *fields, string name)
 					"Proc module - The given field was not included");
 }
 
+void fillField(auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
+			   int eno, int ftype, string value, auction::fieldList_t *fields)
+{
+	auction::fieldDefItem_t iter;
+	auction::field_t field;
+	initializeField(&field);
+	
+	iter = auction::IpApMessageParser::findField(fieldDefs, eno, ftype);
+	field.name = iter.name;
+	field.len = iter.len;
+	field.type = iter.type;
+	auction::IpApMessageParser::parseFieldValue(fieldVals, value, &field);
+	
+	fields->push_back(field);
+
+}
+
 string doubleToString (double value)
 {
 	std::ostringstream s;
 	s << value;
 	return s.str();
 }
+
+string uint32ToString(uint32_t value)
+{
+	std::ostringstream s;
+	s << value;
+	return s.str();
+}
+
+string uint64ToString (uint64_t value)
+{
+	std::ostringstream s;
+	s << value;
+	return s.str();
+}
+
 
 string intToString (int value)
 {

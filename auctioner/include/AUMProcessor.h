@@ -32,14 +32,14 @@
 #include "stdincpp.h"
 #include "ProcModule.h"
 #include "ModuleLoader.h"
-#include "Bid.h"
-#include "Allocation.h"
+#include "BiddingObject.h"
 #include "AuctionManagerComponent.h"
 #include "Error.h"
 #include "Logger.h"
 #include "EventScheduler.h"
 #include "IpApMessageParser.h"
 #include "FieldDefManager.h"
+#include "AuctionProcessObject.h"
 
 namespace auction
 {
@@ -50,26 +50,40 @@ typedef enum
 	AUM_REQUEST_FIELD_SET_NAME
 } agentFieldSet_t;
 
-typedef struct
+
+class auctionProcess : public AuctionProcessObject
 {
-    ProcModule *module;
-    ProcModuleInterface_t *mapi; // module API
-    // config params for module
-    configParam_t *params;
-} ppaction_t;
-
-
-typedef struct {
-
-    ppaction_t action; // action module data.
-    Auction *auction; // auction to start execution.
-    bidDB_t bids;  // Bids competing in the auction.
+	public: 
+		//! config params for module
+		configParam_t *params;
+		
+		//! auction to start execution.
+		Auction *auction; 
+		
+		//! Bids competing in the auction.
+		biddingObjectDB_t bids;  
+		
+		auctionProcess():AuctionProcessObject(), params(NULL), auction(NULL){ }
+		
+		~auctionProcess(){ }
+		
+		void setParams(configParam_t *_params){ params = _params; }
+		
+		configParam_t * getParams(){ return params; }
+		
+		void setAuction(Auction *_auction){ auction = _auction; }
+		
+		Auction * getAuction(){ return auction; }
+		
+		void insertBid(BiddingObject * bid){ bids.push_back(bid); }
+		
+		biddingObjectDB_t * getBids() { return &bids; }
     
-} auctionProcess_t;
+};
 
 //! action list for each auction
-typedef map<int, auctionProcess_t>            auctionProcessList_t;
-typedef map<int, auctionProcess_t>::iterator  auctionProcessListIter_t;
+typedef map<int, auctionProcess>            auctionProcessList_t;
+typedef map<int, auctionProcess>::iterator  auctionProcessListIter_t;
 
 typedef map< agentFieldSet_t, set<ipap_field_key> >  		  setFieldsList_t;
 typedef map< agentFieldSet_t, set<ipap_field_key> >::iterator  setFieldsListIter_t;
@@ -84,20 +98,19 @@ class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser, p
 {
   private:
 
+    //! We use as index for auction process the same auction id.
+    
     //! associated module loader 
     //! this is the algorithm to execute for the bid
     ModuleLoader *loader;
 
     //! action of every auction being processed.
     auctionProcessList_t  auctions;
-
-    //! add timer events to scheduler
-    void addTimerEvents( int auctionID, int actID, ppaction_t &act, EventScheduler &es );
-
+	
 	miscList_t readMiscData( ipap_template *templ, ipap_data_record &record);
 	
 	bool intersects( time_t startDttmAuc, time_t stopDttmAuc, 
-							time_t startDttmReq, time_t stopDttmReq );
+					 time_t startDttmReq, time_t stopDttmReq );
 	
 	bool forResource(string resourceAuc, string resourceIdReq);
 	
@@ -105,7 +118,7 @@ class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser, p
 
 	static setFieldsList_t fieldSets;
 
-    /*! \short   construct and initialize a PacketProcessor object
+    /*! \short   construct and initialize a Auction Manager object
 
         \arg \c cnf        config manager
         \arg \c fdname     field definition file name
@@ -113,54 +126,53 @@ class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser, p
         \arg \c threaded   run as separate thread
         \arg \c moduleDir  action module directory
     */
-    AUMProcessor(ConfigManager *cnf, string fdname, string fvname, int threaded, string moduleDir = "" );
+    AUMProcessor(int domain, ConfigManager *cnf, string fdname, 
+					string fvname, int threaded, string moduleDir = "" );
 
     //!   destroy a Auction Processor object, to be overloaded
     virtual ~AUMProcessor();
 
-    //! add auctions
-    virtual void addAuctions( auctionDB_t *auctions, EventScheduler *e );
 
-    //! delete bids
-    virtual void delAuctions( auctionDB_t *aucts );
-
-    //! delete bids
-    virtual void delBids( bidDB_t *bids );
-
-
-    //! execute the algorithm
-    int executeAuction(int rid, string rname);
-
-    /*! \short   add a Bid to auction bid list
-        \arg \c auctionSet    Auction set
-        \arg \c auctionName   Auction name
-        \arg \c b 			  Pointer to bid to insert
-    */
-    void addBidAuction(string auctionSet, string auctionName, Bid *b );
-
-
-    /*! \short   add a Auction and its associated auction process list
+    /*! \short   add a Auction to auction process list
         \arg \c a   pointer to auction
         \arg \c e   pointer to event scheduler (timer events)
         \returns 0 - on success, <0 - else
     */
-    int addAuction( Auction *a, EventScheduler *e );
+    int addAuctionProcess( Auction *a, EventScheduler *e );
 
+
+    //! execute the algorithm
+    void executeAuction(int index, EventScheduler *e );
+
+    /*! \short   add a Bidding Object to auctio process biddding object list
+        \arg \c index   index to add the element.
+        \arg \c b 		Pointer to bidding object to insert
+    */
+    void addBiddingObjectAuctionProcess(int index, BiddingObject *b );
 
     /*! \short   delete a Bid to auction bid list
-        \arg \c auctionSet    Auction set
-        \arg \c auctionName   Auction name
-        \arg \c b 			  Pointer to bid to delete
+        \arg \c index   index to add the element.
+        \arg \c  b 			   Pointer to bidding object to delete
     */
-    void delBidAuction( string auctionSet, string auctionName, Bid *b );
+    void delBiddingObjectAuctionProcess( int index, BiddingObject *b );
+
+
+    /*! \short   add a set of Bidding Objects to auction process list
+        \arg \c index   index to add the element.
+        \arg \c bids 	Pointer to bidding object list to insert
+    */
+    void addBiddingObjectsAuctionProcess(int index, biddingObjectDB_t *bids );
+
+
+    //! delete biddingObjects
+    void delBiddingObjectsAuctionProcess( int index, biddingObjectDB_t *bids );
 
 
     /*! \short   delete an Auction from the auction process list
-        \arg \c a  pointer to auction
-        \returns 0 - on success, <0 - else
+        \arg \c index  index to erase.
     */
-    int delAuction( Auction *a );
-	
+    void delAuctionProcess( int index );
+		
     /*! \short   get the auctions applicable given the options within the message.
         \arg \message a  pointer to a message with the options to filter.
         \returns 0 - list of application auctions.
@@ -190,9 +202,6 @@ class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser, p
     { 
         return loader->numModules(); 
     }
-
-    // handle module timeouts
-    void timeout(int rid, int actid, unsigned int tmID);
 
     //! get xml info for a specific module
     string getModuleInfoXML( string modname );

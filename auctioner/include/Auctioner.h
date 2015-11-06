@@ -35,7 +35,7 @@
 #include "Logger.h"
 #include "CommandLineArgs.h"
 #include "ConfigManager.h"
-#include "BidManager.h"
+#include "BiddingObjectManager.h"
 #include "AuctionManager.h"
 #include "SessionManager.h"
 #include "CtrlComm.h"
@@ -44,6 +44,7 @@
 #include "AuctionManagerComponent.h"
 #include "AUMProcessor.h"
 #include "IpAp_template_container.h"
+#include "AnslpClient.h"
 
 /*! \short   Auctioner class description
   
@@ -81,11 +82,12 @@ class Auctioner
     auto_ptr<CommandLineArgs> 			args;
     auto_ptr<AuctionTimer>      		auct;
     auto_ptr<ConfigManager>   			conf;
-    auto_ptr<BidManager>     			bidm;
+    auto_ptr<BiddingObjectManager>     	bidm;
     auto_ptr<AuctionManager>   			aucm;
     auto_ptr<SessionManager>			sesm;
     auto_ptr<EventSchedulerAuctioner>  	evnt;
-
+    auto_ptr<AnslpClient>				anslpc;
+    
     auto_ptr<AUMProcessor> 				proc;    
     auto_ptr<CtrlComm>        			comm;
 
@@ -135,21 +137,21 @@ class Auctioner
     
 	void handleGetModInfo(Event *e, fd_sets_t *fds);
     
-	void handleAddBids(Event *e, fd_sets_t *fds);      
+	void handleAddBiddingObjects(Event *e, fd_sets_t *fds);      
 
     void handleAddAuctions(Event *e, fd_sets_t *fds);
 
-	void handleAddBidsCntrlComm(Event *e, fd_sets_t *fds);
+	void handleAddBiddingObjectsCntrlComm(Event *e, fd_sets_t *fds);
 
-	void handleAddBidsAuction(Event *e, fd_sets_t *fds);
+	void handleAddBiddingObjectsAuction(Event *e, fd_sets_t *fds);
 
+	void handleActivateBiddingObjects(Event *e, fd_sets_t *fds);
+	
 	void handleActivateAuction(Event *e, fd_sets_t *fds);
 
-    void handleRemoveBids(Event *e, fd_sets_t *fds);
+    void handleRemoveBiddingObjects(Event *e, fd_sets_t *fds);
     
-    void handleRemoveBidsAuction(Event *e, fd_sets_t *fds);
-
-	void handleRemoveBidsCntrlComm(Event *e, fd_sets_t *fds);
+    void handleRemoveBiddingObjectsAuction(Event *e, fd_sets_t *fds);
 
 	void handleProcModeleTimer(Event *e, fd_sets_t *fds);
 
@@ -160,7 +162,10 @@ class Auctioner
 	void handleCreateSession(Event *e, fd_sets_t *fds);
 
 	void handleAuctioningInteraction(Event *e, fd_sets_t *fds);
-
+	
+	void handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds);
+    
+    void handleTransmitBiddingObjects(Event *e, fd_sets_t *fds);
     
   public:
 

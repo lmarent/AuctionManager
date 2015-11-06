@@ -30,33 +30,61 @@
 
 
 #include "stdincpp.h"
-#include "Bid.h"
-#include "Allocation.h"
 #include "AuctionManagerComponent.h"
 #include "Error.h"
 #include "Logger.h"
+#include "IdSource.h"
 #include "EventScheduler.h"
 #include "ProcModule.h"
 #include "ModuleLoader.h"
 #include "FieldDefManager.h"
+#include "BiddingObject.h"
+#include "AuctionProcessObject.h"
 
 namespace auction
 {
 
-typedef struct {
-
-    int index;
-    string moduleName;			 // Name of the module;
-    ProcModule *module; 		 // Module to execute
-    ProcModuleInterface_t *mapi; // Module API
-    fieldList_t *parameters; 	 // Parameters for execution
-    auctionDB_t *auctions;  		 // Auctions to execute 
+class requestProcess : public AuctionProcessObject
+{
+	public: 
+		//! for reference we set the id of the session
+		string sessionId;
+		
+		//! Name of the module;
+		string moduleName;			 		
+		
+		//! Parameters for execution
+		fieldList_t *parameters; 	 		
+		
+		//! Auctions to execute 
+		auctionDB_t auctions;  		 	
     
-} requestProcess_t;
+		requestProcess(fieldList_t * _parameters=NULL): 
+			AuctionProcessObject(), moduleName(), parameters(_parameters){}
+		
+		~requestProcess(){}
+		
+		string getSession(){ return sessionId; }
+		
+		void setSession(string _sessionId){ sessionId = _sessionId; }
+		
+		string getModuleName(){ return moduleName; }
+		
+		void setModuleName(string _moduleName){ moduleName = _moduleName; }
+		
+		fieldList_t * getParameters() { return parameters; }
+		
+		void setParameters(fieldList_t *_parameters){ parameters = _parameters; }
+		
+		auctionDB_t * getAuctions(){ return &auctions; }
+		
+		void insertAuction(Auction *auction){ auctions.push_back(auction); }
+		
+};
 
 //! action list for each auction
-typedef multimap<int, auctionProcess_t>            auctionProcessList_t;
-typedef multimap<int, auctionProcess_t>::iterator  auctionProcessListIter_t;
+typedef map<int, requestProcess>            requestProcessList_t;
+typedef map<int, requestProcess>::iterator  requestProcessListIter_t;
 
 
 
@@ -74,10 +102,7 @@ class AgentProcessor : public AuctionManagerComponent, public FieldDefManager
     ModuleLoader *loader;
     
     //! requests being processed.
-    requestProcessList_t  requests;
-
-    //! add timer events to scheduler
-    void addTimerEvents( int auctionID, int actID, EventScheduler &es );
+    requestProcessList_t requests;
 
     //! pool of unique request process 
     IdSource idSource;
@@ -97,30 +122,45 @@ class AgentProcessor : public AuctionManagerComponent, public FieldDefManager
     virtual ~AgentProcessor();
 
     //! Add a new request to the list of request to execute.
-    int addRequest( fieldList_t *parameters, auctionDB_t *auctions, EventScheduler *e );
+    int addRequest( string sessionId, auction::fieldList_t *parameters, Auction *auction );
 
     //! delete request
     void delRequest( int index );
 
     //! execute the algorithm
-    int executeRequest( int index );
-
-    //! delete auctions
-    void delAuctions( int index,  auctionsDB_t *auctions );
+    void executeRequest( int index, EventScheduler *e );
 
     /*! \short  add a Auction to auction  list
      *  \arg \c index 		  Id for the request.
         \arg \c a 			  Pointer to auction to insert
     */
-    void addAuction(int index, Auction *a );
+    void addAuctionRequest(int index, Auction *a );
 
-
-    /*! \short   delete an Auction from the request process list
-        \arg \c a  pointer to auction
-        \returns 0 - on success, <0 - else
+    /*! \short  add auctions to a request
+     *  \arg \c index 		  Id for the request.
+        \arg \c auctions 	  List of auctions to add. 
     */
-    void delAuction( int index,  Auction *a );
+	void addAuctionsRequest( int index,  auctionDB_t *auctions );
 
+    /*! \short   	delete an Auction from the request process list
+		\arg index  Id for the request.
+        \arg \c 	a  pointer to auction
+    */
+    void delAuctionRequest( int index,  Auction *a );
+
+    /*! \short delete auctions from a request
+     *  \arg \c index 		  Id for the request.
+	 */
+    void delAuctionsRequest( int index,  auctionDB_t *auctions );	
+	
+    /*! \short delete the set of auctions from all request
+     *  \arg \c aucts 		  auction set to delete.
+     *  If a request process becomes free of auctions, then it is deleted too.
+	 */
+	void delAuctions(auctionDB_t *aucts);
+
+	//! get the sessionId generating a request process
+	string getSession(int index);
 
     //! handle file descriptor event
     virtual int handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds);
@@ -133,9 +173,6 @@ class AgentProcessor : public AuctionManagerComponent, public FieldDefManager
 
     //! dump a AUMProcessor object
     void dump( ostream &os );
-
-    // handle module timeouts
-    void timeout(int rid, int actid, unsigned int tmID);
 
     virtual string getConfigGroup() 
     { 

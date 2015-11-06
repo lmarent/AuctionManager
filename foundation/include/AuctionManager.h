@@ -116,7 +116,6 @@ class AuctionManager : public FieldDefManager
 	//! This field identifies uniquely the agent.
 	int domain; 
 
-
     /*! \short add the auction name to the list of finished bids
 
        \arg \c auctionname - name of the finished auction (source.name)
@@ -128,7 +127,7 @@ class AuctionManager : public FieldDefManager
 
     /*! \short   construct and initialize a AuctionManager object
      */
-    AuctionManager( string fdname, string fvname);
+    AuctionManager( int domain, string fdname, string fvname);
 
     //! destroy a AuctionManager object
     ~AuctionManager(); 
@@ -221,12 +220,13 @@ class AuctionManager : public FieldDefManager
 
     /*! \short   get the ipap_message that contains all the auctions within
      * 			  the container. 
-
+		\arg     auction - container to put in the message.
+		
         \throws an Error exception if some field required is missing.
     */	
 	ipap_message * get_ipap_message(auctionDB_t *auctions, 
 									ipap_template_container *templates,
-									int domainId, bool useIPV6, string sAddressIPV4, 
+									bool useIPV6, string sAddressIPV4, 
 									string sAddressIPV6, uint16_t port);
 
     //! dump a AuctionManager object

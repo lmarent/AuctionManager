@@ -25,7 +25,6 @@
     $Id: MAPIIpApMessageParser.cpp 748 2015-07-23 17:30:00Z amarentes $
 */
 
-#include "ParserFcts.h"
 #include "IpApMessageParser.h"
 
 using namespace auction;
@@ -107,6 +106,7 @@ IpApMessageParser::parseName(string id, string &set, string &name)
 	{
 		name = id;
 	}
+
 }
 
 ipap_object_type_t 

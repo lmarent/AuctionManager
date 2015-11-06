@@ -3,6 +3,7 @@
 #include <iostream>
 #include <map>
 #include <stdio.h>
+#include <inttypes.h>
 #include "config.h"
 #include "stdincpp.h"
 #include "ProcError.h"
@@ -13,6 +14,10 @@ const int MOD_INIT_REQUIRED_PARAMS = 1;
 // Variables given as parameters.
 double bandwidth_to_sell = 0;
 double reserve_price = 0;
+time_t start;
+time_t stop;
+uint32_t lastId;
+ipap_field_container g_ipap_fields;
 
 double getResourceAvailability( auction::configParam_t *params )
 {
@@ -81,12 +86,62 @@ double getReservePrice( auction::configParam_t *params )
 
 }
 
+time_t getTime( auction::configParam_t *params, string name )
+{
+     time_t tim = 0;
+     int numparams = 0;
+     
+     cout << "Starting time" << endl;
+     
+     while (params[0].name != NULL) {
+						
+        if (!strcmp(params[0].name, name.c_str())) {
+			tim = (time_t) parseTime(params[0].value); 
+			numparams++;
+		}
+        params++;
+     }
+     
+     if (numparams == 0)
+		throw auction::ProcError(AUM_PROC_PARAMETER_ERROR, 
+					"bas init module - not enought parameters");
+	
+	if (tim == 0)
+		throw auction::ProcError(AUM_DATETIME_NOT_DEFINED_ERROR, 
+					"bas init module - The given time is incorrect");
+	
+	cout << "Ending time" << tim << endl;
+		
+	return tim;
+     
+}
+
 
 void auction::initModule( auction::configParam_t *params )
 {
 
 	cout <<  "bas module: start init module" << endl;
+	int numparams = 0;
+	
+    while (params[0].name != NULL) {
+		// in all the application we receive the next allocation id to create
+        if (!strcmp(params[0].name, "NextId")) {
+            lastId = parseUInt32( params[0].value );
+			numparams++;
+#ifdef DEBUG
+		fprintf( stdout, "bas module: nextId: [ %"PRIu32" ] \n", lastId );
+#endif
+        }
+        params++;
+    }
 
+	 if ( numparams != MOD_INIT_REQUIRED_PARAMS )
+		 throw ProcError("bas init module - not enought parameters");
+
+	// Bring fields defined for ipap_messages;
+	g_ipap_fields.initialize_forward();
+    g_ipap_fields.initialize_reverse();
+	
 	cout << "bas module: end init module" << endl;
 
 }
@@ -111,84 +166,124 @@ string makeKey(string auctionSet, string auctionName,
 	return auctionSet + auctionName + bidSet + bidName;
 }
 
-auction::Allocation *
+auction::BiddingObject *
 createAllocation( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
 				  string auctionSet, string auctionName, string bidSet, string bidName, 
 				  double quantity, double price )
 {										  		
-	auction::fieldList_t fields;
+	uint64_t timeUint64;
 	
-	// TODO AM: replace this code with true values
-	string allocset = "setalloc";
-	string allocname = "allocaname";
-		
-	auction::field_t field1;
-		
-	auction::fieldDefListIter_t iter; 
-	iter = fieldDefs->find("quantity");
-	field1.name = iter->second.name;
-	field1.len = iter->second.len;
-	field1.type = iter->second.type;
-	string fvalue =doubleToString(quantity);
-	auction::IpApMessageParser::parseFieldValue(fieldVals, fvalue, &field1);
-						
-	auction::field_t field2;
+	auction::elementList_t elements;
+    auction::optionList_t options;
 
-	iter = fieldDefs->find("unitprice");
-	field2.name = iter->second.name;
-	field2.len = iter->second.len;
-	field2.type = iter->second.type;
-	string fvalue2 = doubleToString(price);
-	auction::IpApMessageParser::parseFieldValue(fieldVals, fvalue2, &field2);
-		
-	fields.push_back(field1);
-	fields.push_back(field2);
-
-	auction::allocationIntervalList_t interv;	
+	auction::fieldList_t elementFields;
+	string elementName = "key_1";
 	
-    auction::Allocation *alloc = new auction::Allocation(auctionSet, auctionName, 
-										bidSet, bidName, allocset, allocname,  fields, interv);
+	// The set for the allocation is the same as the initial bid.
+	string allocset = bidSet;
+	
+	// Incrememt the next id given.
+	lastId++;
+	string allocname = uint32ToString(lastId);
+		
+	// Insert quantity
+	ipap_field fQuantity = g_ipap_fields.get_field(0, IPAP_FT_QUANTITY);	
+	ipap_value_field fVQuantity = fQuantity.get_ipap_value_field( quantity );
+	string squantity = fQuantity.writeValue(fVQuantity);
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_QUANTITY, squantity, &elementFields);
+
+	// Insert Unit Value
+	ipap_field fvalue = g_ipap_fields.get_field(0, IPAP_FT_UNITVALUE);	
+	ipap_value_field fVValue = fQuantity.get_ipap_value_field( price );
+	string svalue = fvalue.writeValue(fVValue);
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_UNITVALUE, svalue, &elementFields);
+
+	string recordId = "Unique";
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_IDRECORD, recordId, &elementFields);
+		
+	elements[elementName] = elementFields;
+	
+	// construct the interval with the allocation, based on start datetime 
+	// and interval for the requesting auction
+
+	auction::fieldList_t optionFields;
+
+	// Insert start
+	ipap_field fStart = g_ipap_fields.get_field(0, IPAP_FT_STARTSECONDS);	
+	timeUint64 = *reinterpret_cast<uint64_t*>(&start);
+	ipap_value_field fVStart = fStart.get_ipap_value_field( timeUint64 );
+	string sstart = fStart.writeValue(fVStart);
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_STARTSECONDS, sstart, &optionFields);
+	
+	// Insert stop
+	ipap_field fStop = g_ipap_fields.get_field(0, IPAP_FT_ENDSECONDS);
+	timeUint64 = *reinterpret_cast<uint64_t*>(&stop);	
+	ipap_value_field fVStop = fStop.get_ipap_value_field( timeUint64 );
+	string sstop = fStop.writeValue(fVStop);
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_ENDSECONDS, sstop, &optionFields);
+		
+	fillField(fieldDefs, fieldVals, 0, IPAP_FT_IDRECORD, recordId, &optionFields);
+		
+	options.push_back(pair<string, auction::fieldList_t>(elementName, optionFields));
+	
+    auction::BiddingObject *alloc = new auction::BiddingObject(auctionSet, auctionName, 
+										allocset, allocname, IPAP_ALLOCATION, elements, options);
 
 	
 	return alloc;
 }
 
-void incrementQuantityAllocation(auction::Allocation *allocation, double quantity)
+void incrementQuantityAllocation(auction::fieldValList_t *fieldVals, 
+									auction::BiddingObject *allocation, double quantity)
 {
-	auction::fieldList_t *fields = allocation->getFields();
+	auction::elementList_t *elements = allocation->getElements();
 	
+	// there is only one element. 
 	auction::fieldListIter_t field_iter;
-	
-	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
+	auction::field_t field;
+	for (field_iter = (elements->begin()->second).begin(); 
+				field_iter != (elements->begin()->second).end(); ++field_iter )
 	{
 		if ((field_iter->name).compare("quantity")){
-			auction::field_t field = *field_iter;
-			double temp_qty = parseDouble( ((field.value)[0]).getValue());
-			temp_qty += quantity;
-			string fvalue = doubleToString(temp_qty);
-			field_iter->parseFieldValue(fvalue);
+			// Delete the field. 
+			field = *field_iter; 
+			(elements->begin()->second).erase(field_iter);
 			break;
 		}
 	}
 	
+	if ( !(field.name.empty())){
+		// Insert again the field.
+		double temp_qty = parseDouble( ((field.value)[0]).getValue());
+		temp_qty += quantity;
+		string fvalue = doubleToString(temp_qty);
+		auction::IpApMessageParser::parseFieldValue(fieldVals, fvalue, &field);
+		(elements->begin()->second).push_back(field);
+	} else {
+		throw auction::ProcError("Field quantity was not included in the allocation");
+	}
+
+	
 }
 
 void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,  
-					   auction::configParam_t *params, string aset, string aname, auction::bidDB_t *bids, 
-					   auction::allocationDB_t **allocationdata )
+					   auction::configParam_t *params, string aset, string aname, auction::biddingObjectDB_t *bids, 
+					   auction::biddingObjectDB_t **allocationdata )
 {
 
 	cout << "bas module: start execute" << (int) bids->size() << endl;
 
 	bandwidth_to_sell = getResourceAvailability(params);
-	reserve_price = getReservePrice( params );
+	reserve_price = getReservePrice( params );	
+	start = getTime( params, "Start" );
+	stop = getTime( params, "Stop" );
 
 	std::multimap<double, alloc_proc_t>  orderedBids;
 	// Order Bids by elements.
-	auction::bidDBIter_t bid_iter; 
+	auction::biddingObjectDBIter_t bid_iter; 
 	
-	for (bid_iter = bids->begin(); bid_iter != bids->end(); ++bid_iter ){
-		auction::Bid * bid = *bid_iter;
+	for (bid_iter = bids->begin(); bid_iter != bids->end(); ++bid_iter){
+		auction::BiddingObject * bid = *bid_iter;
 				
 		auction::elementList_t *elems = bid->getElements();
 				
@@ -199,8 +294,8 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 			double quantity = getDoubleField(&(elem_iter->second), "quantity");
 			alloc_proc_t alloc;
 		
-			alloc.bidSet = bid->getBidSet();
-			alloc.bidName = bid->getBidName();
+			alloc.bidSet = bid->getBiddingObjectSet();
+			alloc.bidName = bid->getBiddingObjectName();
 			alloc.elementName = elem_iter->first;
 			alloc.quantity = quantity;
 			orderedBids.insert(make_pair(price,alloc));
@@ -233,8 +328,8 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 
 	cout << "bas module: after executing the auction" << (int) bids->size() << endl;
 	
-	map<string,auction::Allocation *> allocations;
-	map<string,auction::Allocation *>::iterator alloc_iter;
+	map<string,auction::BiddingObject *> allocations;
+	map<string,auction::BiddingObject *>::iterator alloc_iter;
 	
 	// Creates allocations
 	it = orderedBids.end();
@@ -246,10 +341,10 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 			aname,(it->second).bidSet, (it->second).bidName )) != allocations.end()){
 			alloc_iter = allocations.find(makeKey(aset, aname,
 								(it->second).bidSet, (it->second).bidName ));
-			incrementQuantityAllocation(alloc_iter->second, (it->second).quantity); 					
+			incrementQuantityAllocation(fieldVals, alloc_iter->second, (it->second).quantity); 					
 		}
 		else{
-			auction::Allocation *alloc = 
+			auction::BiddingObject *alloc = 
 				createAllocation(fieldDefs, fieldVals, aset, aname, 
 								  (it->second).bidSet, (it->second).bidName, 
 									(it->second).quantity, sellPrice);
@@ -261,7 +356,6 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 	} while (it != orderedBids.begin());
 	
 	// Convert from the map to the final allocationDB result
-	auction::allocationDB_t dbResult;
 	for ( alloc_iter = allocations.begin(); 
 				alloc_iter != allocations.end(); ++alloc_iter )
 	{
@@ -273,7 +367,7 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 
 void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
 							auction::fieldList_t *requestparams, auction::auctionDB_t *auctions, 
-							auction::bidDB_t **biddata )
+							auction::biddingObjectDB_t **biddata )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start execute_user \n");

@@ -146,10 +146,11 @@ MAPIAuctionParser::readAuctionData( ipap_template *templ,
 }
 
 
-configItemList_t MAPIAuctionParser::readMiscAuctionData(ipap_template *templ, 
-											  fieldDefList_t *fieldDefs,
-											  ipap_data_record &record,
-											  string &actionName)
+configItemList_t 
+MAPIAuctionParser::readMiscAuctionData(ipap_template *templ, 
+ 									   fieldDefList_t *fieldDefs,
+									   ipap_data_record &record,
+									   string &actionName)
 {
 
 	configItemList_t miscs;
@@ -236,7 +237,7 @@ MAPIAuctionParser::verifyInsertTemplates(ipap_template *templData, ipap_template
 
 ipap_template * 
 MAPIAuctionParser::findTemplate(ipap_template *templData, ipap_template *templOption,
-				  ipap_template_container *templatesOut, uint16_t templId)
+								ipap_template_container *templatesOut, uint16_t templId)
 {
 	if (templData != NULL){
 		if (templData->get_template_id() == templId){
@@ -560,8 +561,8 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	// Add the data record template associated with the data auction template
 	ipap_field idAuctionF = mes->get_field_definition( 0, IPAP_FT_IDAUCTION );
 	ipap_value_field fvalue0 = idAuctionF.get_ipap_value_field( 
-								strdup( auctionPtr->getIpApId(getDomain()).c_str() ),
-								  auctionPtr->getIpApId(getDomain()).size() );
+								strdup( auctionPtr->getIpApId(getDomain()).c_str() ), 
+										auctionPtr->getIpApId(getDomain()).size() );
 	
 	ipap_data_record data(auctionTemplateId);
 	data.insert_field(0, IPAP_FT_IDAUCTION, fvalue0);
@@ -703,7 +704,7 @@ ipap_message *
 MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs, 
 									auctionDB_t *auctions, 
 									ipap_template_container *templates,
-									int domainId, bool useIPV6, string sAddressIPV4, 
+									bool useIPV6, string sAddressIPV4, 
 									string sAddressIPV6, uint16_t port)
 {
 
@@ -711,14 +712,14 @@ MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
     log->dlog(ch, "Starting get_ipap_message");
 #endif	
 	
-	ipap_message *mes = new ipap_message(domainId, IPAP_VERSION, true);
+	ipap_message *mes = new ipap_message(getDomain(), IPAP_VERSION, true);
 	
 	auctionDBIter_t auctionIter;
 	for (auctionIter=auctions->begin(); auctionIter!=auctions->end(); ++auctionIter)
 	{
 		Auction *a = *auctionIter;
 		get_ipap_message(fieldDefs, a, templates,  
-							domainId, useIPV6, sAddressIPV4, sAddressIPV6, port, mes);
+						getDomain(), useIPV6, sAddressIPV4, sAddressIPV6, port, mes);
 	}
 	mes->output();
 	

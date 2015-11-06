@@ -35,7 +35,7 @@
 #include "Logger.h"
 #include "CommandLineArgs.h"
 #include "ConfigManager.h"
-#include "BidManager.h"
+#include "BiddingObjectManager.h"
 #include "AuctionManager.h"
 #include "MAPIAuctionParser.h"
 #include "CtrlComm.h"
@@ -46,18 +46,14 @@
 #include "SessionManager.h"
 #include "MAPIResourceRequestParser.h"
 #include "EventSchedulerAgent.h"
+#include "AgentSessionManager.h"
 
 namespace auction
 {
 
-
 typedef map<int, ipap_template_container* >   		  			agentTemplateList_t;
 typedef map<int, ipap_template_container* >::iterator   		agentTemplateListIter_t;
 typedef map<int, ipap_template_container* >::const_iterator    	agentTemplateListConstIter_t;
-
-typedef map<uint32_t, ipap_message> 					pendingMessageList_t;
-typedef map<uint32_t, ipap_message>::iterator 			pendingMessageListIter_t;
-typedef map<uint32_t, ipap_message>::const_iterator 	pendingMessageListConstIter_t;
 
 
 
@@ -89,11 +85,10 @@ class Agent
     auto_ptr<AuctionTimer>      					auct;
 	auto_ptr<ConfigManager>   						conf;
     auto_ptr<ResourceRequestManager>   				rreqm;
-    auto_ptr<BidManager>     						bidm;
+    auto_ptr<BiddingObjectManager>     				bidm;
     auto_ptr<AuctionManager>   						aucm;
     auto_ptr<AgentSessionManager>   				asmp;
     auto_ptr<EventSchedulerAgent>  					evnt;
-    auto_ptr<MAPIResourceRequestParser>				mrrp;
     auto_ptr<AnslpClient>							anslpc;
     
     auto_ptr<AgentProcessor> 						proc;    
@@ -103,6 +98,9 @@ class Agent
     
     //! logging channel number used by objects of this class
     int ch;
+
+	//! domain Id for exchanging ipap_messages
+	int domainId;
 
      //! FD list (from AuctionManagerComponent.h)
     fdList_t fdList;
@@ -115,9 +113,6 @@ class Agent
 
     //! List of templates exchanged with different domains.
     agentTemplateList_t agentTemplates;
-
-	//! List of messages pending for confirmation.
-	pendingMessageList_t pendingMessages;
 
 	// defaults values from the configuration file.
 	string defaultSourceAddr;
@@ -152,30 +147,7 @@ class Agent
     
     void handleGetInfo(Event *e, fd_sets_t *fds);
     
-    //! handle the addition of bids.
-    void handleAddBids(Event *e, fd_sets_t *fds);
-
-    //! handle the addition of a bid to an auction.
-    void handleAddBidsAuction(Event *e);
-
-    //! handle the delete of bids
-    void handleRemoveBids(Event *e);
-    
-    //! handle the delete of a bid from an auction.
-    void handleRemoveBidFromAuction(Event *e);
-    
-    //! Execute the bid process.
-    void handlePushExecution(Event *e, fd_sets_t *fds);
-    
-    //! handle the addition of auctions.
-    void handleAddAuctions(Event *e, fd_sets_t *fds);
-
-    //! handle the activation of auctions.
-    void handleActivateAuctions(Event *e);
-    
-    //! handle the remove auctions.
-    void handleRemoveAuctions(Event *e);
-
+            
     //! handle the addition of resource requests.
     void handleAddResourceRequests(Event *e, fd_sets_t *fds);
 
@@ -185,8 +157,35 @@ class Agent
 	//! handle the response for a session creation previously sent.
 	void handleResponseCreateSession(Event *e, fd_sets_t *fds);
 
+    //! handle the addition of auctions.
+    void handleAddAuctions(Event *e, fd_sets_t *fds);
+
+    //! handle the activation of auctions.
+    void handleActivateAuctions(Event *e);
+
+    //! Execute the bid process.
+    void handlePushExecution(Event *e, fd_sets_t *fds);
+
+    //! handle the addition of generated bidding objects
+    void handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds);
+    
+    //! handle the transmission of generated bidding objects
+    void handleTransmitBiddingObjects(Event *e, fd_sets_t *fds);
+    
+    //! handle the remove auctions.
+    void handleRemoveAuctions(Event *e);
+
+    //! handle the addition of bidding objects.
+    void handleAddBiddingObjects(Event *e, fd_sets_t *fds);
+
+    //! handle the delete of biddingObjects
+    void handleRemoveBiddingObjects(Event *e);
+
     //! handle the remove of resource request intervals.
     void handleRemoveResourceRequestInterval(Event *e);
+    
+    //! handle the interaction arrived from a auctioneer system.
+    void handleAuctioningInteraction(Event *e, fd_sets_t *fds);
         
   public:
 

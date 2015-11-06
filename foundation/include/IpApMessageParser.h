@@ -28,7 +28,6 @@
 #ifndef _IPAP_MESSAGE_PARSER_H_
 #define _IPAP_MESSAGE_PARSER_H_
 
-#include "ParserFcts.h"
 #include "stdincpp.h"
 #include "FieldValParser.h"
 #include "ConfigParser.h"
@@ -63,6 +62,9 @@ class IpApMessageParser
 
 		//! lookup field value
 		static string lookup(fieldValList_t *fieldVals, string fvalue, field_t *f);
+
+		//! get a value by name from the misc rule attributes
+		static string getMiscVal(miscList_t *miscList, string name);
 		
 		inline int getDomain(){ return domain; }
 
@@ -81,9 +83,6 @@ class IpApMessageParser
 		
 		//! parse the template type
 		ipap_templ_type_t parseTemplateType(ipap_object_type_t objectType, string sTemplateType);
-
-		//! get a value by name from the misc rule attributes
-		string getMiscVal(miscList_t *miscList, string name);    
 
 		//! Read a template type from a message.
 		ipap_template * readTemplate(ipap_message * message, ipap_templ_type_t type);

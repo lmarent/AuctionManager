@@ -7,6 +7,7 @@
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "ParserFcts.h"
 #include "ResourceRequest.h"
 #include "FieldValue.h"
 #include "FieldDefParser.h"
@@ -36,7 +37,7 @@ class ResourceRequest_Test : public CppUnit::TestFixture {
     FieldDefParser *ptrFieldParsers;
         
     //! filter definitions
-    fieldDefList_t fieldDefs;
+    auction::fieldDefList_t fieldDefs;
     
 };
 
@@ -71,34 +72,46 @@ void ResourceRequest_Test::testResourceRequets()
 
 	time_t              now = time(NULL);
 	
-	fieldList_t fields;
+	auction::fieldList_t fields;
 	resourceReqIntervalList_t intervals;
 	
 	field_t field1;
 	field_t field2;
 	field_t field3;
 	
-	fieldDefListIter_t iter; 
+	auction::fieldDefListIter_t iter; 
 	iter = fieldDefs.find("quantity");
-	field1.name = iter->second.name;
-	field1.len = iter->second.len;
-	field1.type = iter->second.type;
-	string fvalue1 = "2";
-	field1.parseFieldValue(fvalue1);
+	if (iter != fieldDefs.end()){
+		field1.name = iter->second.name;
+		field1.len = iter->second.len;
+		field1.type = iter->second.type;
+		string fvalue1 = "2";
+		field1.parseFieldValue(fvalue1);
+	} else {
+		throw Error("field quantity sot found");
+	}
 
 	iter = fieldDefs.find("unitprice");
-	field2.name = iter->second.name;
-	field2.len = iter->second.len;
-	field2.type = iter->second.type;
-	string fvalue2 = "0.012";
-	field2.parseFieldValue(fvalue2);
+	if (iter != fieldDefs.end()){
+		field2.name = iter->second.name;
+		field2.len = iter->second.len;
+		field2.type = iter->second.type;
+		string fvalue2 = "0.012";
+		field2.parseFieldValue(fvalue2);
+	} else {
+		throw Error("field unitprice sot found");
+	}
 	
-	iter = fieldDefs.find("budget");
-	field3.name = iter->second.name;
-	field3.len = iter->second.len;
-	field3.type = iter->second.type;
-	string fvalue3 = "0.04";
-	field3.parseFieldValue(fvalue3);
+	iter = fieldDefs.find("unitbudget");
+	if (iter != fieldDefs.end()){
+		field3.name = iter->second.name;
+		field3.len = iter->second.len;
+		field3.type = iter->second.type;
+		string fvalue3 = "0.04";
+		field3.parseFieldValue(fvalue3);
+	} else {
+		throw Error("field unitbudget sot found");
+	}
 
 	fields.push_back(field1);
 	fields.push_back(field2);
@@ -132,7 +145,7 @@ void ResourceRequest_Test::testResourceRequets()
 	
 	ptrresourceRequest1 = new ResourceRequest(set, name, fields, intervals);
 
-	fieldList_t fields1;
+	auction::fieldList_t fields1;
 	resourceReqIntervalList_t intervals1;
 
 	field_t field11;
@@ -140,25 +153,37 @@ void ResourceRequest_Test::testResourceRequets()
 	field_t field31;
 	
 	iter = fieldDefs.find("quantity");
-	field11.name = iter->second.name;
-	field11.len = iter->second.len;
-	field11.type = iter->second.type;
-	string fvalue4 = "3";
-	field11.parseFieldValue(fvalue4);
-
-	iter = fieldDefs.find("unitprice");
-	field21.name = iter->second.name;
-	field21.len = iter->second.len;
-	field21.type = iter->second.type;
-	string fvalue5 = "0.013";
-	field21.parseFieldValue(fvalue5);
+	if (iter != fieldDefs.end()){
+		field11.name = iter->second.name;
+		field11.len = iter->second.len;
+		field11.type = iter->second.type;
+		string fvalue4 = "3";
+		field11.parseFieldValue(fvalue4);
+	} else {
+		throw Error("field budget sot found");
+	}
 	
-	iter = fieldDefs.find("budget");
-	field31.name = iter->second.name;
-	field31.len = iter->second.len;
-	field31.type = iter->second.type;
-	string fvalue6 = "0.05";
-	field31.parseFieldValue(fvalue6);
+	iter = fieldDefs.find("unitprice");
+	if (iter != fieldDefs.end()){
+		field21.name = iter->second.name;
+		field21.len = iter->second.len;
+		field21.type = iter->second.type;
+		string fvalue5 = "0.013";
+		field21.parseFieldValue(fvalue5);
+	} else {
+		throw Error("field unitprice sot found");
+	}
+	
+	iter = fieldDefs.find("unitbudget");
+	if (iter != fieldDefs.end()){
+		field31.name = iter->second.name;
+		field31.len = iter->second.len;
+		field31.type = iter->second.type;
+		string fvalue6 = "0.05";
+		field31.parseFieldValue(fvalue6);
+	} else {
+		throw Error("field unitbudget sot found");
+	}
 
 	fields1.push_back(field11);
 	fields1.push_back(field21);
@@ -194,9 +219,9 @@ void ResourceRequest_Test::testResourceRequets()
 	
 	CPPUNIT_ASSERT( ptrresourceRequest1->getState() == ptrresourceRequest2->getState()  ); 
 	
-	ptrresourceRequest1->setState(RR_VALID);
+	ptrresourceRequest1->setState(AO_VALID);
 	
-	CPPUNIT_ASSERT( ptrresourceRequest1->getState() == RR_VALID  );
+	CPPUNIT_ASSERT( ptrresourceRequest1->getState() == AO_VALID  );
 	
 	//cout << "Info:" << ptrresourceRequest1->getInfo() << endl;
 	

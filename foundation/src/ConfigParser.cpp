@@ -94,6 +94,7 @@ void ConfigParser::parse(configItemList_t *list, configADList_t *ad_list)
 	
         if (((!xmlStrcmp(cur->name, (const xmlChar *)"MAIN")) || 
 			 (!xmlStrcmp(cur->name, (const xmlChar *)"AUM_PROCESSOR")) ||
+			 (!xmlStrcmp(cur->name, (const xmlChar *)"AGENT_PROCESSOR")) ||			 
              (!xmlStrcmp(cur->name, (const xmlChar *)"CONTROL"))) && (cur->ns == ns)) {
 	    
             cur2 = cur->xmlChildrenNode;

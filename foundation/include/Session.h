@@ -50,6 +50,11 @@ typedef enum
 } sessionState_t;
 
 
+typedef map<uint32_t, ipap_message> 					pendingMessageList_t;
+typedef map<uint32_t, ipap_message>::iterator 			pendingMessageListIter_t;
+typedef map<uint32_t, ipap_message>::const_iterator 	pendingMessageListConstIter_t;
+
+
 class Session
 {
 
@@ -144,6 +149,12 @@ public:
 	
 	anslp::session_id getAnlspSession(){ return sid; }
 		
+	//! Confirm the response of the message with id mid.
+	void confirmMessage(uint32_t mid);
+	
+	//! add to the list of pensing message a new entry.
+	void addPendingMessage(ipap_message mes);		
+		
 protected:
 	
     //! unique internal sessionID for this Session instance (has to be provided)
@@ -157,7 +168,10 @@ protected:
 
 	//! Session id in the a-nslp application
 	anslp::session_id sid;
-	  
+
+	//! List of messages pending for confirmation.
+	pendingMessageList_t pendingMessages;
+		  
 	//! sender host address.
 	protlib::hostaddress sender_addr;
 		
@@ -181,7 +195,7 @@ protected:
 
 	//! Sequence number for messages being transfered from this session.
 	MessageIdSource mId;
-
+	
 };
 
 //! overload for <<, so that a Auctioner object can be thrown into an ostream

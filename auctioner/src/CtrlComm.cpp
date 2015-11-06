@@ -663,9 +663,9 @@ char *CtrlComm::processAuctionInteraction(parseReq_t *preq )
     log->dlog(ch, "Starting processAuctionInteraction" );
 #endif
 	
-    paramListIter_t id = preq->params.find("SessionID");
+    paramListIter_t sessionId = preq->params.find("SessionID");
 
-    if (id == preq->params.end() ) {
+    if (sessionId == preq->params.end() ) {
         throw Error("processAuctionInteraction: missing parameter 'SessionID'" );
     }
     

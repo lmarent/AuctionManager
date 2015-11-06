@@ -13,6 +13,7 @@ const int MOD_INIT_REQUIRED_PARAMS = 2;
 
 int lastBidGenerated = 0;
 int domainId = 0;
+ipap_field_container g_ipap_fields;
 
 void auction::initModule( auction::configParam_t *params )
 {
@@ -24,6 +25,11 @@ void auction::initModule( auction::configParam_t *params )
 	// Require the lastBidGenerated and domainId.
 	lastBidGenerated = 5;
 	domainId = 7;
+
+	// Bring fields defined for ipap_messages;
+	g_ipap_fields.initialize_forward();
+    g_ipap_fields.initialize_reverse();
+
 		
 #ifdef DEBUG
 	fprintf( stdout,  "bas module: end init module \n");
@@ -68,36 +74,16 @@ int check(auction::fieldDefList_t *fieldDefs, auction::fieldList_t *requestparam
 	return 1;
 }
 
-void fillField(auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
-			   int eno, int ftype, string value, auction::fieldList_t *fields)
-{
-	auction::fieldDefItem_t iter;
-	auction::field_t field;
-	initializeField(&field);
-	
-	iter = auction::IpApMessageParser::findField(fieldDefs, eno, ftype);
-	field.name = iter.name;
-	field.len = iter.len;
-	field.type = iter.type;
-	auction::IpApMessageParser::parseFieldValue(fieldVals, value, &field);
-	
-	fields->push_back(field);
 
-}
  
 
-auction::Bid *
+auction::BiddingObject *
 createBid( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
 		   auction::Auction *auct, float quantity, double unitbudget, 
 		   double unitprice, string start, string stop )
 {										  		
 	uint64_t timeUint64;
-	auction::Bid *bid = NULL;
-
-	// Bring fields defined for ipap_messages;
-	ipap_field_container g_ipap_fields;
-	g_ipap_fields.initialize_forward();
-    g_ipap_fields.initialize_reverse();
+	auction::BiddingObject *bid = NULL;
 	
 	auction::elementList_t elements;
     auction::optionList_t options;
@@ -152,27 +138,27 @@ createBid( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVal
 
 
 	// Bid Set and name
-	string bidSet = "Agent_" + intToString(domainId);
+	string bidSet = intToString(domainId);
 	lastBidGenerated ++;
 	string bidName = "Bid_" + intToString(lastBidGenerated);
 
-    bid = new auction::Bid(auct->getSetName(), auct->getAuctionName(), 
-							bidSet, bidName, elements, options);
+    bid = new auction::BiddingObject(auct->getSetName(), auct->getAuctionName(), 
+							bidSet, bidName, IPAP_BID, elements, options);
     
 	return bid;
 
 }
 
 void auction::execute (auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,  
-					   auction::configParam_t *params, string aset, string aname, auction::bidDB_t *bids, 
-					   auction::allocationDB_t **allocationdata )
+					   auction::configParam_t *params, string aset, string aname, auction::biddingObjectDB_t *bids, 
+					   auction::biddingObjectDB_t **allocationdata )
 {
-
+	// NOTHING TO DO.
 }
 
 void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
 							auction::fieldList_t *requestparams, auction::auctionDB_t *auctions, 
-							auction::bidDB_t **biddata )
+							auction::biddingObjectDB_t **biddata )
 {
 
 #ifdef DEBUG
@@ -211,7 +197,7 @@ void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldVa
 		auctionDBIter_t auctIter;
 		for (auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter)
 		{
-			auction::Bid * bid = createBid( fieldDefs, fieldVals, *auctIter, quantity, 
+			auction::BiddingObject * bid = createBid( fieldDefs, fieldVals, *auctIter, quantity, 
 											budgetByAuction, valuationByAuction, 
 												start, stop );
 			(*biddata)->push_back(bid);

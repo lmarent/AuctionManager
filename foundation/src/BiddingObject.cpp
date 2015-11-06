@@ -204,7 +204,7 @@ string BiddingObject::getIpApId(int domain)
 	string idBiddingObjectS;
 	if (getBiddingObjectSet().empty()){
 		ostringstream ssA;
-		ssA << BID_DEFAULT_SETNAME << domain;
+		ssA << domain;
 		idBiddingObjectS =  ssA.str() + "." + getBiddingObjectName();
 	} else {
 		idBiddingObjectS = getBiddingObjectSet() + "." + getBiddingObjectName();
@@ -495,3 +495,5 @@ BiddingObject::calculateIntervals(time_t now, biddingObjectIntervalList_t *list)
     }    
 		
 }
+
+

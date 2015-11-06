@@ -199,13 +199,20 @@ void MAPIBiddingObjectParser_Test::testMAPIBiddingObjectParser()
 		BiddingObject *ptrBidTmp1, *ptrBidTmp2, *ptrBidTmp3, *ptrBidTmp4, *ptrBidTmp5, *ptrBidTmp6;
 
 		auctionDB_t * auctions = loadAuctions();
+		Auction *auction = (*auctions)[0];
 		biddingObjectDB_t *bids = loadBidsFromFile();
+		
+		BiddingObject *object1 = (*bids)[0];
+		BiddingObject *object2 = (*bids)[1];
+		BiddingObject *object3 = (*bids)[2];
 		
 		CPPUNIT_ASSERT( bids->size() == 3 );
 				
-		ipap_message * message = ptrMAPIBidParser->get_ipap_message(&fieldDefs, bids, auctions, templates);
+		ipap_message * message1 = ptrMAPIBidParser->get_ipap_message(&fieldDefs, object1, auction, templates);
+		ipap_message * message2 = ptrMAPIBidParser->get_ipap_message(&fieldDefs, object2, auction, templates);
+		ipap_message * message3 = ptrMAPIBidParser->get_ipap_message(&fieldDefs, object3, auction, templates);
 		
-		anslp::msg::anslp_ipap_message mes(*message);
+		anslp::msg::anslp_ipap_message mes(*message1);
 		
 		anslp::msg::anslp_ipap_xml_message xmlmes;
 	
@@ -216,26 +223,15 @@ void MAPIBiddingObjectParser_Test::testMAPIBiddingObjectParser()
 								
 		biddingObjectDB_t *bids2 = new biddingObjectDB_t();	
 		
-		ptrMAPIBidParser->parse(&fieldDefs, &fieldVals, message, bids2, templates );
+		ptrMAPIBidParser->parse(&fieldDefs, &fieldVals, message1, bids2, templates );
 				
 		cout << "Bid size:" << bids2->size() << endl;
 		
-		CPPUNIT_ASSERT( bids2->size() == 3 );
+		CPPUNIT_ASSERT( bids2->size() == 1 );
 		
-		ptrBidTmp1 = (*bids)[0];
 		ptrBidTmp2 = (*bids2)[0];
 				
-		CPPUNIT_ASSERT( *ptrBidTmp1 == *ptrBidTmp2 );
-
-		ptrBidTmp3 = (*bids)[1];
-		ptrBidTmp4 = (*bids2)[1];
-	
-		CPPUNIT_ASSERT( *ptrBidTmp3 == *ptrBidTmp4 );
-		
-		ptrBidTmp5 = (*bids)[2];
-		ptrBidTmp6 = (*bids2)[2];
-
-		CPPUNIT_ASSERT( *ptrBidTmp5 == *ptrBidTmp6 );
+		CPPUNIT_ASSERT( *object1 == *ptrBidTmp2 );
 
 
 		// Delete bids and auctions

@@ -79,9 +79,8 @@ void ConfigManager::reread(const string dtdfilename, const string filename)
 string ConfigManager::getValue(string name, string group, string module)
 {
     configItemListIter_t iter;
-
-    for (iter = list.begin(); iter != list.end(); iter++) {
 		
+    for (iter = list.begin(); iter != list.end(); iter++) {
         if ((name == iter->name) && (group.empty() || group == iter->group) &&
             (module.empty() || module == iter->module)) {
             return iter->value;

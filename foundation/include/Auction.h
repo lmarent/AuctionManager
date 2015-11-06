@@ -124,9 +124,6 @@ class Auction : public AuctioningObject
 	//! session referencing this auction
 	sessionList_t sessions;
 
-    //! get a value by name from the misc rule attriutes
-    string getMiscVal(string name);
-
 	//! Add a field to the template given as parameter.
 	void addTemplateField(ipap_template *templ, 
 		 			      ipap_field_container g_ipap_fields, 
@@ -170,6 +167,10 @@ class Auction : public AuctioningObject
     inline string getAuctionName(){ return auctionName; }
         
     inline string getAuctionResource(){ return resource; }
+    
+    inline void setStart(time_t _start){ start = _start; }
+    
+    inline void setStop(time_t _stop){ stop = _stop; }
     
     inline time_t getStart(){ return start; }
     
@@ -253,7 +254,6 @@ class Auction : public AuctioningObject
                  miscanellenous attributes of a configured auction
     */
     miscList_t *getMisc();
-
     
     //! dump a Auction object
     void dump( ostream &os );

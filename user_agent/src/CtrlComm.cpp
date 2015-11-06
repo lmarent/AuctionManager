@@ -31,7 +31,6 @@ $Id: CtrlComm.cpp 748 2015-07-31 9:25:00 amarentes $
 #include "AuctionTimer.h"
 #include "CtrlComm.h"
 #include "AuctionManager.h"
-#include "Bid.h"
 #include "ConstantsAgent.h"
 #include "EventAgent.h"
 #include "anslp_ipap_xml_message.h"

@@ -273,6 +273,28 @@ class ResponseCreateSessionEvent : public CtrlCommEvent
 	}
 };
 
+class PushExecutionEvent : public Event
+{
+  private:
+    int index;
+
+  public:
+
+    PushExecutionEvent(struct timeval time, int _index, unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, time, ival, align), index(_index) {  }
+
+    PushExecutionEvent(time_t offs_sec, int _index, unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, offs_sec, 0, ival, align), index(_index) { }
+
+    PushExecutionEvent(int _index, unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, ival, align), index(_index) { }
+
+    int getIndex()
+    {
+        return index;
+    }
+};
+
 }; // namespace auction
 
 #endif // _EVENT_AGENT_H_

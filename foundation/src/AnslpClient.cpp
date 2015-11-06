@@ -199,14 +199,14 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 }
 
 void 
-AnslpClient::tg_teardown(session_id id) 
+AnslpClient::tg_teardown(anslp::session_id *sid) 
 {
 
 #ifdef DEBUG
     log->dlog(ch,"Starting tg_teardown ");
 #endif        
 
-	event *e = new api_teardown_event(new session_id(id));
+	event *e = new api_teardown_event(sid);
 
 	anslp_event_msg *msg = new anslp_event_msg(session_id(), e);
 	
@@ -221,8 +221,9 @@ AnslpClient::tg_teardown(session_id id)
 }
 
 void 
-AnslpClient::tg_bidding(session_id sid, const hostaddress &source_addr, 
-						const hostaddress &destination_addr,
+AnslpClient::tg_bidding(anslp::session_id *sid, 
+						const protlib::hostaddress &source_addr, 
+						const protlib::hostaddress &destination_addr,
 					    uint16_t source_port, uint16_t dest_port, 
 						uint8_t protocol, ipap_message &message)
 {
@@ -236,7 +237,7 @@ AnslpClient::tg_bidding(session_id sid, const hostaddress &source_addr,
 	// Build the request message 
 
 	anslp_ipap_message mess(message);    
-         
+            
     FastQueue ret;
 	    
     // Build the vector of objects to be configured.
@@ -279,6 +280,21 @@ AnslpClient::tg_bidding(session_id sid, const hostaddress &source_addr,
     // TODO AM: To take the values returned in the message and return them. 
 
 }
+
+void 
+AnslpClient::tg_bidding(anslp::session_id *sid, 
+						const protlib::hostaddress &source_addr, 
+						string destination_addr,
+					    uint16_t source_port, uint16_t dest_port, 
+						uint8_t protocol, ipap_message &message)
+{
+
+   protlib::hostaddress dest_addr;
+   dest_addr.set_ip(destination_addr);
+ 
+   tg_bidding(sid, source_addr, dest_addr, source_port, dest_port, protocol, message);
+
+}						
 
 string AnslpClient::getLocalAddress(void)
 {

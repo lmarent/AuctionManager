@@ -172,7 +172,7 @@ class BiddingObjectManager : public FieldDefManager
     void addBiddingObject(BiddingObject  *b); //ok
 
     //! activate/execute biddingObjects
-    void activateBiddingObjects(biddingObjectDB_t *biddingObjects, EventScheduler *e);
+    void activateBiddingObjects(biddingObjectDB_t *biddingObjects);
 
     /*! \short   delete a biddingObject  description 
 
@@ -211,6 +211,15 @@ class BiddingObjectManager : public FieldDefManager
 
 	//! Return the domain
 	inline int getDomain(){ return domain; }
+
+	/*! \short   get the ipap_message that contains all the bidding objects within
+     * 			  the container. 
+
+        \throws an Error exception if some field required is missing.
+    */	
+	ipap_message * get_ipap_message(BiddingObject *biddingObject,
+									Auction *auction, 
+									ipap_template_container *templates);
 
 };
 

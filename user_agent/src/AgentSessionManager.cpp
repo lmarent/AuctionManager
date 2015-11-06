@@ -26,16 +26,20 @@
 	$Id: AgentSessionManager.cpp 748 2015-10-29 11:00:00Z amarentes $
 */
 
+#include "ParserFcts.h"
+#include "AgentSessionManager.h"
+#include <uuid/uuid.h>
+
 
 
 using namespace auction;
+
 
 AgentSessionManager::AgentSessionManager(): 
 	SessionManager()
 {
 
 }
-
 
 
 AgentSessionManager::~AgentSessionManager()
@@ -53,59 +57,10 @@ AgentSessionManager::createAgentSession(string sessionId, string sourceAddr, str
 
 	auction::AgentSession *session = new auction::AgentSession(sessionId);
 	session->setSourceAddress(sourceAddr);
-	
-	// Get the sender Address.
-	field_t *fptr1 = getField("SrcIP");
-	if (fptr1 != NULL){
-		// TODO AM: implement more than one value.
-		sSenderAddr = ((fptr1->value)[0]).getValue();
-	}
-	else {
-		field_t *fptr2 = getField("SrcIP6");
-		if (fptr2 != NULL){
-			sSenderAddr = ((fptr2->value)[0]).getValue();
-		}
-	}
 	session->setSenderAddress(sSenderAddr);
-
-	// Get the sender Port.
-	field_t *fptr3 = getField("SrcPort");
-	if (fptr3 != NULL){
-		// TODO AM: implement more than one value.
-		string sSender_port = ((fptr3->value)[0]).getValue();
-		unsigned short sndPort = (unsigned short) ParserFcts::parseULong(sSender_port);
-		session->setSenderPort((uint16_t) sndPort);
-	}
-	else {
-		session->setSenderPort(senderPort);
-	}
-
-
-	// Get the destination IP.
-	field_t *fptr4 = getField("DstIP");
-	if (fptr4 != NULL){
-		// TODO AM: implement more than one value.
-		sDestinAddr = ((fptr4->value)[0]).getValue();
-	}
-	else {
-		field_t *fptr5 = getField("DstIP6");
-		if (fptr5 != NULL){
-			sDestinAddr = ((fptr5->value)[0]).getValue();
-		}
-	}
+	session->setSenderPort(senderPort);
 	session->setReceiverAddress(sDestinAddr);
-				
-	// get the destination PORT.
-	field_t *fptr6 = getField("DstPort");
-	if (fptr6 != NULL){
-		// TODO AM: implement more than one value.
-		string sDestin_port = ((fptr6->value)[0]).getValue();
-		unsigned short dstPort = (unsigned short) ParserFcts::parseULong(sDestin_port);
-		session->setReceiverPort((uint16_t) dstPort);
-	}
-	else {
-		session->setSenderPort(destinPort);
-	}
+	session->setSenderPort(destinPort);
 
 	// Set the protocol which is defined by default.
 	session->setProtocol(protocol);

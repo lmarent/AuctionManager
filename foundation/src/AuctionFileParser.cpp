@@ -99,7 +99,7 @@ auctionTemplateField_t AuctionFileParser::parseField(xmlNodePtr cur,
 		sname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"NAME"));
 		// use lower case internally
 		transform(sname.begin(), sname.end(), sname.begin(), ToLower());
-
+		
 		// lookup in field definitions list
 		fieldDefListIter_t iter;
 		iter = fieldDefs->find(sname);
@@ -186,6 +186,7 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
     gset = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
     // use lower case internally
     transform(gset.begin(), gset.end(), gset.begin(), ToLower());
+	
 
 #ifdef DEBUG
     log->dlog(ch, "Global Auction set %s", gset.c_str());
@@ -269,10 +270,22 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
             sid = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
             transform(sid.begin(), sid.end(), sid.begin(), ToLower());
             parseName(sid, sname, rname);
-            
-            if (sname.empty())	
-				sname = gset;
 
+			if (sname.empty()){
+				try{
+					int iset = ParserFcts::parseInt(gset);
+				} catch (Error &e) {
+					gset= ""; // the number given is not an integer.
+				}
+				if (gset.empty()){
+					ostringstream o;
+					o << getDomain();
+					sname = o.str();
+				} else {
+					sname = gset;
+				}
+			}
+			            
             resourceId = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"RESOURCE_ID"));
             transform(resourceId.begin(), resourceId.end(), resourceId.begin(), ToLower());
 

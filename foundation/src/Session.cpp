@@ -200,3 +200,24 @@ string Session::getInfo()
 	
 	return os.str();
 }
+
+//! Confirm the response of the message with id mid.
+void Session::confirmMessage(uint32_t mid)
+{
+	pendingMessageListIter_t iter = pendingMessages.find(mid);
+	if (iter != pendingMessages.end()){
+		pendingMessages.erase(iter);
+	}	
+}
+	
+//! add to the list of pensing message a new entry.
+void Session::addPendingMessage(ipap_message mes)
+{
+	uint32_t mid = mes.get_seqno();
+	pendingMessageListIter_t iter = pendingMessages.find(mid);
+	if (iter == pendingMessages.end()){
+		pendingMessages[mid] = mes;
+	} else{
+		throw Error("message to put in pending already exist");
+	}	
+}

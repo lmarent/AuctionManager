@@ -36,6 +36,7 @@
 #include "IpAp_def.h"
 #include "IpAp_message.h"
 #include "TemplateIdSource.h"
+#include "IpApMessageParser.h"
 
 using namespace auction;
 
@@ -71,11 +72,11 @@ Auction::Auction(time_t now, string sname, string aname, string resource, action
         duration = 0;
 	    
         // get the configured values
-        string sstart = getMiscVal("start");
-        string sstop = getMiscVal("stop");
-        string sduration = getMiscVal("duration");
-        string sinterval = getMiscVal("interval");
-        string salign = getMiscVal("align");
+        string sstart = IpApMessageParser::getMiscVal(getMisc(), "start");
+        string sstop = IpApMessageParser::getMiscVal(getMisc(), "stop");
+        string sduration = IpApMessageParser::getMiscVal(getMisc(), "duration");
+        string sinterval = IpApMessageParser::getMiscVal(getMisc(), "interval");
+        string salign = IpApMessageParser::getMiscVal(getMisc(), "align");
 
 #ifdef DEBUG
 		log->dlog(ch, "SStart:%s SStop:%s SDuration:%s SInterval:%s, SAlign:%s", 
@@ -233,7 +234,7 @@ Auction::getIpApId(int domain)
 	string idAuctionS;
 	if ((getSetName()).empty()){
 		ostringstream ssA;
-		ssA << AUC_DEFAULT_SETNAME << domain;
+		ssA << domain;
 		idAuctionS =  ssA.str() + "." + getAuctionName();
 	} else {
 		idAuctionS = getSetName() + "." + getAuctionName();
@@ -416,19 +417,6 @@ void Auction::buildTemplates(auctionTemplateFieldList_t &templFields,
 #endif  
 
 
-}
-
-/* functions for accessing the templates */
-string Auction::getMiscVal(string name)
-{
-    miscListIter_t iter;
-
-    iter = miscList.find(name);
-    if (iter != miscList.end()) {
-        return iter->second.value;
-    } else {
-        return "";
-    }
 }
 
 

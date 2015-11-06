@@ -75,8 +75,10 @@ class MAPIBiddingObjectParser : public IpApMessageParser, public anslp::msg::ans
 	
 	ipap_template * findTemplate(ipap_template_container *templatesOut, uint16_t templId);
 		   				  
-	void get_ipap_message( fieldDefList_t *fieldDefs, BiddingObject *biddingObjectPtr, 
-						   Auction *auctionPtr, ipap_template_container *templates, 
+	void get_ipap_message( fieldDefList_t *fieldDefs, 
+						   BiddingObject *biddingObjectPtr, 
+						   Auction *auctionPtr, 
+						   ipap_template_container *templates, 
 						   ipap_message *message);
 
 	void parseAuctionKey( fieldDefList_t *fields, fieldValList_t *fieldVals,
@@ -98,7 +100,8 @@ class MAPIBiddingObjectParser : public IpApMessageParser, public anslp::msg::ans
 
 	//! get the ipap_message that represents the set of auctions.
 	ipap_message * get_ipap_message(fieldDefList_t *fieldDefs, 
-									biddingObjectDB_t *biddingObjects, auctionDB_t *auctions, 
+									BiddingObject *biddingObject, 
+									Auction *auction, 
 									ipap_template_container *templates );
 
 };

@@ -32,24 +32,20 @@
 #include "Constants.h"
 #include "EventAgent.h"
 #include "TextResourceRequestParser.h"
+#include "MAPIResourceRequestParser.h"
 
 using namespace auction;
 
 /* ------------------------- ResourceRequestManager ------------------------- */
 
-ResourceRequestManager::ResourceRequestManager( string fdname, string fvname) 
-    : resourceRequests(0), fieldDefFileName(fdname), fieldValFileName(fvname), idSource(1)
+ResourceRequestManager::ResourceRequestManager( int domain, string fdname, string fvname) 
+    : FieldDefManager(fdname, fvname), resourceRequests(0), domain(domain), idSource(1)
 {
     log = Logger::getInstance();
     ch = log->createChannel("ResourceRequestManager");
 #ifdef DEBUG
     log->dlog(ch,"Starting");
 #endif
-
-	loadFieldDefs(fieldDefFileName);
-
-    // load the field val list
-    loadFieldVals(fieldValFileName);	
 
 }
 
@@ -78,70 +74,6 @@ ResourceRequestManager::~ResourceRequestManager()
 }
 
 
-/* -------------------- isReadableFile -------------------- */
-
-static int isReadableFile( string fileName ) {
-
-    FILE *fp = fopen(fileName.c_str(), "r");
-
-    if (fp != NULL) {
-        fclose(fp);
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-/* -------------------- loadFieldDefs -------------------- */
-
-void ResourceRequestManager::loadFieldDefs(string fname)
-{
-    if (fieldDefFileName.empty()) {
-        if (fname.empty()) {
-            fname = FIELDDEF_FILE;
-		}
-    } else {
-        fname = fieldDefFileName;
-    }
-
-#ifdef DEBUG
-    log->dlog(ch, "filename %s", fname.c_str());
-#endif
-
-    if (isReadableFile(fname)) {
-        if (fieldDefs.empty() && !fname.empty()) {
-            FieldDefParser f = FieldDefParser(fname.c_str());
-            f.parse(&fieldDefs);
-        }
-    
-    }else{
-#ifdef DEBUG
-    log->dlog(ch, "filename %s is not readable", fname.c_str());
-#endif    
-    }
-    
-}
-
-/* -------------------- loadFieldVals -------------------- */
-
-void ResourceRequestManager::loadFieldVals( string fname )
-{
-    if (fieldValFileName.empty()) {
-        if (fname.empty()) {
-            fname = FIELDVAL_FILE;
-        }
-    } else {
-        fname = fieldValFileName;
-    }
-
-    if (isReadableFile(fname)) {
-        if (fieldVals.empty() && !fname.empty()) {
-            FieldValParser f = FieldValParser(fname.c_str());
-            f.parse(&fieldVals);
-        }
-    }
-}
-
 /* --------------------- getResourceRequest ------------------------- */
 
 ResourceRequest *ResourceRequestManager::getResourceRequest(int uid)
@@ -157,7 +89,8 @@ ResourceRequest *ResourceRequestManager::getResourceRequest(int uid)
 
 /* -------------------- getResourceRequest -------------------- */
 
-ResourceRequest *ResourceRequestManager::getResourceRequest(string sname, string rname)
+ResourceRequest *
+ResourceRequestManager::getResourceRequest(string sname, string rname)
 {
     resourceRequestSetIndexIter_t iter;
     resourceRequestIndexIter_t iter2;
@@ -189,7 +122,8 @@ ResourceRequest *ResourceRequestManager::getResourceRequest(string sname, string
 
 /* -------------------- getBids -------------------- */
 
-resourceRequestIndex_t *ResourceRequestManager::getResourceRequests(string sname)
+resourceRequestIndex_t *
+ResourceRequestManager::getResourceRequests(string sname)
 {
     resourceRequestSetIndexIter_t iter;
 
@@ -228,12 +162,9 @@ resourceRequestDB_t *ResourceRequestManager::parseResourceRequests(string fname)
     resourceRequestDB_t *new_requests = new resourceRequestDB_t();
 
     try {	
-
-        // load the field def list
-        loadFieldDefs(fieldDefFileName);
 		
         ResourceRequestFileParser rfp = ResourceRequestFileParser(fname);
-        rfp.parse(&fieldDefs, new_requests, &idSource);
+        rfp.parse(FieldDefManager::getFieldDefs(), new_requests, &idSource);
 
 #ifdef DEBUG
     log->dlog(ch, "resource requests parsed");
@@ -259,15 +190,13 @@ resourceRequestDB_t *ResourceRequestManager::parseResourceRequestsBuffer(char *b
     resourceRequestDB_t *new_requests = new resourceRequestDB_t();
 
     try {
-        // load the filter def list
-        loadFieldDefs(fieldDefFileName);
 				
         if (mapi) {
              TextResourceRequestParser rfp = TextResourceRequestParser(buf, len);
-             rfp.parse(&fieldDefs, new_requests, &idSource);
+             rfp.parse(FieldDefManager::getFieldDefs(), new_requests, &idSource);
         } else {
             ResourceRequestFileParser rfp = ResourceRequestFileParser(buf, len);
-            rfp.parse(&fieldDefs,  new_requests, &idSource);
+            rfp.parse(FieldDefManager::getFieldDefs(),  new_requests, &idSource);
         }
 
         return new_requests;
@@ -373,7 +302,7 @@ void ResourceRequestManager::addResourceRequest(ResourceRequest *request)
 		request->setUId(idSource.newId());
 
         // could do some more checks here
-        request->setState(RR_VALID);
+        request->setState(AO_VALID);
 
 #ifdef DEBUG    
 		log->dlog(ch, "Resource Request Id = '%d'", request->getUId());
@@ -416,7 +345,7 @@ void ResourceRequestManager::activateResourceRequests(resourceRequestDB_t *reque
     for (iter = requests->begin(); iter != requests->end(); iter++) {
         ResourceRequest *r = (*iter);
         log->dlog(ch, "activate resource request with name = '%s'", r->getResourceRequestName().c_str());
-        r->setState(RR_ACTIVE);
+        r->setState(AO_ACTIVE);
 		// TODO AM: Finish this code.
     }
 }
@@ -616,7 +545,7 @@ void ResourceRequestManager::delResourceRequests(resourceRequestDB_t *requests, 
 void ResourceRequestManager::storeResourceRequestAsDone(ResourceRequest *r)
 {
     
-    r->setState(RR_DONE);
+    r->setState(AO_DONE);
     resourceRequestDone.push_back(r);
 
     if (resourceRequestDone.size() > DONE_LIST_SIZE) {
@@ -626,6 +555,21 @@ void ResourceRequestManager::storeResourceRequestAsDone(ResourceRequest *r)
         saveDelete(resourceRequestDone.front());
         resourceRequestDone.pop_front();
     }
+}
+
+ipap_message * 
+ResourceRequestManager::get_ipap_message(ResourceRequest *request, time_t start,
+										 string resourceId, bool useIPV6, 
+										 string sAddressIPV4, string sAddressIPV6, uint16_t port)
+{
+
+	MAPIResourceRequestParser mrrp = MAPIResourceRequestParser(getDomain());
+
+	return mrrp.get_ipap_message(FieldDefManager::getFieldDefs(), 
+								 request, start, resourceId, 
+								 useIPV6, sAddressIPV4, sAddressIPV6, port);
+
+
 }
 
 

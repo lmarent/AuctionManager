@@ -46,6 +46,12 @@ libfoundation_la_SOURCES = AuctionTimer.cpp \
 						   MAPIAuctionParser.cpp \
 						   AuctionManagerInfo.cpp \
 						   AuctionManagerComponent.cpp \
+						   Session.cpp \
+						   SessionManager.cpp \
+						   ModuleLoader.cpp \
+						   MessageIdSource.cpp \
+						   ProcModule.cpp \
+						   Module.cpp \
 						   Event.cpp \
 						   EventScheduler.cpp \
 						   AnslpClient.cpp					  

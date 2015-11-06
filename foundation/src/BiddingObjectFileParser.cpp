@@ -120,10 +120,10 @@ void BiddingObjectFileParser::parse(fieldDefList_t *fieldDefs, fieldValList_t *f
             aname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"AUCTION_ID"));
 			// use lower case internally
 			transform(aname.begin(), aname.end(), aname.begin(), ToLower());
-
+			
 			// divide the auction name in set and name
 			parseName(aname, aset, aname);
-
+			
             stype = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"TYPE"));
 			// use lower case internally
 			transform(stype.begin(), stype.end(), stype.begin(), ToLower());
@@ -139,6 +139,22 @@ void BiddingObjectFileParser::parse(fieldDefList_t *fieldDefs, fieldValList_t *f
 			
 			// divide the BiddingObject name in set and name
 			parseName(bname, bset, bname);
+
+			if (bset.empty()){
+				try{
+					int iset = ParserFcts::parseInt(sname);
+				} catch (Error &e) {
+					sname= ""; // the number given is not an integer.
+				}
+				if (sname.empty()){
+					ostringstream o;
+					o << getDomain();
+					bset = o.str();
+				} else {
+					bset = sname;
+				}
+			}
+
 
             cur2 = cur->xmlChildrenNode;
 

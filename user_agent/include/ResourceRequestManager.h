@@ -33,6 +33,7 @@
 #include "stdincpp.h"
 #include "Logger.h"
 #include "Error.h"
+#include "FieldDefManager.h"
 #include "EventSchedulerAgent.h"
 #include "ResourceRequestFileParser.h"
 
@@ -63,7 +64,7 @@ typedef map<time_t, resourceRequestDB_t>::iterator  resourceRequestTimeIndexIter
   The resourceRequest will then be stored in the bidDatabase inside the BidManager
 */
 
-class ResourceRequestManager
+class ResourceRequestManager : public FieldDefManager
 {
   private:
 
@@ -72,6 +73,9 @@ class ResourceRequestManager
 
     //!< number of resource requests in the database
     int resourceRequests;
+
+	//! This field identifies uniquely the agent.
+	int domain; 
 
     //! index to bids via setID and name
     resourceRequestSetIndex_t resourceRequestSetIndex;
@@ -82,26 +86,10 @@ class ResourceRequestManager
     //! list with resource requests done
     resourceRequestDone_t resourceRequestDone;
 
-	//! filter definitions
-    fieldDefList_t fieldDefs;
-
-    //! field values
-    fieldValList_t fieldVals;
-
-
-    // name of field def and field vals files
-    string fieldDefFileName, fieldValFileName;
-
-    //! load filter definitions
-    void loadFieldDefs(string fname);
-
-	//! load field value definitions
-    void loadFieldVals(string fname);
-
-    // pool of unique resourceRequest ids
+    //! pool of unique resourceRequest ids
     ResourceRequestIdSource idSource;
 
-    /* \short add the resourceRequest name to the list of finished resourceRequests
+    /*! \short add the resourceRequest name to the list of finished resourceRequests
 
        \arg \c resourceRequestname - name of the finished resourceRequest (source.name)
     */
@@ -123,7 +111,7 @@ class ResourceRequestManager
         \arg \c fdname  field definition file name
         \arg \c fvname  field value definition name
      */
-    ResourceRequestManager(string fdname, string fvname); //Ok
+    ResourceRequestManager(int domain, string fdname, string fvname); //Ok
 
     //! destroy a ResourceRequestManager object
     ~ResourceRequestManager(); // Ok
@@ -201,13 +189,20 @@ class ResourceRequestManager
     string getInfo(string sname, string rname);
     string getInfo(string sname);
 
+	//! Return the domain
+	inline int getDomain(){ return domain; }
+
+    /*! \short   get the ipap_message that contains the request 
+		\arg     request - request to put in the message.
+		
+        \throws an Error exception if some field required is missing.
+    */	
+	ipap_message * get_ipap_message(ResourceRequest *request, time_t start,
+									string resourceId, bool useIPV6, 
+									string sAddressIPV4, string sAddressIPV6, uint16_t port);
+
     //! dump a ResourceRequestManager object
     void dump( ostream &os );
-
-    fieldDefList_t *getFieldDef() //ok
-    {
-		return &fieldDefs;
-	}
     
 };
 

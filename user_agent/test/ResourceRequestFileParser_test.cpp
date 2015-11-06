@@ -78,7 +78,7 @@ void ResourceRequestFileParser_Test::testParser()
 
 		time_t              now = time(NULL);
 		
-		fieldList_t fields;
+		auction::fieldList_t fields;
 		resourceReqIntervalList_t intervals;
 		
 		field_t field1;
@@ -87,25 +87,37 @@ void ResourceRequestFileParser_Test::testParser()
 		
 		fieldDefListIter_t iter; 
 		iter = fieldDefs.find("quantity");
-		field1.name = iter->second.name;
-		field1.len = iter->second.len;
-		field1.type = iter->second.type;
-		string fvalue1 = "2";
-		field1.parseFieldValue(fvalue1);
+		if (iter != fieldDefs.end()){
+			field1.name = iter->second.name;
+			field1.len = iter->second.len;
+			field1.type = iter->second.type;
+			string fvalue1 = "2";
+			field1.parseFieldValue(fvalue1);
+		} else {
+			throw Error("field quantity was not found");
+		}
 		
-		iter = fieldDefs.find("budget");
-		field3.name = iter->second.name;
-		field3.len = iter->second.len;
-		field3.type = iter->second.type;
-		string fvalue3 = "0.3";
-		field3.parseFieldValue(fvalue3);
+		iter = fieldDefs.find("unitbudget");
+		if (iter != fieldDefs.end()){
+			field3.name = iter->second.name;
+			field3.len = iter->second.len;
+			field3.type = iter->second.type;
+			string fvalue3 = "0.3";
+			field3.parseFieldValue(fvalue3);
+		} else {
+			throw Error("field unitbudget was not found");
+		}
 
 		iter = fieldDefs.find("maxvalue");
-		field2.name = iter->second.name;
-		field2.len = iter->second.len;
-		field2.type = iter->second.type;
-		string fvalue2 = "0.16";
-		field2.parseFieldValue(fvalue2);
+		if (iter != fieldDefs.end()){
+			field2.name = iter->second.name;
+			field2.len = iter->second.len;
+			field2.type = iter->second.type;
+			string fvalue2 = "0.16";
+			field2.parseFieldValue(fvalue2);
+		} else {
+			throw Error("field maxvalue was not found");
+		}
 
 		fields.push_back(field1);
 		fields.push_back(field3);

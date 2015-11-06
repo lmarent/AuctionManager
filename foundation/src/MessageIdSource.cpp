@@ -27,8 +27,8 @@
 */
 
 #include "MessageIdSource.h"
- #include <openssl/rand.h>
- #include <openssl/engine.h>
+#include <openssl/rand.h>
+#include <openssl/engine.h>
 
 
 using namespace auction;
@@ -77,7 +77,7 @@ void MessageIdSource::dump( ostream &os )
 }
 
 
-ostream& operator<< ( ostream &os, MessageIdSource &aim )
+ostream& auction::operator<< ( ostream &os, MessageIdSource &aim )
 {
     aim.dump(os);
     return os;

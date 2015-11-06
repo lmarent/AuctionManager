@@ -29,6 +29,8 @@
 #ifndef _AGENT_SESSION_MANAGER_H_
 #define _AGENT_SESSION_MANAGER_H_
 
+#include "AgentSession.h"
+#include "SessionManager.h"
 
 namespace auction
 {

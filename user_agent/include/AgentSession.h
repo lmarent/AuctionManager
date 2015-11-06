@@ -47,10 +47,20 @@ public:
 	AgentSession( string _sessionId  );
 
 	~AgentSession();
-
-	void setStart(time_t _start);
 	
-	void setStop(time_t s_top);
+	void setRequestData(string set, string name);
+	
+	inline void setStart(time_t _start){ start = _start; }
+	
+	inline void setStop(time_t _stop){ stop = _stop; }
+
+	inline time_t getStart(){ return start; }
+	
+	inline time_t getStop(){ return stop; }
+	
+	inline string getResourceRequestSet(){ return resourceRequestSet; }
+	
+	inline string getResourceRequestName(){ return resourceRequestName; }
 
     void addAuctions(auctionDB_t *auctions);
 	
@@ -65,13 +75,17 @@ public:
 	string getInfo();
 	
 protected:
+
+	//! establish the request interval that create this session.
+	string resourceRequestSet;
+	string resourceRequestName;
 	
-	//! establish the start time of the session 
+	//! establish the start of the interval that create the session. 
 	time_t start;
 	
-	//! Establish the end time of the session
+	//! Establish the end of the interval that create the session.
 	time_t stop;
-	
+
 	//! Auctions created in this session.
 	auctionSet_t  auctionSet;
 

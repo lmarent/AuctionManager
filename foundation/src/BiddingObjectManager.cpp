@@ -303,41 +303,13 @@ void BiddingObjectManager::addBiddingObjects(biddingObjectDB_t * _biddingObjects
 
     // group bidding objects with same start time
     for (iter2 = start.begin(); iter2 != start.end(); iter2++) {
-		biddingObjectDBIter_t bids_iter;
-		
-		// Iterates over the bidding objects starting.
-		for (bids_iter = (iter2->second).begin(); bids_iter != (iter2->second).end(); bids_iter++) 
-		{ 
-			BiddingObject *biddingObject = (*bids_iter);
-					
-#ifdef DEBUG    
-			log->dlog(ch, "Schedulling insert BiddingObject auction event - set: %s, name:  %s", 
-						biddingObject->getAuctionSet().c_str(), 
-						biddingObject->getAuctionName().c_str());
-#endif 					
-			e->addEvent( new InsertBiddingObjectAuctionEvent(iter2->first-now, biddingObject, 
-										  biddingObject->getAuctionSet(),
-										  biddingObject->getAuctionName()));
-		}
+		e->addEvent( new ActivateBiddingObjectsEvent(iter2->second));
     }
     
     // group rules with same stop time
     for (iter2 = stop.begin(); iter2 != stop.end(); iter2++) {
-		biddingObjectDBIter_t bids_iter;
-		// Iterates over the bids starting.
-		for (bids_iter = (iter2->second).begin(); bids_iter != (iter2->second).end(); bids_iter++) 
-		{
-			BiddingObject *biddingObject = (*bids_iter); 
-#ifdef DEBUG    
-			log->dlog(ch, "Schedulling stop BiddingObject auction event - set: %s, name:  %s", 
-						biddingObject->getAuctionSet().c_str(), 
-						biddingObject->getAuctionName().c_str());
-#endif			
-			// Iterates over the auctions configured for the BiddingObject.
-			e->addEvent( new RemoveBiddingObjectAuctionEvent(iter2->first-now, biddingObject, 
-									biddingObject->getAuctionSet(),
-									biddingObject->getAuctionName()));
-		}
+		// Iterates over the auctions configured for the BiddingObject.
+		e->addEvent( new RemoveBiddingObjectsEvent(iter2->second));
     }
 
 #ifdef DEBUG    
@@ -431,7 +403,7 @@ void BiddingObjectManager::addBiddingObject(BiddingObject *b)
 }
 
 void 
-BiddingObjectManager::activateBiddingObjects(biddingObjectDB_t *biddingObjects, EventScheduler *e)
+BiddingObjectManager::activateBiddingObjects(biddingObjectDB_t *biddingObjects)
 {
     biddingObjectDBIter_t             iter;
 
@@ -672,4 +644,16 @@ ostream& operator<< ( ostream &os, BiddingObjectManager &rm )
 {
     rm.dump(os);
     return os;
+}
+
+/* ---------------------- get_ipap_message ------------------------- */
+ipap_message * BiddingObjectManager::get_ipap_message(BiddingObject *biddingObject, 
+													  Auction *auction,
+													  ipap_template_container *templates)
+{
+
+	MAPIBiddingObjectParser mbop = MAPIBiddingObjectParser(getDomain());
+
+	return mbop.get_ipap_message(FieldDefManager::getFieldDefs(), 
+								 biddingObject, auction, templates );
 }

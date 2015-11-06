@@ -34,7 +34,7 @@
 #include "stdincpp.h"
 #include "ProcModule.h"
 #include "ProcModuleInterface.h"
-#include "BidFileParser.h"
+#include "BiddingObjectFileParser.h"
 #include "AuctionFileParser.h"
 #include "AuctionManagerInfo.h"
 #include "Auction.h"
@@ -107,86 +107,27 @@ class RemoveSessionEvent : public CtrlCommEvent
 };
 
 
-class AuctionInteractionEvent : public CtrlCommEvent
-{
-  private:
-	string sessionId;
-	ipap_message message;
-    
-  public:
-
-    AuctionInteractionEvent(string _sessionId, ipap_message &a) 
-      : CtrlCommEvent(AUCTION_INTERACTION), sessionId(_sessionId), message(a) {  }
-  
-	ipap_message  *getMessage()
-	{
-		return &message;
-	}
-	
-	string getSessionId()
-	{
-		return sessionId;
-	}
-};
-
-
 class PushExecutionEvent : public Event
 {
   private:
-    auctionDB_t auctions;
-    string proc;
-    int final;
-
+	int index;
+	
   public:
 
-    PushExecutionEvent(struct timeval time, auctionDB_t &a, string procName, unsigned long ival=0, int align=0) 
-      : Event(PUSH_EXECUTION, time, ival, align), auctions(a), proc(procName), final(0) {  }
+    PushExecutionEvent(struct timeval time, int _index,  unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, time, ival, align), index(_index) {  }
 
-    PushExecutionEvent(time_t offs_sec, auctionDB_t &a, string procName, unsigned long ival=0, int align=0) 
-      : Event(PUSH_EXECUTION, offs_sec, 0, ival, align), auctions(a), proc(procName), final(0) { }
+    PushExecutionEvent(time_t offs_sec, int _index, unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, offs_sec, 0, ival, align), index(_index) { }
 
-    PushExecutionEvent(auctionDB_t &a, string procName, unsigned long ival=0, int align=0) 
-      : Event(PUSH_EXECUTION, ival, align), auctions(a), proc(procName), final(0) { }
+    PushExecutionEvent(int _index, unsigned long ival=0, int align=0) 
+      : Event(PUSH_EXECUTION, ival, align), index(_index) { }
 
-    auctionDB_t *getAuctions()
+    int getIndex()
     {
-        return &auctions;
+        return index;
     }
     
-    string getProcMod()
-    {
-        return proc;
-    }
-
-    int deleteAuction(int uid)
-    {
-        int ret = 0;
-        auctionDBIter_t iter;
-           
-        for (iter=auctions.begin(); iter != auctions.end(); iter++) {
-            if ((*iter)->getUId() == uid) {
-                auctions.erase(iter);
-                ret++;
-                break;
-            }   
-        }
-           
-        if (auctions.empty()) {
-            return ++ret;
-        }
-        
-        return ret;
-    }
-
-    void setFinal(int f)
-    {
-      final = f;
-    }
-
-    int isFinal() 
-    {
-      return final;
-    }
 };
 
 

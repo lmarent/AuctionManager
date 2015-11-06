@@ -35,6 +35,7 @@
 #include "ProcModuleInterface.h"
 #include "AuctionFileParser.h"
 #include "AgentSession.h"
+#include "AuctioningObject.h"
 #include <uuid/uuid.h>
 
 namespace auction
@@ -53,6 +54,8 @@ typedef enum
 //! execution interval definition
 typedef struct 
 {
+    AuctioningObjectState_t state;
+    
     //! resource request interval start
     time_t start;
     //! resource request interval stop
@@ -60,6 +63,9 @@ typedef struct
     
     //! Session Id to fulfill this interval.
     string sessionId;
+    
+    //! request process that are fulfilling this resource request interval.
+    set<int> resourceProcesses;
     
     //! execution interval
     unsigned long interval;
@@ -76,10 +82,8 @@ typedef std::list<resourceReq_interval_t>::iterator  	  resourceReqIntervalListI
 typedef std::list<resourceReq_interval_t>::const_iterator resourceReqIntervalListConstIter_t;
 
 
-class ResourceRequest
+class ResourceRequest : public AuctioningObject
 {
-
-	
 
 public:
 	
@@ -89,26 +93,6 @@ public:
 	ResourceRequest( string rset, string rname, fieldList_t &f, resourceReqIntervalList_t &resReqInter );
 
 	~ResourceRequest();
-
-    int getUId() 
-    { 
-        return uid;
-    }
-    
-    void setUId(int nuid)
-    {
-        uid = nuid;
-    }
-
-    void setState(resourceRequestState_t s) 
-    { 
-        state = s;
-    }
-
-    resourceRequestState_t getState()
-    {
-        return state;
-    }
 
     string getResourceRequestSet()
     {
@@ -130,7 +114,9 @@ public:
 	{
 		name = _name;
 	}	
-
+	
+	string getIpApId(int domain);
+	
 	field_t *getField(string name);
 
 	string getInfo();
@@ -146,9 +132,9 @@ public:
     */
     resourceReqIntervalList_t * getIntervals();
     
-    resourceReq_interval_t getIntervalByStart(time_t start);
+    resourceReqIntervalListIter_t  getIntervalByStart(time_t start);
 
-    resourceReq_interval_t getIntervalByEnd(time_t stop);
+    resourceReqIntervalListIter_t  getIntervalByEnd(time_t stop);
     
     /*! \short   Assign the session created for the interval.
      * 

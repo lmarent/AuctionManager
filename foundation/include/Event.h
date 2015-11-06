@@ -7,7 +7,7 @@
 
     NETAUM is free software; you can redistribute it and/or modify 
     it under the terms of the GNU General Public License as published by 
-    the Free Software Foundation; either version 2 of the License, or
+    the Free Software FoundatPion; either version 2 of the License, or
     (at your option) any later version.
 
     NETAUM is distributed in the hope that it will be useful, 
@@ -47,8 +47,9 @@ typedef enum
       ADD_GENERATED_BIDDING_OBJECTS,
       REMOVE_BIDDING_OBJECTS,
       TRANSMIT_BIDDING_OBJECTS,
-      ADD_BIDDING_OBJECT_AUCTION,
-      REMOVE_BIDDING_OBJECT_AUCTION,
+      ADD_BIDDING_OBJECTS_AUCTION,
+      REMOVE_BIDDING_OBJECTS_AUCTION,
+      ACTIVATE_BIDDING_OBJECTS,
       ADD_AUCTIONS,
       REMOVE_AUCTIONS,
       ACTIVATE_AUCTIONS,
@@ -60,8 +61,6 @@ typedef enum
       GET_INFO,
       GET_MODINFO,
       TEST,
-      REMOVE_BIDDING_OBJECTS_CTRLCOMM,
-      ADD_BIDDING_OBJECTS_CTRLCOMM,
       REMOVE_AUCTIONS_CTRLCOMM,
       ADD_AUCTIONS_CNTRLCOMM,
       PROC_MODULE_TIMER,
@@ -71,7 +70,7 @@ typedef enum
       RESPONSE_CREATE_SESSION,
       RESPONSE_CREATE_CHECK_SESSION,
       REMOVE_SESSION,
-      AUCTION_INTERACTION    
+      AUCTION_INTERACTION_CTRLCOMM    
 } event_t;
 
 //! event names for dump method
@@ -94,8 +93,6 @@ const string eventNames[] =
       "Get-info",
       "Get-module-info",
       "Test",
-      "Remove-Bidding-Objects-ctrlcomm",
-      "Add-Bidding-Objects-ctrlcomm",
       "Remove-Auctions-ctrlcomm",
       "Add-Auctions-ctrlcomm",
       "Proc-module-timer",
@@ -223,13 +220,13 @@ class Event {
     //! delete resource request stored in this event
     virtual int deleteResourceRequest(int uid)
     {
-	return 0;
+		return 0;
 	}
 	
 	//! delete a session stored in this event
 	virtual int deleteSession(int uid)
 	{
-	return 0;
+		return 0;	
 	}
 };
 
@@ -303,12 +300,13 @@ class AddBiddingObjectsEvent : public Event
 class AddGeneratedBiddingObjectsEvent : public Event
 {
   private:
+    int index;
     biddingObjectDB_t biddingObjects;
 
   public:
 
-    AddGeneratedBiddingObjectsEvent( biddingObjectDB_t &biddingObjects ): 
-    Event(ADD_GENERATED_BIDDING_OBJECTS), biddingObjects(biddingObjects) 
+    AddGeneratedBiddingObjectsEvent( int _index, biddingObjectDB_t &biddingObjects ): 
+    Event(ADD_GENERATED_BIDDING_OBJECTS), index(_index), biddingObjects(biddingObjects) 
     {
         
     }
@@ -317,6 +315,8 @@ class AddGeneratedBiddingObjectsEvent : public Event
     {
         return &biddingObjects;
     }
+    
+    int getIndex(){ return index; }
     
     int deleteBiddingObject(int uid)
     {
@@ -340,20 +340,20 @@ class AddGeneratedBiddingObjectsEvent : public Event
 };
 
 
-class RemoveBidsEvent : public Event
+class RemoveBiddingObjectsEvent : public Event
 {
   private:
     biddingObjectDB_t biddingObjects;
 
   public:
 
-    RemoveBidsEvent(struct timeval time, biddingObjectDB_t &b) 
+    RemoveBiddingObjectsEvent(struct timeval time, biddingObjectDB_t &b) 
       : Event(REMOVE_BIDDING_OBJECTS, time), biddingObjects(b) {}
 
-    RemoveBidsEvent(time_t offs_sec, biddingObjectDB_t &b) 
+    RemoveBiddingObjectsEvent(time_t offs_sec, biddingObjectDB_t &b) 
       : Event(REMOVE_BIDDING_OBJECTS, offs_sec), biddingObjects(b) {}
     
-    RemoveBidsEvent(biddingObjectDB_t &b) 
+    RemoveBiddingObjectsEvent(biddingObjectDB_t &b) 
       : Event(REMOVE_BIDDING_OBJECTS), biddingObjects(b) {}
 
     biddingObjectDB_t *getBiddingObjects()
@@ -382,20 +382,66 @@ class RemoveBidsEvent : public Event
     }
 };
 
-class TransmitBiddingObjectsEvent : public Event
+class ActivateBiddingObjectsEvent : public Event
 {
   private:
     biddingObjectDB_t biddingObjects;
 
   public:
+
+    ActivateBiddingObjectsEvent(struct timeval time, biddingObjectDB_t &b) 
+      : Event(ACTIVATE_BIDDING_OBJECTS, time), biddingObjects(b) {}
+
+    ActivateBiddingObjectsEvent(time_t offs_sec, biddingObjectDB_t &b) 
+      : Event(ACTIVATE_BIDDING_OBJECTS, offs_sec), biddingObjects(b) {}
     
-    TransmitBiddingObjectsEvent(biddingObjectDB_t &b) 
-      : Event(TRANSMIT_BIDDING_OBJECTS), biddingObjects(b) {}
+    ActivateBiddingObjectsEvent(biddingObjectDB_t &b) 
+      : Event(ACTIVATE_BIDDING_OBJECTS), biddingObjects(b) {}
 
     biddingObjectDB_t *getBiddingObjects()
     {
         return &biddingObjects;
     }
+    
+    int deleteBiddingObject(int uid)
+    {
+        int ret = 0;
+        biddingObjectDBIter_t iter;
+        
+        for (iter=biddingObjects.begin(); iter != biddingObjects.end(); iter++) {
+            if ((*iter)->getUId() == uid) {
+                biddingObjects.erase(iter);
+                ret++;
+                break;
+            }   
+        }
+          
+        if (biddingObjects.empty()) {
+            return ++ret;
+        }
+          
+        return ret;
+    }
+};
+
+
+class TransmitBiddingObjectsEvent : public Event
+{
+  private:
+    int index;
+    biddingObjectDB_t biddingObjects;
+
+  public:
+    
+    TransmitBiddingObjectsEvent(int _index, biddingObjectDB_t &b) 
+      : Event(TRANSMIT_BIDDING_OBJECTS), index(_index), biddingObjects(b) {}
+
+    biddingObjectDB_t *getBiddingObjects()
+    {
+        return &biddingObjects;
+    }
+    
+    int getIndex(){ return index; }
     
     int deleteBiddingObject(int uid)
     {
@@ -524,96 +570,66 @@ class RemoveAuctionsEvent : public Event
     }
 };
 
-class InsertBiddingObjectAuctionEvent : public Event
+class InsertBiddingObjectsAuctionEvent : public Event
 {
   private:
-	BiddingObject * biddingObject;
-	string auctionSet;
-	string auctionName;
+	biddingObjectDB_t biddingObjects;
 	
   public:
 
-    InsertBiddingObjectAuctionEvent(struct timeval time, 
-									BiddingObject *_biddingObject, 
-									string _auctionSet, 
-									string _auctionName) : 
-		Event(ADD_BIDDING_OBJECT_AUCTION, time), biddingObject(_biddingObject), auctionSet(_auctionSet),
-		auctionName(_auctionName){}
+    InsertBiddingObjectsAuctionEvent(struct timeval time, 
+									 biddingObjectDB_t &_biddingObjects ): 
+		Event(ADD_BIDDING_OBJECTS_AUCTION, time), biddingObjects(_biddingObjects){}
 
-     InsertBiddingObjectAuctionEvent(time_t offs_sec, 
-									 BiddingObject *_biddingObject, 
-									 string _auctionSet, 
-									 string _auctionName) : 
-		Event(ADD_BIDDING_OBJECT_AUCTION, offs_sec), biddingObject(_biddingObject), auctionSet(_auctionSet),
-		auctionName(_auctionName) {}
+     InsertBiddingObjectsAuctionEvent(time_t offs_sec, 
+									  biddingObjectDB_t &_biddingObjects ) : 
+		Event(ADD_BIDDING_OBJECTS_AUCTION, offs_sec), biddingObjects(_biddingObjects){}
 
-     InsertBiddingObjectAuctionEvent(BiddingObject *_biddingObject, 
-									 string _auctionSet, 
-									 string _auctionName ) : 
-		Event(ADD_BIDDING_OBJECT_AUCTION), biddingObject(_biddingObject), auctionSet(_auctionSet),
-		auctionName(_auctionName) {}
+     InsertBiddingObjectsAuctionEvent(biddingObjectDB_t &_biddingObjects  ) : 
+		Event(ADD_BIDDING_OBJECTS_AUCTION), biddingObjects(_biddingObjects) {}
 
-	 BiddingObject * getBiddingObject()
+	 biddingObjectDB_t * getBiddingObjects()
 	 {
-	     return biddingObject;
-	 }
-	 
-	 string getAuctionSet()
-	 {
-		 return auctionSet;
-	 }
-	 
-	 string getAuctionName()
-	 {
-		 return auctionName;
+	     return &biddingObjects;
 	 }
 
 };
 
 
-class RemoveBiddingObjectAuctionEvent : public Event
+class RemoveBiddingObjectsAuctionEvent : public Event
 {
   private:
-	BiddingObject * biddingObject;
-	string auctionSet;
-	string auctionName;
+  
+	int index;
+	biddingObjectDB_t  biddingObjects;
 	
   public:
 
-     RemoveBiddingObjectAuctionEvent(struct timeval time, 
-									 BiddingObject *_biddingObject, 
-									 string _auctionSet, 
-									 string _auctionName) : 
-		Event(REMOVE_BIDDING_OBJECT_AUCTION, time), biddingObject(_biddingObject), 
-			auctionSet(_auctionSet), auctionName(_auctionName){}
+     RemoveBiddingObjectsAuctionEvent(struct timeval time, 
+									 int _index,
+									 biddingObjectDB_t &_biddingObjects ) : 
+		Event(REMOVE_BIDDING_OBJECTS_AUCTION, time), index(_index), 
+		biddingObjects(_biddingObjects){}
 
-     RemoveBiddingObjectAuctionEvent(time_t offs_sec, 
-									 BiddingObject *_biddingObject, 
-									 string _auctionSet, 
-									 string _auctionName) : 
-		Event(REMOVE_BIDDING_OBJECT_AUCTION, offs_sec), biddingObject(_biddingObject),
-			auctionSet(_auctionSet), auctionName(_auctionName) {}
+     RemoveBiddingObjectsAuctionEvent(time_t offs_sec, 
+									  int _index, 
+									  biddingObjectDB_t &_biddingObjects ) : 
+		Event(REMOVE_BIDDING_OBJECTS_AUCTION, offs_sec), index(_index), biddingObjects(_biddingObjects) {}
 
-     RemoveBiddingObjectAuctionEvent(BiddingObject *_biddingObject, 
-									 string _auctionSet, 
-									 string _auctionName ) :
-		Event(REMOVE_BIDDING_OBJECT_AUCTION), biddingObject(_biddingObject), 
-			auctionSet(_auctionSet), auctionName(_auctionName) {}
+     RemoveBiddingObjectsAuctionEvent(int _index,
+									  biddingObjectDB_t &_biddingObjects  ) :
+		Event(REMOVE_BIDDING_OBJECTS_AUCTION), index(_index), biddingObjects(_biddingObjects)  {}
 
-	 BiddingObject * getBiddingObject()
+	 biddingObjectDB_t * getBiddingObjects()
 	 {
-		 return biddingObject;
+		 return &biddingObjects;
 	 }
 	 
-	 string getAuctionSet()
+	 int getIndex()
 	 {
-		 return auctionSet;
+		 return index;
 	 }
 	 
-	 string getAuctionName()
-	 {
-		 return auctionName;
-	 }
 };
 
 
@@ -630,56 +646,6 @@ class CtrlCommTimerEvent : public Event
 
 //! add biddingObjects flags
 const int ADD_BIDS_MAPI   = 0x1;
-
-class AddBiddingObjectsCtrlEvent : public CtrlCommEvent
-{
-  private:
-    int type;
-    char *buf;
-    int len;
-
-  public:
-
-    AddBiddingObjectsCtrlEvent(char *b, int l)
-      : CtrlCommEvent(ADD_BIDDING_OBJECTS_CTRLCOMM), type(0), len(l) 
-    {
-        buf = new char[len+1];
-        memcpy(buf, b, len+1);
-          
-    }
-
-    ~AddBiddingObjectsCtrlEvent()
-    {
-        saveDeleteArr(buf);
-    }
-
-    char *getBuf()
-    {
-        return buf;
-    }
-
-    int getLen()
-    {
-        return len;
-    }
-};
-
-
-class RemoveBiddingObjectsCtrlEvent : public CtrlCommEvent
-{
-  private:
-    string biddingObject;
-
-  public:
-    
-    RemoveBiddingObjectsCtrlEvent(string b) : 
-		CtrlCommEvent(REMOVE_BIDDING_OBJECTS_CTRLCOMM), biddingObject(b) {}
-
-    string getBiddingObject()
-    {
-        return biddingObject;
-    }
-};
 
 
 //! add auction flags
@@ -742,6 +708,29 @@ class RemoveAuctionsCtrlEvent : public CtrlCommEvent
         return auction;
     }
 };
+
+class AuctionInteractionEvent : public CtrlCommEvent
+{
+  private:
+	string sessionId;
+	ipap_message message;
+    
+  public:
+
+    AuctionInteractionEvent(string _sessionId, ipap_message &a) 
+      : CtrlCommEvent(AUCTION_INTERACTION_CTRLCOMM), sessionId(_sessionId), message(a) {  }
+  
+	ipap_message *getMessage()
+	{
+		return &message;
+	}
+	
+	string getSessionId()
+	{
+		return sessionId;
+	}
+};
+
 
 
 //! overload for << so that an Event object can be thrown into an ostream

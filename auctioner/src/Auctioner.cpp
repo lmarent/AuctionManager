@@ -31,7 +31,6 @@
 #include "Auctioner.h"
 #include "ConstantsAum.h"
 #include "EventAuctioner.h"
-#include "AnslpClient.h"
 #include "anslp_ipap_xml_message.h"
 #include "anslp_ipap_message.h"
 
@@ -226,11 +225,13 @@ Auctioner::Auctioner( int argc, char *argv[])
         auto_ptr<AuctionTimer> _auct(AuctionTimer::getInstance());
         auct = _auct;
         
-        auto_ptr<BidManager> _bidm(new BidManager(conf->getValue("FieldDefFile", "MAIN"),
-                                                    conf->getValue("FieldConstFile", "MAIN")));
+        auto_ptr<BiddingObjectManager> _bidm(new BiddingObjectManager(domainId, 
+																	  conf->getValue("FieldDefFile", "MAIN"),
+																	  conf->getValue("FieldConstFile", "MAIN")));
         bidm = _bidm;
         
-        auto_ptr<AuctionManager> _aucm(new AuctionManager(conf->getValue("FieldDefFile", "MAIN"),
+        auto_ptr<AuctionManager> _aucm(new AuctionManager( domainId,
+														   conf->getValue("FieldDefFile", "MAIN"),
 														   conf->getValue("FieldConstFile", "MAIN")));
         aucm = _aucm;
 
@@ -239,20 +240,35 @@ Auctioner::Auctioner( int argc, char *argv[])
         
         auto_ptr<EventSchedulerAuctioner> _evnt(new EventSchedulerAuctioner());
         evnt = _evnt;
+
+		string anslpConfFile = conf->getValue("AnslpConfFile", "MAIN");
+
+#ifdef DEBUG
+		log->dlog(ch,"Anslp client conf file:%s", anslpConfFile.c_str() );
+#endif
+											 
+		auto_ptr<AnslpClient> _anslpc(new AnslpClient(anslpConfFile));
+					
+		anslpc = _anslpc;
 	
         // Startup Processing Components
 
 #ifdef ENABLE_THREADS
 
-        auto_ptr<AUMProcessor> _proc(new AUMProcessor(conf.get(),
-							    conf->isTrue("Thread",
-									 "AUM_PROCESSOR")));
+        auto_ptr<AUMProcessor> _proc(new AUMProcessor( domainId, conf.get(),
+													   conf->getValue("FieldDefFile", "MAIN"),
+													   conf->getValue("FieldConstFile", "MAIN"),
+													   conf->isTrue("Thread", "AUM_PROCESSOR"))
+									);
+									
         pprocThread = conf->isTrue("Thread", "AUM_PROCESSOR");
 #else
         
-        auto_ptr<AUMProcessor> _proc(new AUMProcessor(conf.get(), 
-									 conf->getValue("FieldDefFile", "MAIN"), 
-									 0));
+        auto_ptr<AUMProcessor> _proc(new AUMProcessor( domainId, conf.get(), 
+													   conf->getValue("FieldDefFile", "MAIN"), 
+													   conf->getValue("FieldConstFile", "MAIN"),
+														0)
+									);
         pprocThread = 0;
 		
 		
@@ -360,7 +376,7 @@ string Auctioner::getInfo(infoType_t what, string param)
         s << uptime << " s, since " << noNewline(ctime(&startTime));
         break;
     case I_BIDS_STORED:
-        s << bidm->getNumBids();
+        s << bidm->getNumBiddingObjects();
         break;
     case I_CONFIGFILE:
         s << configFileName;
@@ -376,7 +392,7 @@ string Auctioner::getInfo(infoType_t what, string param)
         break;
     case I_BID:
         if (param.empty()) {
-            throw Error("get_info: missing parameter for bid = <bidname>" );
+            throw Error("get_info: missing parameter for biddingObject = <biddingObjectName>" );
         } else {
             int n = param.find(".");
             if (n > 0) {
@@ -459,34 +475,34 @@ void Auctioner::handleGetModInfo(Event *e, fd_sets_t *fds)
     }
 }
 
-void Auctioner::handleAddBids(Event *e, fd_sets_t *fds)
+void Auctioner::handleAddBiddingObjects(Event *e, fd_sets_t *fds)
 {
 
 #ifdef DEBUG
-        log->dlog(ch,"processing event adding bids" );
+        log->dlog(ch,"processing event adding bidding Objects" );
 #endif
 
 
-	bidDB_t *new_bids = NULL;
+	biddingObjectDB_t *new_bids = NULL;
 
     try {
 		// support only XML rules from file
-        new_bids = bidm->parseBids(((AddBidsEvent *)e)->getFileName());
+        new_bids = bidm->parseBiddingObjects(((AddBiddingObjectsEvent *)e)->getFileName());
 
 #ifdef DEBUG
-        log->dlog(ch,"Bids sucessfully parsed " );
+        log->dlog(ch,"Bidding Objects sucessfully parsed " );
 #endif
              
         // TODO AM : test rule spec 
         //proc->checkRules(new_rules);
 
 #ifdef DEBUG
-        log->dlog(ch,"Bids sucessfully checked " );
+        log->dlog(ch,"Bidding Objects sucessfully checked " );
 #endif
 
-        // no error so lets add the rules and schedule for activation
+        // no error so lets add the bidding objects and schedule for activation
         // and removal
-        bidm->addBids(new_bids, evnt.get());
+        bidm->addBiddingObjects(new_bids, evnt.get());
 
         saveDelete(new_bids);
 
@@ -505,7 +521,7 @@ void Auctioner::handleAddBids(Event *e, fd_sets_t *fds)
 		}
 
 #ifdef DEBUG
-        log->dlog(ch,"Ending event adding bids" );
+        log->dlog(ch,"Ending event adding bidding objects" );
 #endif
 
 	} catch (Error &e) {
@@ -575,66 +591,50 @@ void Auctioner::handleAddAuctions(Event *e, fd_sets_t *fds)
      }
 }
 
-void Auctioner::handleAddBidsCntrlComm(Event *e, fd_sets_t *fds)
+void Auctioner::handleAddBiddingObjectsAuction(Event *e, fd_sets_t *fds)
 {
 
 #ifdef DEBUG
-    log->dlog(ch,"processing event add bids by controlcomm" );
-#endif
-
-	bidDB_t *new_bids = NULL;
-	try {
-              
-        new_bids = bidm->parseBidsBuffer(
-        ((AddBidsCtrlEvent *)e)->getBuf(),
-        ((AddBidsCtrlEvent *)e)->getLen());
-	  
-        // no error so let's add the rules and 
-        // schedule for activation and removal
-        bidm->addBids(new_bids, evnt.get());
-        comm->sendMsg("bid(s) added", ((AddBidsCtrlEvent *)e)->getReq(), fds);
-        saveDelete(new_bids);
-
-#ifdef DEBUG
-    log->dlog(ch,"Ending event add bids by controlcomm" );
-#endif
-
-    } catch (Error &err) {
-        // error in bid(s)
-        if (new_bids) {
-             saveDelete(new_bids);
-        }
-        comm->sendErrMsg(err.getError(), ((AddBidsCtrlEvent *)e)->getReq(), fds); 
-    }
-}
-
-void Auctioner::handleAddBidsAuction(Event *e, fd_sets_t *fds)
-{
-
-#ifdef DEBUG
-	log->dlog(ch,"processing event add bid auction" );
+	log->dlog(ch,"processing event add bidding Objects to auction" );
 #endif		  
 
-	Bid *b = NULL;
+	biddingObjectDB_t *bids = NULL;
 
-	try{
+	try
+	{
 		
-		b = ((InsertBidAuctionEvent *) e)->getBid();
+		bids = ((InsertBiddingObjectsAuctionEvent *) e)->getBiddingObjects();
+		
+	    // Verifies that every auction is included in the container
+	    biddingObjectDBIter_t iter;
+	    for (iter = bids->begin(); iter != bids->end(); ++iter)
+	    {	
+			string aSet = (*iter)->getAuctionSet();
+			string aName = (*iter)->getAuctionName();
+			Auction * a = aucm->getAuction(aSet, aName);
+		
+			if ((a == NULL) || (a->getState() != AO_ACTIVE)){
+				log->dlog( ch, "Auction %s.%s not found in auction manager container", aSet.c_str(), aName.c_str() );
+				throw Error("Auction %s.%s not found in auction manager container", aSet.c_str(), aName.c_str());
+			}	
+		}
 
-		string auctionSet = ((InsertBidAuctionEvent *) e)->getAuctionSet();          
-		string auctionName = ((InsertBidAuctionEvent *) e)->getAuctionName();
-                    
-		proc->addBidAuction(auctionSet, auctionName, b);
-
+	    // Proceed to insert the bid to its corresponding auction
+	    for (iter = bids->begin(); iter != bids->end(); ++iter)
+	    {
+			string aSet = (*iter)->getAuctionSet();
+			string aName = (*iter)->getAuctionName();
+			Auction * a = aucm->getAuction(aSet, aName);
+			proc->addBiddingObjectAuctionProcess(a->getUId(), *iter);
+		}
+		
+		
 #ifdef DEBUG
-	log->dlog(ch,"Ending event add bid auction" );
+	log->dlog(ch,"Ending event add bidding Object to auction" );
 #endif		  
 
 	}
 	catch (Error &err) {
-		if (b){
-			saveDelete(b);
-		}
 		log->dlog( ch, err.getError().c_str() );
 	}
 
@@ -652,11 +652,17 @@ void Auctioner::handleActivateAuction(Event *e, fd_sets_t *fds)
 	try
 	{		
 	
+		// get the auction involved.
 		auctions = ((ActivateAuctionsEvent *)e)->getAuctions();
 
-		proc->addAuctions(auctions, evnt.get());
-		// activate
-		activateAuctions(auctions, evnt.get());
+		// Add the auctions to the process.
+		auctionDBIter_t iter;
+		for (iter = auctions->begin(); iter != auctions->end(); ++iter){
+			proc->addAuctionProcess(*iter, evnt.get());
+		}
+		
+		// change their state to active
+		aucm->activateAuctions(auctions, evnt.get());
 
 #ifdef DEBUG
 		log->dlog(ch,"Ending event activate auctions" );
@@ -669,26 +675,75 @@ void Auctioner::handleActivateAuction(Event *e, fd_sets_t *fds)
 
 }
 
-void Auctioner::handleRemoveBids(Event *e, fd_sets_t *fds)
+void Auctioner ::handleActivateBiddingObjects(Event *e, fd_sets_t *fds)
 {
-
 #ifdef DEBUG
-	log->dlog(ch,"processing event remove bids" );
+	log->dlog(ch,"Starting event Handle activate bidding Objects" );
 #endif
 
-	bidDB_t *bids = NULL;
+	biddingObjectDB_t *bids = NULL;
 
 	try
 	{    		
 		
-		bids = ((RemoveBidsEvent *)e)->getBids();
-			  
-		// now get rid of the expired bid
-		proc->delBids(bids);
-		bidm->delBids(bids, evnt.get());
+		bids = ((ActivateBiddingObjectsEvent *)e)->getBiddingObjects();
+		
+		evnt->addEvent( new InsertBiddingObjectsAuctionEvent(*bids));	  
+		
+		bidm->activateBiddingObjects(bids);
 		
 #ifdef DEBUG
-		log->dlog(ch,"Ending event remove bids" );
+		log->dlog(ch,"Ending event remove bidding Objects" );
+#endif		
+	}
+	catch (Error &err) {
+		if (bids) {
+			saveDelete(bids);
+        }
+		log->dlog( ch, err.getError().c_str() );		
+	}
+
+
+
+#ifdef DEBUG
+	log->dlog(ch,"ending event Handle activate bidding Objects" );
+#endif
+
+}
+
+void Auctioner::handleRemoveBiddingObjects(Event *e, fd_sets_t *fds)
+{
+
+#ifdef DEBUG
+	log->dlog(ch,"processing event remove bidding Objects" );
+#endif
+
+	biddingObjectDB_t *bids = NULL;
+
+	try
+	{    		
+		
+		bids = ((RemoveBiddingObjectsEvent *)e)->getBiddingObjects();
+
+	    // Proceed to delete the bid from its corresponding auction
+	    biddingObjectDBIter_t iter;
+	    for (iter = bids->begin(); iter != bids->end(); ++iter)
+	    {
+			string aSet = (*iter)->getAuctionSet();
+			string aName = (*iter)->getAuctionName();
+			try{
+				Auction * a = aucm->getAuction(aSet, aName);
+				proc->delBiddingObjectAuctionProcess(a->getUId(), *iter);
+			} catch(Error &e){
+				//Nothing to do
+			}
+		}
+			  
+		// now get rid of the expired bid
+		bidm->delBiddingObjects(bids, evnt.get());
+		
+#ifdef DEBUG
+		log->dlog(ch,"Ending event remove bidding Objects" );
 #endif		
 	}
 	catch (Error &err) {
@@ -699,93 +754,34 @@ void Auctioner::handleRemoveBids(Event *e, fd_sets_t *fds)
 	}
 }
 
-void Auctioner::handleRemoveBidsAuction(Event *e, fd_sets_t *fds)
+void Auctioner::handleRemoveBiddingObjectsAuction(Event *e, fd_sets_t *fds)
 {
 
 #ifdef DEBUG
-	log->dlog(ch,"processing event remove bid from auction" );
+	log->dlog(ch,"processing event remove bidding object from auction" );
 #endif
 
-	Bid *b = NULL;
+	biddingObjectDB_t *bids = NULL;
 
 	try{
 				
-		b = ((RemoveBidAuctionEvent *) e)->getBid();
-		string auctionSet = ((RemoveBidAuctionEvent *) e)->getAuctionSet();
-		string auctionName = ((RemoveBidAuctionEvent *) e)->getAuctionName();
-		proc->delBidAuction(auctionSet, auctionName, b);
+		int index = ((RemoveBiddingObjectsAuctionEvent *) e)->getIndex();
+		bids = ((RemoveBiddingObjectsAuctionEvent *) e)->getBiddingObjects();
+
+		proc->delBiddingObjectsAuctionProcess(index, bids);
 
 #ifdef DEBUG
-		log->dlog(ch,"Ending event remove bid from auction" );
+		log->dlog(ch,"Ending event remove bidding object from auction" );
 #endif		
 	} catch(Error &err) {
-		if (b){
-			saveDelete(b);
+		if (bids){
+			saveDelete(bids);
 		}
 		log->dlog( ch, err.getError().c_str() );
 	}  
 
 }
 
-void Auctioner::handleRemoveBidsCntrlComm(Event *e, fd_sets_t *fds)
-{
-	try 
-	{
-
-#ifdef DEBUG
-		log->dlog(ch,"processing event remove bids cntrlcomm" );
-#endif
-
-        string r = ((RemoveBidsCtrlEvent *)e)->getBid();
-        int n = r.find(".");
-
-        if (n > 0) {
-			string sname = r.substr(0,n); 
-			string rname = r.substr(n+1, r.length()-n);
-#ifdef DEBUG
-			log->dlog(ch,"Deleting bid set=%s ruleId=%s", sname.c_str(), rname.c_str() );
-#endif
-
-            // delete 1 bid
-            Bid *rptr = bidm->getBid(sname, rname);
-            if (rptr == NULL) {
-				throw Error("no such bid");
-            }
-                  
-			proc->delBidAuction(rptr->getAuctionSet(), rptr->getAuctionName(), rptr);
-                  
-            bidm->delBid(rptr, evnt.get());
-
-        } else {
-
-#ifdef DEBUG
-			log->dlog(ch,"Deleting bid set=%s ", r.c_str() );
-#endif				  
-            // delete rule set
-            bidIndex_t *bids = bidm->getBids(r);
-            if (bids == NULL) {
-				throw Error("no such bid set");
-			}
-
-            for (bidIndexIter_t i = bids->begin(); i != bids->end(); i++) {
-				Bid *rptr = bidm->getBid(i->second);
-
-				proc->delBidAuction(rptr->getAuctionSet(), rptr->getAuctionName(), rptr);
-
-                bidm->delBid(rptr, evnt.get());
-            }
-        }
-        comm->sendMsg("bid(s) deleted", ((RemoveBidsCtrlEvent *)e)->getReq(), fds);
-
-#ifdef DEBUG
-		log->dlog(ch,"Ending event remove bids cntrlcomm" );
-#endif
-
-        
-   } catch (Error &err) {
-        comm->sendErrMsg(err.getError(), ((RemoveBidsCtrlEvent *)e)->getReq(), fds);
-   }
-}
 
 void Auctioner::handleProcModeleTimer(Event *e, fd_sets_t *fds)
 {
@@ -809,29 +805,21 @@ void Auctioner::handlePushExecution(Event *e, fd_sets_t *fds)
     log->dlog(ch,"processing event push execution" );
 #endif
 
-    auctionDB_t *auctions = NULL;
-
 	try {
-        auctions = ((PushExecutionEvent *)e)->getAuctions();
-
-        // multiple auctions can process at the same time
-        for (auctionDBIter_t iter = auctions->begin(); iter != auctions->end(); iter++) {
-			
-			// Execute the algorithm
-            proc->executeAuction((*iter)->getUId(), (*iter)->getAuctionName());
+        
+        int index = ((PushExecutionEvent *)e)->getIndex();
+        
+		// Execute the algorithm
+        proc->executeAuction(index, evnt.get());
               
-            // TODO AM: Send allocations for agents.
+       // TODO AM: Send allocations for agents.
               
-        }
 
 #ifdef DEBUG
 		log->dlog(ch,"ending event push execution" );
 #endif
 
 	}  catch (Error &err) {
-        if (auctions) {
-             saveDelete(auctions);
-        }
 		log->dlog( ch, err.getError().c_str() );		
 	}
 }
@@ -1004,7 +992,7 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
         // Search the domain in the template container
         auctionerTemplateListIter_t iter = auctionerTemplates.find(domainId);
 
-		message_return = aucm->get_ipap_message(auctions, iter->second, domainId, useIPV6, 
+		message_return = aucm->get_ipap_message(auctions, iter->second, useIPV6, 
 									sAddressIPV4, sAddressIPV6, port);
 
 #ifdef DEBUG
@@ -1103,9 +1091,7 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 {
 
 	ipap_message *message = NULL;
-	auctionDB_t *auctions = NULL;
-	bidDB_t *bids = NULL;
-	allocationDB_t *allocations = NULL;
+	biddingObjectDB_t *bids = NULL;
 	auction::Session *s = NULL;
 	
 	try {
@@ -1113,22 +1099,148 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 		string sessionId = ((AuctionInteractionEvent *)e)->getSessionId();
 		
 		// Search for the session that is involved.
-		s = sesm->getSession(string _sessionId);
+		s = sesm->getSession(sessionId);
 		if (s == NULL)
 			throw Error("Session %s not found", sessionId.c_str());
 
 		message = ((AuctionInteractionEvent *)e)->getMessage();
-		auctions = aucm->getAuctions(message);
-		bids = bidm->getAuctions(message);
-		allocations = allm->getAuctions(message);
+		// get the msgSeqNbr from the message
+		uint32_t seqNbr = message->get_seqno();
 		
+		// Bring the list of local templates
+		auctionerTemplateListIter_t templIter = auctionerTemplates.find(domainId);
+		if (templIter != auctionerTemplates.end()){
 		
-	
-	} catch (){
-	
+			bids = bidm->parseMessage(message,templIter->second);
+			
+			// Insert the session as part of the elements of bidding object
+			biddingObjectDBIter_t bidIter;
+			for (bidIter = bids->begin(); bidIter != bids->end(); ++bidIter){
+				(*bidIter)->setSession(sessionId);
+			}
+			
+			// Add the bidding objects to the bidding object manager.
+			bidm->addBiddingObjects(bids, evnt.get());  
+			
+			// Build the response for the originator agent.
+			ipap_message resp = ipap_message(domainId, IPAP_VERSION, true);
+			resp.set_seqno(s->getNextMessageId());
+			resp.set_ackseqno(seqNbr+1);
+			resp.output();
+			
+			anslp::msg::anslp_ipap_xml_message mess;
+			anslp::msg::anslp_ipap_message anlp_mess(resp);
+			string xmlMessage = mess.get_message(anlp_mess);
+			
+			// Send the response message.
+			comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
+		} else {
+		  string error = "templates not initialized in the auctioneer"; 
+		  comm->sendErrMsg(error, ((AuctionInteractionEvent *)e)->getReq(), fds); 			
+		}
+	} catch (Error &err){
+		if (message){
+			saveDelete(message);
+        }
+		log->dlog( ch, err.getError().c_str() );	
+		comm->sendErrMsg(err.getError(), ((AuctionInteractionEvent *)e)->getReq(), fds); 			
 	}
 
 }
+
+void Auctioner::handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds)
+{
+
+#ifdef DEBUG
+    log->dlog(ch,"processing event add generated bidding objects" );
+#endif
+
+	biddingObjectDB_t *new_bids = NULL;
+	int index = 0;
+
+   try {
+
+       new_bids = ((AddGeneratedBiddingObjectsEvent *)e)->getBiddingObjects();
+	   index = ((AddGeneratedBiddingObjectsEvent *)e)->getIndex();
+	   
+       // Add the new bidding object in the biddingObject manager
+       bidm->addBiddingObjects(new_bids, evnt.get());
+
+	   evnt.get()->addEvent(new TransmitBiddingObjectsEvent(index, *new_bids));
+
+#ifdef DEBUG
+       log->dlog(ch,"BiddingObjects sucessfully added " );
+#endif
+
+
+    } catch (Error &e) {
+       throw e;
+    }	
+	
+}
+
+void 
+Auctioner::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
+{
+	ipap_message *mes = NULL;
+
+	try{
+		biddingObjectDB_t *new_bids = ((TransmitBiddingObjectsEvent *)e)->getBiddingObjects();
+		
+		// get the request index 
+		int index = ((TransmitBiddingObjectsEvent *)e)->getIndex();
+
+		// Bring the list of local templates
+		auctionerTemplateListIter_t templIter = auctionerTemplates.find(domainId);
+		if (templIter != auctionerTemplates.end()){
+			
+			biddingObjectDBIter_t iter;
+			for (iter = new_bids->begin(); iter != new_bids->end(); ++iter)
+			{
+				// We find the auction for the bid
+				BiddingObject *biddingObject = *iter;
+			
+				// Search for the corresponding session for this connection
+				string sessionId = biddingObject->getSession();
+				Session *session = sesm->getSession(sessionId);
+			
+				Auction *a = aucm->getAuction(biddingObject->getAuctionSet(), 
+												biddingObject->getAuctionName());
+				
+				uint32_t mid = session->getNextMessageId();
+				
+				mes = bidm->get_ipap_message(biddingObject, a, templIter->second);
+				mes->set_seqno(mid);
+				mes->set_ackseqno(0);
+				
+				// Save the message within the pending messages.
+				session->addPendingMessage(*mes);
+				
+				// Finally send the message through the anslp client application.
+				anslpc->tg_bidding( new anslp::session_id(sessionId), 
+									session->getReceiverAddress(), 
+									session->getSenderAddress(), 
+									session->getReceiverPort(), 
+									session->getSenderPort(),
+									session->getProtocol(), *mes );
+
+				saveDelete(mes);
+			}
+		} else {
+		  if (mes){
+			saveDelete(mes);
+		  }	
+		  string error = "templates not initialized in the auctioneer"; 
+		  throw Error(error);
+		}
+	} catch (Error &e){
+		if (mes){
+			saveDelete(mes);
+		 }	
+		throw e;
+	}
+}
+
 
 
 /* -------------------- handleEvent -------------------- */
@@ -1157,36 +1269,32 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 		handleGetModInfo(e,fds);
 		break;
     
-    case ADD_BIDS:
-		handleAddBids(e,fds);      
+    case ADD_BIDDING_OBJECTS:
+		handleAddBiddingObjects(e,fds);      
 		break;
 
     case ADD_AUCTIONS:
 		handleAddAuctions(e,fds);
 		break;
 
-    case ADD_BIDS_CTRLCOMM:
-		handleAddBidsCntrlComm(e,fds);
-		break; 	
-
-	case ADD_BID_AUCTION:
-		handleAddBidsAuction(e,fds);
+	case ADD_BIDDING_OBJECTS_AUCTION:
+		handleAddBiddingObjectsAuction(e,fds);
+		break;
+		
+	case ACTIVATE_BIDDING_OBJECTS:
+		handleActivateBiddingObjects(e,fds);
 		break;
 
     case ACTIVATE_AUCTIONS:
 		handleActivateAuction(e,fds);
 		break;
 
-    case REMOVE_BIDS:
-		handleRemoveBids(e,fds);
+    case REMOVE_BIDDING_OBJECTS:
+		handleRemoveBiddingObjects(e,fds);
 		break;
 
-	case REMOVE_BID_AUCTION:
-		handleRemoveBidsAuction(e,fds);
-		break;
-
-    case REMOVE_BIDS_CTRLCOMM:
-		handleRemoveBidsCntrlComm(e,fds);
+	case REMOVE_BIDDING_OBJECTS_AUCTION:
+		handleRemoveBiddingObjectsAuction(e,fds);
 		break;
 
     case PROC_MODULE_TIMER:
@@ -1205,7 +1313,7 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 		handleCreateCheckSession(e,fds);
 		break;
 
-	case AUCTION_INTERACTION:
+	case AUCTION_INTERACTION_CTRLCOMM:
 		handleAuctioningInteraction(e,fds);
 		break;
 		

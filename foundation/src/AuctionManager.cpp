@@ -36,8 +36,8 @@ using namespace auction;
 
 /* ------------------------- AuctionManager ------------------------- */
 
-AuctionManager::AuctionManager( string fdname, string fvname) 
-    : FieldDefManager(fdname, fvname),  auctions(0), idSource(1)
+AuctionManager::AuctionManager( int domain, string fdname, string fvname) 
+    : FieldDefManager(fdname, fvname), auctions(0), idSource(1), domain(domain)
 {
     log = Logger::getInstance();
     ch = log->createChannel("AuctionManager");
@@ -358,14 +358,14 @@ void AuctionManager::addAuction(Auction *a)
 /* ---------------------- get_ipap_message ------------------------- */
 ipap_message * AuctionManager::get_ipap_message(auctionDB_t *auctions, 
 												ipap_template_container *templates,
-												int domainId,  bool useIPV6, string sAddressIPV4, 
+												bool useIPV6, string sAddressIPV4, 
 												string sAddressIPV6, uint16_t port)
 {
 
 	MAPIAuctionParser mpap = MAPIAuctionParser(getDomain());
 
 	return mpap.get_ipap_message(FieldDefManager::getFieldDefs(), auctions,templates, 
-									domainId, useIPV6, sAddressIPV4, sAddressIPV6, port);
+								 useIPV6, sAddressIPV4, sAddressIPV6, port);
 }
 
 /* ------------------------- getInfo ------------------------- */

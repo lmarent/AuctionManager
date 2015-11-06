@@ -68,7 +68,7 @@ void BiddingObjectManager_Test::setUp()
 	try
 	{
 
-		int domain = 0;
+		int domain = 1;
 		
 		const string filename = "../../etc/example_bids1.xml";
 		const string fieldname = DEF_SYSCONFDIR "/fielddef.xml";
@@ -119,7 +119,7 @@ void BiddingObjectManager_Test::testBiddingManagerManager()
 		
 		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 1 );
 
-		ptrBid2->setBiddingObjectSet("Agent2");
+		ptrBid2->setBiddingObjectSet("2");
 		manager->addBiddingObject(ptrBid2);
 		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 2 );
 		
@@ -133,8 +133,8 @@ void BiddingObjectManager_Test::testBiddingManagerManager()
 		
 		manager->delBiddingObject(bid2->getUId(), evnt.get());
 		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 0 );
-		ptrBid3->setBiddingObjectSet("Agent3");
-		ptrBid4->setBiddingObjectSet("Agent4");		
+		ptrBid3->setBiddingObjectSet("3");
+		ptrBid4->setBiddingObjectSet("4");		
 		manager->addBiddingObject(ptrBid3);
 		manager->addBiddingObject(ptrBid4);
 		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 2 );
@@ -143,10 +143,10 @@ void BiddingObjectManager_Test::testBiddingManagerManager()
 		manager->delBiddingObjects(&in_bids, evnt.get());
 		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 0 );
 	
-		ptrBid5->setBiddingObjectSet("Agent5");
+		ptrBid5->setBiddingObjectSet("5");
 		manager->addBiddingObject(ptrBid5);
 		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 1 );
-		manager->delBiddingObjects("Agent5", evnt.get());
+		manager->delBiddingObjects("5", evnt.get());
 		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 0 );
 			
 	} catch(Error &e){
@@ -166,33 +166,36 @@ void BiddingObjectManager_Test::testBiddingObjectManager2()
 	try
 	{
 	
-
-
+		//1.Bid2
 		const string filename2 = "../../etc/example_bids2.xml";
 		biddingObjectDB_t *new_bids2 = manager->parseBiddingObjects(filename2);
 		CPPUNIT_ASSERT( new_bids2->size() == 1 );
 		ptrBid2 = new BiddingObject(*((*new_bids2)[0]));
 		saveDelete(new_bids2);
 		
-
+		//2.Bid1
 		const string filename3 = "../../etc/example_bids3.xml";
 		biddingObjectDB_t *new_bids3 = manager->parseBiddingObjects(filename3);
 		CPPUNIT_ASSERT( new_bids3->size() == 1 );
 		ptrBid3 = new BiddingObject(*((*new_bids3)[0]));
 		saveDelete(new_bids3);
 
+		//3.Bid1
 		const string filename4 = "../../etc/example_bids4.xml";
 		biddingObjectDB_t *new_bids4 = manager->parseBiddingObjects(filename4);
 		CPPUNIT_ASSERT( new_bids4->size() == 1 );
 		ptrBid4 = new BiddingObject(*((*new_bids4)[0]));
 		saveDelete(new_bids4);
 
+		
+		//4.Bid1
 		const string filename5 = "../../etc/example_bids5.xml";
 		biddingObjectDB_t *new_bids5 = manager->parseBiddingObjects(filename5);
 		CPPUNIT_ASSERT( new_bids5->size() == 1 );
 		ptrBid5 = new BiddingObject(*((*new_bids5)[0]));
 		saveDelete(new_bids5);
 
+		
 		manager->addBiddingObject(ptrBid1);
 		manager->addBiddingObject(ptrBid2);
 		manager->addBiddingObject(ptrBid3);
@@ -200,26 +203,26 @@ void BiddingObjectManager_Test::testBiddingObjectManager2()
 		manager->addBiddingObject(ptrBid5);
 		
 		
-		CPPUNIT_ASSERT( manager->getBiddingObjects("general1","1").size() == 3);
-		CPPUNIT_ASSERT( manager->getBiddingObjects("general2","1").size() == 2);
+		CPPUNIT_ASSERT( manager->getBiddingObjects("1","1").size() == 3);
+		CPPUNIT_ASSERT( manager->getBiddingObjects("2","1").size() == 2);
 		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 5 );
 				
 		// Delete a BiddingObject 1, it should delete from the auction index containing 
-		// auction general1.
+		// bid 1.Bid1
 		manager->delBiddingObject(ptrBid1->getUId(), evnt.get());
-		CPPUNIT_ASSERT( manager->getBiddingObjects("general1","1").size() == 2);
+		CPPUNIT_ASSERT( manager->getBiddingObjects("1","1").size() == 2);
 				
 		// Delete a BiddingObject 2, it should delete from the auction index containing 
 		// auction general1.
 		manager->delBiddingObject(ptrBid2->getUId(), evnt.get());
-		CPPUNIT_ASSERT( manager->getBiddingObjects("general1","1").size() == 1);
+		CPPUNIT_ASSERT( manager->getBiddingObjects("1","1").size() == 1);
 				
 		// Delete a BiddingObject 3, it should delete from the auction index containing 
 		// auction general1.
 		manager->delBiddingObject(ptrBid3->getUId(), evnt.get());
-		CPPUNIT_ASSERT( manager->getBiddingObjects("general1","1").size() == 0);
+		CPPUNIT_ASSERT( manager->getBiddingObjects("1","1").size() == 0);
 				
-		CPPUNIT_ASSERT( manager->getBiddingObjects("general2","1").size() == 2);
+		CPPUNIT_ASSERT( manager->getBiddingObjects("2","1").size() == 2);
 		
 		
 			

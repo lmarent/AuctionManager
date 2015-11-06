@@ -11,7 +11,7 @@
 #include "AUMProcessor.h"
 #include "Constants.h"
 #include "ConstantsAum.h"
-#include "BidManager.h"
+#include "BiddingObjectManager.h"
 #include "ConfigManager.h"
 #include "EventScheduler.h"
 #include "AuctionManager.h"
@@ -32,15 +32,15 @@ class AUMProcessor_Test : public CppUnit::TestFixture {
 
   private:
 
-	  Bid *ptrBid1;
-      Bid *ptrBid2;
-      Bid *ptrBid3;
-      Bid *ptrBid4;
-      Bid *ptrBid5;
+	  BiddingObject *ptrBid1;
+      BiddingObject *ptrBid2;
+      BiddingObject *ptrBid3;
+      BiddingObject *ptrBid4;
+      BiddingObject *ptrBid5;
 
 	  ConfigManager *configManagerPtr;
 	  AuctionManager *auctionManagerPtr;
-	  BidManager *bidManagerPtr;
+	  BiddingObjectManager *bidManagerPtr;
 	  AUMProcessor *aumProcessorPtr;
       auto_ptr<EventScheduler>  evnt;
 	  
@@ -72,31 +72,33 @@ void AUMProcessor_Test::setUp()
 		}
 		argv[argc] = 0;
 		
+		int domain = 5;
+		
 		const string fieldname = DEF_SYSCONFDIR "/fielddef.xml";
 		const string fieldValuename = DEF_SYSCONFDIR "/fieldval.xml";
 				
-		bidManagerPtr = new BidManager(fieldname,fieldValuename);
+		bidManagerPtr = new BiddingObjectManager(domain, fieldname,fieldValuename);
 
-		const string filenameAgent1 = DEF_SYSCONFDIR "/example_bids2.xml";
-		bidDB_t *new_bidsAgent1 = bidManagerPtr->parseBids(filenameAgent1);
+		const string filenameAgent1 = "../../etc/example_bids2.xml";
+		biddingObjectDB_t *new_bidsAgent1 = bidManagerPtr->parseBiddingObjects(filenameAgent1);
 				
-		const string filenameAgent2 = DEF_SYSCONFDIR "/example_bids3.xml";
-		bidDB_t *new_bidsAgent2 = bidManagerPtr->parseBids(filenameAgent2);
+		const string filenameAgent2 = "../../etc/example_bids3.xml";
+		biddingObjectDB_t *new_bidsAgent2 = bidManagerPtr->parseBiddingObjects(filenameAgent2);
 
-		const string filenameAgent3 = DEF_SYSCONFDIR "/example_bids4.xml";
-		bidDB_t *new_bidsAgent3 = bidManagerPtr->parseBids(filenameAgent3);
+		const string filenameAgent3 = "../../etc/example_bids4.xml";
+		biddingObjectDB_t *new_bidsAgent3 = bidManagerPtr->parseBiddingObjects(filenameAgent3);
 
-		const string filenameAgent4 = DEF_SYSCONFDIR "/example_bids5.xml";
-		bidDB_t *new_bidsAgent4 = bidManagerPtr->parseBids(filenameAgent4);
+		const string filenameAgent4 = "../../etc/example_bids5.xml";
+		biddingObjectDB_t *new_bidsAgent4 = bidManagerPtr->parseBiddingObjects(filenameAgent4);
 
-		const string filenameAgent5 = DEF_SYSCONFDIR "/example_bids6.xml";
-		bidDB_t *new_bidsAgent5 = bidManagerPtr->parseBids(filenameAgent5);
+		const string filenameAgent5 = "../../etc/example_bids6.xml";
+		biddingObjectDB_t *new_bidsAgent5 = bidManagerPtr->parseBiddingObjects(filenameAgent5);
 
-		ptrBid1 = new Bid(*((*new_bidsAgent1)[0]));
-		ptrBid2 = new Bid(*((*new_bidsAgent2)[0]));
-		ptrBid3 = new Bid(*((*new_bidsAgent3)[0]));
-		ptrBid4 = new Bid(*((*new_bidsAgent4)[0]));
-		ptrBid5 = new Bid(*((*new_bidsAgent5)[0]));
+		ptrBid1 = new BiddingObject(*((*new_bidsAgent1)[0]));
+		ptrBid2 = new BiddingObject(*((*new_bidsAgent2)[0]));
+		ptrBid3 = new BiddingObject(*((*new_bidsAgent3)[0]));
+		ptrBid4 = new BiddingObject(*((*new_bidsAgent4)[0]));
+		ptrBid5 = new BiddingObject(*((*new_bidsAgent5)[0]));
 	
 		const string configDTD = DEF_SYSCONFDIR "/netaum.conf.dtd";
 		const string configFileName = NETAUM_DEFAULT_CONFIG_FILE;
@@ -107,7 +109,9 @@ void AUMProcessor_Test::setUp()
 		
 		ipap_template_container *templContainer = new ipap_template_container();
 		
-		auctionManagerPtr = new AuctionManager(fieldname, fieldValuename);
+		int domainAuct = 8;
+		
+		auctionManagerPtr = new AuctionManager(domainAuct, fieldname, fieldValuename);
 
 		const string filenameAuctions = DEF_SYSCONFDIR "/example_auctions2.xml";
 		
@@ -119,36 +123,27 @@ void AUMProcessor_Test::setUp()
 				
 		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
 		
-		aumProcessorPtr = new AUMProcessor(configManagerPtr, 
-											configManagerPtr->getValue("FieldDefFile", "MAIN"),
-											configManagerPtr->isTrue("Thread","AUM_PROCESSOR"));
+		aumProcessorPtr = new AUMProcessor(domainAuct,
+										   configManagerPtr, 
+										   configManagerPtr->getValue("FieldDefFile", "MAIN"),
+										   configManagerPtr->getValue("FilterConstFile", "MAIN"),
+										   configManagerPtr->isTrue("Thread","AUM_PROCESSOR"));
 		
 		cout << "Auction Id:" << auction->getUId() << endl;
 		
-		aumProcessorPtr->addAuctions( auctions, evnt.get() );
+		aumProcessorPtr->addAuctionProcess( auction, evnt.get() );
 		
-        aumProcessorPtr->addBidAuction(auction->getSetName(), 
-										auction->getAuctionName(), 
-										  ptrBid1 );
+        aumProcessorPtr->addBiddingObjectAuctionProcess(auction->getUId(), ptrBid1 );
 
-        aumProcessorPtr->addBidAuction(auction->getSetName(), 
-										auction->getAuctionName(), 
-										  ptrBid2 );
+        aumProcessorPtr->addBiddingObjectAuctionProcess(auction->getUId(), ptrBid2 );
 
-        aumProcessorPtr->addBidAuction(auction->getSetName(), 
-										auction->getAuctionName(), 
-										  ptrBid3 );
+        aumProcessorPtr->addBiddingObjectAuctionProcess(auction->getUId(), ptrBid3 );
 
-        aumProcessorPtr->addBidAuction(auction->getSetName(), 
-										auction->getAuctionName(), 
-										  ptrBid4 );
+        aumProcessorPtr->addBiddingObjectAuctionProcess(auction->getUId(), ptrBid4 );
 
-        aumProcessorPtr->addBidAuction(auction->getSetName(), 
-										auction->getAuctionName(), 
-										  ptrBid5 );
+        aumProcessorPtr->addBiddingObjectAuctionProcess(auction->getUId(), ptrBid5 );
 									  
-        aumProcessorPtr->executeAuction(auction->getUId(), 
-										 auction->getAuctionName());
+        aumProcessorPtr->executeAuction(auction->getUId(), evnt.get());
         
 	}
 	catch(Error &e){

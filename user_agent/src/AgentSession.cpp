@@ -55,6 +55,12 @@ AgentSession::~AgentSession()
 	
 }
 
+void AgentSession::setRequestData(string set, string name)
+{
+	resourceRequestSet = set;
+	resourceRequestName = name;
+}
+
 std::ostream& operator<<(std::ostream &out, const AgentSession &obj) 
 {
 	using namespace std;

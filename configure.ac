@@ -428,8 +428,10 @@ AC_CONFIG_FILES([Makefile \
 				 foundation/Makefile \
 				 proc_modules/Makefile \
 				 auctioner/src/Makefile \
+				 auctioner/test/Makefile \
 				 auctioner/Makefile \
                  user_agent/src/Makefile
+                 user_agent/test/Makefile
                  user_agent/Makefile ] )
 
 AC_OUTPUT

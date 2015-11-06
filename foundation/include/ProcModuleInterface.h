@@ -109,7 +109,7 @@ typedef vector<Auction*>            auctionDB_t;
 typedef vector<Auction*>::iterator  auctionDBIter_t;
 
 //! Bid list
-typedef vector<BiddingObject*>            	biddingObjectDB_t;
+typedef vector<BiddingObject*>             biddingObjectDB_t;
 typedef vector<BiddingObject*>::iterator   biddingObjectDBIter_t;
 
 typedef int (*proc_timeout_func_t)( int timerID, void *flowdata );

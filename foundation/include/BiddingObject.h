@@ -106,7 +106,10 @@ public:
 	string getAuctionIpAPId();
 	
 	string getInfo();
-		
+	
+	inline void setSession(string _sessionId){ sessionId = _sessionId; }
+	
+	inline string getSession(){ return sessionId; } 	
 
     /*! \short   get names and values (parameters) of configured elements
         \returns a pointer (link) to a list that contains the configured elements for this BiddingObject
@@ -148,6 +151,10 @@ protected:
 
     //! name of the rule for the external system calling the Auction Manager
     string BiddingObjectName;
+   
+    //! for the auctioneer this field has a reference to the session 
+    //! that is the origin of the bidding object.
+    string sessionId;
    
     //! Bidding object type
     ipap_object_type_t biddingObjectType;

@@ -608,8 +608,9 @@ MAPIBiddingObjectParser::get_ipap_message(fieldDefList_t *fieldDefs,
 
 ipap_message * 
 MAPIBiddingObjectParser::get_ipap_message(fieldDefList_t *fieldDefs, 
-								 biddingObjectDB_t *bids, auctionDB_t *auctions, 
-								 ipap_template_container *templates )
+										  BiddingObject *biddingObject, 
+										  Auction *auction, 
+										  ipap_template_container *templates )
 {
 
 #ifdef DEBUG
@@ -617,32 +618,15 @@ MAPIBiddingObjectParser::get_ipap_message(fieldDefList_t *fieldDefs,
 #endif	
 	
 	ipap_message *mes = new ipap_message(getDomain(), IPAP_VERSION, true);
-	
-	biddingObjectDBIter_t bidIter;
-	for (bidIter=bids->begin(); bidIter!=bids->end(); ++bidIter)
-	{
-		BiddingObject *b = *bidIter;
-		
-#ifdef DEBUG
-		log->dlog(ch, "BiddingObject to include %s.%s belonging to auction:%s.%s", 
-				(b->getBiddingObjectSet()).c_str(), b->getBiddingObjectName().c_str(), 
-				(b->getAuctionSet()).c_str(), b->getAuctionName().c_str() );
-#endif			
-		auctionDBIter_t auctionIter;
-		for (auctionIter = auctions->begin(); auctionIter != auctions->end(); ++auctionIter){
-			Auction *a = *auctionIter;
-
-#ifdef DEBUG
-			log->dlog(ch, "Auction %s.%s", (a->getSetName()).c_str(), a->getAuctionName().c_str() );
-#endif
 			
-			if ( (b->getAuctionSet() == a->getSetName()) && (b->getAuctionName() == a->getAuctionName()) ){
-				get_ipap_message(fieldDefs, b, a, templates, mes);
-				break;
-			}
-		}
+	if ( (biddingObject->getAuctionSet() == auction->getSetName()) && 
+		   (biddingObject->getAuctionName() == auction->getAuctionName()) ){
+		get_ipap_message(fieldDefs, biddingObject, auction, templates, mes);
+		mes->output();
+	} else {
+		throw Error("the auction is not the same as the one referenced in the bidding object");
 	}
-	mes->output();
+	
 
 #ifdef DEBUG
     log->dlog(ch, "Ending get_ipap_messages");

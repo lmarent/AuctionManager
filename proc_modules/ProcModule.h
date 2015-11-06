@@ -33,11 +33,10 @@
 
 #include "ProcModuleInterface.h"
 #include "IpApMessageParser.h"
-#include "Allocation.h"
 #include "Auction.h"
 #include "Field.h"
 #include "FieldValue.h"
-#include "Bid.h"
+#include "BiddingObject.h"
 #include "IpAp_field_container.h"
 #include "IpAp_template.h"
 
@@ -58,15 +57,15 @@ void initializeField(auction::field_t *f);
  
 long parseLong( string s );
 
-uint8_t parseUInt8(unsigned char *val);
+uint8_t parseUInt8( char *val );
 
 unsigned long parseULong( string s );
 
-uint16_t parseUInt16( unsigned char *val );
+uint16_t parseUInt16( char *val );
 
 long long parseLLong( string s );
 
-uint32_t parseUInt32( unsigned char *val );
+uint32_t parseUInt32( char *val );
 
 unsigned long long parseULLong( string s );
 
@@ -82,9 +81,18 @@ double getDoubleField(auction::fieldList_t *fields, string name);
 
 float getFloatField(auction::fieldList_t *fields, string name);
 
+time_t parseTime(string timestr);
+
+void fillField(auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
+			   int eno, int ftype, string value, auction::fieldList_t *fields);
+
 string getStringField(auction::fieldList_t *fields, string name);
 
 string doubleToString(double value);
+
+string uint64ToString (uint64_t value);
+
+string uint32ToString(double value);
 
 string intToString(int value);
 

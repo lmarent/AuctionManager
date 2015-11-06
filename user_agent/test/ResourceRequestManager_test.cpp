@@ -7,6 +7,7 @@
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "ParserFcts.h"
 #include "ResourceRequest.h"
 #include "FieldValue.h"
 #include "FieldDefParser.h"
@@ -53,7 +54,7 @@ void ResourceRequestManager_Test::createResourceRequest()
 
 		time_t              now = time(NULL);
 		
-		fieldList_t fields;
+		auction::fieldList_t fields;
 		resourceReqIntervalList_t intervals;
 		
 		field_t field1;
@@ -61,26 +62,38 @@ void ResourceRequestManager_Test::createResourceRequest()
 		field_t field3;
 		
 		fieldDefListIter_t iter; 
-		iter = manager->getFieldDef()->find("quantity");
-		field1.name = iter->second.name;
-		field1.len = iter->second.len;
-		field1.type = iter->second.type;
-		string fvalue1 = "2";
-		field1.parseFieldValue(fvalue1);
+		iter = manager->getFieldDefs()->find("quantity");
+		if (iter != manager->getFieldDefs()->end()){
+			field1.name = iter->second.name;
+			field1.len = iter->second.len;
+			field1.type = iter->second.type;
+			string fvalue1 = "2";
+			field1.parseFieldValue(fvalue1);
+		} else {
+			throw Error("field quantity not found");
+		}
 
-		iter = manager->getFieldDef()->find("maxvalue");
-		field2.name = iter->second.name;
-		field2.len = iter->second.len;
-		field2.type = iter->second.type;
-		string fvalue2 = "0.35";
-		field2.parseFieldValue(fvalue2);
+		iter = manager->getFieldDefs()->find("maxvalue");
+		if (iter != manager->getFieldDefs()->end()){
+			field2.name = iter->second.name;
+			field2.len = iter->second.len;
+			field2.type = iter->second.type;
+			string fvalue2 = "0.35";
+			field2.parseFieldValue(fvalue2);
+		} else {
+			throw Error("field maxvalue not found");
+		}
 		
-		iter = manager->getFieldDef()->find("budget");
-		field3.name = iter->second.name;
-		field3.len = iter->second.len;
-		field3.type = iter->second.type;
-		string fvalue3 = "0.04";
-		field3.parseFieldValue(fvalue3);
+		iter = manager->getFieldDefs()->find("unitbudget");
+		if (iter != manager->getFieldDefs()->end()){
+			field3.name = iter->second.name;
+			field3.len = iter->second.len;
+			field3.type = iter->second.type;
+			string fvalue3 = "0.04";
+			field3.parseFieldValue(fvalue3);
+		} else {
+			throw Error("field unitbudget not found");
+		}
 
 		fields.push_back(field1);
 		fields.push_back(field2);
@@ -113,36 +126,48 @@ void ResourceRequestManager_Test::createResourceRequest()
 		string name1 = "1";
 		
 		ptrResourceRequest1 = new ResourceRequest(set1, name1, fields, intervals);
-		ptrResourceRequest1->setState(RR_VALID);
+		ptrResourceRequest1->setState(AO_VALID);
 		
 
-		fieldList_t fields1;
+		auction::fieldList_t fields1;
 		resourceReqIntervalList_t intervals1;
 
 		field_t field11;
 		field_t field21;
 		field_t field31;
 		
-		iter = manager->getFieldDef()->find("quantity");
-		field11.name = iter->second.name;
-		field11.len = iter->second.len;
-		field11.type = iter->second.type;
-		string fvalue4 = "3";
-		field11.parseFieldValue(fvalue4);
+		iter = manager->getFieldDefs()->find("quantity");
+		if (iter != manager->getFieldDefs()->end()){
+			field11.name = iter->second.name;
+			field11.len = iter->second.len;
+			field11.type = iter->second.type;
+			string fvalue4 = "3";
+			field11.parseFieldValue(fvalue4);
+		} else {
+			throw Error("field quantity not found");
+		}
 
-		iter = manager->getFieldDef()->find("unitprice");
-		field21.name = iter->second.name;
-		field21.len = iter->second.len;
-		field21.type = iter->second.type;
-		string fvalue5 = "0.013";
-		field21.parseFieldValue(fvalue5);
+		iter = manager->getFieldDefs()->find("unitprice");
+		if (iter != manager->getFieldDefs()->end()){
+			field21.name = iter->second.name;
+			field21.len = iter->second.len;
+			field21.type = iter->second.type;
+			string fvalue5 = "0.013";
+			field21.parseFieldValue(fvalue5);
+		} else {
+			throw Error("field unitprice not found");
+		}
 		
-		iter = manager->getFieldDef()->find("budget");
-		field31.name = iter->second.name;
-		field31.len = iter->second.len;
-		field31.type = iter->second.type;
-		string fvalue6 = "0.05";
-		field31.parseFieldValue(fvalue6);
+		iter = manager->getFieldDefs()->find("unitbudget");
+		if (iter != manager->getFieldDefs()->end()){
+			field31.name = iter->second.name;
+			field31.len = iter->second.len;
+			field31.type = iter->second.type;
+			string fvalue6 = "0.05";
+			field31.parseFieldValue(fvalue6);
+		} else {
+			throw Error("field unitbudget not found");
+		}
 
 		fields1.push_back(field11);
 		fields1.push_back(field21);
@@ -188,9 +213,10 @@ void ResourceRequestManager_Test::setUp()
 		
 	try
 	{
-
+		int domain = 7;
 		string fieldname = DEF_SYSCONFDIR "/fielddef.xml";
-		manager = new ResourceRequestManager(fieldname);
+		string fieldvalue = DEF_SYSCONFDIR "/fieldval.xml";
+		manager = new ResourceRequestManager(domain, fieldname, fieldvalue);
 		
 		auto_ptr<EventSchedulerAgent> _evnt(new EventSchedulerAgent());
         evnt = _evnt;
@@ -198,6 +224,7 @@ void ResourceRequestManager_Test::setUp()
 	}
 	catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 }
 
@@ -222,8 +249,11 @@ void ResourceRequestManager_Test::testResourceManagerManager()
 		// Release all resource request.
 		saveDelete(manager);
 
+		
+		int domain = 7;
 		string fieldname = DEF_SYSCONFDIR "/fielddef.xml";
-		manager = new ResourceRequestManager(fieldname);
+		string fieldval = DEF_SYSCONFDIR "/fieldval.xml";
+		manager = new ResourceRequestManager(domain, fieldname,fieldval);
 
 		createResourceRequest();
 		
@@ -232,9 +262,7 @@ void ResourceRequestManager_Test::testResourceManagerManager()
 		manager->addResourceRequest(ptrResourceRequest2);
 		
 		CPPUNIT_ASSERT( manager->getNumResourceRequests() == 2 );
-				
-		ResourceRequest *tmpResourceRequest = manager->getResourceRequest(0);
-				
+					
 		CPPUNIT_ASSERT( ptrResourceRequest1->getInfo() == manager->getInfo("set1", "1") );
 		
 		CPPUNIT_ASSERT( manager->getResourceRequest(1) != NULL );
@@ -250,7 +278,7 @@ void ResourceRequestManager_Test::testResourceManagerManager()
 		// Release all resource request.
 		saveDelete(manager);
 								
-		manager = new ResourceRequestManager(fieldname);
+		manager = new ResourceRequestManager(domain, fieldname, fieldval);
 		
 		createResourceRequest();
 
@@ -262,7 +290,7 @@ void ResourceRequestManager_Test::testResourceManagerManager()
 		// Release all allocations.
 		saveDelete(manager);
 				
-		manager = new ResourceRequestManager(fieldname);
+		manager = new ResourceRequestManager(domain, fieldname, fieldval);
 		
 		createResourceRequest();
 
@@ -276,7 +304,7 @@ void ResourceRequestManager_Test::testResourceManagerManager()
 		// Release all ResourceRequest.
 		saveDelete(manager);
 				
-		manager = new ResourceRequestManager(fieldname);
+		manager = new ResourceRequestManager(domain,fieldname, fieldval);
 		
 		createResourceRequest();
 		

@@ -10,6 +10,7 @@
     <PREF NAME="PidFile">/tmp/netagent.pid</PREF>
     <!-- ansl-client configuration file -->    
     <PREF NAME="AnslpConfFile">@DEF_SYSCONFDIR@/nsis-ka_agent.conf</PREF>
+    <PREF NAME="Domain">6</PREF>       
     <!-- field attribute definition file -->    
     <PREF NAME="FieldDefFile">@DEF_SYSCONFDIR@/fielddef.xml</PREF>
     <!-- filter constant file -->
@@ -25,8 +26,6 @@
     <PREF NAME="DefaultSourcePort" TYPE="UInt16">12248</PREF>    
   </MAIN>
   <CONTROL>
-    <!-- enable remote control interface -->
-    <PREF NAME="Enable" TYPE="Bool">yes</PREF>
     <!-- port for control connections -->
     <PREF NAME="ControlPort" TYPE="UInt16">12248</PREF>
     <!-- use SSL encryption -->
@@ -49,6 +48,8 @@
   <AGENT_PROCESSOR>
     <!-- run as separate thread -->
     <PREF NAME="Thread" TYPE="Bool">no</PREF>
-    
+    <PREF NAME="ModuleDir">/usr/local/lib/auctionmanager</PREF>
+    <!-- allow on-demand loading i.e. when new module is used in rule definition --> 
+    <PREF NAME="ModuleDynamicLoad" TYPE="Bool">yes</PREF>
   </AGENT_PROCESSOR>  
 </CONFIG>

@@ -67,19 +67,20 @@ class MAPIResourceRequestParser : public IpApMessageParser
 	
   public:
 
-    MAPIResourceRequestParser();
+    MAPIResourceRequestParser(int domain);
 
     ~MAPIResourceRequestParser() {}
 					   
 	//! get the ipap_message that represents an specifc resource request.
-	/*! @param recordId - it identifies the request being processed.
-	 * 		  resourceId - It identifies the resource request, if empty
-	 * 					   means any resource.
+	/*! \arg request 		- the request being processed.
+	 * 	\arg start   		- the start time for the interval to put on the message.
+	 * 	\arg resourceId		- It identifies the resource request, if empty
+	 * 					   	  means any resource.
 	 */
 	ipap_message * get_ipap_message(fieldDefList_t *fieldDefs, 
-								    string recordId,
-									string resourceId,
-								    resourceReq_interval_t interval,
+								    ResourceRequest * request,
+								    time_t start,
+								    string resourceId, 
 								    bool useIPV6, string sAddressIPV4, 
 								    string sAddressIPV6, uint16_t port);
 

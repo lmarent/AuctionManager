@@ -24,6 +24,9 @@ netagent_SOURCES =  @top_srcdir@/foundation/src/Constants.cpp \
 					@top_srcdir@/foundation/src/FieldDefParser.cpp \
 					@top_srcdir@/foundation/src/FieldValParser.cpp \
 					@top_srcdir@/foundation/src/FieldDefManager.cpp \
+					@top_srcdir@/foundation/src/CommandLineArgs.cpp \
+					@top_srcdir@/foundation/src/ConfigManager.cpp \
+					@top_srcdir@/foundation/src/ConfigParser.cpp \
 					@top_srcdir@/foundation/src/TemplateIdSource.cpp \
 					@top_srcdir@/foundation/src/IpApMessageParser.cpp \
 					@top_srcdir@/foundation/src/IdSource.cpp \
@@ -33,25 +36,20 @@ netagent_SOURCES =  @top_srcdir@/foundation/src/Constants.cpp \
 					@top_srcdir@/foundation/src/MAPIAuctionParser.cpp \
 					@top_srcdir@/foundation/src/AuctionManagerInfo.cpp \
 					@top_srcdir@/foundation/src/AuctionManagerComponent.cpp \
+					@top_srcdir@/foundation/src/AuctionManager.cpp \
 					@top_srcdir@/foundation/src/Event.cpp \
 					@top_srcdir@/foundation/src/EventScheduler.cpp \
-					@top_srcdir@/foundation/src/Bid.cpp \
-					@top_srcdir@/foundation/src/BidFileParser.cpp \
-					@top_srcdir@/foundation/src/MAPIBidParser.cpp \
-					@top_srcdir@/foundation/src/BidManager.cpp \
-					@top_srcdir@/foundation/src/CommandLineArgs.cpp \
-					@top_srcdir@/foundation/src/ConfigManager.cpp \
-					@top_srcdir@/foundation/src/ConfigParser.cpp \
-					@top_srcdir@/foundation/src/Allocation.cpp \
-					@top_srcdir@/foundation/src/AuctionManager.cpp \
-					@top_srcdir@/foundation/src/MAPIAllocationParser.cpp \
-					@top_srcdir@/foundation/src/AllocationManager.cpp \
+					@top_srcdir@/foundation/src/BiddingObject.cpp \
+					@top_srcdir@/foundation/src/BiddingObjectFileParser.cpp \
+					@top_srcdir@/foundation/src/MAPIBiddingObjectParser.cpp \
+					@top_srcdir@/foundation/src/BiddingObjectManager.cpp \
 					@top_srcdir@/foundation/src/AnslpClient.cpp \
 					@top_srcdir@/foundation/src/Session.cpp \
 					@top_srcdir@/foundation/src/SessionManager.cpp \
 					@top_srcdir@/foundation/src/ModuleLoader.cpp \
 					@top_srcdir@/foundation/src/Module.cpp \
 					@top_srcdir@/foundation/src/ProcModule.cpp \
+					@top_srcdir@/foundation/src/MessageIdSource.cpp \
 					ResourceRequest.cpp \
 					ResourceRequestIdSource.cpp \
 					ResourceRequestFileParser.cpp \
@@ -63,6 +61,7 @@ netagent_SOURCES =  @top_srcdir@/foundation/src/Constants.cpp \
 					PageRepository.cpp \
 					CtrlComm.cpp \
 					AgentManagerInfo.cpp \
+					AgentSessionManager.cpp \
 					AgentProcessor.cpp \
 					ConstantsAgent.cpp \
 					Agent.cpp \

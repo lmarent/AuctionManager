@@ -1,6 +1,7 @@
 <?xml version ="1.0" encoding="UTF-8"?>
 <!DOCTYPE AUCTIONSET SYSTEM "auctionfile.dtd"> 
-<AUCTIONSET ID="General1">
+<!-- The Id must be an integer which represents the domain id-->
+<AUCTIONSET ID="1">
   <!-- global part is the default for all auctions -->
   <!-- overwritten by rule specific configuration -->
   <GLOBAL>

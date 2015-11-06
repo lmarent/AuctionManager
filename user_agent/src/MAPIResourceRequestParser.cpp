@@ -32,8 +32,8 @@
 
 using namespace auction;
 
-MAPIResourceRequestParser::MAPIResourceRequestParser()
-    : IpApMessageParser()
+MAPIResourceRequestParser::MAPIResourceRequestParser(int domain)
+    : IpApMessageParser(domain)
 {
     log = Logger::getInstance();
     ch = log->createChannel("MAPIResourceRequestParser" );
@@ -193,9 +193,8 @@ void MAPIResourceRequestParser::addOptionRecord(string recordId,
 /* ------------------------- getMessage ------------------------- */
 ipap_message * 
 MAPIResourceRequestParser::get_ipap_message(fieldDefList_t *fieldDefs, 
-											string recordId,
-											string resourceId,
-											resourceReq_interval_t interval,
+											ResourceRequest * request,
+											time_t start, string resourceId,
 											bool useIPV6, string sAddressIPV4, 
 											string sAddressIPV6, uint16_t port )
 {
@@ -208,10 +207,15 @@ MAPIResourceRequestParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	uint16_t bidOptionTemplateId;
 	ipap_message *mes = new ipap_message();
 	
+	resourceReqIntervalListIter_t interval = request->getIntervalByStart(start);
+	
 	bidOptionTemplateId = addFieldsOptionTemplate(fieldDefs, mes);
-				
+
+	// Build the recordId as the resourceRequestSet + resourceRequestName
+	string recordId = request->getIpApId(getDomain());
+			
 	// Loop through the related auctions to include them in a option record.
-	addOptionRecord(recordId, resourceId, interval, useIPV6, sAddressIPV4, 
+	addOptionRecord(recordId, resourceId, *interval, useIPV6, sAddressIPV4, 
 					sAddressIPV6, port, bidOptionTemplateId, mes);
 	
 	mes->output();

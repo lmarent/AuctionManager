@@ -114,7 +114,7 @@ class MAPIAuctionParser : public IpApMessageParser, public anslp::msg::anslp_ipa
 	ipap_message * get_ipap_message(fieldDefList_t *fieldDefs, 
 									auctionDB_t *auctions, 
 									ipap_template_container *templates,
-									int domainId, bool useIPV6, string sAddressIPV4, 
+									bool useIPV6, string sAddressIPV4, 
 									string sAddressIPV6, uint16_t port );
 
 };

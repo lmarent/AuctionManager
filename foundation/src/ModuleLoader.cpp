@@ -54,10 +54,16 @@ ModuleLoader::ModuleLoader( ConfigManager *cnf, string basedir,
 
     s_log = Logger::getInstance();
     ch = s_log->createChannel(channelPrefix + "ModuleLoader");
+    
 #ifdef DEBUG
-    s_log->dlog(ch, "Creating: with modeles %s", modules.c_str() );
+    s_log->dlog(ch, "Creating: with modules %s with path:%s", 
+					modules.c_str(), basedir.c_str() );
 #endif
-
+	
+	if (basepath.empty()){
+		throw Error("ModuleLoader: invalid empty basepath ");
+	}
+	
     // add '/' if dir does not end in one already
     if (basepath[basepath.size()-1] != '/') {
         basepath += "/";
