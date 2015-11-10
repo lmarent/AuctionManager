@@ -27,10 +27,12 @@
   <DEF TYPE="UInt16" ENO="0" FTYPE="42">DstPort</DEF> 
   <DEF TYPE="UInt16" ENO="0" FTYPE="47">SrcAuctionPort</DEF>
   <DEF TYPE="UInt16" ENO="0" FTYPE="48">DstAuctionPort</DEF> 
-  <DEF TYPE="UInt8" ENO="0" FTYPE="49">IPVersion</DEF> 
+  <DEF TYPE="UInt8" ENO="0" FTYPE="49">IPVersion</DEF>   
   <!-- Reserve price -->
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="39">ReservePrice</DEF>
   <!-- Algorithm data -->
   <DEF TYPE="String" ENO="0" FTYPE="31">AlgorithmName</DEF>
-  
+  <!-- Template list for an auction -->  
+  <DEF TYPE="String" ENO="0" FTYPE="51">TemplateList</DEF> 
+
 </FIELDDEF>

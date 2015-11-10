@@ -137,7 +137,7 @@ void destroyModule( configParam_t *params );
     freed by caller. 
 */
 void execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
-			  configParam_t *params, string aset, string aname, biddingObjectDB_t *bids, 
+			  configParam_t *params, string aset, string aname, time_t start, time_t stop, biddingObjectDB_t *bids, 
 			  biddingObjectDB_t **allocationdata );
 
 /*! \short   execute the bidding process for the list of auctions given 
@@ -227,8 +227,8 @@ typedef struct {
     void (*destroyModule)( configParam_t *params );
 
     void (*execute)( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
-					 configParam_t *params, string aset, string aname, biddingObjectDB_t *bids, 
-					 biddingObjectDB_t **allocationdata );
+					 configParam_t *params, string aset, string aname, time_t start, 
+					 time_t stop, biddingObjectDB_t *bids, biddingObjectDB_t **allocationdata );
 
 	void (*execute_user)( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
 						  fieldList_t *requestparams, auctionDB_t *auctions, biddingObjectDB_t **biddata );	

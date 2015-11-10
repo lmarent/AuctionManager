@@ -260,6 +260,7 @@ void Auction::addTemplateField(ipap_template *templ,
 	// By default network encoding
 	int encodeNetwork = 1;
 	
+	
 	ipap_field field = g_ipap_fields.get_field(eno, type);
 	uint16_t length = (uint16_t) field.get_field_type().length;
    	templ->add_field(length,KNOWN,encodeNetwork,field);
@@ -549,6 +550,29 @@ string Auction::getInfo(void)
     s << endl;
 
     return s.str();
+}
+
+string 
+Auction::getTemplateList(void)
+{
+	ostringstream s;
+	bool firstTime = true;
+	
+	for (int i=1; i < IPAP_MAX_OBJECT_TYPE; i++){
+		set<ipap_templ_type_t> setObject = ipap_template::getObjectTemplateTypes((ipap_object_type_t) i);
+		set<ipap_templ_type_t>::iterator itTemplObject;
+		for (itTemplObject = setObject.begin(); itTemplObject != setObject.end(); ++itTemplObject){
+			uint16_t templateId = getBiddingObjectTemplate((ipap_object_type_t) i, *itTemplObject);
+			if (firstTime == true){
+				s << templateId;
+				firstTime = false;
+			} else {
+				s << "," << templateId;
+			}	
+		}
+	}
+	
+	return s.str();
 }
 
 void Auction::incrementSessionReferences(string sessionId)

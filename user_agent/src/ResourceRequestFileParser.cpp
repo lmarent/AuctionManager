@@ -164,15 +164,20 @@ ResourceRequestFileParser::parseTime(string timestr)
 }
 
 
-void 
-ResourceRequestFileParser::calculateInterval(time_t now, miscList_t *miscList, 
+time_t 
+ResourceRequestFileParser::calculateInterval(time_t start, miscList_t *miscList, 
 							resourceReq_interval_t *resInterval)
 {
 
+#ifdef DEBUG
+    log->dlog(ch, "start calculateInterval: start:%s ", Timeval::toString(start).c_str());
+#endif
+
     unsigned long duration;
+    time_t now = time(NULL);
         
     /* time stuff */
-    resInterval->start = now;
+    resInterval->start = start;
         
     // stop = 0 indicates infinite running time
     resInterval->stop = 0;
@@ -195,6 +200,11 @@ ResourceRequestFileParser::calculateInterval(time_t now, miscList_t *miscList,
         if(resInterval->start == 0) {
             throw Error(410, "invalid start time %s", sstart.c_str());
         }
+        
+        if ((resInterval->start) < start){
+			throw Error(410, "invalid start time %s, it should be greater than previous interval stop %s", 
+					sstart.c_str(), Timeval::toString(start).c_str());
+		}
     }
 
     if (!sstop.empty()) {
@@ -202,6 +212,11 @@ ResourceRequestFileParser::calculateInterval(time_t now, miscList_t *miscList,
         if(resInterval->stop == 0) {
             throw Error(411, "invalid stop time %s", sstop.c_str());
         }
+        if ((resInterval->stop) < start){
+			throw Error(410, "invalid stop time %s, it should be greater than previous interval stop %s", 
+					sstop.c_str(), Timeval::toString(start).c_str());
+		}
+
     }
 	
     if (!sduration.empty()) {
@@ -238,19 +253,27 @@ ResourceRequestFileParser::calculateInterval(time_t now, miscList_t *miscList,
 	if (!sinterval.empty()){
 		_interval = ParserFcts::parseInt(sinterval);
     }
+    
     int _align = (!salign.empty()) ? 1 : 0;
 				
 	if (_interval > 0) {
 
         resInterval->interval = _interval;
-        resInterval->align = _align;
-			
-#ifdef DEBUG
-    log->dlog(ch, "Interval: %d - Align:%d", _interval, _align);
-#endif    
+        resInterval->align = _align;   
 		
+    } else {
+		resInterval->interval = 0;
+        resInterval->align = _align;
     }				
 
+#ifdef DEBUG
+    log->dlog(ch, "Ending Calculate Interval: start:%s, stop:%s, interval:%d - Align:%d", 
+						Timeval::toString(resInterval->start).c_str(), 
+						Timeval::toString(resInterval->stop).c_str(), 
+						_interval, _align);
+#endif 
+	
+	return resInterval->stop;
 }
 
 
@@ -262,7 +285,7 @@ ResourceRequestFileParser::parse(fieldDefList_t *fieldDefs,
     xmlNodePtr cur, cur2, cur3;
     string rset;
     cur = xmlDocGetRootElement(XMLDoc);
-    time_t now = time(NULL);    
+    time_t start = time(NULL);
 
     rset = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
 	// use lower case internally - set id.
@@ -356,7 +379,7 @@ ResourceRequestFileParser::parse(fieldDefList_t *fieldDefs,
                         // get action specific PREFs
                         cur3 = cur3->next;
                     }
-					calculateInterval(now, &miscList, &interval);
+					start = calculateInterval(start, &miscList, &interval);
 					intervals.push_back(interval);
                 }
                 cur2 = cur2->next;

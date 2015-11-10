@@ -82,6 +82,7 @@ const string eventNames[] =
       "Transmit-Bidding-Objects",
       "Add-Bidding-Object-Auction",
       "Delete-Bidding-Object-Auction",
+      "Activate-Bidding-Objects",
       "Add-Auctions",
       "Remove-Auctions",
       "Activate-Auctions",
@@ -240,7 +241,7 @@ class CtrlCommEvent: public Event
   public:
     //! ctrlcomm events always expire now
     CtrlCommEvent(event_t type, unsigned long ival=0, int align=0)
-      : Event(type, ival, align) {}
+      : Event(type, ival, align), req(NULL) {}
 
     virtual ~CtrlCommEvent() {}
 

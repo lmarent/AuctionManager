@@ -48,7 +48,8 @@ class MAPIAuctionParser : public IpApMessageParser, public anslp::msg::anslp_ipa
 							   ipap_data_record &record,
 							   string &auctionName,
 							   string &resourceId,
-							   string &status);
+							   string &status,
+							   string &templateList);
     
 	//! Read the action data associated with the auction.
 	configItemList_t readMiscAuctionData(ipap_template *templ, 

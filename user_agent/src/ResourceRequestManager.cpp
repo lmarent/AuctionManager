@@ -221,6 +221,12 @@ void ResourceRequestManager::addResourceRequests(resourceRequestDB_t * requests,
     resourceRequestTimeIndex_t     stop;
     resourceRequestTimeIndexIter_t iter2;
     time_t              now = time(NULL);
+ 
+
+#ifdef DEBUG
+    log->dlog(ch, "starting add resource requests");
+#endif
+ 
         
     // add bids
     for (iter = requests->begin(); iter != requests->end(); iter++) {

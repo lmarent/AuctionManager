@@ -60,8 +60,8 @@ class ResourceRequestFileParser : public XMLParser
 	//! parse a field value
 	void parseFieldValue(string value, field_t *f);   
 		
-	//! Calculates intervals associated to auction.
-	void calculateInterval(time_t now, miscList_t *miscList, 
+	//! Calculates intervals associated to resource request interval.
+	time_t calculateInterval(time_t start, miscList_t *miscList, 
 							resourceReq_interval_t *resInterval);
 
     //! parse time string

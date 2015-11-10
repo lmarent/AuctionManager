@@ -35,9 +35,9 @@ using namespace auction;
 
 /* ------------------------- AUMProcessor ------------------------- */
 
-AgentProcessor::AgentProcessor(ConfigManager *cnf, string fdname, string fvname, int threaded, string moduleDir ) 
+AgentProcessor::AgentProcessor(int domain, ConfigManager *cnf, string fdname, string fvname, int threaded, string moduleDir ) 
     : AuctionManagerComponent(cnf, "AGENT_PROCESSOR", threaded), 
-	  FieldDefManager(fdname, fvname), idSource(0)
+	  FieldDefManager(fdname, fvname), idSource(0), domain(domain)
 {
     string txt;
     
@@ -122,7 +122,7 @@ int AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, Aucti
 				
 		// Read the name of the module to load
 		sModuleName = auction->getAction()->name;
-				
+		sModuleName = sModuleName + "user";
 		requestProcess reqProcess;
 					
 		// load the module
@@ -135,6 +135,7 @@ int AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, Aucti
 			index = idSource.newId();
 			reqProcess.setSession(sessionId);
 			reqProcess.setUId(index);
+			reqProcess.setModuleName(sModuleName);
 
 			reqProcess.setParameters(parameters);
 			reqProcess.insertAuction(auction);
@@ -178,7 +179,7 @@ int AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, Aucti
 	}
 
 #ifdef DEBUG
-    log->dlog(ch,"Start addRequest");
+    log->dlog(ch,"ending addRequest");
 #endif
 
 	return index;
@@ -188,6 +189,11 @@ int AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, Aucti
 /* ------------------------- delRequest ------------------------- */
 void AgentProcessor::delRequest( int index )
 {
+
+#ifdef DEBUG
+    log->dlog(ch,"starting delRequest");
+#endif
+
 
 	// Verifies that the index is valid
 	if (index < 0){
@@ -207,6 +213,10 @@ void AgentProcessor::delRequest( int index )
 	} else {
 		throw Error("Request index:%d not found", index);
 	}
+
+#ifdef DEBUG
+    log->dlog(ch,"ending delRequest");
+#endif
 		        	
 }
 
@@ -214,6 +224,11 @@ void AgentProcessor::delRequest( int index )
 void  
 AgentProcessor::executeRequest( int index, EventScheduler *e )
 {
+
+#ifdef DEBUG
+    log->dlog(ch,"starting executeRequest");
+#endif
+
 	
     AUTOLOCK(threaded, &maccess);  
 
@@ -224,19 +239,27 @@ AgentProcessor::executeRequest( int index, EventScheduler *e )
 		biddingObjectDB_t bids;
 		biddingObjectDB_t *ptr = &bids;
 		
-		
-		((ret->second).getMAPI())->execute_user( FieldDefManager::getFieldDefs(), 
+		try{ 
+			((ret->second).getMAPI())->execute_user( FieldDefManager::getFieldDefs(), 
 										   FieldDefManager::getFieldVals(),
 										   (ret->second).getParameters(),
 										   (ret->second).getAuctions(),
 										   &ptr );
-		
+		} catch (ProcError &e){
+			log->elog(ch,e.getError().c_str());
+			throw Error(e.getError().c_str());
+		}
 		// Add the Bids (bidding objects) created to the local container.
 		e->addEvent(new AddGeneratedBiddingObjectsEvent(index, bids));
 		
 	} else {
 		throw Error("Request with index:%d was not found", index);
 	}
+
+#ifdef DEBUG
+    log->dlog(ch,"ending executeRequest");
+#endif
+
 
 }
 
@@ -263,14 +286,29 @@ AgentProcessor::addAuctionRequest( int index, Auction *a )
 	{
 		throw Error("Request with index %d not found", index);
 	} 
+	
+	// Second look the auction in the list of auction already inserted, if it exists generates an error
+	reqIter = requests.find(index);	
+	auctionDBIter_t iterAuct;
+	for (iterAuct = ((reqIter->second).auctions).begin(); iterAuct != ((reqIter->second).auctions).end(); ++iterAuct)
+	{
+		Auction *aTmp = *iterAuct;
+		if ( (aTmp->getSetName() == a->getSetName()) &&
+			  (aTmp->getAuctionName() == a->getAuctionName()) ) {
+			throw Error("Auction %s.%s is inserted in the request process with index %d not found", 
+							a->getSetName().c_str(), a->getAuctionName().c_str(),  index);  
+		} 
+	}
 			
 	// After search for the module name on those already loaded.
 	string sModuleName = a->getAction()->name;
+	sModuleName = sModuleName + "user";
 
 	if ((reqIter->second).getModuleName() == sModuleName){
 			(reqIter->second).insertAuction(a);
 	} else {
-		throw Error("The module to load must be the same for the request %d", index);
+		throw Error("The module to load:%s must be the same: %s for the request %d", 
+						sModuleName.c_str(), (reqIter->second).getModuleName().c_str(),  index);
 	}
 		
 #ifdef DEBUG

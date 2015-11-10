@@ -84,7 +84,7 @@ Auctioner::Auctioner( int argc, char *argv[])
         signal(SIGUSR1, sigusr1_handler);
         signal(SIGALRM, sigalarm_handler);
         // FIXME sighup for log file rotation
-				
+						
         auto_ptr<CommandLineArgs> _args(new CommandLineArgs());
         args = _args;
 
@@ -107,6 +107,7 @@ Auctioner::Auctioner( int argc, char *argv[])
 #endif
         args->add('P', "ControlPort", "<portnumber>", "use alternative control port",
                   "CONTROL", "cport");
+        
 #ifndef ENABLE_NF
 #ifndef HAVE_LIBIPULOG_LIBIPULOG_H
         args->add('i', "NetInterface", "<iface>[,<iface2>,...]", "select network interface(s)"
@@ -122,7 +123,7 @@ Auctioner::Auctioner( int argc, char *argv[])
             // user wanted help
             exit(0);
         }
-
+		
         if (args->getArgValue('V') == "yes") {
             cout << getHelloMsg();
             exit(0);
@@ -648,6 +649,7 @@ void Auctioner::handleActivateAuction(Event *e, fd_sets_t *fds)
 #endif
 
 	auctionDB_t *auctions = NULL;
+	time_t now = time(NULL);
 
 	try
 	{		
@@ -656,12 +658,20 @@ void Auctioner::handleActivateAuction(Event *e, fd_sets_t *fds)
 		auctions = ((ActivateAuctionsEvent *)e)->getAuctions();
 
 		// Add the auctions to the process.
+		int index = 0;
 		auctionDBIter_t iter;
 		for (iter = auctions->begin(); iter != auctions->end(); ++iter){
-			proc->addAuctionProcess(*iter, evnt.get());
+			// create the auction process. 
+			index = proc->addAuctionProcess(*iter, evnt.get());
+			time_t start = (*iter)->getStart();
+			time_t stop = (*iter)->getStop();
+			interval_t interval = (*iter)->getInterval();
+			
+			evnt.get()->addEvent(new PushExecutionEvent(start-now, index, stop, interval.interval, interval.align));
+			
 		}
 		
-		// change their state to active
+		// change the state of all auctions to active
 		aucm->activateAuctions(auctions, evnt.get());
 
 #ifdef DEBUG
@@ -808,13 +818,24 @@ void Auctioner::handlePushExecution(Event *e, fd_sets_t *fds)
 	try {
         
         int index = ((PushExecutionEvent *)e)->getIndex();
+        time_t stop = ((PushExecutionEvent *)e)->getStop();
+        
+        unsigned long interval = e->getIval();
+        struct timeval t = ((PushExecutionEvent *)e)->getTime();
+        time_t start = (time_t) t.tv_sec;
+        
+        time_t stoptmp = start + interval;
+        if (stoptmp > stop)
+			stoptmp = stop;
         
 		// Execute the algorithm
-        proc->executeAuction(index, evnt.get());
+        proc->executeAuction(index, start, stoptmp, evnt.get());
               
-       // TODO AM: Send allocations for agents.
+        // Re-schedule the event.
+        if (stoptmp < stop){
+			evnt.get()->reschedNextEvent(e);
+        }
               
-
 #ifdef DEBUG
 		log->dlog(ch,"ending event push execution" );
 #endif
@@ -922,7 +943,12 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 		saveDelete(s);
 		saveDelete(auctions);
 		
-		comm->sendMsg(os.str().c_str(), ((CreateCheckSessionEvent *)e)->getReq(), fds);
+		if (((CreateCheckSessionEvent *)e)->getReq() != NULL){
+			comm->sendMsg(os.str().c_str(), ((CreateCheckSessionEvent *)e)->getReq(), fds);
+		}
+		else {
+			log->dlog(ch,"Message to send: %s", os.str().c_str() );
+		}
 
 #ifdef DEBUG
 		log->dlog(ch,"Ending event create check session" );
@@ -994,19 +1020,22 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 
 		message_return = aucm->get_ipap_message(auctions, iter->second, useIPV6, 
 									sAddressIPV4, sAddressIPV6, port);
-
+		
+		uint32_t seqNo = message->get_seqno();
+		message_return->set_ackseqno(seqNo + 1);
+		
+		
 #ifdef DEBUG
 		log->dlog(ch,"after building the message" );
 #endif			
-									
-		anslp::msg::anslp_ipap_xml_message mess;
-		anslp::msg::anslp_ipap_message anlp_mess(*message_return);
-		
-		saveDelete(message_return);
-		string xmlMessage = mess.get_message(anlp_mess);
-		
+											
 		// Only create the session, if the number of auctions is greater than zero.
-		if (auctions->size() > 0){ 			
+		if (auctions->size() > 0){ 
+
+#ifdef DEBUG
+			log->dlog(ch,"Auction size > 0" );
+#endif
+				
 			string sessionId = ((CreateSessionEvent *)e)->getSessionId();
 			s = new auction::Session(sessionId);
 
@@ -1059,13 +1088,44 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 			} else {
 				throw("session information was not provided");
 			}
+						
+			uint32_t SeqNbr = s->getNextMessageId();
+			message_return->set_seqno(SeqNbr);
 			
+			anslp::msg::anslp_ipap_xml_message mess;
+			anslp::msg::anslp_ipap_message anlp_mess(*message_return);
+
+			// Add the message as pending for the session.
+			s->addPendingMessage(*message_return);
+			
+			saveDelete(message_return);
+			string xmlMessage = mess.get_message(anlp_mess);
+
+			// Add the new session to session manager.
 			sesm->addSession(s); 
+
+			saveDelete(auctions);
+
+			if (((CreateSessionEvent *)e)->getReq() != NULL){
+				comm->sendMsg(xmlMessage.c_str(), ((CreateSessionEvent *)e)->getReq(), fds);
+			} else {
+			   log->dlog(ch,"Message to send: %s", xmlMessage.c_str() );
+			}
+
+		
+		} else {	
+			
+			saveDelete(message_return);
+			saveDelete(auctions);
+
+			if (((CreateSessionEvent *)e)->getReq() != NULL){
+				comm->sendErrMsg("No auctions found", ((CreateSessionEvent *)e)->getReq(), fds); 
+			} else {
+				log->dlog(ch,"Message to send: %s", "No auctions found" );
+			}
 		}
 
-		saveDelete(auctions);
-
-		comm->sendMsg(xmlMessage.c_str(), ((CreateSessionEvent *)e)->getReq(), fds);
+		
 
 #ifdef DEBUG
 		log->dlog(ch,"Ending event create session" );

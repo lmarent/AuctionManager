@@ -44,7 +44,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( ResourceRequestFileParser_Test );
 
 void ResourceRequestFileParser_Test::setUp() 
 {
-	const string filename = DEF_SYSCONFDIR "/example_resource_request1.xml";
+	const string filename = "../../etc/example_resource_request1.xml";
 
 	try
 	{
@@ -58,6 +58,7 @@ void ResourceRequestFileParser_Test::setUp()
 	}catch (Error &e)
 	{
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 }
 
@@ -84,6 +85,8 @@ void ResourceRequestFileParser_Test::testParser()
 		field_t field1;
 		field_t field2;
 		field_t field3;
+		field_t field4;
+		field_t field5;
 		
 		fieldDefListIter_t iter; 
 		iter = fieldDefs.find("quantity");
@@ -97,31 +100,56 @@ void ResourceRequestFileParser_Test::testParser()
 			throw Error("field quantity was not found");
 		}
 		
-		iter = fieldDefs.find("unitbudget");
+		iter = fieldDefs.find("totalbudget");
 		if (iter != fieldDefs.end()){
-			field3.name = iter->second.name;
-			field3.len = iter->second.len;
-			field3.type = iter->second.type;
-			string fvalue3 = "0.3";
-			field3.parseFieldValue(fvalue3);
+			field2.name = iter->second.name;
+			field2.len = iter->second.len;
+			field2.type = iter->second.type;
+			string fvalue2 = "0.3";
+			field2.parseFieldValue(fvalue2);
 		} else {
 			throw Error("field unitbudget was not found");
 		}
 
 		iter = fieldDefs.find("maxvalue");
 		if (iter != fieldDefs.end()){
-			field2.name = iter->second.name;
-			field2.len = iter->second.len;
-			field2.type = iter->second.type;
-			string fvalue2 = "0.16";
-			field2.parseFieldValue(fvalue2);
+			field3.name = iter->second.name;
+			field3.len = iter->second.len;
+			field3.type = iter->second.type;
+			string fvalue3 = "0.16";
+			field3.parseFieldValue(fvalue3);
 		} else {
 			throw Error("field maxvalue was not found");
 		}
 
+		iter = fieldDefs.find("dstip");
+		if (iter != fieldDefs.end()){
+			field4.name = iter->second.name;
+			field4.len = iter->second.len;
+			field4.type = iter->second.type;
+			string fvalue4 = "8.8.8.8";
+			field4.parseFieldValue(fvalue4);
+		} else {
+			throw Error("field maxvalue was not found");
+		}
+
+		iter = fieldDefs.find("dstport");
+		if (iter != fieldDefs.end()){
+			field5.name = iter->second.name;
+			field5.len = iter->second.len;
+			field5.type = iter->second.type;
+			string fvalue5 = "80";
+			field5.parseFieldValue(fvalue5);
+		} else {
+			throw Error("field maxvalue was not found");
+		}
+
+
 		fields.push_back(field1);
-		fields.push_back(field3);
 		fields.push_back(field2);
+		fields.push_back(field3);
+		fields.push_back(field4);
+		fields.push_back(field5);
 		
 		resourceReq_interval_t interval1;
 		resourceReq_interval_t interval2;
@@ -131,8 +159,8 @@ void ResourceRequestFileParser_Test::testParser()
 		interval1.interval = 0;
 		interval1.align = 0;
 		
-		interval2.start = now;
-		interval2.stop = interval1.start + 100;
+		interval2.start = interval1.stop;
+		interval2.stop = interval2.start + 100;
 		interval2.interval = 0;
 		interval2.align = 0;
 		
@@ -153,7 +181,7 @@ void ResourceRequestFileParser_Test::testParser()
 		
 		string info1 = (*new_requests)[0]->getInfo();
 		string info2 = ptrresourceRequest1->getInfo();
-		
+				
 		CPPUNIT_ASSERT( info1.compare(info2) == 0);
 		
 		saveDelete(ptrresourceRequest1);
@@ -161,6 +189,7 @@ void ResourceRequestFileParser_Test::testParser()
 	}
 	catch (Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 }
 

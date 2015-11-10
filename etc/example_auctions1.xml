@@ -11,8 +11,8 @@
     <!-- How often they should be run - value in seconds -->
     <PREF NAME="Interval">10</PREF>
   </GLOBAL>
-  <AUCTION ID="1" RESOURCE_ID="router1">
-    <ACTION NAME="bas" DEFAULT="true"></ACTION>
+  <AUCTION ID="10" RESOURCE_ID="router1">
+    <ACTION NAME="libbas" DEFAULT="true"></ACTION>
     
 	<FIELD NAME="quantity">
 	<TEMPLATE_FIELD OBJECT_TYPE = "BID" TEMPLATE_TYPE = "DATA"></TEMPLATE_FIELD>

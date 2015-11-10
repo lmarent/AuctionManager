@@ -65,7 +65,7 @@ public:
     */
 	Session( string _sessionId  );
 
-	~Session();
+	virtual ~Session();
 
     int getUId() 
     { 
@@ -153,7 +153,11 @@ public:
 	void confirmMessage(uint32_t mid);
 	
 	//! add to the list of pensing message a new entry.
-	void addPendingMessage(ipap_message mes);		
+	void addPendingMessage(ipap_message mes);
+	
+	pendingMessageListIter_t beginMessages() { return pendingMessages.begin(); }		
+	
+	pendingMessageListIter_t endMessages() { return pendingMessages.end(); }		
 		
 protected:
 	

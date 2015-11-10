@@ -217,6 +217,22 @@ IpApMessageParser::findField(fieldDefList_t *fieldDefs, string fname)
 	return val_return;
 }
 
+bool 
+IpApMessageParser::isFieldIncluded(auction::fieldList_t *fields, string name)
+{
+	bool included = false;
+	auction::fieldListIter_t field_iter;
+	
+	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
+	{
+	
+		if ((field_iter->name).compare(name) == 0 ){
+			return true;
+		}
+	}
+	
+	return included;
+}
 
 /* ------------------------- readTemplate ------------------------- */
 ipap_template * 

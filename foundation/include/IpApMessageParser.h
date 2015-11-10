@@ -67,7 +67,10 @@ class IpApMessageParser
 		static string getMiscVal(miscList_t *miscList, string name);
 		
 		inline int getDomain(){ return domain; }
+	
+		static bool isFieldIncluded(auction::fieldList_t *fields, string name);
 
+	
 	protected:
 
 		/*! parse an object name (auction or bid).

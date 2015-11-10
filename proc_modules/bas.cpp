@@ -12,27 +12,27 @@
 const int MOD_INIT_REQUIRED_PARAMS = 1;
 
 // Variables given as parameters.
-double bandwidth_to_sell = 0;
+float bandwidth_to_sell = 0;
 double reserve_price = 0;
-time_t start;
-time_t stop;
 uint32_t lastId;
 ipap_field_container g_ipap_fields;
 
-double getResourceAvailability( auction::configParam_t *params )
+float getResourceAvailability( auction::configParam_t *params )
 {
  
+#ifdef DEBUG
 	 cout << "Starting getResourceAvailability" << endl;
+#endif
 	
-     double bandwidth = 0;
+     float bandwidth = 0;
      int numparams = 0;
      
      while (params[0].name != NULL) {
 		// in all the application we establish the rates and 
 		// burst parameters in bytes
-				
-        if (!strcmp(params[0].name, "Bandwidth")) {
-			bandwidth = (double) parseDouble( params[0].value );
+				        
+        if (!strcmp(params[0].name, "bandwidth")) {
+			bandwidth = (float) parseFloat( params[0].value );
 			numparams++;
 		}
         params++;
@@ -46,7 +46,9 @@ double getResourceAvailability( auction::configParam_t *params )
 		throw auction::ProcError(AUM_PROC_BANDWIDTH_AVAILABLE_ERROR, 
 					"bas init module - The given bandwidth parameter is incorrect");
 
+#ifdef DEBUG
 	cout << "Ending getResourceAvailability - Bandwidth:" << bandwidth << endl;
+#endif
 	
 	return bandwidth;
      
@@ -58,13 +60,15 @@ double getReservePrice( auction::configParam_t *params )
      double price = 0;
      int numparams = 0;
      
+#ifdef DEBUG
      cout << "Starting getReservePrice" << endl;
+#endif
      
      while (params[0].name != NULL) {
 		// in all the application we establish the rates and 
 		// burst parameters in bytes
 				
-        if (!strcmp(params[0].name, "ReservePrice")) {
+        if (!strcmp(params[0].name, "reserveprice")) {
 			price = (double) parseDouble( params[0].value );
 			numparams++;
 		}
@@ -79,7 +83,9 @@ double getReservePrice( auction::configParam_t *params )
 		throw auction::ProcError(AUM_PRICE_RESERVE_ERROR, 
 					"bas init module - The given reserve price is incorrect");
 	
+#ifdef DEBUG
 	cout << "Ending getReservePrice" << price << endl;
+#endif
 		
 	return price;
      
@@ -91,7 +97,9 @@ time_t getTime( auction::configParam_t *params, string name )
      time_t tim = 0;
      int numparams = 0;
      
-     cout << "Starting time" << endl;
+#ifdef DEBUG
+     cout << "get time - field:" << name << endl;
+#endif
      
      while (params[0].name != NULL) {
 						
@@ -110,7 +118,9 @@ time_t getTime( auction::configParam_t *params, string name )
 		throw auction::ProcError(AUM_DATETIME_NOT_DEFINED_ERROR, 
 					"bas init module - The given time is incorrect");
 	
-	cout << "Ending time" << tim << endl;
+#ifdef DEBUG
+	cout << "get time" << tim << endl;
+#endif
 		
 	return tim;
      
@@ -125,7 +135,10 @@ void auction::initModule( auction::configParam_t *params )
 	
     while (params[0].name != NULL) {
 		// in all the application we receive the next allocation id to create
-        if (!strcmp(params[0].name, "NextId")) {
+		
+		cout << "Param:" << params[0].name << endl;
+		
+        if (caseInsensitiveStringCompare(params[0].name, "nextid")) {
             lastId = parseUInt32( params[0].value );
 			numparams++;
 #ifdef DEBUG
@@ -169,8 +182,12 @@ string makeKey(string auctionSet, string auctionName,
 auction::BiddingObject *
 createAllocation( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
 				  string auctionSet, string auctionName, string bidSet, string bidName, 
-				  double quantity, double price )
+				  time_t start, time_t stop, float quantity, double price )
 {										  		
+#ifdef DEBUG
+	fprintf( stdout, "bas module: start create allocation \n");
+#endif
+
 	uint64_t timeUint64;
 	
 	auction::elementList_t elements;
@@ -192,11 +209,19 @@ createAllocation( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *f
 	string squantity = fQuantity.writeValue(fVQuantity);
 	fillField(fieldDefs, fieldVals, 0, IPAP_FT_QUANTITY, squantity, &elementFields);
 
+#ifdef DEBUG
+	fprintf( stdout, "bas module: start create allocation after quantity \n");
+#endif
+
 	// Insert Unit Value
 	ipap_field fvalue = g_ipap_fields.get_field(0, IPAP_FT_UNITVALUE);	
-	ipap_value_field fVValue = fQuantity.get_ipap_value_field( price );
+	ipap_value_field fVValue = fvalue.get_ipap_value_field( price );
 	string svalue = fvalue.writeValue(fVValue);
 	fillField(fieldDefs, fieldVals, 0, IPAP_FT_UNITVALUE, svalue, &elementFields);
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: start create allocation after unitvalue \n");
+#endif
 
 	string recordId = "Unique";
 	fillField(fieldDefs, fieldVals, 0, IPAP_FT_IDRECORD, recordId, &elementFields);
@@ -214,6 +239,10 @@ createAllocation( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *f
 	ipap_value_field fVStart = fStart.get_ipap_value_field( timeUint64 );
 	string sstart = fStart.writeValue(fVStart);
 	fillField(fieldDefs, fieldVals, 0, IPAP_FT_STARTSECONDS, sstart, &optionFields);
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: start create allocation after startSeconds \n");
+#endif
 	
 	// Insert stop
 	ipap_field fStop = g_ipap_fields.get_field(0, IPAP_FT_ENDSECONDS);
@@ -221,7 +250,11 @@ createAllocation( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *f
 	ipap_value_field fVStop = fStop.get_ipap_value_field( timeUint64 );
 	string sstop = fStop.writeValue(fVStop);
 	fillField(fieldDefs, fieldVals, 0, IPAP_FT_ENDSECONDS, sstop, &optionFields);
-		
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: start create allocation after endSeconds \n");
+#endif		
+
 	fillField(fieldDefs, fieldVals, 0, IPAP_FT_IDRECORD, recordId, &optionFields);
 		
 	options.push_back(pair<string, auction::fieldList_t>(elementName, optionFields));
@@ -229,13 +262,23 @@ createAllocation( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *f
     auction::BiddingObject *alloc = new auction::BiddingObject(auctionSet, auctionName, 
 										allocset, allocname, IPAP_ALLOCATION, elements, options);
 
-	
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: ending create allocation \n");
+#endif	
+
 	return alloc;
 }
 
 void incrementQuantityAllocation(auction::fieldValList_t *fieldVals, 
-									auction::BiddingObject *allocation, double quantity)
+									auction::BiddingObject *allocation, float quantity)
 {
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: starting increment quantity allocation \n");
+#endif	
+
+
 	auction::elementList_t *elements = allocation->getElements();
 	
 	// there is only one element. 
@@ -254,29 +297,33 @@ void incrementQuantityAllocation(auction::fieldValList_t *fieldVals,
 	
 	if ( !(field.name.empty())){
 		// Insert again the field.
-		double temp_qty = parseDouble( ((field.value)[0]).getValue());
+		float temp_qty = parseFloat( ((field.value)[0]).getValue());
 		temp_qty += quantity;
-		string fvalue = doubleToString(temp_qty);
+		string fvalue = floatToString(temp_qty);
 		auction::IpApMessageParser::parseFieldValue(fieldVals, fvalue, &field);
 		(elements->begin()->second).push_back(field);
 	} else {
 		throw auction::ProcError("Field quantity was not included in the allocation");
 	}
 
+#ifdef DEBUG
+	fprintf( stdout, "bas module: ending increment quantity allocation \n");
+#endif	
 	
 }
 
 void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,  
-					   auction::configParam_t *params, string aset, string aname, auction::biddingObjectDB_t *bids, 
+					   auction::configParam_t *params, string aset, string aname, time_t start, 
+					   time_t stop, auction::biddingObjectDB_t *bids, 
 					   auction::biddingObjectDB_t **allocationdata )
 {
 
+#ifdef DEBUG
 	cout << "bas module: start execute" << (int) bids->size() << endl;
+#endif
 
 	bandwidth_to_sell = getResourceAvailability(params);
 	reserve_price = getReservePrice( params );	
-	start = getTime( params, "Start" );
-	stop = getTime( params, "Stop" );
 
 	std::multimap<double, alloc_proc_t>  orderedBids;
 	// Order Bids by elements.
@@ -302,10 +349,12 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 		}
 	}
 
-	double qtyAvailable = bandwidth_to_sell;
+	float qtyAvailable = bandwidth_to_sell;
 	double sellPrice = 0;
-	
+
+#ifdef DEBUG	
 	cout << "bas module- qty available:" << qtyAvailable << endl;
+#endif
 	
 	std::multimap<double, alloc_proc_t>::iterator it = orderedBids.end();
 	do
@@ -326,7 +375,9 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 		
 	} while (it != orderedBids.begin());
 
+#ifdef DEBUG	
 	cout << "bas module: after executing the auction" << (int) bids->size() << endl;
+#endif
 	
 	map<string,auction::BiddingObject *> allocations;
 	map<string,auction::BiddingObject *>::iterator alloc_iter;
@@ -346,7 +397,7 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 		else{
 			auction::BiddingObject *alloc = 
 				createAllocation(fieldDefs, fieldVals, aset, aname, 
-								  (it->second).bidSet, (it->second).bidName, 
+								  (it->second).bidSet, (it->second).bidName, start, stop,
 									(it->second).quantity, sellPrice);
 									
 			allocations[makeKey(aset, aname,
@@ -362,7 +413,9 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 		(*allocationdata)->push_back(alloc_iter->second);
 	}
 	
+#ifdef DEBUG	
 	cout << "bas module: end execute" <<  endl;
+#endif
 }
 
 void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 

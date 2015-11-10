@@ -8,6 +8,8 @@
     <PREF NAME="LogFile">@DEF_STATEDIR@/log/netaum.log</PREF>
     <!-- pid file location -->
     <PREF NAME="PidFile">@DEF_STATEDIR@/run/netaum.pid</PREF>
+    <!-- ansl-client configuration file -->    
+    <PREF NAME="AnslpConfFile">@DEF_SYSCONFDIR@/nsis-ka_agent.conf</PREF>    
     <!-- Domain Id that uniquely identifies this auction manager when exchanging ipap_messages -->    
     <PREF NAME="Domain">5</PREF>
     <!-- filter attribute definition file -->    
@@ -15,7 +17,7 @@
     <!-- filter constant file -->
     <PREF NAME="FilterConstFile">@DEF_SYSCONFDIR@/fieldval.xml</PREF>     
     <!-- auction file to load at start -->
-    <PREF NAME="AuctionFile">@DEF_SYSCONFDIR@/example_auctions2.xml</PREF>
+    <PREF NAME="AuctionFile">@DEF_SYSCONFDIR@/example_auctions2.xml</PREF>    
   </MAIN>
   <CONTROL>
     <!-- port for control connections -->
@@ -52,6 +54,8 @@
 		  <PREF NAME="Rate" TYPE="UInt32">102400</PREF>
 		  <!-- Burst for the interface is on bytes -->
 		  <PREF NAME="Burst" TYPE="UInt32">1556</PREF>
+		  <!-- Next bidding Id to generate -->
+		  <PREF NAME="NextId" TYPE="UInt32">100</PREF>		  
       </MODULE>
     </MODULES>
   </AUM_PROCESSOR>  

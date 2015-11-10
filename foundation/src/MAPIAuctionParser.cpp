@@ -82,7 +82,8 @@ MAPIAuctionParser::readAuctionData( ipap_template *templ,
 									ipap_data_record &record,
 									string &auctionName, 
 									string &resourceId,
-									string &status )
+									string &status,
+									string &templateList )
 {
 
 #ifdef DEBUG
@@ -119,7 +120,10 @@ MAPIAuctionParser::readAuctionData( ipap_template *templ,
 				  (kField.get_ftype()== IPAP_FT_IDRESOURCE )){
 				resourceId = field.writeValue(dFieldValue);
 			}
-			else {
+			else if ((kField.get_eno() == 0) && 
+				  (kField.get_ftype() == IPAP_FT_TEMPLATES )){
+				templateList = field.writeValue(dFieldValue);
+			} else {
 				configItem_t item;
 				item.name = fItem.name;
 				item.type = fItem.type;
@@ -282,6 +286,7 @@ void MAPIAuctionParser::parseAuctionKey( fieldDefList_t *fieldDefs,
 	string sname, aname;
 	string actionName, auctionName;
 	string status;
+	string templateList; 
 	action_t action;
 	miscList_t miscs;
 
@@ -344,7 +349,7 @@ void MAPIAuctionParser::parseAuctionKey( fieldDefList_t *fieldDefs,
 					if (templData != NULL){
 						if (templId == templData->get_template_id()){
 							miscs = readAuctionData( templData, fieldDefs, *dataRecordIter, 
-													  auctionName, resourceId, status);
+													  auctionName, resourceId, status, templateList);
 							parseName(auctionName, sname, aname);
 							++NbrDataRead;
 						}
@@ -383,12 +388,32 @@ void MAPIAuctionParser::parseAuctionKey( fieldDefList_t *fieldDefs,
 				break;
 			}
 		}
-
+				
 		a = new Auction(now, sname, aname, resourceId, action, miscs, 
 							AS_COPY_TEMPLATE, templFields, templatesOut );
 
 		int istatus = ParserFcts::parseInt(status, 0, 16);
 		a->setState((AuctioningObjectState_t) istatus);
+		
+		// Set templates attached to this auction.
+		stringstream ss( templateList.c_str() );
+		list<int> templateIds;
+
+		while( ss.good() )
+		{
+			string substr;
+			getline( ss, substr, ',' );
+			templateIds.push_back( atoi(substr.c_str()) );
+		}
+		list<int>::iterator tempIter;
+		
+		for ( tempIter = templateIds.begin(); tempIter != templateIds.end(); ++tempIter ){
+			
+			ipap_template *templ = templatesOut->get_template((uint16_t) *tempIter);
+			
+			a->setBiddingObjectTemplate(ipap_template::getObjectType(templ->get_type()),
+										templ->get_type(), templ->get_template_id());
+		}
 		
 		auctions->push_back(a);
 	
@@ -419,6 +444,24 @@ void MAPIAuctionParser::parse( fieldDefList_t *fieldDefs,
 				
 		split(const_cast< anslp::msg::anslp_ipap_message &>(mes));
 		
+		// Insert the templates associated with any key field auction
+		// Those are templates asociated with auctions.
+		list<int> templateIds = templates.get_template_list();
+		list<int>::iterator templIter; 
+		for (templIter = templateIds.begin(); templIter != templateIds.end(); ++templIter ){
+			ipap_template *templ = templates.get_template(*templIter);
+			// search the template in the output container 
+			try{
+				
+				ipap_template * templ2 = templatesOut->get_template(*templIter);
+				assert(*templ == *templ2);
+				
+			} catch (ipap_bad_argument &e){
+				// Insert the template.
+				templatesOut->add_template(templ->copy());
+			}
+		}
+	
 		anslp::msg::xmlDataRecordIterList_t iter;
 		for (iter = objectDataRecords.begin(); iter != objectDataRecords.end();  ++iter)
 		{
@@ -428,9 +471,9 @@ void MAPIAuctionParser::parse( fieldDefList_t *fieldDefs,
 		}
 		
 
-	#ifdef DEBUG
+#ifdef DEBUG
 		log->dlog(ch, "Ending parse");
-	#endif
+#endif
 	
 	
 	} catch (Error &e) {
@@ -451,6 +494,13 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
     log->dlog(ch, "Starting get_ipap_message");
 #endif
 
+	ipap_field_container g_ipap_fields;
+	
+    g_ipap_fields.initialize_forward();
+
+    g_ipap_fields.initialize_reverse();
+
+
 	uint16_t auctionTemplateId, optAuctionTemplateId; 
 	action_t *action = auctionPtr->getAction();
 	
@@ -463,17 +513,11 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	mes->make_template(aucTempl);
 		
 #ifdef DEBUG
-    log->dlog(ch, "get_ipap_message - after insert data auction template");
+    log->dlog(ch, "get_ipap_message - after insert data auction template numfields:%d", aucTempl->get_numfields());
 #endif
 
 	
 	//----------------- Add the option data auction template
-
-	ipap_field_container g_ipap_fields;
-	
-    g_ipap_fields.initialize_forward();
-
-    g_ipap_fields.initialize_reverse();
 
 	optAuctionTemplateId = auctionPtr->getOptionAuctionTemplate();
 
@@ -619,7 +663,11 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	ipap_value_field fvaluePort = portF.get_ipap_value_field( port);
 	data.insert_field(0, IPAP_FT_DESTINATIONAUCTIONPORT, fvaluePort);
 
-
+	// Add the resource Id. 
+	ipap_field resourceIdF = mes->get_field_definition( 0, IPAP_FT_IDRESOURCE );
+	ipap_value_field fvalueresourceId = resourceIdF.parseString(  auctionPtr->getAuctionResource() );
+	data.insert_field(0, IPAP_FT_IDRESOURCE, fvalueresourceId);
+	
 	// Add the start time.
 	assert (sizeof(uint64_t) >= sizeof(time_t));
 	time_t time = auctionPtr->getStart();
@@ -641,6 +689,13 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	ipap_field idIntervalF = mes->get_field_definition( 0, IPAP_FT_INTERVALSECONDS );
 	ipap_value_field fvalueInterval = idIntervalF.get_ipap_value_field( uinter );
 	data.insert_field(0, IPAP_FT_INTERVALSECONDS, fvalueInterval);
+
+	// Add the template list.
+	string tList = auctionPtr->getTemplateList();
+	ipap_field tListF = mes->get_field_definition( 0, IPAP_FT_TEMPLATES );
+	ipap_value_field fTList = tListF.parseString( tList );
+	data.insert_field(0, IPAP_FT_TEMPLATES, fTList);
+	
 
 	// Include data to the message.
 	mes->include_data(auctionTemplateId, data);

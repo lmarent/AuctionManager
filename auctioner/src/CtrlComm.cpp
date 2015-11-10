@@ -569,6 +569,7 @@ char *CtrlComm::processCheckSession(parseReq_t *preq)
 #ifdef DEBUG
     log->dlog(ch, "Starting processCheckSession" );
 #endif	
+	anslp::msg::anslp_ipap_message *ipap_mes = NULL;
 	
     paramListIter_t sessionId = preq->params.find("SessionID");
 
@@ -585,10 +586,16 @@ char *CtrlComm::processCheckSession(parseReq_t *preq)
     try {
         // assume xml ipap_message def
         anslp::msg::anslp_ipap_xml_message mess;
-        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(message->second);
+        ipap_mes = mess.from_message(message->second);
+        
         retEvent = new CreateCheckSessionEvent(sessionId->second, ipap_mes->ip_message);
+        saveDelete(ipap_mes);
         
     } catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		if (ipap_mes != NULL){
+			saveDelete(ipap_mes);
+		}
+			
 		log->elog( ch, e.what() );
         throw Error(e.what());
     }

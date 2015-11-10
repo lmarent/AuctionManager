@@ -260,6 +260,8 @@ class Auction : public AuctioningObject
 
     //! get rule info string
     string getInfo(void);
+    
+    string getTemplateList(void);
 	
 	//! increment the number of session references to this auction
 	void incrementSessionReferences(string sessionId);

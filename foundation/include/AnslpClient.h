@@ -87,13 +87,13 @@ class AnslpClient
 					    uint16_t source_port, uint16_t dest_port, 
 						uint8_t protocol, ipap_message &message);
 
-
 		void tg_bidding(anslp::session_id *sid, 
 						const protlib::hostaddress &source_addr, 
 						string destination_addr,
 						uint16_t source_port, uint16_t dest_port, 
 						uint8_t protocol, ipap_message &message);
-	
+
+
 };
 
 };

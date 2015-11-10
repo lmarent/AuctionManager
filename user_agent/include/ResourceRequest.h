@@ -77,9 +77,9 @@ typedef struct
 
 
 //! execution list intervals.
-typedef std::list<resourceReq_interval_t>            	  resourceReqIntervalList_t;
-typedef std::list<resourceReq_interval_t>::iterator  	  resourceReqIntervalListIter_t;
-typedef std::list<resourceReq_interval_t>::const_iterator resourceReqIntervalListConstIter_t;
+typedef std::vector<resourceReq_interval_t>            	  resourceReqIntervalList_t;
+typedef std::vector<resourceReq_interval_t>::iterator  	  resourceReqIntervalListIter_t;
+typedef std::vector<resourceReq_interval_t>::const_iterator resourceReqIntervalListConstIter_t;
 
 
 class ResourceRequest : public AuctioningObject

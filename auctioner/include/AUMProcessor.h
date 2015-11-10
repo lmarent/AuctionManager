@@ -142,7 +142,7 @@ class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser, p
 
 
     //! execute the algorithm
-    void executeAuction(int index, EventScheduler *e );
+    void executeAuction(int index, time_t start, time_t stop, EventScheduler *e );
 
     /*! \short   add a Bidding Object to auctio process biddding object list
         \arg \c index   index to add the element.

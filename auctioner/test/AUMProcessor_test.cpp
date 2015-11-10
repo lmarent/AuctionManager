@@ -55,10 +55,10 @@ void AUMProcessor_Test::setUp()
 	
 	try
 	{
-		cout << "Start setup" << endl;
 		string commandLine = "auctioner";
 		char *cstr = new char[commandLine.length() + 1];
 		strcpy(cstr, commandLine.c_str());
+		time_t now = time(NULL);
 		
 		enum { kMaxArgs = 64 };
 		int argc = 0;
@@ -113,7 +113,7 @@ void AUMProcessor_Test::setUp()
 		
 		auctionManagerPtr = new AuctionManager(domainAuct, fieldname, fieldValuename);
 
-		const string filenameAuctions = DEF_SYSCONFDIR "/example_auctions2.xml";
+		const string filenameAuctions = "../../etc/example_auctions2.xml";
 		
 		auctionDB_t * auctions = auctionManagerPtr->parseAuctions(filenameAuctions, templContainer);
 				
@@ -128,9 +128,7 @@ void AUMProcessor_Test::setUp()
 										   configManagerPtr->getValue("FieldDefFile", "MAIN"),
 										   configManagerPtr->getValue("FilterConstFile", "MAIN"),
 										   configManagerPtr->isTrue("Thread","AUM_PROCESSOR"));
-		
-		cout << "Auction Id:" << auction->getUId() << endl;
-		
+				
 		aumProcessorPtr->addAuctionProcess( auction, evnt.get() );
 		
         aumProcessorPtr->addBiddingObjectAuctionProcess(auction->getUId(), ptrBid1 );
@@ -142,8 +140,10 @@ void AUMProcessor_Test::setUp()
         aumProcessorPtr->addBiddingObjectAuctionProcess(auction->getUId(), ptrBid4 );
 
         aumProcessorPtr->addBiddingObjectAuctionProcess(auction->getUId(), ptrBid5 );
+		
+		time_t stop = now + 200; 
 									  
-        aumProcessorPtr->executeAuction(auction->getUId(), evnt.get());
+        aumProcessorPtr->executeAuction(auction->getUId(), now, stop, evnt.get());
         
 	}
 	catch(Error &e){

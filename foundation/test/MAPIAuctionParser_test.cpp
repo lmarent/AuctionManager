@@ -102,22 +102,24 @@ void MAPIAuctionParser_Test::testParser()
 		{
 			(*iter)->setState(AO_ACTIVE);
 		}
+		
+		cout << "estamos aqui" << endl;
 						
 		// Build the message from auctions in the vector
 				
 		ipap_message * messages2 = ptrMAPIAuctionParser->
 						get_ipap_message(&fieldDefs, new_auctions, 
-										  templates, domainId, useIPV6, 
+										  templates, useIPV6, 
 										  sAddressIPV4, sAddressIPV6, port );
-
+				
 		anslp::msg::anslp_ipap_message msgb (*messages2);	
 		
 		anslp::msg::anslp_ipap_xml_message xmlMes;
-		
+				
 		string sxmlMes = xmlMes.get_message(msgb);
 		
 		// Please activate to print the message. 
-		// cout << "Message:" << sxmlMes << endl;
+		cout << "Message:" << sxmlMes << endl;
 
 		saveDelete(messages2);
 

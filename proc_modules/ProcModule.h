@@ -90,11 +90,15 @@ string getStringField(auction::fieldList_t *fields, string name);
 
 string doubleToString(double value);
 
+string floatToString(float value);
+
 string uint64ToString (uint64_t value);
 
-string uint32ToString(double value);
+string uint32ToString(uint32_t value);
 
 string intToString(int value);
+
+bool caseInsensitiveStringCompare( const std::string& str1, const std::string& str2 );
 
 /*! \short   declaration of struct containing all function pointers of a module */
 extern auction::ProcModuleInterface_t func;

@@ -10,11 +10,11 @@
 	<FIELD NAME="DstPort">80</FIELD>
 	<INTERVAL NAME="interval1">
 		<!-- Duration  -->
-		<PREF NAME="Duration">500</PREF>
+		<PREF NAME="Duration">100</PREF>
     </INTERVAL>
 	<INTERVAL NAME="interval2">
 		<!-- Duration  -->
-		<PREF NAME="Duration">500</PREF>
+		<PREF NAME="Duration">100</PREF>
     </INTERVAL>
 
   </RESOURCE_REQUEST>

@@ -46,7 +46,9 @@ void AuctionManager_Test::setUp()
 	
 	try
 	{
-		auctionManagerPtr = new AuctionManager(filename, fieldValuename);
+		int domain = 5;
+		
+		auctionManagerPtr = new AuctionManager(domain, filename, fieldValuename);
 		auto_ptr<EventScheduler> _evnt(new EventScheduler());
         evnt = _evnt;
 				
@@ -73,12 +75,12 @@ void AuctionManager_Test::test()
 	{
 		ipap_template_container *templates;
 		
-		const string filename = DEF_SYSCONFDIR "/example_auctions1.xml";
+		const string filename = "../../etc/example_auctions1.xml";
 		
 		templates = new ipap_template_container();
 		
 		auctionDB_t * auctions = auctionManagerPtr->parseAuctions(filename, templates);
-				
+		
 		saveDelete(templates);
 				
 		auctionManagerPtr->addAuctions(auctions, evnt.get());
@@ -183,7 +185,7 @@ void AuctionManager_Test::test()
 		auctions = auctionManagerPtr->parseAuctions(filename, templates);
 		
 		saveDelete(templates);
-				
+		
 		auctionManagerPtr->addAuctions(auctions, evnt.get());
 				
 		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );

@@ -293,11 +293,11 @@ void AUMProcessor::delAuctions(auctionDB_t *aucts)
 
 /* ------------------------- execute ------------------------- */
 
-void AUMProcessor::executeAuction(int index, EventScheduler *e )
+void AUMProcessor::executeAuction(int index, time_t start, time_t stop, EventScheduler *e )
 {
 		
     AUTOLOCK(threaded, &maccess);  
-
+	
 	auctionProcessListIter_t ret;
 	ret = auctions.find(index);	
 	if (ret != auctions.end()){
@@ -305,22 +305,28 @@ void AUMProcessor::executeAuction(int index, EventScheduler *e )
 		auctionProcess actProcess = auctions[index];
 		
 		biddingObjectDB_t allocations;
-		
+			
 		biddingObjectDB_t *ptr = &allocations;
-					
-		actProcess.getMAPI()->execute( FieldDefManager::getFieldDefs(),
-										FieldDefManager::getFieldVals(),
-										actProcess.getParams(), 
-										actProcess.getAuction()->getSetName(),
-										actProcess.getAuction()->getAuctionName(),
-										actProcess.getBids(), 
-										&ptr );
-		
+		try{			
+			actProcess.getMAPI()->execute( FieldDefManager::getFieldDefs(),
+											FieldDefManager::getFieldVals(),
+											actProcess.getParams(), 
+											actProcess.getAuction()->getSetName(),
+											actProcess.getAuction()->getAuctionName(),
+											start, stop, 
+											actProcess.getBids(), 
+											&ptr );
+
+		} catch (ProcError &e){
+			log->elog(ch,e.getError().c_str());
+			throw Error(e.getError().c_str());
+		}
+			
 		e->addEvent(new AddGeneratedBiddingObjectsEvent(index, allocations));
+		
 	} else {
 		throw Error("auction process with index:%d was not found", index);
 	}
-	
 }
 
 

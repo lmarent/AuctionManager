@@ -106,6 +106,9 @@ class AgentProcessor : public AuctionManagerComponent, public FieldDefManager
 
     //! pool of unique request process 
     IdSource idSource;
+    
+    //! identifies uniquely biddings from this agent.
+    int domain;
 
   public:
 
@@ -116,7 +119,7 @@ class AgentProcessor : public AuctionManagerComponent, public FieldDefManager
         \arg \c fvname     field value definition file name
         \arg \c threaded   run as separate thread
     */
-    AgentProcessor(ConfigManager *cnf, string fdname, string fvname, int threaded, string moduleDir = "" );
+    AgentProcessor(int domain, ConfigManager *cnf, string fdname, string fvname, int threaded, string moduleDir = "" );
 
     //!   destroy a Agent Processor object, to be overloaded
     virtual ~AgentProcessor();
@@ -165,6 +168,13 @@ class AgentProcessor : public AuctionManagerComponent, public FieldDefManager
     //! handle file descriptor event
     virtual int handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds);
 
+	//! gives an iterator over the first process request registered.
+	inline requestProcessListIter_t begin(){ return requests.begin(); }
+	
+	inline requestProcessListIter_t end(){ return requests.end(); }
+	
+	inline int getNumRequestProcess(void) { return requests.size(); }
+	
     //! thread main function
     void main();
    

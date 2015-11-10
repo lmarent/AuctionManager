@@ -160,7 +160,7 @@ void ResourceRequest_Test::testResourceRequets()
 		string fvalue4 = "3";
 		field11.parseFieldValue(fvalue4);
 	} else {
-		throw Error("field budget sot found");
+		throw Error("field quantity sot found");
 	}
 	
 	iter = fieldDefs.find("unitprice");

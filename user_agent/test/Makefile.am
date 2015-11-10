@@ -22,6 +22,7 @@ test_runner_SOURCES = 	@top_srcdir@/user_agent/src/ResourceRequest.cpp \
 						@top_srcdir@/user_agent/test/ResourceRequest_test.cpp \
 						@top_srcdir@/user_agent/test/ResourceRequestFileParser_test.cpp \
 						@top_srcdir@/user_agent/test/ResourceRequestManager_test.cpp \
+						@top_srcdir@/user_agent/test/AgentProcessor_test.cpp \
 						@top_srcdir@/user_agent/test/Agent_test.cpp \
 						@top_srcdir@/user_agent/test/test_runner.cpp
 

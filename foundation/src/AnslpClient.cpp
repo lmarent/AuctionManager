@@ -296,6 +296,8 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
 
 }						
 
+
+
 string AnslpClient::getLocalAddress(void)
 {
 	list<hostaddress>::iterator iter;

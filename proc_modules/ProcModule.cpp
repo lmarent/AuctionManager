@@ -235,6 +235,8 @@ double getDoubleField(auction::fieldList_t *fields, string name)
 	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
 	{
 	
+	    fprintf(stdout, "field:%s", (field_iter->name).c_str());
+	
 		if ((field_iter->name).compare(name) == 0 ){
 			return parseDouble( ((field_iter->value)[0]).getValue());
 		}
@@ -340,6 +342,13 @@ string doubleToString (double value)
 	return s.str();
 }
 
+string floatToString (float value)
+{
+	std::ostringstream s;
+	s << value;
+	return s.str();
+}
+
 string uint32ToString(uint32_t value)
 {
 	std::ostringstream s;
@@ -360,4 +369,12 @@ string intToString (int value)
 	std::ostringstream s;
 	s << value;
 	return s.str();
+}
+
+bool caseInsensitiveStringCompare( const std::string& str1, const std::string& str2 ) {
+    std::string str1Cpy( str1 );
+    std::string str2Cpy( str2 );
+    std::transform( str1Cpy.begin(), str1Cpy.end(), str1Cpy.begin(), ::tolower );
+    std::transform( str2Cpy.begin(), str2Cpy.end(), str2Cpy.begin(), ::tolower );
+    return ( str1Cpy == str2Cpy );
 }

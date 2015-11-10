@@ -238,8 +238,8 @@ Agent::Agent( int argc, char *argv[])
 
 #ifdef ENABLE_THREADS
 
-        auto_ptr<AgentProcessor> _proc(
-										 new AgentProcessor(conf.get(),
+        auto_ptr<AgentProcessor> _proc( new AgentProcessor(domainId,  
+											conf.get(),
 											conf->getValue("FieldDefFile", "MAIN"),
 											conf->getValue("FieldConstFile", "MAIN"), 
 											conf->isTrue("Thread","AGENT_PROCESSOR")
@@ -248,7 +248,8 @@ Agent::Agent( int argc, char *argv[])
         pprocThread = conf->isTrue("Thread", "AGENT_PROCESSOR");
 #else
         
-        auto_ptr<AgentProcessor> _proc(new AgentProcessor(conf.get(), 
+        auto_ptr<AgentProcessor> _proc(new AgentProcessor(domainId,  
+										conf.get(), 
 										conf->getValue("FieldDefFile", "MAIN"),
 										conf->getValue("FieldConstFile", "MAIN"),  
 										0
@@ -737,92 +738,144 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 				
 			auctions = aucm->parseMessage( message, tmplIter->second);
 			
-			Session *ses = asmp->getSession(sessionId);
-			// Bring the session from that create the initial request.
-			AgentSession *session = reinterpret_cast<AgentSession*>(ses);
+			if (auctions->size() > 0){
 			
-			// Acknowledge the message.
-			session->confirmMessage(mid-1);
-			
-			// Bring the request.
-			ResourceRequest *request = rreqm->getResourceRequest(session->getResourceRequestSet(), 
-																session->getResourceRequestName());
-			
-			// Bring the request interval.
-			resourceReqIntervalListIter_t interval = request->getIntervalByStart(session->getStart());
-			
-			for ( auctionDBIter_t auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter){
-				// update the auction start and stop time.
-				(*auctIter)->setStart(interval->start);
-				(*auctIter)->setStop(interval->stop);
-			}
-			
-			// insert auctions in container ( this will trigger events to activate and remove)
-			aucm->addAuctions(auctions, evnt.get());
-			
-			// Go through the list of auctions and create groups by their module 
-			map<string, auctionDB_t> splitByModule;
-			map<string, auctionDB_t>::iterator splitByModuleIter;
-			string sModuleName;
-			
-			for ( auctionDBIter_t auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter){
-				// Read the name of the module to load
-				sModuleName = (*auctIter)->getAction()->name;
-				splitByModuleIter = splitByModule.find(sModuleName);
+				Session *ses = asmp->getSession(sessionId);
+				// Bring the session from that create the initial request.
+				AgentSession *session = reinterpret_cast<AgentSession*>(ses);
+				
+				// Acknowledge the message.
+				session->confirmMessage(mid-1);
+				
+				// Bring the request.
+				ResourceRequest *request = rreqm->getResourceRequest(session->getResourceRequestSet(), 
+																	session->getResourceRequestName());
+				
+				// Bring the request interval.
+				resourceReqIntervalListIter_t interval = request->getIntervalByStart(session->getStart());
 
-				// Insert a pointer to the auction.
-				(splitByModule[sModuleName]).push_back(*auctIter);
-			}
+	#ifdef DEBUG			
+				log->dlog(ch, "auction interval - start:%s stop:%s", 
+							Timeval::toString(interval->start).c_str(),
+								Timeval::toString(interval->stop).c_str());
+	#endif
 				
-			// Create a process request for each group created.
-			for (splitByModuleIter = splitByModule.begin(); splitByModuleIter != splitByModule.end();  ++splitByModuleIter)
-			{	
-				
-				bool firstTime = true;
-				int index = 0;
-				time_t start;
-				
-				for (auctionDBIter_t auctIter2 = (splitByModuleIter->second).begin(); auctIter2 != (splitByModuleIter->second).end(); ++auctIter2){
-					if (firstTime == true){
-						// Create new request process for coming auctions.
-						index = proc->addRequest( sessionId, request->getFields(),*auctIter2 );
-				
-						// Insert the index in the resource process set created. 
-						(interval->resourceProcesses).insert(index);
-						
-						start = (*auctIter2)->getStart();
-						firstTime = false;
-					}
-					
-					proc->addAuctionRequest(index, *auctIter2  );
+				for ( auctionDBIter_t auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter){
+					// update the auction start and stop time.
+					(*auctIter)->setStart(interval->start);
+					(*auctIter)->setStop(interval->stop);
 				}
 				
-				// Schedule the execution of the request.
-				evnt.get()->addEvent(new PushExecutionEvent(start - now, index)); 
-		
-				// Observation: the removal of the resource process comes 
-				//				with the removal of those auctions in it.
+				// insert auctions in container ( this will trigger events to activate and remove)
+				aucm->addAuctions(auctions, evnt.get());
+				
+				// Go through the list of auctions and create groups by their module 
+				map<string, auctionDB_t> splitByModule;
+				map<string, auctionDB_t>::iterator splitByModuleIter;
+				string sModuleName;
+				
+				for ( auctionDBIter_t auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter){
+					// Read the name of the module to load
+					sModuleName = (*auctIter)->getAction()->name;
+					splitByModuleIter = splitByModule.find(sModuleName);
 
-			}
-								
-			// Bring the id of every auction in the auctionDB.
-			auctionSet_t setAuc; 
-			aucm->getIds(auctions, setAuc);
-						
-			// Add a new reference to the auction (there is another session reference it).
-			aucm->incrementReferences(setAuc, sessionId );
+					// Insert a pointer to the auction.
+					(splitByModule[sModuleName]).push_back(*auctIter);
+				}
+					
+				time_t now = time(NULL);
+				
+				// Create a process request for each group created.
+				for (splitByModuleIter = splitByModule.begin(); splitByModuleIter != splitByModule.end();  ++splitByModuleIter)
+				{	
+									
+					bool firstTime = true;
+					int index = 0;
+					time_t start;
+					
+					
+					for (auctionDBIter_t auctIter2 = (splitByModuleIter->second).begin(); auctIter2 != (splitByModuleIter->second).end(); ++auctIter2){
+						if (firstTime == true){
+							// Create new request process for coming auctions.
+							index = proc->addRequest( sessionId, request->getFields(),*auctIter2 );
+													
+							// Insert the index in the resource process set created. 
+							(interval->resourceProcesses).insert(index);
+							
+							start = (*auctIter2)->getStart();
+							firstTime = false;
+						} else {
+							proc->addAuctionRequest(index, *auctIter2  );
+						}
+					}
+									
+					// Schedule the execution of the request.
+					evnt.get()->addEvent(new PushExecutionEvent(start - now, index)); 
 			
-			// Add related auctions to session object.
-			session->setAuctions(setAuc);
-			
-			// delete the pointer to auctionDB.
-			saveDelete(auctions);
-			
-			comm->sendMsg("", ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
+					// Observation: the removal of the resource process comes 
+					//				with the removal of those auctions in it.
 
+				}
+									
+				// Bring the id of every auction in the auctionDB.
+				auctionSet_t setAuc; 
+				aucm->getIds(auctions, setAuc);
+							
+				// Add a new reference to the auction (there is another session reference it).
+				aucm->incrementReferences(setAuc, sessionId );
+				
+				// Add related auctions to session object.
+				session->setAuctions(setAuc);
+
+				// Get the address information of any of the auctions, so a reply can be sent.
+				Auction *atmp = *(auctions->begin());
+
+				string sipv4Address = IpApMessageParser::getMiscVal(atmp->getMisc(), "dstip");
+				string sipv6Address = IpApMessageParser::getMiscVal(atmp->getMisc(), "dstip6");
+				string sport = IpApMessageParser::getMiscVal(atmp->getMisc(), "dstport");
+				string sipversion = IpApMessageParser::getMiscVal(atmp->getMisc(), "ipversion");
+				int ipVersion = ParserFcts:: parseInt(sipversion);
+				
+				string destinAddr;
+				
+				if (ipVersion == 4) {
+					destinAddr = sipv4Address;
+				} else {
+					destinAddr = sipv6Address;
+				}
+				
+				int iport = ParserFcts::parseInt(sport);
+			
+				// Build the response for the originator agent.
+				ipap_message resp = ipap_message(domainId, IPAP_VERSION, true);
+				resp.set_seqno(session->getNextMessageId());
+				resp.set_ackseqno(message->get_seqno() + 1);
+				resp.output();
+				
+				// Finally send the message through the anslp client application.
+				anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession()), 
+										session->getSenderAddress(), destinAddr, 
+										session->getSenderPort(), iport,
+										session->getProtocol(), 
+										resp );
 #ifdef DEBUG
 			log->dlog(ch,"Ending event handleResponseCreateSession - auctions number:%d", auctions->size() );
 #endif
+
+			}
+			else {
+				throw Error("Agent: Invalid group of auctions given in the message");
+			}
+				
+			// delete the pointer to auctionDB.
+			saveDelete(auctions);
+			
+			if (((ResponseCreateSessionEvent *)e)->getReq() != NULL){
+				comm->sendMsg("", ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
+			} else {
+				log->dlog( ch, "Ok" );
+			}
+
 			
 		} else{
 			throw Error("Agent: Invalid domain id associated with the message");
@@ -832,9 +885,12 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 		if (auctions){
 			saveDelete(auctions);
 		}
-		
-		log->dlog( ch, err.getError().c_str() );	
-		comm->sendErrMsg(err.getError(), ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
+		if (((ResponseCreateSessionEvent *)e)->getReq() != NULL){ 
+			log->dlog( ch, err.getError().c_str() );
+			comm->sendErrMsg(err.getError(), ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
+		} else {
+			log->dlog( ch, err.getError().c_str() );
+		}
 	}
 }
 

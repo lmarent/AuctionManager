@@ -27,6 +27,7 @@ void auction::initModule( auction::configParam_t *params )
 	domainId = 7;
 
 	// Bring fields defined for ipap_messages;
+	g_ipap_fields.clear();
 	g_ipap_fields.initialize_forward();
     g_ipap_fields.initialize_reverse();
 
@@ -54,22 +55,44 @@ void auction::destroyModule( auction::configParam_t *params )
 /*-- Return 1 if Ok, 0 otherwise. */
 int check(auction::fieldDefList_t *fieldDefs, auction::fieldList_t *requestparams)
 {
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: starting check \n");
+#endif
+	
 	set<ipap_field_key>requiredFields;
 	requiredFields.insert(ipap_field_key(0,IPAP_FT_QUANTITY));
 	requiredFields.insert(ipap_field_key(0,IPAP_FT_TOTALBUDGET));
 	requiredFields.insert(ipap_field_key(0,IPAP_FT_MAXUNITVALUATION));
-	requiredFields.insert(ipap_field_key(0,IPAP_FT_STARTSECONDS));
-	requiredFields.insert(ipap_field_key(0,IPAP_FT_ENDSECONDS));
 	
 	set<ipap_field_key>::iterator iter;
 	
-	for (iter = requiredFields.begin(); iter != requiredFields.begin(); ++iter)
+	for (iter = requiredFields.begin(); iter != requiredFields.end(); ++iter)
 	{
 		 auction::fieldDefItem_t fieldItem = 
 				auction::IpApMessageParser::findField(fieldDefs, iter->get_eno(), iter->get_ftype());
-		 if ((fieldItem.name).empty())
+		 if ((fieldItem.name).empty()){
+#ifdef DEBUG
+			fprintf( stdout, "bas module: ending check - it does not pass the check, field not parametrized %d.%d \n", 
+							iter->get_eno(), iter->get_ftype());
+#endif			 
 			return 0;
+		 
+		 } else {
+			if (auction::IpApMessageParser::isFieldIncluded(requestparams, fieldItem.name) == false){
+#ifdef DEBUG
+				fprintf( stdout, "bas module: ending check - it does not pass the check, field not included %d.%d \n", 
+							iter->get_eno(), iter->get_ftype());
+#endif					
+				return 0;
+	
+		    }		
+		 }
 	}
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: ending check - it pass the check \n");
+#endif
 	
 	return 1;
 }
@@ -80,7 +103,7 @@ int check(auction::fieldDefList_t *fieldDefs, auction::fieldList_t *requestparam
 auction::BiddingObject *
 createBid( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
 		   auction::Auction *auct, float quantity, double unitbudget, 
-		   double unitprice, string start, string stop )
+		   double unitprice, time_t start, time_t stop )
 {										  		
 	uint64_t timeUint64;
 	auction::BiddingObject *bid = NULL;
@@ -150,7 +173,8 @@ createBid( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVal
 }
 
 void auction::execute (auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,  
-					   auction::configParam_t *params, string aset, string aname, auction::biddingObjectDB_t *bids, 
+					   auction::configParam_t *params, string aset, string aname, 
+					   time_t start, time_t stop, auction::biddingObjectDB_t *bids, 
 					   auction::biddingObjectDB_t **allocationdata )
 {
 	// NOTHING TO DO.
@@ -162,34 +186,34 @@ void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldVa
 {
 
 #ifdef DEBUG
-	fprintf( stdout, "bas module: start execute %d \n",  (int) auctions->size() );
+	fprintf( stdout, "bas module: start execute with # %d of auctions \n",  (int) auctions->size() );
 #endif
 
 	auction::fieldDefItem_t fieldItem;
 	double budget, valuation;
 	double budgetByAuction, valuationByAuction;
 	float quantity;
-	string start, stop;
+	time_t start, stop;
 	
 	int check_ret = check(fieldDefs, requestparams);
 	
 	if ((check_ret > 0) && (auctions->size() > 0) ){
-		
-		// Get the total money and budget and divide them by the number of auctions
-		fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_TOTALBUDGET);
-		budget = getDoubleField(requestparams, fieldItem.name);
-		
-		fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_MAXUNITVALUATION);
-		valuation = getDoubleField(requestparams, fieldItem.name);
 
-		fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_QUANTITY);
-		quantity = getFloatField(requestparams, fieldItem.name);
+	   // Get the total money and budget and divide them by the number of auctions
+	   fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_TOTALBUDGET);
+	   budget = getDoubleField(requestparams, fieldItem.name);
 
-		fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_STARTSECONDS);
-		start = getStringField(requestparams, fieldItem.name);
+	   fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_MAXUNITVALUATION);
+	   valuation = getDoubleField(requestparams, fieldItem.name);
 
-		fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_ENDSECONDS);
-		stop = getStringField(requestparams, fieldItem.name);
+	   fieldItem = auction::IpApMessageParser::findField(fieldDefs, 0, IPAP_FT_QUANTITY);
+	   quantity = getFloatField(requestparams, fieldItem.name);
+	
+	   // start and stop time come from the auction, because they are replaced by the
+	   // interval definition.
+	   auctionDBIter_t firstAuct = auctions->begin();
+	   start = (*firstAuct)->getStart();
+	   stop = (*firstAuct)->getStop();
 		
 		budgetByAuction = budget / (int) auctions->size();
 		valuationByAuction = valuation / (int) auctions->size();
@@ -202,7 +226,13 @@ void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldVa
 												start, stop );
 			(*biddata)->push_back(bid);
 		}
+
+#ifdef DEBUG
+	fprintf( stdout, "bas module: in the middle 2 \n");
+#endif
 		
+	} else {
+		throw ProcError("A required field was not provided");
 	}
 		
 #ifdef DEBUG
@@ -216,6 +246,9 @@ void auction::destroy( auction::configParam_t *params )
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start destroy \n");
 #endif
+
+	g_ipap_fields.clear();
+
 
 #ifdef DEBUG
 	fprintf( stdout, "bas module: end destroy \n");
@@ -250,7 +283,7 @@ const char* auction::getModuleInfo( int i )
     case auction::I_BRIEF:      return "Bid process to verify general functionality of the auction manager";
     case auction::I_VERBOSE:    return "The auction just choose put the budget and unit price given as parameters"; 
     case auction::I_HTMLDOCS:   return "http://www.uniandes.edu.co/... ";
-    case auction::I_PARAMS:     return "None";
+    case auction::I_PARAMS:     return "IPAP_FT_QUANTITY, IPAP_FT_TOTALBUDGET, IPAP_FT_MAXUNITVALUATION, IPAP_FT_STARTSECONDS, IPAP_FT_ENDSECONDS";
     case auction::I_RESULTS:    return "The set of assigments";
     case auction::I_AUTHOR:     return "Andres Marentes";
     case auction::I_AFFILI:     return "Universidad de los Andes, Colombia";
