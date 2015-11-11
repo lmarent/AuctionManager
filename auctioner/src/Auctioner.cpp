@@ -304,6 +304,9 @@ Auctioner::Auctioner( int argc, char *argv[])
 
 
     } catch (Error &e) {
+        
+        log->dlog(ch, e.what());
+        
         if (log.get()) {
             log->elog(ch, e);
         }  
