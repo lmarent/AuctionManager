@@ -75,7 +75,9 @@ AnslpClient::AnslpClient(string config_filename)
 
 		// register all GIST configuration parameters at the registry
 		ntlp::gconf.setRepository();
-
+		
+		ntlp::gconf.variable = 10;
+		
 		// read all config values from config file
 		configfile cfgfile(configpar_repository::instance());
 		conf->getparref<string>(anslpconf_conffilename) = config_filename;
