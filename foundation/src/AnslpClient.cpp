@@ -75,10 +75,6 @@ AnslpClient::AnslpClient(string config_filename)
 		// register all GIST configuration parameters at the registry
 		ntlp::gconf.setRepository();
 
-#ifdef DEBUG
-		log->dlog(ch,"Parameters registered \n %s", ntlp::gconf.to_string().c_str());
-#endif	
-
 		// read all config values from config file
 		configfile cfgfile(configpar_repository::instance());
 		conf->getparref<string>(anslpconf_conffilename) = config_filename;
@@ -90,6 +86,9 @@ AnslpClient::AnslpClient(string config_filename)
 
 		cfgfile.load(conf->getparref<string>(anslpconf_conffilename));
 
+#ifdef DEBUG
+		log->dlog(ch,"Parameters registered \n %s", ntlp::gconf.to_string().c_str());
+#endif	
 		
 	}
 	catch(configParException& cfgerr)
