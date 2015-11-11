@@ -279,8 +279,17 @@ Module *ModuleLoader::loadModule( string libname, int preload )
                 throw Error("unsupported module type (unknown magic number)");
             }
         }
+
+#ifdef DEBUG
+		s_log->log(ch, "We are going to link the module");
+#endif
 	
         module->link();             // increase sue counter in this module
+
+#ifdef DEBUG
+		s_log->log(ch, "module stored");
+#endif
+        
         modules[libname] = module;  // and finally store the module
 			
 #ifdef DEBUG    
@@ -291,6 +300,10 @@ Module *ModuleLoader::loadModule( string libname, int preload )
         return module;
         
     } catch (Error &e) {
+
+#ifdef DEBUG    
+        s_log->log(ch, "error loading the module");
+#endif		
         if (module) {
             saveDelete(module);
         }
