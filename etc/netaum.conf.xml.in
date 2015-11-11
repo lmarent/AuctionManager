@@ -9,7 +9,7 @@
     <!-- pid file location -->
     <PREF NAME="PidFile">@DEF_STATEDIR@/run/netaum.pid</PREF>
     <!-- ansl-client configuration file -->    
-    <PREF NAME="AnslpConfFile">@DEF_SYSCONFDIR@/nsis-ka_agent.conf</PREF>    
+    <PREF NAME="AnslpConfFile">@DEF_SYSCONFDIR@/../a-nslp/nsis.ka.conf</PREF>    
     <!-- Domain Id that uniquely identifies this auction manager when exchanging ipap_messages -->    
     <PREF NAME="Domain">1</PREF>
     <!-- filter attribute definition file -->    
