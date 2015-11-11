@@ -29,6 +29,7 @@
 #include <unistd.h>
 
 #include "logfile.h"
+#include "gist_conf.h"
 #include "AnslpClient.h"
 
 
