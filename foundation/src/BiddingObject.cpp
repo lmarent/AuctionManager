@@ -368,7 +368,6 @@ BiddingObject::getOptionVal(string optionName, string name)
 #endif
 	
 	// Convert to lower case for comparison.
-	transform(optionName.begin(), optionName.end(), optionName.begin(), ToLower());
 	transform(name.begin(), name.end(), name.begin(), ToLower());
 	
 	field_t field;
@@ -376,20 +375,12 @@ BiddingObject::getOptionVal(string optionName, string name)
 	optionListIter_t iter;
 	for (iter = optionList.begin(); iter != optionList.end(); ++iter ){
 		// Convert the record name to lower case
-		string optName = iter->first;
-		transform(optName.begin(), optName.end(), optName.begin(), ToLower());
-		
-		cout << "optName:" << optName << endl;
-		
-		if (optName == optionName){ 
+				
+		if (iter->first == optionName){ 
 			fieldListIter_t fieldIter;
-			
-			cout << "found optName:" << optName << endl;
-			
+						
 			for (fieldIter = (iter->second).begin(); fieldIter != (iter->second).end(); ++fieldIter){
-				
-				cout << "fieldIter:" << fieldIter->name << endl;
-				
+								
 				if (fieldIter->name == name) 
 					return *fieldIter;
 			}

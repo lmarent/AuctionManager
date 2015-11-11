@@ -168,6 +168,9 @@ class Agent
 
     //! handle the addition of generated bidding objects
     void handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds);
+
+    //! handle the activation of bidding objects
+    void handleActivateBiddingObjects(Event *e, fd_sets_t *fds);
     
     //! handle the transmission of generated bidding objects
     void handleTransmitBiddingObjects(Event *e, fd_sets_t *fds);

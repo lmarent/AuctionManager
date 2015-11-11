@@ -115,7 +115,7 @@ class ActivateResourceRequestIntervalEvent : public Event
   public:
 
     ActivateResourceRequestIntervalEvent(struct timeval time, resourceRequestDB_t &r, time_t _startTime) 
-      : Event(REMOVE_RESOURCEREQUESTS, time), requests(r), startTime(_startTime) {}
+      : Event(REMOVE_RESOURCEREQUESTS, time), requests(r), startTime(_startTime) { cout << "new ActivateResourceRequestIntervalEvent" << endl; }
 
     ActivateResourceRequestIntervalEvent(time_t offs_sec, resourceRequestDB_t &r, time_t _startTime) 
       : Event(ACTIVATE_RESOURCE_REQUEST_INTERVAL, offs_sec), requests(r), startTime(_startTime) {}
@@ -159,27 +159,27 @@ class RemoveResourceRequestIntervalEvent : public Event
 {
   private:
     resourceRequestDB_t requests;
-    time_t startTime;
+    time_t stopTime;
 
   public:
 
-    RemoveResourceRequestIntervalEvent(struct timeval time, resourceRequestDB_t &r, time_t _startTime) 
-      : Event(REMOVE_RESOURCEREQUESTS, time), requests(r), startTime(_startTime) {}
+    RemoveResourceRequestIntervalEvent(struct timeval time, resourceRequestDB_t &r, time_t _stoptime) 
+      : Event(REMOVE_RESOURCEREQUESTS, time), requests(r), stopTime(_stoptime) {}
 
-    RemoveResourceRequestIntervalEvent(time_t offs_sec, resourceRequestDB_t &r, time_t _startTime) 
-      : Event(REMOVE_RESOURCE_REQUEST_INTERVAL, offs_sec), requests(r), startTime(_startTime) {}
+    RemoveResourceRequestIntervalEvent(time_t offs_sec, resourceRequestDB_t &r, time_t _stoptime) 
+      : Event(REMOVE_RESOURCE_REQUEST_INTERVAL, offs_sec), requests(r), stopTime(_stoptime) {}
 
-    RemoveResourceRequestIntervalEvent(resourceRequestDB_t &r, time_t _startTime) 
-      : Event(REMOVE_RESOURCEREQUESTS), requests(r), startTime(_startTime) {}
+    RemoveResourceRequestIntervalEvent(resourceRequestDB_t &r, time_t _stoptime) 
+      : Event(REMOVE_RESOURCEREQUESTS), requests(r), stopTime(_stoptime) {}
 
      resourceRequestDB_t *getResourceRequests()
      {
          return &requests;
      }
 
-     time_t getStartTime()
+     time_t getStopTime()
      {
-		return startTime;
+		return stopTime;
 	 }
 
      int deleteResourceRequest(int uid)

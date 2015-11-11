@@ -49,6 +49,7 @@ typedef struct
 	string bidSet;
 	string bidName;
 	string elementName;
+	string sessionId;
 	double quantity;
 	double sellPrice;
 } alloc_proc_t;

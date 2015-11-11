@@ -78,7 +78,7 @@ void Agent_Test::setUp()
         agentPtr = new agent_test(argc, argv);
         
     } catch (Error &e) {
-        cout << "Ter1minating netAgent on error: " << e.getError() << endl;
+        cout << "Terminating netAgent on error: " << e.getError() << endl;
         if (agentPtr != NULL)
 			saveDelete(agentPtr);
         throw e;
@@ -88,6 +88,7 @@ void Agent_Test::setUp()
 
 void Agent_Test::tearDown() 
 {
+	cout << "Teardown agent test " << endl;
 	
 	if (agentPtr != NULL)
 		saveDelete(agentPtr);
@@ -99,10 +100,13 @@ void Agent_Test::test()
 
 	try
 	{
+			
+			
 		
 		cout << "Start the agent test " << endl;
         // going into main loop
         if (agentPtr != NULL){
+			
 			Event * evt = agentPtr->evnt.get()->getNextEvent();
 			
 			// Verifies that a new add resource request message event was generated
@@ -113,9 +117,10 @@ void Agent_Test::test()
 			
 			// Process the add resource request message
 			agentPtr->handleEvent(evt, NULL);
-			
+						
 			// Verifies that an activate resource request interval events were created.
-			// Another was executed inmediately.
+			// Another was executed inmediately. Take into account that an activate
+			// resource request event is lost, because we skip its execution to ease the cases.
 			
 			evt = agentPtr->evnt.get()->getNextEvent();
 			ActivateResourceRequestIntervalEvent *arri = dynamic_cast<ActivateResourceRequestIntervalEvent *>(evt);
@@ -138,6 +143,7 @@ void Agent_Test::test()
 			sessions.clear();
 			
 			string sessionId = ses->getSessionId();
+						
 			uint32_t seqNo = ses->getNextMessageId();
 			
 			// Verify that a pending message was created.
@@ -173,7 +179,7 @@ void Agent_Test::test()
 			agentPtr->handleEvent(evt, NULL);
 			
 			// Verify that templates have been created.
-			agentTemplateListIter_t tmplIter = agentPtr->agentTemplates.find(5);
+			agentTemplateListIter_t tmplIter = agentPtr->agentTemplates.find(1);
 		
 			CPPUNIT_ASSERT( tmplIter != agentPtr->agentTemplates.end() );
 						
@@ -233,26 +239,112 @@ void Agent_Test::test()
 			
 			biddingObjectDB_t *new_bids = ((AddGeneratedBiddingObjectsEvent *)evt)->getBiddingObjects();
 			
+			int numBids = 0;
 			biddingObjectDBIter_t bidIter;
 			for (bidIter = new_bids->begin(); bidIter != new_bids->end(); ++bidIter){
-				cout << (*bidIter)->getInfo() << endl;
+				numBids++;
 			} 
+			
+			CPPUNIT_ASSERT( numBids == 1);
 			
 			// Handle the Add-Generated-Bidding-Objects event.
 			agentPtr->handleEvent(evt, NULL);
-			
+						
 			CPPUNIT_ASSERT( agentPtr->bidm->getNumBiddingObjects() == 1);
 			
-			while (evt != NULL ){
-				cout << "Event:" << eventNames[evt->getType()] << endl;			
-				evt = agentPtr->evnt.get()->getNextEvent();
-			}	
+
+			// Verify that a new activate bidding Object event was created.
+			evt = agentPtr->evnt.get()->getNextEvent();
+			ActivateBiddingObjectsEvent *aboe = dynamic_cast<ActivateBiddingObjectsEvent *>(evt);
+			CPPUNIT_ASSERT( aboe != NULL );
+			
+			numBids = 0;
+			new_bids = ((ActivateBiddingObjectsEvent *)evt)->getBiddingObjects();
+			for (bidIter = new_bids->begin(); bidIter != new_bids->end(); ++bidIter){
+				numBids++;
+			} 
+			
+			CPPUNIT_ASSERT( numBids == 1);
+			
+			// Handle the Activate-Bidding-Objects event.
+			agentPtr->handleEvent(evt, NULL);
+			
+			// Verify that a new transmit bidding Object event was created.
+			
+			evt = agentPtr->evnt.get()->getNextEvent();
+			TransmitBiddingObjectsEvent *tboe = dynamic_cast<TransmitBiddingObjectsEvent *>(evt);
+			CPPUNIT_ASSERT( tboe != NULL );
+			
+			numBids = 0;
+			new_bids = ((TransmitBiddingObjectsEvent *)evt)->getBiddingObjects();
+			for (bidIter = new_bids->begin(); bidIter != new_bids->end(); ++bidIter){
+				numBids++;
+			} 
+			
+			CPPUNIT_ASSERT( numBids == 1);
+
+			// Handle the Transmit-Bidding-Objects event.
+			agentPtr->handleEvent(evt, NULL);
+			
+			evt = agentPtr->evnt.get()->getNextEvent();
+			RemoveResourceRequestIntervalEvent *rrrie = dynamic_cast<RemoveResourceRequestIntervalEvent *>(evt);
+			CPPUNIT_ASSERT( rrrie != NULL );
+			
+			resourceRequestDB_t * requests = rrrie->getResourceRequests();
+			resourceRequestDBIter_t requestIter;
+			int reqNumber = 0;
+			for (requestIter = requests->begin(); requestIter != requests->end(); ++requestIter){
+				reqNumber++;
+			}
+			
+			CPPUNIT_ASSERT( reqNumber == 1);
+			
+			// Handle the Remove-Request-Interval event.
+			agentPtr->handleEvent(evt, NULL);
+
+			// Verify that a new request process was create
+			nbrRequest = 0;
+			for (reqIter = agentPtr->proc->begin(); reqIter != agentPtr->proc->end(); ++reqIter){
+				nbrRequest++;
+			}
+			
+			CPPUNIT_ASSERT( nbrRequest == 0 );
+
+			evt = agentPtr->evnt.get()->getNextEvent();
+			RemoveAuctionsEvent *rae = dynamic_cast<RemoveAuctionsEvent *>(evt);
+			CPPUNIT_ASSERT( rae != NULL );
+
+			auctionDB_t *auctions = rae->getAuctions();
+			auctionDBIter_t aucIter;
+			int numAuct = 0;
+			for (aucIter = auctions->begin(); aucIter != auctions->end(); ++aucIter){
+				numAuct++;
+			} 
+			
+			CPPUNIT_ASSERT( numAuct == 1 );
+			
+			// Handle the Remove-Auctions event.
+			agentPtr->handleEvent(evt, NULL);
+			
+			// Verify the auction depletion.
+			CPPUNIT_ASSERT( agentPtr->aucm->getNumAuctions() == 0);
+			
+			evt = agentPtr->evnt.get()->getNextEvent();
+			RemoveBiddingObjectsEvent *rboe = dynamic_cast<RemoveBiddingObjectsEvent *>(evt);
+			CPPUNIT_ASSERT( rboe != NULL );
+			
+			// Handle the Remove-Bidding Objects event.
+			agentPtr->handleEvent(evt, NULL);
+			
+			CPPUNIT_ASSERT( agentPtr->bidm->getNumBiddingObjects() == 0);
+			
 			
 		}	
-
+		
 		
 	} catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 
 

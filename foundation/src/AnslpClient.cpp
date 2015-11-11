@@ -270,7 +270,8 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
 		 << "sec: " << current->tm_sec 
 		 << "milli: " << detail_time.tv_usec/1000 << endl;	
 	
-    saveDelete(r);
+    if (r != NULL)
+		saveDelete(r);
 
         
 #ifdef DEBUG

@@ -960,9 +960,45 @@ void Agent::handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds)
 	
 }
 
+void Agent::handleActivateBiddingObjects(Event *e, fd_sets_t *fds)
+{
+#ifdef DEBUG
+	log->dlog(ch,"Starting event Handle activate bidding Objects" );
+#endif
+
+	biddingObjectDB_t *bids = NULL;
+
+	try
+	{    		
+		
+		bids = ((ActivateBiddingObjectsEvent *)e)->getBiddingObjects();
+				
+		bidm->activateBiddingObjects(bids);
+		
+#ifdef DEBUG
+		log->dlog(ch,"Ending event Handle activate bidding Objects" );
+#endif		
+	}
+	catch (Error &err) {
+		log->dlog( ch, err.getError().c_str() );		
+	}
+
+
+
+#ifdef DEBUG
+	log->dlog(ch,"ending event Handle activate bidding Objects" );
+#endif
+
+}
+
+
 void 
 Agent::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 {
+	
+#ifdef DEBUG
+       log->dlog(ch,"starting handleTransmitBiddingObjects" );
+#endif
 
 	try{
 		biddingObjectDB_t *new_bids = ((TransmitBiddingObjectsEvent *)e)->getBiddingObjects();
@@ -985,8 +1021,9 @@ Agent::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 			// We obtain from the auction the connection settings for auctioning ( Ip address, port, Ip_version )
 			string sipv4Address = IpApMessageParser::getMiscVal(a->getMisc(), "dstip");
 			string sipv6Address = IpApMessageParser::getMiscVal(a->getMisc(), "dstip6");
-			string sport = IpApMessageParser::getMiscVal(a->getMisc(), "dstport");
+			string sport = IpApMessageParser::getMiscVal(a->getMisc(), "dstauctionport");
 			string sipversion = IpApMessageParser::getMiscVal(a->getMisc(), "ipversion");
+						
 			int ipVersion = ParserFcts:: parseInt(sipversion);
 			
 			string destinAddr;
@@ -1016,6 +1053,15 @@ Agent::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 			// Save the message within the pending messages.
 			session->addPendingMessage(*mes);
 			
+#ifdef DEBUG
+			// Activate to see the bidding message to send.
+			anslp::msg::anslp_ipap_xml_message messRes;
+			anslp::msg::anslp_ipap_message ipapMesBid(*mes);
+			string xmlMessage = messRes.get_message(ipapMesBid);
+			log->dlog(ch,"Bidding message: %s", xmlMessage.c_str() );
+#endif
+			
+			
 			// Finally send the message through the anslp client application.
 			anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession()), 
 								session->getSenderAddress(), destinAddr, 
@@ -1024,7 +1070,12 @@ Agent::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 								*mes );
 			
 			saveDelete(mes);
+
 		}
+#ifdef DEBUG
+		log->dlog(ch,"ending handleTransmitBiddingObjects" );
+#endif
+		
 	} catch (Error &e){
 		throw e;
 	}
@@ -1118,7 +1169,7 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 	log->dlog(ch,"Starting event remove resource request interval" );
 #endif
 
-	time_t start = ((RemoveResourceRequestIntervalEvent *)e)->getStartTime();
+	time_t stop = ((RemoveResourceRequestIntervalEvent *)e)->getStopTime();
 	
 	resourceRequestDB_t *request = 
 				((RemoveResourceRequestIntervalEvent *)e)->getResourceRequests();
@@ -1131,16 +1182,22 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 			
 			auctionDB_t auctionDb;
 			
-			resourceReqIntervalListIter_t interval = (*iter)->getIntervalByStart(start);
+			resourceReqIntervalListIter_t interval = (*iter)->getIntervalByEnd(stop);
 			
 			// Get the auctions corresponding with this resource request interval
 			string sessionId = interval->sessionId;
-				
+							
 			AgentSession *session = reinterpret_cast<AgentSession *>(asmp->getSession(sessionId));
 			auctionSet_t auctions = session->getAuctions();
 			
 			// teardown the session created.
 			anslpc->tg_teardown( new anslp::session_id(session->getAnlspSession())); 
+			
+			// Delete active request process associated with this request interval.
+			set<int> requestProcs = interval->resourceProcesses;
+			for ( set<int>::iterator it = requestProcs.begin(); it != requestProcs.end(); ++it){
+				proc->delRequest( *it );
+			}
 			
 			// Add a new reference to the auction (there is another session reference it).
 			aucm->decrementReferences(auctions, sessionId);
@@ -1204,6 +1261,12 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 		
 		// get the msgSeqNbr from the message
 		uint32_t seqNbr = message->get_seqno();
+		uint32_t ackSeqNbr = message->get_ackseqno();
+		
+		// Confirm the message arriving, if it is confirming a previous message. 
+		if (ackSeqNbr > 0){
+			s->confirmMessage(ackSeqNbr-1);
+		}
 		
 		int domainBidObj = message->get_domain();
 		// Search the domain in the template container
@@ -1276,9 +1339,15 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
 	
 	case ADD_GENERATED_BIDDING_OBJECTS:
 		handleAddGeneratedBiddingObjects(e,fds);
-      
+		break;
+
 	case TRANSMIT_BIDDING_OBJECTS:
 		handleTransmitBiddingObjects(e,fds);
+		break;
+      
+	case ACTIVATE_BIDDING_OBJECTS:
+		handleActivateBiddingObjects(e,fds);
+		break;
 		  
     case REMOVE_BIDDING_OBJECTS:
 		handleRemoveBiddingObjects(e);

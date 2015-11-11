@@ -11,7 +11,7 @@
     <!-- ansl-client configuration file -->    
     <PREF NAME="AnslpConfFile">@DEF_SYSCONFDIR@/nsis-ka_agent.conf</PREF>    
     <!-- Domain Id that uniquely identifies this auction manager when exchanging ipap_messages -->    
-    <PREF NAME="Domain">5</PREF>
+    <PREF NAME="Domain">1</PREF>
     <!-- filter attribute definition file -->    
     <PREF NAME="FilterDefFile">@DEF_SYSCONFDIR@/fielddef.xml</PREF>
     <!-- filter constant file -->

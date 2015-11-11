@@ -303,13 +303,13 @@ void BiddingObjectManager::addBiddingObjects(biddingObjectDB_t * _biddingObjects
 
     // group bidding objects with same start time
     for (iter2 = start.begin(); iter2 != start.end(); iter2++) {
-		e->addEvent( new ActivateBiddingObjectsEvent(iter2->second));
+		e->addEvent( new ActivateBiddingObjectsEvent(iter2->first-now, iter2->second));
     }
     
     // group rules with same stop time
     for (iter2 = stop.begin(); iter2 != stop.end(); iter2++) {
 		// Iterates over the auctions configured for the BiddingObject.
-		e->addEvent( new RemoveBiddingObjectsEvent(iter2->second));
+		e->addEvent( new RemoveBiddingObjectsEvent(iter2->first-now, iter2->second));
     }
 
 #ifdef DEBUG    

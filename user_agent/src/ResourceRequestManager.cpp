@@ -245,9 +245,13 @@ void ResourceRequestManager::addResourceRequests(resourceRequestDB_t * requests,
 					intervals_iter != intervals->end(); ++intervals_iter){
 				
 				resourceReq_interval_t interv_tmp = *intervals_iter;
+				
+				cout << "Resource Request Interval Start:" << Timeval::toString(interv_tmp.start) << endl;
+				
 				start[interv_tmp.start].push_back(r);
 			
 				if (interv_tmp.stop){
+					cout << "Resource Request Interval Stop:" << Timeval::toString(interv_tmp.stop) << endl;
 					stop[interv_tmp.stop].push_back(r);
 				}
 			}
@@ -268,11 +272,13 @@ void ResourceRequestManager::addResourceRequests(resourceRequestDB_t * requests,
     // group resource requests with same start time
     for (iter2 = start.begin(); iter2 != start.end(); iter2++) 
     {
+		cout << "aqui estoy 1" << Timeval::toString(iter2->first) << endl; 
 		e->addEvent(new ActivateResourceRequestIntervalEvent(iter2->first-now, iter2->second, iter2->first));
     }
     
     // group resource request with same stop time
     for (iter2 = stop.begin(); iter2 != stop.end(); iter2++) {
+		cout << "aqui estoy 2" << endl;
 		e->addEvent(new RemoveResourceRequestIntervalEvent(iter2->first-now, iter2->second, iter2->first));
     }
 

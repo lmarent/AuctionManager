@@ -182,7 +182,7 @@ string makeKey(string auctionSet, string auctionName,
 auction::BiddingObject *
 createAllocation( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
 				  string auctionSet, string auctionName, string bidSet, string bidName, 
-				  time_t start, time_t stop, float quantity, double price )
+				  string sessionId, time_t start, time_t stop, float quantity, double price )
 {										  		
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start create allocation \n");
@@ -262,7 +262,9 @@ createAllocation( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *f
     auction::BiddingObject *alloc = new auction::BiddingObject(auctionSet, auctionName, 
 										allocset, allocname, IPAP_ALLOCATION, elements, options);
 
-
+	// All objects must be inherit the session from the bid.
+	alloc->setSession(sessionId);
+	
 #ifdef DEBUG
 	fprintf( stdout, "bas module: ending create allocation \n");
 #endif	
@@ -344,6 +346,7 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 			alloc.bidSet = bid->getBiddingObjectSet();
 			alloc.bidName = bid->getBiddingObjectName();
 			alloc.elementName = elem_iter->first;
+			alloc.sessionId = bid->getSession();
 			alloc.quantity = quantity;
 			orderedBids.insert(make_pair(price,alloc));
 		}
@@ -397,8 +400,8 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 		else{
 			auction::BiddingObject *alloc = 
 				createAllocation(fieldDefs, fieldVals, aset, aname, 
-								  (it->second).bidSet, (it->second).bidName, start, stop,
-									(it->second).quantity, sellPrice);
+								  (it->second).bidSet, (it->second).bidName, (it->second).sessionId,
+								    start, stop, (it->second).quantity, sellPrice);
 									
 			allocations[makeKey(aset, aname,
 								(it->second).bidSet, (it->second).bidName)] = alloc;

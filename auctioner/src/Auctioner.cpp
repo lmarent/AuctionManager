@@ -8,7 +8,7 @@
     NETAUM is free software; you can redistribute it and/or modify 
     it under the terms of the GNU General Public License as published by 
     the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+    (at your option) any later versAion.
 
     NETAUM is distributed in the hope that it will be useful, 
     but WITHOUT ANY WARRANTY; without even the implied warranty of 
@@ -667,7 +667,8 @@ void Auctioner::handleActivateAuction(Event *e, fd_sets_t *fds)
 			time_t stop = (*iter)->getStop();
 			interval_t interval = (*iter)->getInterval();
 			
-			evnt.get()->addEvent(new PushExecutionEvent(start-now, index, stop, interval.interval, interval.align));
+			// The interval must be in microseconds.
+			evnt.get()->addEvent(new PushExecutionEvent(start-now, index, stop, (interval.interval)*1000, interval.align));
 			
 		}
 		
@@ -692,32 +693,36 @@ void Auctioner ::handleActivateBiddingObjects(Event *e, fd_sets_t *fds)
 #endif
 
 	biddingObjectDB_t *bids = NULL;
+	
 
 	try
 	{    		
 		
 		bids = ((ActivateBiddingObjectsEvent *)e)->getBiddingObjects();
 		
-		evnt->addEvent( new InsertBiddingObjectsAuctionEvent(*bids));	  
+		// only we have to add bids to auctions.
+		biddingObjectDB_t bids2;
+		biddingObjectDBIter_t bidIter;
+		for (bidIter = bids->begin(); bidIter != bids->end(); ++bidIter){
+			if ((*bidIter)->getType() == IPAP_BID){
+				bids2.push_back(*bidIter);
+			}
+		}
+		
+		if (bids2.size() > 0){
+			evnt->addEvent( new InsertBiddingObjectsAuctionEvent(bids2));	  
+		}
 		
 		bidm->activateBiddingObjects(bids);
 		
 #ifdef DEBUG
-		log->dlog(ch,"Ending event remove bidding Objects" );
-#endif		
+		log->dlog(ch,"ending event Handle activate bidding Objects" );
+#endif
+
 	}
 	catch (Error &err) {
-		if (bids) {
-			saveDelete(bids);
-        }
 		log->dlog( ch, err.getError().c_str() );		
 	}
-
-
-
-#ifdef DEBUG
-	log->dlog(ch,"ending event Handle activate bidding Objects" );
-#endif
 
 }
 
@@ -824,12 +829,15 @@ void Auctioner::handlePushExecution(Event *e, fd_sets_t *fds)
         struct timeval t = ((PushExecutionEvent *)e)->getTime();
         time_t start = (time_t) t.tv_sec;
         
-        time_t stoptmp = start + interval;
+        // The interval was inserted in milliseconds.
+        time_t stoptmp = start + (interval/1000);
         if (stoptmp > stop)
 			stoptmp = stop;
         
 		// Execute the algorithm
         proc->executeAuction(index, start, stoptmp, evnt.get());
+        
+        cout << "start:" << Timeval::toString(start) << " stoptmp:" << Timeval::toString(stoptmp) << " Stop:" << Timeval::toString(stop) << endl;
               
         // Re-schedule the event.
         if (stoptmp < stop){
@@ -1166,6 +1174,12 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 		message = ((AuctionInteractionEvent *)e)->getMessage();
 		// get the msgSeqNbr from the message
 		uint32_t seqNbr = message->get_seqno();
+		uint32_t ackSeqNbr = message->get_ackseqno();
+		
+		// Confirm the message arriving, if it is confirming a previous message. 
+		if (ackSeqNbr > 0){
+			s->confirmMessage(ackSeqNbr-1);
+		}	
 		
 		// Bring the list of local templates
 		auctionerTemplateListIter_t templIter = auctionerTemplates.find(domainId);
@@ -1193,17 +1207,26 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 			string xmlMessage = mess.get_message(anlp_mess);
 			
 			// Send the response message.
-			comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
+			if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
+				comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
+			} else {
+				log->dlog(ch,"Message to send: %s", xmlMessage.c_str() );
+			}
+				
+			
 		} else {
 		  string error = "templates not initialized in the auctioneer"; 
-		  comm->sendErrMsg(error, ((AuctionInteractionEvent *)e)->getReq(), fds); 			
+		  if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
+			  comm->sendErrMsg(error, ((AuctionInteractionEvent *)e)->getReq(), fds); 			
+		  } else {
+				log->elog(ch,"AuctioningInteraction Error: %s", error.c_str() );
+		  } 
 		}
 	} catch (Error &err){
-		if (message){
-			saveDelete(message);
-        }
-		log->dlog( ch, err.getError().c_str() );	
-		comm->sendErrMsg(err.getError(), ((AuctionInteractionEvent *)e)->getReq(), fds); 			
+		log->elog( ch, err.getError().c_str() );	
+		if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
+			comm->sendErrMsg(err.getError(), ((AuctionInteractionEvent *)e)->getReq(), fds);
+		}
 	}
 
 }
@@ -1247,7 +1270,7 @@ Auctioner::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 	try{
 		biddingObjectDB_t *new_bids = ((TransmitBiddingObjectsEvent *)e)->getBiddingObjects();
 		
-		// get the request index 
+		// get the auction process index 
 		int index = ((TransmitBiddingObjectsEvent *)e)->getIndex();
 
 		// Bring the list of local templates
@@ -1257,11 +1280,12 @@ Auctioner::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 			biddingObjectDBIter_t iter;
 			for (iter = new_bids->begin(); iter != new_bids->end(); ++iter)
 			{
-				// We find the auction for the bid
+				// We find the auction for the bidding object
 				BiddingObject *biddingObject = *iter;
 			
 				// Search for the corresponding session for this connection
 				string sessionId = biddingObject->getSession();
+				
 				Session *session = sesm->getSession(sessionId);
 			
 				Auction *a = aucm->getAuction(biddingObject->getAuctionSet(), 
@@ -1270,11 +1294,19 @@ Auctioner::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 				uint32_t mid = session->getNextMessageId();
 				
 				mes = bidm->get_ipap_message(biddingObject, a, templIter->second);
+				
+				cout << "finish with the message" << endl; 
+				
 				mes->set_seqno(mid);
 				mes->set_ackseqno(0);
 				
+				cout << "finish with the message 2" << endl; 
+				
 				// Save the message within the pending messages.
 				session->addPendingMessage(*mes);
+				
+				
+				cout << "finish with the message 3" << endl; 
 				
 				// Finally send the message through the anslp client application.
 				anslpc->tg_bidding( new anslp::session_id(sessionId), 
@@ -1284,7 +1316,12 @@ Auctioner::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 									session->getSenderPort(),
 									session->getProtocol(), *mes );
 
+				cout << "finish with the message 4" << endl; 
+
 				saveDelete(mes);
+
+				cout << "finish with the message 5" << endl; 
+
 			}
 		} else {
 		  if (mes){
@@ -1355,6 +1392,14 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 
 	case REMOVE_BIDDING_OBJECTS_AUCTION:
 		handleRemoveBiddingObjectsAuction(e,fds);
+		break;
+
+	case ADD_GENERATED_BIDDING_OBJECTS:
+		handleAddGeneratedBiddingObjects(e,fds);
+		break;
+
+	case TRANSMIT_BIDDING_OBJECTS:
+		handleTransmitBiddingObjects(e,fds);
 		break;
 
     case PROC_MODULE_TIMER:

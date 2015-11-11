@@ -179,6 +179,12 @@ class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser, p
     */
 	auctionDB_t * getApplicableAuctions(ipap_message *message);
 
+
+	//! gives an iterator over the first auction process registered.
+	inline auctionProcessListIter_t begin(){ return auctions.begin(); }
+	
+	inline auctionProcessListIter_t end(){ return auctions.end(); }
+
     /*! \short   get the session information within the message.
         \arg \message a pointer to a message with the options to filter.
         \returns 0 - map of values that identify the session.

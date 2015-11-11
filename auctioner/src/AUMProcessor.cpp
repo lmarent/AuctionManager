@@ -297,6 +297,11 @@ void AUMProcessor::executeAuction(int index, time_t start, time_t stop, EventSch
 {
 		
     AUTOLOCK(threaded, &maccess);  
+
+#ifdef DEBUG	
+	log->dlog(ch,"Starting executeAuction index:%d start:%s stop:%s", index,
+					Timeval::toString(start).c_str(), Timeval::toString(stop).c_str() ); 
+#endif	
 	
 	auctionProcessListIter_t ret;
 	ret = auctions.find(index);	
@@ -307,23 +312,33 @@ void AUMProcessor::executeAuction(int index, time_t start, time_t stop, EventSch
 		biddingObjectDB_t allocations;
 			
 		biddingObjectDB_t *ptr = &allocations;
-		try{			
-			actProcess.getMAPI()->execute( FieldDefManager::getFieldDefs(),
-											FieldDefManager::getFieldVals(),
-											actProcess.getParams(), 
-											actProcess.getAuction()->getSetName(),
-											actProcess.getAuction()->getAuctionName(),
-											start, stop, 
-											actProcess.getBids(), 
-											&ptr );
-
-		} catch (ProcError &e){
-			log->elog(ch,e.getError().c_str());
-			throw Error(e.getError().c_str());
-		}
-			
-		e->addEvent(new AddGeneratedBiddingObjectsEvent(index, allocations));
 		
+		if ( actProcess.getBids()->size() > 0 ){
+		
+			try {			
+				actProcess.getMAPI()->execute( FieldDefManager::getFieldDefs(),
+												FieldDefManager::getFieldVals(),
+												actProcess.getParams(), 
+												actProcess.getAuction()->getSetName(),
+												actProcess.getAuction()->getAuctionName(),
+												start, stop, 
+												actProcess.getBids(), 
+												&ptr );
+
+#ifdef DEBUG	
+				log->dlog(ch,"Number of allocations generated %d", allocations.size() ); 
+#endif	
+
+			} catch (ProcError &e){
+				log->elog(ch,e.getError().c_str());
+				throw Error(e.getError().c_str());
+			}
+			
+			e->addEvent(new AddGeneratedBiddingObjectsEvent(index, allocations));
+		}
+		else {
+			log->log(ch,"No bids included");
+		}
 	} else {
 		throw Error("auction process with index:%d was not found", index);
 	}
