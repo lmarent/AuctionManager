@@ -46,7 +46,6 @@ int Auctioner::enableCtrl = 0;
 // global timeout flag
 int g_timeout = 0;
 
-
 // remove newline from end of C string
 static inline char *noNewline( char* s )
 {
@@ -305,7 +304,7 @@ Auctioner::Auctioner( int argc, char *argv[])
 
     } catch (Error &e) {
         
-        log->dlog(ch, e.what());
+        log->dlog(ch, e.getError().c_str());
         
         if (log.get()) {
             log->elog(ch, e);
