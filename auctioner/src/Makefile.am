@@ -13,45 +13,7 @@ else
 				-I$(top_srcdir)/foundation/include
 endif
 
-auctionManager_SOURCES =  @top_srcdir@/foundation/src/Constants.cpp \
-						  @top_srcdir@/foundation/src/ConstantsAum.cpp \
-						  @top_srcdir@/foundation/src/ParserFcts.cpp \
-						  @top_srcdir@/foundation/src/XMLParser.cpp \
-						  @top_srcdir@/foundation/src/Timeval.cpp \
-						  @top_srcdir@/foundation/src/AuctionTimer.cpp \
-						  @top_srcdir@/foundation/src/Field.cpp \
-						  @top_srcdir@/foundation/src/FieldValue.cpp \
-						  @top_srcdir@/foundation/src/FieldDefParser.cpp \
-						  @top_srcdir@/foundation/src/FieldValParser.cpp \
-						  @top_srcdir@/foundation/src/FieldDefManager.cpp \
-						  @top_srcdir@/foundation/src/TemplateIdSource.cpp \
-						  @top_srcdir@/foundation/src/IpApMessageParser.cpp \
-						  @top_srcdir@/foundation/src/IdSource.cpp \
-						  @top_srcdir@/foundation/src/AuctioningObject.cpp \
-						  @top_srcdir@/foundation/src/Auction.cpp \
-						  @top_srcdir@/foundation/src/AuctionFileParser.cpp \
-						  @top_srcdir@/foundation/src/MAPIAuctionParser.cpp \
-						  @top_srcdir@/foundation/src/AuctionManagerInfo.cpp \
-						  @top_srcdir@/foundation/src/AuctionManagerComponent.cpp \
-						  @top_srcdir@/foundation/src/Event.cpp \
-						  @top_srcdir@/foundation/src/EventScheduler.cpp \
-						  @top_srcdir@/foundation/src/BiddingObject.cpp \
-						  @top_srcdir@/foundation/src/BiddingObjectFileParser.cpp \
-						  @top_srcdir@/foundation/src/MAPIBiddingObjectParser.cpp \
-						  @top_srcdir@/foundation/src/BiddingObjectManager.cpp \
-						  @top_srcdir@/foundation/src/CommandLineArgs.cpp \
-						  @top_srcdir@/foundation/src/ConfigManager.cpp \
-						  @top_srcdir@/foundation/src/ConfigParser.cpp \
-						  @top_srcdir@/foundation/src/Allocation.cpp \
-						  @top_srcdir@/foundation/src/AuctionManager.cpp \
-						  @top_srcdir@/foundation/src/AnslpClient.cpp \
-						  @top_srcdir@/foundation/src/Session.cpp \
-						  @top_srcdir@/foundation/src/SessionManager.cpp \
-						  @top_srcdir@/foundation/src/ModuleLoader.cpp \
-						  @top_srcdir@/foundation/src/Module.cpp \
-						  @top_srcdir@/foundation/src/ProcModule.cpp \
-						  @top_srcdir@/foundation/src/MessageIdSource.cpp \
-						  EventSchedulerAuctioner.cpp \
+auctionManager_SOURCES =  EventSchedulerAuctioner.cpp \
 						  PageRepository.cpp \
 						  CtrlComm.cpp \
 						  AUMProcessor.cpp \
@@ -66,11 +28,13 @@ auctionManager_CPPFLAGS = -I$(top_srcdir)/lib/getopt_long \
 
 auctionManager_LDADD = $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 					   $(top_builddir)/lib/httpd/libhttpd.a \
+					   $(abs_top_builddir)/foundation/src/libfoundation.la \
 					   @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@
 
 auctionManager_LDFLAGS = -export-dynamic -module \
 						 $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 						 $(top_builddir)/lib/httpd/libhttpd.a \
+						 $(abs_top_builddir)/foundation/src/libfoundation.la \
 						 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ $(LIBIPAP_LIBS) \
 						 $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) \
 					     $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS)

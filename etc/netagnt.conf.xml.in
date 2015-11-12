@@ -9,7 +9,7 @@
     <!-- pid file location -->
     <PREF NAME="PidFile">/tmp/netagent.pid</PREF>
     <!-- ansl-client configuration file -->    
-    <PREF NAME="AnslpConfFile">@DEF_SYSCONFDIR@/../nsis.ka.conf</PREF>
+    <PREF NAME="AnslpConfFile">@DEF_SYSCONFDIR@/../a-nslp/nsis.ka.conf</PREF>
     <PREF NAME="Domain">6</PREF>       
     <!-- field attribute definition file -->    
     <PREF NAME="FieldDefFile">@DEF_SYSCONFDIR@/fielddef.xml</PREF>
