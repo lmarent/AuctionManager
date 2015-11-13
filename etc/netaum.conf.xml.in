@@ -23,14 +23,14 @@
     <!-- port for control connections -->
     <PREF NAME="ControlPort" TYPE="UInt16">12246</PREF>
     <!-- use SSL encryption -->
-    <PREF NAME="UseSSL" TYPE="Bool">yes</PREF>
+    <PREF NAME="UseSSL" TYPE="Bool">no</PREF>
     <!-- use IPv6 (if no IPv6 interface present IP4 will be used) -->
     <PREF NAME="UseIPv6" TYPE="Bool">no</PREF>
     <!-- log all incoming control requests -->
     <PREF NAME="LogOnConnect" TYPE="Bool">yes</PREF>
     <!-- log all meter commands -->
     <PREF NAME="LogQoSCommand" TYPE="Bool">yes</PREF>
-    <PREF NAME="LocalAddr-V4" TYPE="IPAddr">10.0.2.15</PREF>
+    <PREF NAME="LocalAddr-V4" TYPE="IPAddr">192.168.2.12</PREF>
     <PREF NAME="LocalAddr-V6" TYPE="IP6Addr">0:0:0:0:0:0:0:0</PREF>
     <!-- access list -->
     <ACCESS>

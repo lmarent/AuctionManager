@@ -28,13 +28,13 @@ auctionManager_CPPFLAGS = -I$(top_srcdir)/lib/getopt_long \
 
 auctionManager_LDADD = $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 					   $(top_builddir)/lib/httpd/libhttpd.a \
-					   $(abs_top_builddir)/foundation/src/libfoundation.la \
+					   $(top_builddir)/foundation/src/libfoundation.la \
 					   @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@
 
 auctionManager_LDFLAGS = -export-dynamic -module \
 						 $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 						 $(top_builddir)/lib/httpd/libhttpd.a \
-						 $(abs_top_builddir)/foundation/src/libfoundation.la \
+						 $(top_builddir)/foundation/src/libfoundation.la \
 						 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ $(LIBIPAP_LIBS) \
 						 $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) \
 					     $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS)
@@ -49,6 +49,10 @@ $(top_builddir)/lib/httpd/libhttpd.a:
 
 $(top_builddir)/lib/getopt_long/libgetopt_long.a:
 	cd $(top_builddir)/lib/getopt_long ; $(MAKE)
+
+$(top_builddir)/foundation/src/libfoundation.la:
+	cd $(top_builddir)/foundation/src ; $(MAKE)
+
 
 install-data-hook:
 	$(INSTALL) -d $(DESTDIR)/$(localstatedir)/run

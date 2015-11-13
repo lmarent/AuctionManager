@@ -33,11 +33,6 @@
 #include "AnslpClient.h"
 
 
-namespace ntlp {
-// configuration class
-gistconf gconf;
-}
-
 using namespace protlib;
 using namespace protlib::log;
 using namespace ntlp;
@@ -45,6 +40,10 @@ using namespace anslp;
 using namespace anslp::msg;
 using namespace auction;
 
+namespace ntlp {
+// configuration class
+gistconf gconf;
+}
 
 
 AnslpClient::AnslpClient(string config_filename)
@@ -61,11 +60,9 @@ AnslpClient::AnslpClient(string config_filename)
 
 	hostaddress source;
 	
-	init_framework();
 	try {
 
-		auto_ptr<anslp_config> _conf(new anslp_config()); 	
-		conf = _conf;
+		conf = new anslp_config(); 	
 		
 		// create the global configuration parameter repository 
 		conf->repository_init();
@@ -76,7 +73,7 @@ AnslpClient::AnslpClient(string config_filename)
 		// register all GIST configuration parameters at the registry
 		ntlp::gconf.setRepository();
 		
-		ntlp::gconf.variable = 10;
+		ntlp::gconf.var = 10;
 		
 		// read all config values from config file
 		configfile cfgfile(configpar_repository::instance());
@@ -128,10 +125,9 @@ AnslpClient::~AnslpClient()
 	starter->stop_processing();
 	starter->wait_until_stopped();
 	
-	cleanup_framework();
-	
 	saveDelete(starter);
-
+	
+	saveDelete(conf);
 
 #ifdef DEBUG
     log->dlog(ch,"Ending destructor AnslpClient");
@@ -324,7 +320,7 @@ string AnslpClient::getLocalAddress(void)
 
 uint32_t AnslpClient::getInitiatorLifetime(void)
 {
-	if (conf.get()){
+	if (conf){
 		uint32_t lifetime = conf->get_ni_session_lifetime();
 		return lifetime;
 	}

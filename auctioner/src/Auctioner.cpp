@@ -33,6 +33,7 @@
 #include "EventAuctioner.h"
 #include "anslp_ipap_xml_message.h"
 #include "anslp_ipap_message.h"
+#include <openssl/ssl.h>
 
 using namespace auction;
 
@@ -116,7 +117,7 @@ Auctioner::Auctioner( int argc, char *argv[])
 #endif
 #endif
 
-
+		
         // parse command line args
         if (args->parseArgs(argc, argv)) {
             // user wanted help
@@ -135,6 +136,7 @@ Auctioner::Auctioner( int argc, char *argv[])
 
         // register exit function
         atexit(exit_fct);
+			
 				
         auto_ptr<Logger> _log(Logger::getInstance()); 	
         log = _log;
@@ -157,7 +159,7 @@ Auctioner::Auctioner( int argc, char *argv[])
         auto_ptr<ConfigManager> _conf(new 
 				ConfigManager(AUM_CONFIGFILE_DTD, configFileName, argv[0]));
         conf = _conf;
-
+		
         // merge into config
         conf->mergeArgs(args->getArgList(), args->getArgVals());
 
@@ -188,6 +190,19 @@ Auctioner::Auctioner( int argc, char *argv[])
         log->log(ch,"configfilename used is: '%s'", configFileName.c_str());
         log->dlog(ch,"------- startup -------" );
 #endif
+		
+		// Initialize The openssl framework.
+		anslp::init_framework();
+
+		const EVP_MD *md;
+		
+		md = EVP_get_digestbyname("SHA1");
+		if(!md) {
+			std::cout << " SHA1 not available. Please update your OpenSSL library!" << std::endl;
+			abort();
+		} else {
+			std::cout << " SHA1 found !" << std::endl;
+		}
 
         // Read parameters from configuration file.
         
@@ -220,7 +235,7 @@ Auctioner::Auctioner( int argc, char *argv[])
         log->log(ch,"domainId used is: '%d' UseIpv:%d, IPv6:%s, Ipv4:%s", 
 					domainId, useIPV6, _sIPV6.c_str(), _sIPV4.c_str());
 #endif
-
+		
         // startup other core classes
         auto_ptr<AuctionTimer> _auct(AuctionTimer::getInstance());
         auct = _auct;
@@ -229,12 +244,12 @@ Auctioner::Auctioner( int argc, char *argv[])
 																	  conf->getValue("FieldDefFile", "MAIN"),
 																	  conf->getValue("FieldConstFile", "MAIN")));
         bidm = _bidm;
-        
+		
         auto_ptr<AuctionManager> _aucm(new AuctionManager( domainId,
 														   conf->getValue("FieldDefFile", "MAIN"),
 														   conf->getValue("FieldConstFile", "MAIN")));
         aucm = _aucm;
-
+		
         auto_ptr<SessionManager> _sesm(new SessionManager());
         sesm = _sesm;
         
@@ -296,7 +311,7 @@ Auctioner::Auctioner( int argc, char *argv[])
 		comm = _comm;
 		comm->mergeFDs(&fdList);
 		
-
+		
 #ifdef DEBUG
         log->dlog(ch,"------- end Auctioner constructor -------" );
 #endif
@@ -1558,6 +1573,9 @@ void Auctioner::run()
         } while (!stop);
 
 		proc->waitUntilDone();
+
+		// Cleaup the OPEN SSL framework.
+		anslp::cleanup_framework();
 
 		log->log(ch,"NetAum going down on Ctrl-C" );
 

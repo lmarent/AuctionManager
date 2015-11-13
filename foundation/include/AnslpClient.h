@@ -59,7 +59,7 @@ class AnslpClient
 		protlib::ThreadStarter<anslp::anslp_daemon, anslp::anslp_daemon_param> *starter;
 
 		//! Pointer to anslp application configuration object.
-		auto_ptr<anslp::anslp_config>			conf;
+		anslp::anslp_config			*conf;
 
 
 

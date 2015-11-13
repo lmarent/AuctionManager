@@ -37,11 +37,13 @@ int main(int argc, char *argv[])
 #ifdef DEBUG
         cout << NETAUM_OPTIONS << endl;
 #endif
-        auto_ptr<Auctioner> auction(new Auctioner(argc, argv));
+        Auctioner *auction = new Auctioner(argc, argv);
 
         // going into main loop
         auction->run();
-
+		
+		cout << "finishing program" << endl;  
+		
     } catch (Error &e) {
         cerr << "Terminating Auctioner on error: " << e.getError() << endl;
         exit(1);
