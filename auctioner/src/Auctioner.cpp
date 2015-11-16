@@ -319,11 +319,14 @@ Auctioner::Auctioner( int argc, char *argv[])
 
     } catch (Error &e) {
         
-        log->dlog(ch, e.getError().c_str());
+        
         
         if (log.get()) {
             log->elog(ch, e);
-        }  
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
+        
         throw e;
     }
 }

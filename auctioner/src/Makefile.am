@@ -32,7 +32,7 @@ auctionManager_LDADD = $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 					   @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@
 
 auctionManager_LDFLAGS = -export-dynamic -module \
-						 $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
+						 $(CPPUNIT_LIBS) -ldl -lcppunit -lssl $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 						 $(top_builddir)/lib/httpd/libhttpd.a \
 						 $(top_builddir)/foundation/src/libfoundation.la \
 						 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ $(LIBIPAP_LIBS) \

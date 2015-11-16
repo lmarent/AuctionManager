@@ -177,6 +177,9 @@ Agent::Agent( int argc, char *argv[])
         log->dlog(ch,"------- startup -------" );
 #endif
 
+		// Initialize The openssl framework.
+		anslp::init_framework();
+
         string _domainId = conf->getValue("Domain", "MAIN");
 		domainId = ParserFcts::parseInt( _domainId );
 
@@ -302,7 +305,9 @@ Agent::Agent( int argc, char *argv[])
     } catch (Error &e) {
         if (log.get()) {
             log->elog(ch, e);
-        }  
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
         throw e;
     }
 }
@@ -1517,6 +1522,8 @@ void Agent::run()
         } while (!stop);
 
 		proc->waitUntilDone();
+
+		anslp::cleanup_framework();
 
 		log->log(ch,"NetAgent going down on Ctrl-C" );
 

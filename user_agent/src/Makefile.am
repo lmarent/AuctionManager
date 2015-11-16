@@ -57,3 +57,16 @@ AM_CPPFLAGS = -g  -I@top_srcdir@/include
 
 			 
 LDADD = $(LIBIPAP_LIBS)
+
+$(top_builddir)/lib/httpd/libhttpd.a:
+	cd $(top_builddir)/lib/httpd ; $(MAKE)
+
+$(top_builddir)/lib/getopt_long/libgetopt_long.a:
+	cd $(top_builddir)/lib/getopt_long ; $(MAKE)
+
+$(top_builddir)/foundation/src/libfoundation.la:
+	cd $(top_builddir)/foundation/src ; $(MAKE)
+
+install-data-hook:
+	$(INSTALL) -d $(DESTDIR)/$(localstatedir)/run
+	$(INSTALL) -d $(DESTDIR)/$(localstatedir)/log
