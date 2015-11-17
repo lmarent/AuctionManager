@@ -768,11 +768,11 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 				// Bring the request interval.
 				resourceReqIntervalListIter_t interval = request->getIntervalByStart(session->getStart());
 
-	#ifdef DEBUG			
+#ifdef DEBUG			
 				log->dlog(ch, "auction interval - start:%s stop:%s", 
 							Timeval::toString(interval->start).c_str(),
 								Timeval::toString(interval->stop).c_str());
-	#endif
+#endif
 				
 				for ( auctionDBIter_t auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter){
 					// update the auction start and stop time.
@@ -830,6 +830,10 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 					//				with the removal of those auctions in it.
 
 				}
+
+#ifdef DEBUG			
+				log->dlog(ch, "handle create session - after creating the auctions");
+#endif
 									
 				// Bring the id of every auction in the auctionDB.
 				auctionSet_t setAuc; 
@@ -859,6 +863,10 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 				}
 				
 				int iport = ParserFcts::parseInt(sport);
+
+#ifdef DEBUG			
+				log->dlog(ch, "handle create session - after configuring auctions");
+#endif
 			
 				// Build the response for the originator agent.
 				ipap_message resp = ipap_message(domainId, IPAP_VERSION, true);
