@@ -881,7 +881,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 #endif
 				
 				// Finally send the message through the anslp client application.
-				anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession()), 
+				anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession().to_string()), 
 										session->getSenderAddress(), destinAddr, 
 										session->getSenderPort(), iport,
 										session->getProtocol(), 
@@ -1089,7 +1089,7 @@ Agent::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 			
 			
 			// Finally send the message through the anslp client application.
-			anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession()), 
+			anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession().to_string()), 
 								session->getSenderAddress(), destinAddr, 
 								session->getSenderPort(), iport,
 								session->getProtocol(), 
