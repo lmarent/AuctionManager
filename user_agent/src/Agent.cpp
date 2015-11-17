@@ -1289,13 +1289,18 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 		uint32_t seqNbr = message->get_seqno();
 		uint32_t ackSeqNbr = message->get_ackseqno();
 		
-		// Confirm the message arriving, if it is confirming a previous message. 
+		// send the same message arriving, if it is confirming a previous message. 
 		if (ackSeqNbr > 0){
 			s->confirmMessage(ackSeqNbr-1);
+			
+			anslp::msg::anslp_ipap_xml_message mess;
+			anslp::msg::anslp_ipap_message anlp_mess(*message);
+			string xmlMessage = mess.get_message(anlp_mess);
+
 #ifdef DEBUG
 			log->dlog(ch,"Ending handle Auction Interaction" );
 #endif				
-			comm->sendMsg("", ((AuctionInteractionEvent *)e)->getReq(), fds);
+			comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
 		} 
 		else {
 		
@@ -1318,12 +1323,65 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 			anslp::msg::anslp_ipap_xml_message mess;
 			anslp::msg::anslp_ipap_message anlp_mess(resp);
 			string xmlMessage = mess.get_message(anlp_mess);
+						
+			// Send the response message.
+			comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
+			
+			
+			// If the number of bids is greater than zero, then take the first bidding object
+			// to find the replying address.
+			
+			if ( bids->size() > 0 ){
+				biddingObjectDBIter_t iter = bids->begin();
+				BiddingObject *biddingObject = *iter;
+				Auction *a = aucm->getAuction(biddingObject->getAuctionSet(), 
+											biddingObject->getAuctionName());
+			
+				// We obtain from the auction the connection settings for auctioning ( Ip address, port, Ip_version )
+				string sipv4Address = IpApMessageParser::getMiscVal(a->getMisc(), "dstip");
+				string sipv6Address = IpApMessageParser::getMiscVal(a->getMisc(), "dstip6");
+				string sport = IpApMessageParser::getMiscVal(a->getMisc(), "dstauctionport");
+				string sipversion = IpApMessageParser::getMiscVal(a->getMisc(), "ipversion");
+						
+				int ipVersion = ParserFcts:: parseInt(sipversion);
+			
+				string destinAddr;
+			
+				if (ipVersion == 4) {
+					destinAddr = sipv4Address;
+				} else {
+					destinAddr = sipv6Address;
+				}
+			
+				int iport = ParserFcts::parseInt(sport);
+													
+			
+				// Build the response for the originator agent.
+				ipap_message conf = ipap_message(domainId, IPAP_VERSION, true);
+				conf.set_seqno(s->getNextMessageId());
+				conf.set_ackseqno(seqNbr+1);
+				conf.output();
+				
+#ifdef DEBUG
+				// Activate to see the message to send.
+				anslp::msg::anslp_ipap_xml_message mess2;
+				anslp::msg::anslp_ipap_message anlp_mess2(conf);
+				string confXmlMessage = mess2.get_message(anlp_mess2);
+#endif
+			
+				// Finally send the message through the anslp client application.
+				anslpc->tg_bidding( new anslp::session_id(sessionId), 
+									s->getSenderAddress(), destinAddr, 
+									s->getSenderPort(), iport,
+									s->getProtocol(), 
+									conf );
+			
+			}		
 
 #ifdef DEBUG
 			log->dlog(ch,"Ending handle Auction Interaction" );
-#endif						
-			// Send the response message.
-			comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
+#endif
+			
 		}
 	} catch (Error &err){
 		log->dlog( ch, err.getError().c_str() );	
