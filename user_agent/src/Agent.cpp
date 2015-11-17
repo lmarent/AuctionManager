@@ -853,7 +853,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 				string sport = IpApMessageParser::getMiscVal(atmp->getMisc(), "dstport");
 				string sipversion = IpApMessageParser::getMiscVal(atmp->getMisc(), "ipversion");
 #ifdef DEBUG			
-				log->dlog(ch, "ipversion: %s", sipversion);
+				log->dlog(ch, "ipversion: %s", sipversion.c_str());
 #endif				
 				int ipVersion = ParserFcts::parseInt(sipversion);
 
