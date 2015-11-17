@@ -874,6 +874,11 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 				resp.set_seqno(session->getNextMessageId());
 				resp.set_ackseqno(message->get_seqno() + 1);
 				resp.output();
+
+#ifdef DEBUG
+			log->dlog(ch,"Ending event handleResponseCreateSession - auctions number:%d sessionId:%s", 
+						auctions->size(),session->getAnlspSession().to_string().c_str()  );
+#endif
 				
 				// Finally send the message through the anslp client application.
 				anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession()), 
@@ -881,9 +886,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 										session->getSenderPort(), iport,
 										session->getProtocol(), 
 										resp );
-#ifdef DEBUG
-			log->dlog(ch,"Ending event handleResponseCreateSession - auctions number:%d", auctions->size() );
-#endif
+
 
 			}
 			else {
