@@ -676,6 +676,10 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 			
 			// Add the message as pending for ack.
 			session->addPendingMessage(*mes);
+
+#ifdef DEBUG
+			log->dlog(ch,"Anslp Session Id:" << sid );
+#endif
 			
 			// Set to the session the anslp session created by the client.
 			session->setAnlspSession(sid);
