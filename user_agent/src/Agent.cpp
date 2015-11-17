@@ -850,16 +850,10 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 
 				string sipv4Address = IpApMessageParser::getMiscVal(atmp->getMisc(), "dstip");
 				string sipv6Address = IpApMessageParser::getMiscVal(atmp->getMisc(), "dstip6");
-				string sport = IpApMessageParser::getMiscVal(atmp->getMisc(), "dstport");
+				string sport = IpApMessageParser::getMiscVal(atmp->getMisc(), "dstauctionport");
 				string sipversion = IpApMessageParser::getMiscVal(atmp->getMisc(), "ipversion");
-#ifdef DEBUG			
-				log->dlog(ch, "ipversion: %s", sipversion.c_str());
-#endif				
+		
 				int ipVersion = ParserFcts::parseInt(sipversion);
-
-#ifdef DEBUG			
-				log->dlog(ch, "handle create session - after reading parameters for built the response message");
-#endif
 				
 				string destinAddr;
 				
