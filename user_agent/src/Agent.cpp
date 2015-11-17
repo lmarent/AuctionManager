@@ -846,7 +846,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 				session->setAuctions(setAuc);
 
 				// Get the address information of any of the auctions, so a reply can be sent.
-				Auction *atmp = (*auctions)->begin();
+				Auction *atmp = *(auctions->begin());
 
 				string sipv4Address = IpApMessageParser::getMiscVal(atmp->getMisc(), "dstip");
 				string sipv6Address = IpApMessageParser::getMiscVal(atmp->getMisc(), "dstip6");
