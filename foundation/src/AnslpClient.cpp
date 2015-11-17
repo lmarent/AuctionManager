@@ -206,7 +206,7 @@ AnslpClient::tg_teardown(anslp::session_id *sid)
 
 	event *e = new api_teardown_event(sid);
 
-	anslp_event_msg *msg = new anslp_event_msg(session_id(), e);
+	anslp_event_msg *msg = new anslp_event_msg(*sid, e);
 	
 	anslp_daemon *anslpd = starter->get_thread_object();
 	

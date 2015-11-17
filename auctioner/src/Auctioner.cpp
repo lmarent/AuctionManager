@@ -1203,54 +1203,91 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 		// Confirm the message arriving, if it is confirming a previous message. 
 		if (ackSeqNbr > 0){
 			s->confirmMessage(ackSeqNbr-1);
-		}	
-		
-		// Bring the list of local templates
-		auctionerTemplateListIter_t templIter = auctionerTemplates.find(domainId);
-		if (templIter != auctionerTemplates.end()){
-		
-			bids = bidm->parseMessage(message,templIter->second);
-			
-			// Insert the session as part of the elements of bidding object
-			biddingObjectDBIter_t bidIter;
-			for (bidIter = bids->begin(); bidIter != bids->end(); ++bidIter){
-				(*bidIter)->setSession(sessionId);
-			}
-			
-			// Add the bidding objects to the bidding object manager.
-			bidm->addBiddingObjects(bids, evnt.get());  
-			
-			// Build the response for the originator agent.
-			ipap_message resp = ipap_message(domainId, IPAP_VERSION, true);
-			resp.set_seqno(s->getNextMessageId());
-			resp.set_ackseqno(seqNbr+1);
-			resp.output();
-			
-			anslp::msg::anslp_ipap_xml_message mess;
-			anslp::msg::anslp_ipap_message anlp_mess(resp);
-			string xmlMessage = mess.get_message(anlp_mess);
-
-
-#ifdef DEBUG
-			log->dlog(ch,"Ending handle Auction Interaction" );
-#endif	
 			
 			// Send the response message.
 			if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
-				comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
+				comm->sendMsg("", ((AuctionInteractionEvent *)e)->getReq(), fds);
 			} else {
-				log->dlog(ch,"Message to send: %s", xmlMessage.c_str() );
+				log->dlog(ch,"Message to send: %s", "ok" );
 			}
 			
+		}	
+		else {
+			// Bring the list of local templates
+			auctionerTemplateListIter_t templIter = auctionerTemplates.find(domainId);
+			if (templIter == auctionerTemplates.end()){
+				throw Error("Local templates not initialized with domain:%d", domainId);
+			} 
+			else {	
+				bids = bidm->parseMessage(message,templIter->second);
+				
+				// Insert the session as part of the elements of bidding object
+				biddingObjectDBIter_t bidIter;
+				for (bidIter = bids->begin(); bidIter != bids->end(); ++bidIter){
+					(*bidIter)->setSession(sessionId);
+				}
+				
+				// Add the bidding objects to the bidding object manager.
+				bidm->addBiddingObjects(bids, evnt.get());  
+
+				if ( bids->size() > 0 ){
+					biddingObjectDBIter_t iter = bids->begin();
+					BiddingObject *biddingObject = *iter;
+					Auction *a = aucm->getAuction(biddingObject->getAuctionSet(), 
+													biddingObject->getAuctionName());
 			
-		} else {
-		  string error = "templates not initialized in the auctioneer"; 
-		  if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
-			  comm->sendErrMsg(error, ((AuctionInteractionEvent *)e)->getReq(), fds); 			
-		  } else {
-				log->elog(ch,"AuctioningInteraction Error: %s", error.c_str() );
-		  } 
-		}
+					// We obtain from the auction the connection settings for auctioning ( Ip address, port, Ip_version )
+					string sipv4Address = IpApMessageParser::getMiscVal(a->getMisc(), "dstip");
+					string sipv6Address = IpApMessageParser::getMiscVal(a->getMisc(), "dstip6");
+					string sport = IpApMessageParser::getMiscVal(a->getMisc(), "dstauctionport");
+					string sipversion = IpApMessageParser::getMiscVal(a->getMisc(), "ipversion");
+						
+					int ipVersion = ParserFcts:: parseInt(sipversion);
+			
+					string destinAddr;
+			
+					if (ipVersion == 4) {
+						destinAddr = sipv4Address;
+					} else {
+						destinAddr = sipv6Address;
+					}
+			
+					int iport = ParserFcts::parseInt(sport);
+
+				
+					// Build the response for the originator agent.
+					ipap_message resp = ipap_message(domainId, IPAP_VERSION, true);
+					resp.set_seqno(s->getNextMessageId());
+					resp.set_ackseqno(seqNbr+1);
+					resp.output();
+				
+				
+#ifdef DEBUG
+					// Activate to see the message to send.
+					anslp::msg::anslp_ipap_xml_message mess;
+					anslp::msg::anslp_ipap_message anlp_mess(resp);
+					string xmlMessage = mess.get_message(anlp_mess);
+#endif
+					// Finally send the message through the anslp client application.
+					anslpc->tg_bidding( new anslp::session_id(sessionId), 
+										s->getSenderAddress(), destinAddr, 
+										s->getSenderPort(), iport,
+										s->getProtocol(), 
+										resp );
+
+#ifdef DEBUG
+					log->dlog(ch,"Ending handle Auction Interaction" );
+#endif			
+				}
+				// Send the response message.
+				if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
+					comm->sendMsg("", ((AuctionInteractionEvent *)e)->getReq(), fds);
+				} else {
+					log->dlog(ch,"Message to send: %s", "ok" );
+				}
+			}
+		}	
+			
 	} catch (Error &err){
 		log->elog( ch, err.getError().c_str() );	
 		if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
