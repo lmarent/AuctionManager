@@ -641,11 +641,14 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 			// Get the auctions corresponding with this resource request interval
 			mes = rreqm->get_ipap_message( req, start, resourceId, useIPV6, _sIPV4, _sIPV6, port);
 			
-			// Create a new session for sending the request.
+			// Create a new session for sending the request with a temporary id. 
+			// It is replaced with the one given by the anslp client
+			
 			session = asmp->createAgentSession( defaultSourceAddr, defaultSourceAddr, 
 												defaultDestinAddr, defaultSourcePort, 
 												defaultDestinPort, defaultProtocol,
 												defaultLifeTime  );
+												
 			uint32_t mid = session->getNextMessageId();
 			mes->set_seqno(mid);
 			mes->set_ackseqno(0);
@@ -673,6 +676,8 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 											   session->getProtocol(),
 											   session->getLifetime(),
 											   *mes );
+			
+			session->setSessionId(sid.to_string());
 			
 			// Add the message as pending for ack.
 			session->addPendingMessage(*mes);
