@@ -246,7 +246,7 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
     event *e = new api_bidding_event(sid, source_addr, destination_addr, source_port, 
    				       dest_port, protocol, mspec_objects, &ret);
 
-    anslp_event_msg *msg = new anslp_event_msg(session_id(), e);
+    anslp_event_msg *msg = new anslp_event_msg(*sid, e);
 
 	anslp_daemon *anslpd = starter->get_thread_object();
 
@@ -262,12 +262,7 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
 	current = localtime(&now);
 	struct timeval detail_time;
 	gettimeofday(&detail_time,NULL);
-
-	cout << "hour: " << current->tm_hour 
-		 << "mins: " << current->tm_min
-		 << "sec: " << current->tm_sec 
-		 << "milli: " << detail_time.tv_usec/1000 << endl;	
-	
+		
     if (r != NULL)
 		saveDelete(r);
 
