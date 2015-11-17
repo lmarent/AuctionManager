@@ -678,7 +678,7 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 			session->addPendingMessage(*mes);
 
 #ifdef DEBUG
-			log->dlog(ch,"Anslp Session Id:" << sid );
+			log->dlog(ch,"Anslp Session Id:%s",  sid.to_string().c_str() );
 #endif
 			
 			// Set to the session the anslp session created by the client.
