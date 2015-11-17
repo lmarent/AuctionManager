@@ -866,7 +866,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 				int iport = ParserFcts::parseInt(sport);
 
 #ifdef DEBUG			
-				log->dlog(ch, "handle create session - after configuring auctions");
+				log->dlog(ch, "handle create session - destin address:%s port:%d", destinAddr.c_str(), iport);
 #endif
 			
 				// Build the response for the originator agent.
