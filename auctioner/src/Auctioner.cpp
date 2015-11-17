@@ -194,18 +194,7 @@ Auctioner::Auctioner( int argc, char *argv[])
 		// Initialize The openssl framework.
 		anslp::init_framework();
 
-		const EVP_MD *md;
-		
-		md = EVP_get_digestbyname("SHA1");
-		if(!md) {
-			std::cout << " SHA1 not available. Please update your OpenSSL library!" << std::endl;
-			abort();
-		} else {
-			std::cout << " SHA1 found !" << std::endl;
-		}
-
-        // Read parameters from configuration file.
-        
+        // Read parameters from configuration file.        
         // set the domain id
         string _domainId = conf->getValue("Domain", "MAIN");
 		domainId = ParserFcts::parseInt( _domainId );
@@ -724,7 +713,7 @@ void Auctioner ::handleActivateBiddingObjects(Event *e, fd_sets_t *fds)
 		biddingObjectDB_t bids2;
 		biddingObjectDBIter_t bidIter;
 		for (bidIter = bids->begin(); bidIter != bids->end(); ++bidIter){
-			if ((*bidIter)->getType() == IPAP_BID){
+			if ( (*bidIter)->getType() == IPAP_BID ){
 				bids2.push_back(*bidIter);
 			}
 		}
@@ -856,9 +845,7 @@ void Auctioner::handlePushExecution(Event *e, fd_sets_t *fds)
         
 		// Execute the algorithm
         proc->executeAuction(index, start, stoptmp, evnt.get());
-        
-        cout << "start:" << Timeval::toString(start) << " stoptmp:" << Timeval::toString(stoptmp) << " Stop:" << Timeval::toString(stop) << endl;
-              
+                      
         // Re-schedule the event.
         if (stoptmp < stop){
 			evnt.get()->reschedNextEvent(e);
@@ -1247,10 +1234,6 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 				anslp::msg::anslp_ipap_message anlp_mess(resp);
 				string xmlMessage = mess.get_message(anlp_mess);
 
-#ifdef DEBUG
-				log->dlog(ch,"Ending handle Auction Interaction" );
-#endif			
-
 				// Send the response message.
 				if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
 					comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
@@ -1260,37 +1243,13 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 
 
 				if ( bids->size() > 0 ){
-					biddingObjectDBIter_t iter = bids->begin();
-					BiddingObject *biddingObject = *iter;
-					Auction *a = aucm->getAuction(biddingObject->getAuctionSet(), 
-													biddingObject->getAuctionName());
-			
-					// We obtain from the auction the connection settings for auctioning ( Ip address, port, Ip_version )
-					string sipv4Address = IpApMessageParser::getMiscVal(a->getMisc(), "dstip");
-					string sipv6Address = IpApMessageParser::getMiscVal(a->getMisc(), "dstip6");
-					string sport = IpApMessageParser::getMiscVal(a->getMisc(), "dstauctionport");
-					string sipversion = IpApMessageParser::getMiscVal(a->getMisc(), "ipversion");
 						
-					int ipVersion = ParserFcts:: parseInt(sipversion);
-			
-					string destinAddr;
-			
-					if (ipVersion == 4) {
-						destinAddr = sipv4Address;
-					} else {
-						destinAddr = sipv6Address;
-					}
-			
-					int iport = ParserFcts::parseInt(sport);
-
-				
 					// Build the response for the originator agent.
 					ipap_message conf = ipap_message(domainId, IPAP_VERSION, true);
 					conf.set_seqno(s->getNextMessageId());
 					conf.set_ackseqno(seqNbr+1);
 					conf.output();
-				
-				
+								
 #ifdef DEBUG
 					// Activate to see the message to send.
 					anslp::msg::anslp_ipap_xml_message mess2;
@@ -1298,11 +1257,13 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 					string confXmlMessage = mess2.get_message(anlp_mess2);
 #endif
 					// Finally send the message through the anslp client application.
+					
 					anslpc->tg_bidding( new anslp::session_id(sessionId), 
-										s->getSenderAddress(), destinAddr, 
-										s->getSenderPort(), iport,
-										s->getProtocol(), 
-										conf );
+											s->getReceiverAddress(), 
+											s->getSenderAddress(), 
+											s->getReceiverPort(), 
+											s->getSenderPort(),
+											s->getProtocol(), conf );
 				}
 
 #ifdef DEBUG
@@ -1582,7 +1543,7 @@ void Auctioner::run()
             if (cnt > 0)  {
 
 #ifdef DEBUG			
-				log->dlog(ch,"In check FD events");
+				log->dlog(ch,"In check FD events time:%s", (Timeval::toString(tv)).c_str());
 #endif
 
                 if (FD_ISSET( s_sigpipe[0], &rset)) {
@@ -1614,8 +1575,11 @@ void Auctioner::run()
                                 } else {
                                     handleEvent(e, &fds);
                                 }
-                                // reschedule the event
-                                evnt->reschedNextEvent(e);
+                                
+                                // reschedule events different to push execution.
+                                if (e->getType() != PUSH_EXECUTION){
+									evnt->reschedNextEvent(e);
+								}
                                 e = NULL;
                             }		    
                             break;

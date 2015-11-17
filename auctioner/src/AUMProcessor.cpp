@@ -403,14 +403,21 @@ void AUMProcessor::delBiddingObjectAuctionProcess( int index, BiddingObject *b )
 #endif
 
 				
+		biddingObjectDB_t * bidObjects;
 		biddingObjectDBIter_t bid_iter;
-		for ( bid_iter = ((iter->second).getBids())->begin(); 
-				bid_iter != ((iter->second).getBids())->end(); ++bid_iter ){
+		
+		bidObjects = (iter->second).getBids();
+
+#ifdef DEBUG
+		log->dlog(ch, "Nro Bidding Objects:%d", bidObjects->size());
+#endif		
+		for ( bid_iter = bidObjects->begin();  bid_iter != bidObjects->end(); ++bid_iter ){
 			
 			if ((b->getBiddingObjectSet().compare((*bid_iter)->getBiddingObjectSet()) == 0) &&
 				(b->getBiddingObjectName().compare((*bid_iter)->getBiddingObjectName()) == 0)){
 				((iter->second).bids).erase(bid_iter);
 				deleted=true;
+				break;
 			}
 		} 
 		
