@@ -1178,6 +1178,10 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 {
 
+#ifdef DEBUG
+	log->dlog(ch,"Starting handle Auction Interaction" );
+#endif
+
 	ipap_message *message = NULL;
 	biddingObjectDB_t *bids = NULL;
 	auction::Session *s = NULL;
@@ -1225,6 +1229,11 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 			anslp::msg::anslp_ipap_xml_message mess;
 			anslp::msg::anslp_ipap_message anlp_mess(resp);
 			string xmlMessage = mess.get_message(anlp_mess);
+
+
+#ifdef DEBUG
+			log->dlog(ch,"Ending handle Auction Interaction" );
+#endif	
 			
 			// Send the response message.
 			if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
@@ -1232,7 +1241,7 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 			} else {
 				log->dlog(ch,"Message to send: %s", xmlMessage.c_str() );
 			}
-				
+			
 			
 		} else {
 		  string error = "templates not initialized in the auctioneer"; 
