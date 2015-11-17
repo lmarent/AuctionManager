@@ -1420,14 +1420,11 @@ void Agent::run()
         fds.max = fdList.begin()->first.fd;
 		
 		// register a timer for ctrlcomm (only online capturing)
-		if (enableCtrl) {
-		  int t = comm->getTimeout();
-		  if (t > 0) {
-				evnt->addEvent(new CtrlCommTimerEvent(t, t * 1000));
-		  }
+		int t = comm->getTimeout();
+		if (t > 0) {
+			evnt->addEvent(new CtrlCommTimerEvent(t, t * 1000));
 		}
-		
-		
+				
         // start threads (if threading is configured)
         proc->run();
 
@@ -1499,10 +1496,7 @@ void Agent::run()
                     }
                 } 
                 else {
-                    if (enableCtrl) {
-                      cout << "enableCtrl" << endl;
-                      comm->handleFDEvent(&retEvents, &rset, &wset, &fds);
-                    }
+                   comm->handleFDEvent(&retEvents, &rset, &wset, &fds);
                 }
 	        }	
 
