@@ -1317,6 +1317,11 @@ void Auctioner::handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds)
 void 
 Auctioner::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 {
+
+#ifdef DEBUG
+    log->dlog(ch,"processing event handleTransmitBiddingObjects" );
+#endif	
+	
 	ipap_message *mes = NULL;
 
 	try{
@@ -1346,20 +1351,19 @@ Auctioner::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 				uint32_t mid = session->getNextMessageId();
 				
 				mes = bidm->get_ipap_message(biddingObject, a, templIter->second);
-				
-				cout << "finish with the message" << endl; 
-				
+								
 				mes->set_seqno(mid);
 				mes->set_ackseqno(0);
-				
-				cout << "finish with the message 2" << endl; 
-				
+								
 				// Save the message within the pending messages.
-				session->addPendingMessage(*mes);
-				
-				
-				cout << "finish with the message 3" << endl; 
-				
+				session->addPendingMessage(*mes);		
+
+#ifdef DEBUG
+				log->dlog(ch,"ReceivAddr:%s, SenderAddr:%s, RecPort:%d, senderPort:%d, Prot:%d, mesId:", 
+							session->getReceiverAddress().get_ip_str(), session->getSenderAddress().get_ip_str(), 
+							session->getReceiverPort(), session->getSenderPort(), 
+							session->getProtocol(), mes->get_seqno()  );
+#endif
 				// Finally send the message through the anslp client application.
 				anslpc->tg_bidding( new anslp::session_id(sessionId), 
 									session->getReceiverAddress(), 
@@ -1368,14 +1372,16 @@ Auctioner::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 									session->getSenderPort(),
 									session->getProtocol(), *mes );
 
-				cout << "finish with the message 4" << endl; 
-
 				saveDelete(mes);
 
-				cout << "finish with the message 5" << endl; 
+#ifdef DEBUG
+    log->dlog(ch,"ending event process handleTransmitBiddingObjects" );
+#endif
 
 			}
-		} else {
+		} 
+		else 
+		{
 		  if (mes){
 			saveDelete(mes);
 		  }	

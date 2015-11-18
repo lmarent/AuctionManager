@@ -235,43 +235,32 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
 	// Build the request message 
 
 	anslp_ipap_message mess(message);    
-            
-    FastQueue ret;
-	    
+            	    
     // Build the vector of objects to be configured.
     vector<msg::anslp_mspec_object *> mspec_objects;
     mspec_objects.push_back(mess.copy());
 
     // Create a new event for launching the configure event.
     event *e = new api_bidding_event(sid, source_addr, destination_addr, source_port, 
-   				       dest_port, protocol, mspec_objects, &ret);
+   				       dest_port, protocol, mspec_objects, NULL);
 
     anslp_event_msg *msg = new anslp_event_msg(*sid, e);
+
+#ifdef DEBUG
+    log->dlog(ch,"Message id: %lld", msg->get_id());
+#endif	
+	
 
 	anslp_daemon *anslpd = starter->get_thread_object();
 
     anslpd->get_fqueue()->enqueue(msg);
 	
-    protlib::message *ret_msg = ret.dequeue_timedwait(10000);
-
-    anslp_event_msg *r = dynamic_cast<anslp_event_msg *>(ret_msg);
-
-	time_t now;
-	struct tm *current;
-	now = time(0);
-	current = localtime(&now);
-	struct timeval detail_time;
-	gettimeofday(&detail_time,NULL);
-		
-    if (r != NULL)
-		saveDelete(r);
-
         
 #ifdef DEBUG
     log->dlog(ch,"Ending tg_bidding ");
 #endif        
     
-    // TODO AM: To take the values returned in the message and return them. 
+
 
 }
 

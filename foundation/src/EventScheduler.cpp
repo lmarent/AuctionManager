@@ -89,6 +89,20 @@ void EventScheduler::addEvent(Event *ev)
 #endif
     
     events.insert(make_pair(ev->getTime(),ev));
+    
+#ifdef DEBUG
+    log->dlog(ch,"nbr of events active after inserting:", events.size());
+    eventListIter_t iter;
+            
+    // output all scheduled Events to ostream
+    for (iter = events.begin(); iter != events.end(); iter++) {
+        struct timeval rv = iter->first;
+        log->dlog(ch,"Time:%s event:%s", (Timeval::toString(rv)).c_str(), 
+					eventNames[iter->second->getType()].c_str());        
+    }
+    
+#endif
+    
 }
 
 
@@ -185,7 +199,18 @@ void EventScheduler::reschedNextEvent(Event *ev)
 {
 
 #ifdef DEBUG
-        log->dlog(ch,"starting requeue event %s", eventNames[ev->getType()].c_str());
+    log->dlog(ch,"starting requeue event %s", eventNames[ev->getType()].c_str());
+#endif
+
+#ifdef DEBUG     
+	eventListIter_t iter;
+	
+    // output all scheduled Events to ostream
+    for (iter = events.begin(); iter != events.end(); iter++) {
+        struct timeval rv = iter->first;
+        log->dlog(ch,"Time:%s event:%s", (Timeval::toString(rv)).c_str(), 
+					eventNames[iter->second->getType()].c_str());        
+    }
 #endif
 
     assert(ev != NULL);
@@ -209,6 +234,19 @@ void EventScheduler::reschedNextEvent(Event *ev)
 
         // and requeue it
         events.insert(make_pair(ev->getTime(),ev));
+
+#ifdef DEBUG     
+	log->dlog(ch,"after reschule the event");
+	eventListIter_t iter;
+	
+    // output all scheduled Events to ostream
+    for (iter = events.begin(); iter != events.end(); iter++) {
+        struct timeval rv = iter->first;
+        log->dlog(ch,"Time:%s event:%s", (Timeval::toString(rv)).c_str(), 
+					eventNames[iter->second->getType()].c_str());        
+    }
+#endif
+        
     } else {
 #ifdef DEBUG
         log->dlog(ch,"remove event %s", eventNames[ev->getType()].c_str());
