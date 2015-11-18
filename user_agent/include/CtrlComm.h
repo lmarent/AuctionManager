@@ -182,7 +182,7 @@ class CtrlComm : public auction::AuctionManagerComponent
     char *processResponseSessionRemove(parseReq_t *preq );
 
 	//! execute an auction interaction for a currently active sessions
-    char *processResponseAuctionInteraction(parseReq_t *preq );
+    char *processAuctionInteraction(parseReq_t *preq );
 
     //! return agent information (bidlist,status,modlist)
     char *processGetInfo(parseReq_t *preq );

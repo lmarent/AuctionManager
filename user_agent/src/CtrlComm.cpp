@@ -35,6 +35,7 @@ $Id: CtrlComm.cpp 748 2015-07-31 9:25:00 amarentes $
 #include "EventAgent.h"
 #include "anslp_ipap_xml_message.h"
 #include "anslp_ipap_message.h"
+#include "anslp_ipap_exception.h" 
 
 
 using namespace std;
@@ -511,8 +512,8 @@ int CtrlComm::processCmd(struct REQUEST *req)
             processGetInfo(&preq);
         } else if (preq.comm == "/res_add_session") {
             processResponseSessionCreate(&preq);
-        } else if (preq.comm == "/res_auction_interaction") {
-            processResponseAuctionInteraction(&preq);
+        } else if (preq.comm == "/auct_interact") {
+            processAuctionInteraction(&preq);
         } else if (preq.comm == "/res_del_session") {
             processResponseSessionRemove(&preq);
         } else {
@@ -599,9 +600,9 @@ char *CtrlComm::processResponseSessionRemove(parseReq_t *preq )
     return NULL;
 }
 
-/* ------------------ processResponseSessionRemove ------------------ */
+/* ------------------ processAuctionInteraction ------------------ */
 
-char *CtrlComm::processResponseAuctionInteraction(parseReq_t *preq )
+char *CtrlComm::processAuctionInteraction(parseReq_t *preq )
 {
     paramListIter_t sessionId = preq->params.find("SessionID");
 
@@ -609,8 +610,24 @@ char *CtrlComm::processResponseAuctionInteraction(parseReq_t *preq )
         throw Error("processAuctionInteraction: missing parameter 'SessionID'" );
     }
     
-    // Exec the response to the response auction interaction.
-    //retEvent = new auction::RemoveBidsCtrlEvent(id->second);
+    paramListIter_t message = preq->params.find("Message");
+
+    if (message == preq->params.end() ) {
+        throw Error("processAuctionInteraction: missing parameter 'Message'" );
+    }
+
+    try {
+        // assume xml ipap_message def
+        anslp::msg::anslp_ipap_xml_message mess;
+        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(message->second);
+        retEvent = new AuctionInteractionEvent(sessionId->second, ipap_mes->ip_message);
+        
+    } catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		log->elog( ch, e.what() );
+        throw Error(e.what());
+    }
+  
+    return NULL;
   
     return NULL;
 }

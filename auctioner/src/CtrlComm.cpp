@@ -679,7 +679,7 @@ char *CtrlComm::processAuctionInteraction(parseReq_t *preq )
     paramListIter_t message = preq->params.find("Message");
 
     if (message == preq->params.end() ) {
-        throw Error("add_Session: missing parameter 'Message'" );
+        throw Error("processAuctionInteraction: missing parameter 'Message'" );
     }
 
     try {
