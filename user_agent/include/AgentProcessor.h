@@ -130,6 +130,9 @@ class AgentProcessor : public AuctionManagerComponent, public FieldDefManager
     //! delete request
     void delRequest( int index );
 
+    //! release the module attached to the request
+    void releaseRequest( int index );
+
     //! execute the algorithm
     void executeRequest( int index, EventScheduler *e );
 

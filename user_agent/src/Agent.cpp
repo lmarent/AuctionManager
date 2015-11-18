@@ -1313,6 +1313,8 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 			
 			bids = bidm->parseMessage(message,iterCont->second);
 			
+			// Add the bidding objects to the bidding object manager.
+			bidm->addBiddingObjects(bids, evnt.get());  
 										
 			// Build the response for the originator agent.
 			ipap_message resp = ipap_message(domainId, IPAP_VERSION, true);

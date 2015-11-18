@@ -187,6 +187,38 @@ int AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, Aucti
 }
 
 /* ------------------------- delRequest ------------------------- */
+void AgentProcessor::releaseRequest( int index )
+{
+
+#ifdef DEBUG
+    log->dlog(ch,"starting releaseRequest");
+#endif
+
+
+	// Verifies that the index is valid
+	if (index < 0){
+		throw Error("Invalid index:%d given", index);
+	}
+
+    AUTOLOCK(threaded, &maccess);  
+	
+	requestProcessListIter_t ret = requests.find(index);	
+	if (ret != requests.end()){
+		loader->releaseModule((ret->second).getModule());
+				
+	} else {
+		throw Error("Request index:%d not found", index);
+	}
+
+#ifdef DEBUG
+    log->dlog(ch,"ending releaseRequest");
+#endif
+		        	
+}
+
+
+
+/* ------------------------- delRequest ------------------------- */
 void AgentProcessor::delRequest( int index )
 {
 
@@ -206,8 +238,7 @@ void AgentProcessor::delRequest( int index )
 	if (ret != requests.end()){
 		loader->releaseModule((ret->second).getModule());
 		
-		requests.erase(index);
-		
+		requests.erase(ret);		
 		// Release the used Id
 		idSource.freeId(index);
 	} else {
@@ -396,16 +427,26 @@ AgentProcessor::delAuctions(auctionDB_t *aucts)
 {
 	AUTOLOCK(threaded, &maccess);
 	
-    requestProcessListIter_t iter;
-    for (iter = requests.begin(); iter != requests.end(); ++iter){
+    requestProcessListIter_t iter = requests.begin();
+    for (; iter != requests.end(); ++iter){
 		// delete the actions from the request process.
- 		delAuctionsRequest(iter->first, aucts);
+ 		delAuctionsRequest(iter->first, aucts);		
+	}
 	
-	    // If the number of auction left in the request is zero, then delete the request process.
+	
+	// If the number of auction left in the request is zero, then delete the request process.
+	for (iter = requests.begin() ; iter != requests.end();){
         requestProcessListIter_t iter2 = requests.find(iter->first);
         if ((iter2->second).getAuctions()->size() == 0){
-			delRequest( iter->first );
-		}	
+			releaseRequest( iter->first );
+			// Release the used Id
+			idSource.freeId(iter->first);
+ 
+			requests.erase(iter++);
+		} 
+		else {
+			++iter;
+		}
 	}
 }
 
