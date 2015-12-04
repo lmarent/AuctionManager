@@ -72,7 +72,7 @@ class FieldValParser : public XMLParser
     virtual void parse(fieldValList_t *list);
 };
 
-}; // namespace auction
+} // namespace auction
 
 
 #endif // _FIELD_VALPARSER_H_

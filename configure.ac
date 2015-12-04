@@ -268,10 +268,12 @@ if test "$XSLT_DIR" ; then
    CPPFLAGS="$CPPFLAGS -I$XSLT_DIR/include"
 fi
 
+dnl # check xml2 lib
 AC_CHECK_HEADERS([libxml/parser.h],,[AC_MSG_ERROR([cannot find libxml2 headers])]) 
 AC_CHECK_LIB(xml2, xmlParseFile,
   [XMLLIB="-lxml2"],
   [AC_MSG_ERROR([cannot find libxml2])])
+
 dnl # check xslt lib
 AC_CHECK_HEADERS([libxslt/transform.h libxslt/xsltutils.h],,
   [AC_MSG_WARN([cannot find xslt headers])])
@@ -297,6 +299,10 @@ AM_CONDITIONAL(CURL, test -n "$CURL_LIBS")
 AC_SUBST(CURL_CFLAGS)
 AC_SUBST(CURL_LIBS)
 
+PKG_CHECK_MODULES(PQXX, libpqxx >= 4.0)
+AC_SUBST(PQXX_CFLAGS)
+AC_SUBST(PQXX_LIBS)
+   
 PKG_CHECK_MODULES(OPENSSL, openssl,
         CXXFLAGS="$CXXFLAGS `pkg-config --cflags openssl`";
         LIBS="$LIBS -lcrypto `pkg-config --libs-only-L --libs-only-other openssl`")
@@ -386,6 +392,16 @@ AC_DEFINE_UNQUOTED(DEF_LIBDIR, "$DEF_LIBDIR", "lib dir")
 DEF_BINDIR=`eval echo ${bindir}`
 AC_DEFINE_UNQUOTED(DEF_BINDIR, "$DEF_BINDIR", "bin dir")
 
+# Additional arguments (and substitutions)
+# Allow the pkg-config directory to be set
+AC_ARG_WITH(pkgconfigdir,
+	AC_HELP_STRING([--with-pkgconfigdir],
+	[Use the specified pkgconfig dir (default is pkgconfig)]),
+	[pkgconfigdir=${withval}],
+	[pkgconfigdir='${exec_prefix}/lib/pkgconfig'])
+	
+	
+
 AC_SUBST(VERSION)
 AC_SUBST(REL_DATE)
 AC_SUBST(OS)
@@ -410,10 +426,11 @@ AC_SUBST(DEF_STATEDIR)
 AC_SUBST(DEF_LIBDIR)
 AC_SUBST(DEF_BINDIR)
 AC_SUBST(DOXY)
-
+AC_SUBST([pkgconfigdir])
 
 
 AC_CONFIG_FILES([Makefile \
+				 libauctionfdtion-0.0.pc \
 				 lib/Makefile \
 				 lib/getpass/Makefile \
   				 lib/httpd/Makefile \

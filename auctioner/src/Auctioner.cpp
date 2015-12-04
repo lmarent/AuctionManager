@@ -229,9 +229,27 @@ Auctioner::Auctioner( int argc, char *argv[])
         auto_ptr<AuctionTimer> _auct(AuctionTimer::getInstance());
         auct = _auct;
         
+        // setup the database connection string.
+        string _dbIp = conf->getValue("DataBaseIpAddress", "MAIN");
+        string _dbName = conf->getValue("DBname", "MAIN");
+        string _dbUser = conf->getValue("DBUser", "MAIN");
+        string _dbPassword = conf->getValue("DBPassword", "MAIN");
+        string _dbPort = conf->getValue("DBPort", "MAIN");
+        
+        string connectionDb;
+        if (!_dbName.empty()){
+        
+			connectionDb = "dbname=" + _dbName; 
+			connectionDb = connectionDb + "user=" + _dbUser; 
+			connectionDb = connectionDb + "password=" + _dbPassword;
+			connectionDb = connectionDb + "hostaddr=" + _dbIp;
+			connectionDb = connectionDb + "port=" + _dbPort;
+		} 
+        
         auto_ptr<BiddingObjectManager> _bidm(new BiddingObjectManager(domainId, 
 																	  conf->getValue("FieldDefFile", "MAIN"),
-																	  conf->getValue("FieldConstFile", "MAIN")));
+																	  conf->getValue("FieldConstFile", "MAIN"),
+																	  connectionDb));
         bidm = _bidm;
 		
         auto_ptr<AuctionManager> _aucm(new AuctionManager( domainId,

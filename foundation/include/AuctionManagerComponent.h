@@ -202,6 +202,6 @@ class AuctionManagerComponent
 
 };
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _AUCTIONMANAGERCOMPONENT_H_

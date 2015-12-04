@@ -130,6 +130,6 @@ class EventScheduler
 //! overload for << so that a EventScheduler object can be thrown into an ostream
 ostream& operator<<(ostream &os, EventScheduler &es);
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _EVENTSCHEDULER_H_

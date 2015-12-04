@@ -84,6 +84,6 @@ class MessageIdSource
 //! overload for <<, so that a MessageIdSource object can be thrown into an iostream
 ostream& operator<< ( ostream &os, MessageIdSource &mis );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _MESSAGE_ID_SOURCE_H_

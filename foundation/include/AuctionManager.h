@@ -251,6 +251,6 @@ class AuctionManager : public FieldDefManager
 //! overload for <<, so that a AuctionManager object can be thrown into an iostream
 ostream& operator<< ( ostream &os, AuctionManager &rm );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _AUCTION_MANAGER_H_

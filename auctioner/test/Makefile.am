@@ -18,7 +18,7 @@ if ENABLE_DEBUG
 				-I@top_srcdir@/auctioner/include $(LIBIPAP_CFLAGS) \
 				$(LIBANSLP_CFLAGS) $(LIBANSLP_MSG_CFLAGS)  \
 			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
-			    -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING -DINTEL			    
+			    -fno-inline -ggdb -DDEBUG -DPROFILING -DINTEL			    
 else
   AM_CXXFLAGS = -O2 -I@top_srcdir@/foundation/include $(CPPUNIT_CFLAGS) \
 				-I@top_srcdir@/auctioner/include $(LIBIPAP_CFLAGS) \

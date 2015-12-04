@@ -93,6 +93,6 @@ class ProcError
 //! overload for << so that a Error object can be thrown into an ostream
 std::ostream& operator<< ( std::ostream &os, ProcError &e );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _PROC_ERROR_H_

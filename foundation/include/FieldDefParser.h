@@ -59,6 +59,6 @@ class FieldDefParser : public XMLParser
     virtual void parse(fieldDefList_t *list);
 };
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _FIELD_DEFPARSER_H_

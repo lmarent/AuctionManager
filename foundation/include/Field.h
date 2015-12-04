@@ -152,6 +152,6 @@ typedef vector<field_t>::iterator  			fieldListIter_t;
 typedef vector<field_t>::const_iterator  	fieldListconstIter_t;
 
 
-}; // namespace auction.
+} // namespace auction.
 
 #endif // _FIELD_H_

@@ -106,19 +106,23 @@ class BiddingObjectManager : public FieldDefManager
 	//! This field identifies uniquely the agent.
 	int domain; 
 	
-    /* \short add the biddingObject  name to the list of finished biddingObjects
+    /*! \short add the biddingObject  name to the list of finished biddingObjects
 
        \arg \c bidname - name of the finished biddingObject  (source.name)
     */
     void storeBiddingObjectAsDone(BiddingObject  *r);
 
+    //! connection string to the database.
+    string connectionDBStr;
+    
   public:
 
     /*! \short   construct and initialize a BiddingObjectManager object
-        \arg \c fdname  field definition file name
-        \arg \c fvname  field value definition name
+        \arg \c fdname  		field definition file name
+        \arg \c fvname  		field value definition name
+        \arg \c connectionDB 	string to connect to the data base. If empty inactive DB management.
      */
-    BiddingObjectManager(int domain, string fdname, string fvname); //Ok
+    BiddingObjectManager(int domain, string fdname, string fvname, string connectionDB); //Ok
 
     //! destroy a BiddingObjectManager object
     ~BiddingObjectManager(); // Ok
@@ -220,13 +224,13 @@ class BiddingObjectManager : public FieldDefManager
 	ipap_message * get_ipap_message(BiddingObject *biddingObject,
 									Auction *auction, 
 									ipap_template_container *templates);
-
+	
 };
 
 
 //! overload for <<, so that a BiddingObjectManager object can be thrown into an iostream
 ostream& operator<< ( ostream &os, BiddingObjectManager &rm );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _BIDMANAGER_H_

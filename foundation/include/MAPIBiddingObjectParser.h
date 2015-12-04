@@ -106,7 +106,7 @@ class MAPIBiddingObjectParser : public IpApMessageParser, public anslp::msg::ans
 
 };
 
-}; // namespace auction
+} // namespace auction
 
 
 #endif // _MAPI_BIDDING_OBJECT_PARSER_H_

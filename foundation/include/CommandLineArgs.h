@@ -131,6 +131,6 @@ class CommandLineArgs
 
 };
 
-};
+}
 
 #endif // _COMMANDLINEARGS_H_

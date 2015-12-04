@@ -18,6 +18,12 @@
     <PREF NAME="FilterConstFile">@DEF_SYSCONFDIR@/fieldval.xml</PREF>     
     <!-- auction file to load at start -->
     <PREF NAME="AuctionFile">@DEF_SYSCONFDIR@/example_auctions2.xml</PREF>    
+	<!-- Information for database store -->
+    <PREF NAME="DataBaseIpAddress" TYPE="IPAddr">127.0.0.1</PREF>
+    <PREF NAME="DBname" TYPE="String">auctionDB</PREF>
+    <PREF NAME="DBUser" TYPE="String">postgres</PREF>
+    <PREF NAME="DBPassword" TYPE="String">admin2607</PREF>
+    <PREF NAME="DBPort" TYPE="String">5432</PREF>
   </MAIN>
   <CONTROL>
     <!-- port for control connections -->
@@ -47,7 +53,7 @@
     <!-- allow on-demand loading i.e. when new module is used in rule definition --> 
     <PREF NAME="ModuleDynamicLoad" TYPE="Bool">yes</PREF>
     <!-- module which is preloaded at startup, if the user put a list, the SW will only load the first module defined-->
-    <PREF NAME="Modules">libbas </PREF>
+    <PREF NAME="Modules">libbas libtwoauction</PREF>
     <MODULES>
       <MODULE NAME="libbas">
 		  <!-- Total interface Rate is on bytes  -->
@@ -57,6 +63,10 @@
 		  <!-- Next bidding Id to generate -->
 		  <PREF NAME="NextId" TYPE="UInt32">100</PREF>		  
       </MODULE>
+      <MODULE NAME="libtwoauction">
+		  <!-- Next bidding Id to generate -->
+		  <PREF NAME="NextId" TYPE="UInt32">100</PREF>		  
+      </MODULE>      
     </MODULES>
   </AUM_PROCESSOR>  
 </CONFIG>

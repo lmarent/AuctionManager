@@ -68,6 +68,6 @@ class FieldDefManager
 
 };
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _FIELD_DEF_MANAGER_H_

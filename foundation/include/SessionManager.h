@@ -166,6 +166,6 @@ class SessionManager
 //! overload for <<, so that a SessionManager object can be thrown into an iostream
 ostream& operator<< ( ostream &os, SessionManager &rm );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _SESSION_MANAGER_H_

@@ -98,6 +98,6 @@ extern const string NO_AUCTION_VALUE;
 // Allocation.cpp
 extern const string ALL_DEFAULT_SETNAME;
 
-};
+}
 
 #endif // _CONSTANTS_H_

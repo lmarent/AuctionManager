@@ -151,6 +151,6 @@ class Module
 //! overload for <<, so that a Module object can be thrown into an ostream
 ostream& operator<< ( ostream &os, Module &obj );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _MODULE_H_

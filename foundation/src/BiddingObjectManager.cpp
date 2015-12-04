@@ -29,19 +29,19 @@
 
 #include "ParserFcts.h"
 #include "BiddingObjectManager.h"
-// #include "CtrlComm.h"
 #include "Constants.h"
+#include <pqxx/pqxx>
 
 using namespace auction;
 
 /* ------------------------- BiddingObjectManager ------------------------- */
 
-BiddingObjectManager::BiddingObjectManager( int domain, string fdname, string fvname) 
-    : FieldDefManager(fdname, fvname),  biddingObjects(0), idSource(1), domain(domain)
+BiddingObjectManager::BiddingObjectManager( int domain, string fdname, string fvname, string connectionDB) 
+    : FieldDefManager(fdname, fvname), biddingObjects(0), idSource(1), domain(domain), connectionDBStr(connectionDB)
 {
     log = Logger::getInstance();
     ch = log->createChannel("BiddingObjectManager");
-    
+        
 #ifdef DEBUG
     log->dlog(ch,"Starting");
 #endif
@@ -615,15 +615,23 @@ void BiddingObjectManager::storeBiddingObjectAsDone(BiddingObject *r)
 {
     
     r->setState(AO_DONE);
-    biddingObjectDone.push_back(r);
+    
+    if (connectionDBStr.empty()){
+    
+		biddingObjectDone.push_back(r);
 
-    if (biddingObjectDone.size() > DONE_LIST_SIZE) {
-        // release id
-        idSource.freeId(biddingObjectDone.front()->getUId());
-        // remove rule
-        saveDelete(biddingObjectDone.front());
-        biddingObjectDone.pop_front();
-    }
+		if (biddingObjectDone.size() > DONE_LIST_SIZE) {
+			// release id
+			idSource.freeId(biddingObjectDone.front()->getUId());
+			// remove rule
+			saveDelete(biddingObjectDone.front());
+			biddingObjectDone.pop_front();
+		}
+	} else {
+		// Store in the database
+		pqxx::connection c(connectionDBStr);
+		r->save(c);
+	}
 }
 
 

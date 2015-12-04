@@ -30,6 +30,7 @@
 
 using namespace auction;
 
+const char *auction::AuctionObjectStateNames[] = { "new", "valid", "scheduled", "active", "done", "error"};
 
 AuctioningObject::AuctioningObject(string name): 
 uid(0), state(AO_NEW)

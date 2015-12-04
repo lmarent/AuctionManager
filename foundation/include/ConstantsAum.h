@@ -50,6 +50,6 @@ extern const string AUM_CONFIGFILE_DTD;
 extern const string AUM_CERT_FILE;
 #endif
 
-};
+}
 
 #endif // _CONSTANTS_AUM_H_

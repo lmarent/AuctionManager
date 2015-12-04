@@ -113,6 +113,6 @@ public:
 
 };
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _AUCTIONMANAGERINFO_H_

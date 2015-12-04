@@ -72,6 +72,6 @@ class Timeval
     //! print time in readable format.
     static std::string toString(time_t t);
 
-}; // namespace auction
+}; 
 
 #endif // _TIMEVAL_H_

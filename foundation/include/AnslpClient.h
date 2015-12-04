@@ -26,6 +26,10 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 //
 // ===========================================================
+
+#ifndef _ANSLP_CLIENT_H_
+#define _ANSLP_CLIENT_H_
+
 #include <unistd.h>
 
 #include "stdincpp.h"
@@ -96,4 +100,6 @@ class AnslpClient
 
 };
 
-};
+}
+
+#endif // _ANSLP_CLIENT_H

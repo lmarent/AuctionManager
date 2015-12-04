@@ -137,6 +137,6 @@ class FieldValue
     string getInfo(void);
 };
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _FIELDVALUE_H_

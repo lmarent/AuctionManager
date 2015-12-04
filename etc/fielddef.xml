@@ -6,11 +6,18 @@
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="2">UnitPrice</DEF>
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="3">UnitBudget</DEF>
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="4">TotalBudget</DEF>  
+  <!-- Maximum Valuation -->
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="1">MaxValue</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="58">MaxValue01</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="59">MaxValue02</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="60">MaxValue03</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="61">MaxValue04</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="62">MaxValue05</DEF>
   <DEF LENGTH="4" TYPE="SInt32" ENO="0" FTYPE="5">AuctionDuration</DEF>
   <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="38">Bandwidth</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="24">AuctionID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="25">BiddingObjectID</DEF>
+  <DEF TYPE="String" ENO="0" FTYPE="52">RefBiddingObjectID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="26">AllocationID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="32">RecordID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="40">ResourceID</DEF>
@@ -30,6 +37,11 @@
   <DEF TYPE="UInt8" ENO="0" FTYPE="49">IPVersion</DEF>   
   <!-- Reserve price -->
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="39">ReservePrice</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="53">ReservePrice01</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="54">ReservePrice02</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="55">ReservePrice03</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="56">ReservePrice04</DEF>
+  <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="57">ReservePrice05</DEF>
   <!-- Algorithm data -->
   <DEF TYPE="String" ENO="0" FTYPE="31">AlgorithmName</DEF>
   <!-- Template list for an auction -->  

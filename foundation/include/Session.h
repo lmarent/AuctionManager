@@ -205,7 +205,7 @@ protected:
 //! overload for <<, so that a Auctioner object can be thrown into an ostream
 std::ostream& operator<< ( std::ostream &os, Session &obj );
 
-}; // namespace auction
+} // namespace auction
 
 
 

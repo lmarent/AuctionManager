@@ -162,6 +162,6 @@ class ConfigManager
 //! overload << for use on ConfigManager objects
 ostream& operator<< ( ostream &os, ConfigManager &cm );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _CONFIGMANAGER_H_

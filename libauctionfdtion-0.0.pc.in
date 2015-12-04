@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@/auctionmanager
+
+Name:libauctionfdtion
+Description: Auction foundation library
+Version: 0.0.0
+Cflags: -I${includedir}
+Libs: -L${libdir} -lauctionfdtion

@@ -75,6 +75,6 @@ class AuctionFileParser : public XMLParser, IpApMessageParser
 					    ipap_template_container *templates );
 };
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _AUCTIONFILEPARSER_H_

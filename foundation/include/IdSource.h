@@ -102,6 +102,6 @@ class IdSource
 //! overload for <<, so that a IdSource object can be thrown into an iostream
 ostream& operator<< ( ostream &os, IdSource &ris );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _IDSOURCE_H_

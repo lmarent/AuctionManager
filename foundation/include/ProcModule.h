@@ -152,6 +152,6 @@ class ProcModule : public Module
 //! overload for <<, so that a ProcModule object can be thrown into an ostream
 ostream& operator<< ( ostream &os, ProcModule &obj );
 
-}; // namespace auction  
+} // namespace auction  
 
 #endif // _PROCMODULE_H_

@@ -168,7 +168,7 @@ struct autoLock
 
 #endif // ENABLE_THREADS
 
-}; // namespace auction
+} // namespace auction
 
 
 

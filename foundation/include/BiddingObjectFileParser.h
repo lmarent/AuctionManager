@@ -65,6 +65,6 @@ class BiddingObjectFileParser : public XMLParser, public IpApMessageParser
     virtual void parse(fieldDefList_t *fields, fieldValList_t *fieldVals, biddingObjectDB_t *bids );
 };
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _BIDDING_OBJECT_FILEPARSER_H_

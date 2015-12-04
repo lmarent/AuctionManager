@@ -133,6 +133,6 @@ ostream& operator<< ( ostream &os, configADList_t &list );
 ostream& operator<< ( ostream &os, configADItem_t &item );
 
 
-}; // namespace auction
+} // namespace auction
 
 #endif //_CONFIGPARSER_H_

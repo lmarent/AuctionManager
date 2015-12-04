@@ -190,6 +190,6 @@ class AuctionTimer
 //! overload for <<, so that a AuctionTimer object can be thrown into an ostream
 ostream& operator<< ( ostream &os, AuctionTimer &obj );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _AUCTIONTIMER_H_

@@ -35,6 +35,8 @@
 #include "IpAp_template.h"
 #include "AuctionTimer.h"
 #include "AuctioningObject.h"
+#include <pqxx/pqxx>
+
 
 namespace auction
 {
@@ -136,6 +138,24 @@ public:
 	
 	//! Set the type of the bidding object
 	inline void setType(ipap_object_type_t _type) { biddingObjectType = _type; }
+
+	//! prepare the sql statement to save the hdr in the DB.
+	void prepare_insert_biddingObjectHdr(pqxx::connection_base &c);
+	
+	//! prepare the sql statement to save elements in the DB.
+	void prepare_insert_biddingObjectElement(pqxx::connection_base &c);
+	
+	//! prepare the sql statement to save element fields in the DB.
+	void prepare_insert_biddingObjectElementField(pqxx::connection_base &c);
+	
+	//! prepare the sql statement to save options in the DB.
+	void prepare_insert_biddingObjectOption(pqxx::connection_base &c);
+	
+	//! prepare the sql statement to save option fields in the DB.
+	void prepare_insert_biddingObjectOptionField(pqxx::connection_base &c);
+	
+	//! save the bidding object in the database.
+	void save(pqxx::connection_base &c);
 	
 protected:
 	
@@ -168,6 +188,6 @@ protected:
     
 };
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _BIDDINGOBJECT_H_

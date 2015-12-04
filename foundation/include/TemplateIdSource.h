@@ -119,6 +119,6 @@ class TemplateIdSource
 //! overload for <<, so that a TemplateIdSource object can be thrown into an iostream
 ostream& operator<< ( ostream &os, TemplateIdSource &tis );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _TEMPLATE_ID_SOURCE_H_

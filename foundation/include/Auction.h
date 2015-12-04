@@ -276,7 +276,7 @@ class Auction : public AuctioningObject
 //! overload for <<, so that a Auction object can be thrown into an iostream
 ostream& operator<< ( ostream &os, Auction &ai );	
 
-}; // namespace auction
+} // namespace auction
 
 
 #endif // _AUCTION_H_

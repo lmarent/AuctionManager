@@ -243,7 +243,7 @@ typedef struct {
 
 } ProcModuleInterface_t;
 
-}; // namespace auction
+} // namespace auction
 
 
 #endif /* __PROCMODULEINTERFACE_H */

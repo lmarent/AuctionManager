@@ -98,6 +98,6 @@ class AuctionIdSource
 //! overload for <<, so that a AuctionIdSource object can be thrown into an iostream
 ostream& operator<< ( ostream &os, AuctionIdSource &ais );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _AUCTION_IDSOURCE_H_

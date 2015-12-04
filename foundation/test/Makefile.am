@@ -57,7 +57,7 @@ test_runner_SOURCES = 	@top_srcdir@/foundation/src/Constants.cpp \
 if ENABLE_DEBUG
   AM_CXXFLAGS = -g -I@top_srcdir@/foundation/include $(CPPUNIT_CFLAGS) \
 			    -I$(top_srcdir)/lib/getopt_long -I$(top_srcdir)/lib/httpd \
-			    -fno-inline -D_GLIBCXX_DEBUG -DDEBUG -DPROFILING -DINTEL \
+			    -fno-inline -ggdb -DDEBUG -DPROFILING -DINTEL \
 			     $(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) $(LIBFASTQUEUE_CFLAGS) \
 				 $(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) $(LIBANSLP_CFLAGS) 
 else

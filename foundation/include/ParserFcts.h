@@ -68,7 +68,7 @@ class ParserFcts
 
 };
 
-}; // namespace auction
+} // namespace auction
 
 
 #endif // _PARSERFCTS_H_

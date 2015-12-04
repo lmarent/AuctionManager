@@ -737,6 +737,6 @@ class AuctionInteractionEvent : public CtrlCommEvent
 //! overload for << so that an Event object can be thrown into an ostream
 ostream& operator<< ( ostream &os, Event &ev );
 
-}; // namespace auction.
+} // namespace auction.
 
 #endif // _EVENT_H_

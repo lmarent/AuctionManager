@@ -46,6 +46,7 @@ typedef enum
     AO_ERROR
 } AuctioningObjectState_t;
 
+extern const char *AuctionObjectStateNames[AO_ERROR+1];
 
 class AuctioningObject
 {

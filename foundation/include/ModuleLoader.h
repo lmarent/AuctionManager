@@ -197,6 +197,6 @@ class ModuleLoader
 //! overload for <<, so that a ModuleLoader object can be thrown into an iostream
 ostream& operator<< ( ostream &os, ModuleLoader &ml );
 
-}; // namespace auction
+} // namespace auction
 
 #endif // _MODULELOADER_H_
