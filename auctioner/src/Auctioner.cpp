@@ -240,10 +240,10 @@ Auctioner::Auctioner( int argc, char *argv[])
         if (!_dbName.empty()){
         
 			connectionDb = "dbname=" + _dbName; 
-			connectionDb = connectionDb + "user=" + _dbUser; 
-			connectionDb = connectionDb + "password=" + _dbPassword;
-			connectionDb = connectionDb + "hostaddr=" + _dbIp;
-			connectionDb = connectionDb + "port=" + _dbPort;
+			connectionDb = connectionDb + " user=" + _dbUser; 
+			connectionDb = connectionDb + " password=" + _dbPassword;
+			connectionDb = connectionDb + " hostaddr=" + _dbIp;
+			connectionDb = connectionDb + " port=" + _dbPort;
 		} 
         
         auto_ptr<BiddingObjectManager> _bidm(new BiddingObjectManager(domainId, 
@@ -789,9 +789,6 @@ void Auctioner::handleRemoveBiddingObjects(Event *e, fd_sets_t *fds)
 #endif		
 	}
 	catch (Error &err) {
-		if (bids) {
-			saveDelete(bids);
-        }
 		log->dlog( ch, err.getError().c_str() );		
 	}
 }

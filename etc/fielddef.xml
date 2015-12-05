@@ -14,7 +14,13 @@
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="61">MaxValue04</DEF>
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="62">MaxValue05</DEF>
   <DEF LENGTH="4" TYPE="SInt32" ENO="0" FTYPE="5">AuctionDuration</DEF>
+  <!-- Bandwitdh fields -->
   <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="38">Bandwidth</DEF>
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="63">Bandwidth01</DEF>
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="64">Bandwidth02</DEF>
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="65">Bandwidth03</DEF>
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="66">Bandwidth03</DEF>
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="67">Bandwidth03</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="24">AuctionID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="25">BiddingObjectID</DEF>
   <DEF TYPE="String" ENO="0" FTYPE="52">RefBiddingObjectID</DEF>

@@ -28,6 +28,8 @@
 
 #include "ProcModule.h"
 #include "ProcError.h"
+#include <openssl/rand.h>
+
 
 /*! \short   embed magic cookie number in every packet processing module
     _N_et_M_ate _P_rocessing Module */
@@ -144,18 +146,16 @@ long long parseLLong( string s )
 uint32_t parseUInt32( char *val )
 {
 
-	unsigned char uval[5];
-	
-	memcpy(uval, val, 4*sizeof(char) + 1);
+	char *errp = NULL;
+    uint32_t n;
+    n = strtoul(val, &errp, 0);
 
-
-	uint32_t val_return;
-	val_return = (uint32_t)uval[0] << 24 |
-				 (uint32_t)uval[1] << 16 |
-				 (uint32_t)uval[2] << 8  |
-				 (uint32_t)uval[3];
+    if ((*errp != '\0')) {
+        throw auction::ProcError("Not an unsigned long long number: %s", errp);
+    }
+    
+    return n;
 				 
-	return val_return;
 }
 
 unsigned long long parseULLong( string s )
@@ -377,4 +377,16 @@ bool caseInsensitiveStringCompare( const std::string& str1, const std::string& s
     std::transform( str1Cpy.begin(), str1Cpy.end(), str1Cpy.begin(), ::tolower );
     std::transform( str2Cpy.begin(), str2Cpy.end(), str2Cpy.begin(), ::tolower );
     return ( str1Cpy == str2Cpy );
+}
+
+uint32_t getId()
+{
+
+	uint32_t nbr;
+	
+	int ret = RAND_bytes((unsigned char *) &nbr, sizeof(uint32_t));
+
+	assert( ret == 1 );
+	
+	return nbr;
 }

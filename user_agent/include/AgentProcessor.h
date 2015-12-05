@@ -181,6 +181,9 @@ class AgentProcessor : public AuctionManagerComponent, public FieldDefManager
     //! thread main function
     void main();
    
+    //! Get the domain as a string
+    string getDomainStr();
+   
     //! get information about load module
     string getInfo();
 

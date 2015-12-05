@@ -551,7 +551,6 @@ void BiddingObjectManager::delBiddingObject(BiddingObject *r, EventScheduler *e)
 #endif
 
     // remove BiddingObject from database and from index
-    storeBiddingObjectAsDone(r);
     biddingObjectDB[r->getUId()] = NULL;
     biddingObjectSetIndex[r->getBiddingObjectSet()].erase(r->getBiddingObjectName());
     
@@ -593,6 +592,9 @@ void BiddingObjectManager::delBiddingObject(BiddingObject *r, EventScheduler *e)
         e->delBiddingObjectEvents(r->getUId());
     }
 
+    // remove BiddingObject from database and from index
+    storeBiddingObjectAsDone(r);
+
     biddingObjects--;
 }
 
@@ -613,6 +615,10 @@ void BiddingObjectManager::delBiddingObjects(biddingObjectDB_t *bids, EventSched
 
 void BiddingObjectManager::storeBiddingObjectAsDone(BiddingObject *r)
 {
+
+#ifdef DEBUG    
+    log->dlog(ch, "StoreBiddingObjects name = '%s'", r->getBiddingObjectName().c_str());
+#endif
     
     r->setState(AO_DONE);
     
@@ -628,9 +634,19 @@ void BiddingObjectManager::storeBiddingObjectAsDone(BiddingObject *r)
 			biddingObjectDone.pop_front();
 		}
 	} else {
+
+#ifdef DEBUG    
+		log->dlog(ch, "connection Str = '%s'", connectionDBStr.c_str());
+#endif
 		// Store in the database
 		pqxx::connection c(connectionDBStr);
 		r->save(c);
+
+		// release id
+		idSource.freeId(r->getUId());
+		// remove rule
+		saveDelete(r);
+
 	}
 }
 

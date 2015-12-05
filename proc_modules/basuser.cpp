@@ -3,13 +3,14 @@
 #include <iostream>
 #include <map>
 #include <stdio.h>
+#include <openssl/rand.h>
 #include "config.h"
 #include "stdincpp.h"
 #include "IpAp_template.h"
 #include "ProcError.h"
 #include "ProcModule.h"
 
-const int MOD_INIT_REQUIRED_PARAMS = 2;
+const int MOD_REINIT_REQUIRED_PARAMS = 1;
 
 int lastBidGenerated = 0;
 int domainId = 0;
@@ -22,9 +23,11 @@ void auction::initModule( auction::configParam_t *params )
 	fprintf( stdout,  "bas module: start init module \n");
 #endif
 	
-	// Require the lastBidGenerated and domainId.
-	lastBidGenerated = 5;
-	domainId = 7;
+	// Randomly assign the domain Id.
+	uint32_t nbr;
+	int ret = RAND_bytes((unsigned char *) &nbr, sizeof(uint32_t));
+	assert( ret == 1 );
+	domainId = nbr;
 
 	// Bring fields defined for ipap_messages;
 	g_ipap_fields.clear();
@@ -162,8 +165,8 @@ createBid( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVal
 
 	// Bid Set and name
 	string bidSet = intToString(domainId);
-	lastBidGenerated ++;
-	string bidName = "Bid_" + intToString(lastBidGenerated);
+	uint32_t lid = getId();
+	string bidName = uint32ToString(lid);
 
     bid = new auction::BiddingObject(auct->getSetName(), auct->getAuctionName(), 
 							bidSet, bidName, IPAP_BID, elements, options);
@@ -257,13 +260,34 @@ void auction::destroy( auction::configParam_t *params )
 
 void auction::reset( auction::configParam_t *params )
 {
-#ifdef DEBUG
-	fprintf( stdout, "bas module: start reset \n");
-#endif
 
 #ifdef DEBUG
-	fprintf( stdout, "bas module: end reset \n");
+	cout <<  "bas user module: start reset module" << endl;
 #endif
+
+	int numparams = 0;
+	
+    while (params[0].name != NULL) {
+		// in all the application we receive the next allocation id to create
+				
+        if (caseInsensitiveStringCompare(params[0].name, "domainid")) {
+            domainId = parseUInt32( params[0].value );
+			numparams++;
+#ifdef DEBUG
+		cout << "bas user module: domainId:" << domainId << endl;
+#endif
+        }
+        params++;
+    }
+
+	if ( numparams != MOD_REINIT_REQUIRED_PARAMS )
+		throw ProcError("bas user init module - not enought parameters");
+	
+#ifdef DEBUG
+	cout << "bas user module: end reset module" << endl;
+#endif
+
+
 }
 
 const char* auction::getModuleInfo( int i )

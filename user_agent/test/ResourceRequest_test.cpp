@@ -91,7 +91,7 @@ void ResourceRequest_Test::testResourceRequets()
 		throw Error("field quantity sot found");
 	}
 
-	iter = fieldDefs.find("unitprice");
+	iter = fieldDefs.find("maxvalue");
 	if (iter != fieldDefs.end()){
 		field2.name = iter->second.name;
 		field2.len = iter->second.len;

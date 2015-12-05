@@ -271,6 +271,25 @@ AgentProcessor::executeRequest( int index, EventScheduler *e )
 		biddingObjectDB_t *ptr = &bids;
 		
 		try{ 
+
+			configParam_t *params = new configParam_t[2];
+			int i = 0;
+		
+			string paramName2 = "domainid";
+			string paramValue2 = getDomainStr();
+			if (!paramValue2.empty()){
+				params[i].name = (char* ) paramName2.c_str();
+				params[i].value = (char *) paramValue2.c_str();
+				i++;
+			
+				params[i].name = NULL;
+				params[i].value = NULL;
+			
+				((ret->second).getMAPI())->reset( params );
+
+				saveDelete(params);
+			}
+			
 			((ret->second).getMAPI())->execute_user( FieldDefManager::getFieldDefs(), 
 										   FieldDefManager::getFieldVals(),
 										   (ret->second).getParameters(),
@@ -492,6 +511,20 @@ void AgentProcessor::waitUntilDone(void)
       }
     }
 #endif
+}
+
+string 
+AgentProcessor::getDomainStr()
+{
+
+    ostringstream s;
+
+    AUTOLOCK(threaded, &maccess);
+
+    s << domain;
+
+    return s.str();
+
 }
 
 

@@ -84,10 +84,18 @@ ProcModule::ProcModule( ConfigManager *_cnf, string libname, string libfile,
 	{
 		cnf->dump(cout);
 		configItemList_t list = cnf->getItems(confgroup, libname );
+
+#ifdef DEBUG		
+		configItemListIter_t iter;
+		for (iter = list.begin(); iter != list.end(); ++iter){
+		s_log->dlog(s_ch,	"name:%s value:%s", (iter->name).c_str(),  (iter->value).c_str());
+		}
+#endif
+		
 		configParam_t *params = cnf->getParamList(list);
 
 #ifdef DEBUG
-    s_log->dlog(s_ch, "It is going to initialize module" );
+    s_log->dlog(s_ch, "It is going to initialize module configroup: %s, libname: %s", confgroup.c_str(), libname.c_str());
 #endif
 		
 		funcList->initModule(params);

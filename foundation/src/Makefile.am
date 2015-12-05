@@ -7,6 +7,8 @@ INC_DIR 	= $(top_srcdir)/foundation/include
 pkginclude_HEADERS = $(INC_DIR)/Auction.h \
 					 $(INC_DIR)/AuctioningObject.h \
 					 $(INC_DIR)/AuctionManagerInfo.h \
+					 $(INC_DIR)/AuctionManager.h \
+					 $(INC_DIR)/MAPIAuctionParser.h \
 					 $(INC_DIR)/AuctionFileParser.h \
 					 $(INC_DIR)/IdSource.h \
 					 $(INC_DIR)/BiddingObject.h \

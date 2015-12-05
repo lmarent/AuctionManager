@@ -101,6 +101,8 @@ string intToString(int value);
 
 bool caseInsensitiveStringCompare( const std::string& str1, const std::string& str2 );
 
+uint32_t getId();
+
 /*! \short   declaration of struct containing all function pointers of a module */
 extern auction::ProcModuleInterface_t func;
 

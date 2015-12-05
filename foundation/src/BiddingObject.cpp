@@ -527,6 +527,12 @@ BiddingObject::calculateIntervals(time_t now, biddingObjectIntervalList_t *list)
 void BiddingObject::save(pqxx::connection_base &c)
 {
 
+#ifdef DEBUG
+    log->dlog(ch, "Start Save BiddingObject: %s.%s - now:%s stop %s", getBiddingObjectSet().c_str(), 
+										getBiddingObjectName().c_str());
+#endif
+
+	
 	// Create a transaction object.
 	pqxx::work w(c);
 
@@ -536,10 +542,19 @@ void BiddingObject::save(pqxx::connection_base &c)
 		prepare_insert_biddingObjectElementField(c);
 		prepare_insert_biddingObjectOption(c);
 		prepare_insert_biddingObjectOptionField(c);
-
+		
+#ifdef DEBUG
+		log->dlog(ch, "after preparing" );
+#endif
+		
+		
 		std::string biddingObjectTypeStr = AuctionObjectStateNames[getState()];
 
 		pqxx::result r = w.prepared("insertBO_HDR")(auctionSet)(auctionName)(BiddingObjectSet)(BiddingObjectName)(sessionId)(biddingObjectTypeStr).exec();
+		
+#ifdef DEBUG
+		log->dlog(ch, "after header" );
+#endif
 		
 		elementListIter_t iter;
 		for (iter = elementList.begin(); iter != elementList.end(); ++iter ){
@@ -553,6 +568,10 @@ void BiddingObject::save(pqxx::connection_base &c)
 			}
 
 		}
+		
+#ifdef DEBUG
+		log->dlog(ch, "after elements" );
+#endif
 			
 		optionListIter_t iterOpt;
 		for (iterOpt = optionList.begin(); iterOpt != optionList.end(); ++iterOpt ){

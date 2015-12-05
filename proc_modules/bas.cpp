@@ -136,7 +136,7 @@ void auction::initModule( auction::configParam_t *params )
     while (params[0].name != NULL) {
 		// in all the application we receive the next allocation id to create
 		
-		cout << "Param:" << params[0].name << endl;
+		cout << "Param:" << params[0].name << "value:" << params[0].value << endl;
 		
         if (caseInsensitiveStringCompare(params[0].name, "nextid")) {
             lastId = parseUInt32( params[0].value );
@@ -200,8 +200,8 @@ createAllocation( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *f
 	string allocset = bidSet;
 	
 	// Incrememt the next id given.
-	lastId++;
-	string allocname = uint32ToString(lastId);
+	uint32_t lid = getId();
+	string allocname = uint32ToString(lid);
 		
 	// Insert quantity
 	ipap_field fQuantity = g_ipap_fields.get_field(0, IPAP_FT_QUANTITY);	
