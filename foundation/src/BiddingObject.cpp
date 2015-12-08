@@ -96,6 +96,12 @@ BiddingObject::BiddingObject( const BiddingObject &rhs )
 
 BiddingObject::~BiddingObject()
 {
+
+	while (!optionList.empty())
+	{
+		cout << (optionList.back()).first << endl;
+		optionList.pop_back();
+	}
   
 }
 
