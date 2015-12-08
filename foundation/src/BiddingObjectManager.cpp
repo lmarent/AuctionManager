@@ -63,12 +63,12 @@ BiddingObjectManager::~BiddingObjectManager()
     for (iter = biddingObjectDB.begin(); iter != biddingObjectDB.end(); iter++) {
         if (*iter != NULL) {
             // delete rule
-            saveDelete(*iter);
+            delete *iter;
         } 
     }
 
     for (biddingObjectDoneIter_t i = biddingObjectDone.begin(); i != biddingObjectDone.end(); i++) {
-        saveDelete(*i);
+        delete *i;
     }
 
 #ifdef DEBUG
