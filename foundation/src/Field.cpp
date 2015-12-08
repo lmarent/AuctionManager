@@ -41,7 +41,8 @@ field_t::field_t(const field_t &param)
 	vector<FieldValue>::const_iterator fval_iter;
 	for ( fval_iter = param.value.begin(); fval_iter != param.value.end(); ++fval_iter )
 	{
-		value.push_back(*fval_iter);
+		FieldValue val(*fval_iter);
+		value.push_back(val);
 	}
 }
 
