@@ -98,7 +98,9 @@ BiddingObject::BiddingObject( const BiddingObject &rhs )
 BiddingObject::~BiddingObject()
 {
 
-	cout << "Bidding object to delete" << getBiddingObjectName() << endl;
+#ifdef DEBUG
+    log->dlog(ch, "BiddingObject destructor %s", getBiddingObjectName());
+#endif 
 	
 	while (!optionList.empty())
 	{
