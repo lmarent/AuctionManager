@@ -160,7 +160,9 @@ createBid( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVal
 	string sstop = fStop.writeValue(fVStop);
 	fillField(fieldDefs, fieldVals, 0, IPAP_FT_ENDSECONDS, sstop, &optionFields);
 	
-	options.push_back(pair<string,auction::fieldList_t>(optionId, optionFields));
+	std::pair<string,auction::fieldList_t> data;
+	data = std::make_pair (optionId, optionFields);
+	options.push_back(data);
 
 
 	// Bid Set and name
