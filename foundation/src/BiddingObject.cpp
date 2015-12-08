@@ -113,10 +113,7 @@ BiddingObject::BiddingObject( const BiddingObject &rhs )
 
 BiddingObject::~BiddingObject()
 {
-#ifdef DEBUG
-    log->dlog(ch, "BiddingObject destructor");
-#endif    
-
+  
 }
 
 string BiddingObject::getInfo()
