@@ -37,10 +37,10 @@ using namespace auction;
 
 /* ------------------------- BiddingObject ------------------------- */
 
-BiddingObject::BiddingObject( string auctionSet, string auctionName, string BiddingObjectSet, string BiddingObjectName, 
+BiddingObject::BiddingObject( string _auctionSet, string _auctionName, string _BiddingObjectSet, string _BiddingObjectName, 
 		  ipap_object_type_t _type, elementList_t &elements, optionList_t &options)
-  : AuctioningObject("BiddingObject"), auctionSet(auctionSet), auctionName(auctionName), 
-	BiddingObjectSet(BiddingObjectSet), BiddingObjectName(BiddingObjectName), biddingObjectType(_type),
+  : AuctioningObject("BiddingObject"), auctionSet(_auctionSet), auctionName(_auctionName), 
+	BiddingObjectSet(_BiddingObjectSet), BiddingObjectName(_BiddingObjectName), biddingObjectType(_type),
 	elementList(elements), optionList(options)
 {
 
