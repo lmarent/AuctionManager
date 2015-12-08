@@ -123,7 +123,7 @@ public:
 	
 	field_t(): mtype(FT_WILD), len(0), cnt(0)  {}
 	
-	~field_t() {}
+	~field_t();
 	
 	field_t(const field_t &param);
 				
