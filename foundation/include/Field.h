@@ -121,7 +121,7 @@ public:
 	//! WILD -> no value
 	vector<FieldValue> value;
 	
-	field_t(): mtype(FT_WILD), len(0), cnt(0)  {}
+	field_t(): name(), type(), mtype(FT_WILD), len(0), cnt(0)  {}
 	
 	~field_t();
 	

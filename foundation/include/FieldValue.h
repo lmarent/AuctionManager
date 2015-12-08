@@ -58,7 +58,7 @@ class FieldValue
 
     /** Empty constructor.
 		*/
-    FieldValue() : len(0) {}
+    FieldValue() : len(0), ftype(), val() {}
 
     /** Constructor from type and value.
 		*/
