@@ -393,7 +393,7 @@ BiddingObject::getOptionVal(string optionName, string name)
 
 void BiddingObject::prepare_insert_biddingObjectHdr(pqxx::connection_base &c)
 {
-	c.prepare("insertBO_HDR", "INSERT INTO biddingObjectHdr( auctionSet, auctionName, BiddingObjectSet, BiddingObjectName, sessionId, biddingObjectType) VALUES ($1, $2, $3, $4, $5, $6 )");
+	c.prepare("insertBO_HDR", "INSERT INTO biddingObjectHdr( auctionSet, auctionName, BiddingObjectSet, BiddingObjectName, sessionId, biddingObjectType, biddingobjectstatus) VALUES ($1, $2, $3, $4, $5, $6, $7 )");
 }
 
 void BiddingObject::prepare_insert_biddingObjectElement(pqxx::connection_base &c)
@@ -548,9 +548,10 @@ void BiddingObject::save(pqxx::connection_base &c)
 #endif
 		
 		
-		std::string biddingObjectTypeStr = AuctionObjectStateNames[getState()];
+		std::string biddingObjectTypeStr = ipap_object_type_names[getType()];
+		std::string biddingtypeStateStr = AuctionObjectStateNames[getState()];
 
-		pqxx::result r = w.prepared("insertBO_HDR")(auctionSet)(auctionName)(BiddingObjectSet)(BiddingObjectName)(sessionId)(biddingObjectTypeStr).exec();
+		pqxx::result r = w.prepared("insertBO_HDR")(auctionSet)(auctionName)(BiddingObjectSet)(BiddingObjectName)(sessionId)(biddingObjectTypeStr)(biddingtypeStateStr).exec();
 		
 #ifdef DEBUG
 		log->dlog(ch, "after header" );

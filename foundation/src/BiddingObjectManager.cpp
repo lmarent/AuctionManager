@@ -70,6 +70,10 @@ BiddingObjectManager::~BiddingObjectManager()
     for (biddingObjectDoneIter_t i = biddingObjectDone.begin(); i != biddingObjectDone.end(); i++) {
         saveDelete(*i);
     }
+
+#ifdef DEBUG
+    log->dlog(ch,"Finish Shutdown");
+#endif    
 }
 
 
