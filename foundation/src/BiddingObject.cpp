@@ -99,7 +99,7 @@ BiddingObject::~BiddingObject()
 {
 
 #ifdef DEBUG
-    log->dlog(ch, "BiddingObject destructor %s", getBiddingObjectName());
+    log->dlog(ch, "BiddingObject destructor %s", getBiddingObjectName().c_str());
 #endif 
 	
 	while (!optionList.empty())
