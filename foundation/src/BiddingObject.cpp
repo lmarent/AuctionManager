@@ -98,6 +98,8 @@ BiddingObject::BiddingObject( const BiddingObject &rhs )
 BiddingObject::~BiddingObject()
 {
 
+	cout << "Bidding object to delete" << getBiddingObjectName() << endl;
+	
 	while (!optionList.empty())
 	{
 		cout << (optionList.back()).first << endl;
