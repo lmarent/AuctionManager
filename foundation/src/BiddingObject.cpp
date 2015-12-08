@@ -90,7 +90,8 @@ BiddingObject::BiddingObject( const BiddingObject &rhs )
 			field_t field = *fielditer;
 			fieldList.push_back(field);
 		}
-		optionList.push_back(pair<string, fieldList_t>(iterOpt->first,fieldList));
+		string optionItem = iterOpt->first;
+		optionList.push_back(pair<string, fieldList_t>(optionItem,fieldList));
 	}	
 }
 
