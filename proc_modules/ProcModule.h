@@ -87,17 +87,17 @@ time_t parseTime(string timestr);
 void fillField(auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
 			   int eno, int ftype, string value, auction::fieldList_t *fields);
 
-string getStringField(auction::fieldList_t *fields, string name);
+std::string getStringField(auction::fieldList_t *fields, string name);
 
-string doubleToString(double value);
+std::string doubleToString(double value);
 
-string floatToString(float value);
+std::string floatToString(float value);
 
-string uint64ToString (uint64_t value);
+std::string uint64ToString (uint64_t value);
 
-string uint32ToString(uint32_t value);
+std::string uint32ToString(uint32_t value);
 
-string intToString(int value);
+std::string intToString(int value);
 
 bool caseInsensitiveStringCompare( const std::string& str1, const std::string& str2 );
 

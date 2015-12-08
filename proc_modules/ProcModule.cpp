@@ -335,28 +335,28 @@ void fillField(auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fiel
 
 }
 
-string doubleToString (double value)
+std::string doubleToString (double value)
 {
 	std::ostringstream s;
 	s << value;
 	return s.str();
 }
 
-string floatToString (float value)
+std::string floatToString (float value)
 {
 	std::ostringstream s;
 	s << value;
 	return s.str();
 }
 
-string uint32ToString(uint32_t value)
+std::string uint32ToString(uint32_t value)
 {
 	std::ostringstream s;
 	s << value;
 	return s.str();
 }
 
-string uint64ToString (uint64_t value)
+std::string uint64ToString (uint64_t value)
 {
 	std::ostringstream s;
 	s << value;
@@ -364,7 +364,7 @@ string uint64ToString (uint64_t value)
 }
 
 
-string intToString (int value)
+std::string intToString (int value)
 {
 	std::ostringstream s;
 	s << value;
