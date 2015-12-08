@@ -104,24 +104,7 @@ BiddingObject::BiddingObject( const BiddingObject &rhs )
 		
 		for ( fielditer = (iterOpt->second).begin(); 
 				fielditer != (iterOpt->second).end(); ++fielditer ){
-			field_t field;
-			field.name = (*fielditer).name;
-			field.type = (*fielditer).type;
-			field.mtype = (*fielditer).mtype;
-			field.len = (*fielditer).len;
-			field.cnt = (*fielditer).cnt;
-			
-			// Initialize the values for the field.
-			for (int i=0 ; i < MAX_FIELD_SET_SIZE; i++)
-			{
-				FieldValue fielvalue;
-				field.value.push_back(fielvalue);
-			}
-
-			// Assign the values from the BiddingObject.
-			for (int i=0 ; i< MAX_FIELD_SET_SIZE; ++i) {
-				field.value[i] = FieldValue((*fielditer).value[i]);
-			}
+			field_t field = *fielditer;
 			fieldList.push_back(field);
 		}
 		optionList.push_back(pair<string, fieldList_t>(iterOpt->first,fieldList));
