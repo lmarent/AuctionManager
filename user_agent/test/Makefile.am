@@ -41,10 +41,11 @@ endif
 			     
 AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 			 $(top_builddir)/lib/httpd/libhttpd.a \
-			 $(abs_top_builddir)/foundation/src/libfoundation.la
+			 $(abs_top_builddir)/foundation/src/libauctionfdtion.la
 			 
 			 
 			 	 
 LDADD =  $(LIBIPAP_LIBS) @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ \
 			 $(LIBIPAP_LIBS) $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) \
-			 $(LIBGIST_LIBS) $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS) @LIBUUID_LIBS@
+			 $(LIBGIST_LIBS) $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS) @LIBUUID_LIBS@ \
+			 $(PQXX_LIBS)
