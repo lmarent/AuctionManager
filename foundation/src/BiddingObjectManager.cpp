@@ -277,14 +277,14 @@ void BiddingObjectManager::addBiddingObjects(biddingObjectDB_t * _biddingObjects
     time_t              now = time(NULL);
     
     // add bids
-    for (iter = _biddingObjects->begin(); iter != _biddingObjects->end(); iter++) {
+    for (iter = _biddingObjects->begin(); iter != _biddingObjects->end();) {
         BiddingObject *b = (*iter);
         
         try {
 			biddingObjectIntervalList_t intervalList;
+            b->calculateIntervals(now,  &intervalList);
             addBiddingObject(b);
-			b->calculateIntervals(now,  &intervalList);
-			
+						
             biddingObjectIntervalListIter_t intervIter;
             for ( intervIter = intervalList.begin(); intervIter != intervalList.end(); ++intervIter ){ 
 				start[(intervIter->second).start].push_back(b);
@@ -293,8 +293,15 @@ void BiddingObjectManager::addBiddingObjects(biddingObjectDB_t * _biddingObjects
 					stop[(intervIter->second).stop].push_back(b);
 				}
 			}
+
+			// continue with the next Bidding object.
+			iter++;
+			
         } catch (Error &e ) {
+            // skip the bidding object, as it has problems.
+            _biddingObjects->erase(iter);
             saveDelete(b);
+            
             // if only one rule return error
             if (_biddingObjects->size() == 1) {
 				log->dlog(ch, "Error: %s", e.getError().c_str());

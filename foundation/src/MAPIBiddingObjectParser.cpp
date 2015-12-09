@@ -199,9 +199,10 @@ void MAPIBiddingObjectParser::addOptionRecord(fieldDefList_t *fieldDefs, Bidding
 			log->dlog(ch, "get_ipap_message - it is going to add %s eno:%d ftype:%d", 
 					fieldListIter->name.c_str(), fItem.eno, fItem.ftype);
 #endif
+			
 			ipap_field fieldAct = mes->get_field_definition(fItem.eno, fItem.ftype);
 		
-			//TODO AM: we have to fix to manage more than one value.
+			//TODO AM: we have to fix for managing more than one value.
 			ipap_value_field actFvalue = fieldAct.parse((fieldListIter->value[0]).getValue());
 			data.insert_field(fItem.eno, fItem.ftype, actFvalue);		
 		}
@@ -550,7 +551,7 @@ MAPIBiddingObjectParser::get_ipap_message(fieldDefList_t *fieldDefs,
 			(biddingObjectPtr->getAuctionName() == auctionPtr->getAuctionName() ));
 
 	uint16_t dataTemplateId, optionTemplateId;
-	
+		
 	// Find both templates types for the bidding object.
 	tempType = ipap_template::getTemplateType(biddingObjectPtr->getType(), IPAP_RECORD);
 	dataTemplateId = auctionPtr->getBiddingObjectTemplate(biddingObjectPtr->getType(), tempType);
@@ -572,7 +573,6 @@ MAPIBiddingObjectParser::get_ipap_message(fieldDefList_t *fieldDefs,
 #ifdef DEBUG
     log->dlog(ch, "Finish inserting option template - NumFields:%d", optTempl->get_numfields());
 #endif		
-
 
 	// Include data records.
 	elementListIter_t elemIter;
@@ -596,8 +596,6 @@ MAPIBiddingObjectParser::get_ipap_message(fieldDefList_t *fieldDefs,
 						bidInterval.stop, optIter->second, optionTemplateId, message );
 		i = i + 1;
 	}
-	
-
 	
 	
 #ifdef DEBUG

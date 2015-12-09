@@ -63,7 +63,7 @@ auctionDB_t *
 MAPIBiddingObjectParser_Test::loadAuctions()
 {
 	
-	const string filename = "../../etc/example_auctions2.xml";
+	const string filename = "../../etc/example_auctions3.xml";
 	auctionDB_t *new_auctions = NULL;
 	AuctionFileParser *ptrAuctionFileParser = NULL; 
 
@@ -209,7 +209,10 @@ void MAPIBiddingObjectParser_Test::testMAPIBiddingObjectParser()
 		
 		CPPUNIT_ASSERT( bids->size() == 3 );
 				
+		
 		ipap_message * message1 = ptrMAPIBidParser->get_ipap_message(&fieldDefs, object1, auction, templates);
+		
+		
 		ipap_message * message2 = ptrMAPIBidParser->get_ipap_message(&fieldDefs, object2, auction, templates);
 		ipap_message * message3 = ptrMAPIBidParser->get_ipap_message(&fieldDefs, object3, auction, templates);
 		
@@ -220,7 +223,7 @@ void MAPIBiddingObjectParser_Test::testMAPIBiddingObjectParser()
 		string xmlMessage = xmlmes.get_message(mes);	
 	
 		// Activate to see the message 
-		cout << "Message:" << xmlMessage << endl;
+		cout << " asdad Message:" << xmlMessage << endl;
 								
 		biddingObjectDB_t *bids2 = new biddingObjectDB_t();	
 		
@@ -233,8 +236,7 @@ void MAPIBiddingObjectParser_Test::testMAPIBiddingObjectParser()
 		ptrBidTmp2 = (*bids2)[0];
 				
 		CPPUNIT_ASSERT( *object1 == *ptrBidTmp2 );
-
-
+		
 		// Delete bids and auctions
 		for(auctionDBIter_t i=auctions->begin(); i != auctions->end(); i++) {
             saveDelete(*i);
@@ -246,11 +248,13 @@ void MAPIBiddingObjectParser_Test::testMAPIBiddingObjectParser()
             saveDelete(*i);
         }
         saveDelete(bids);
-
+		
+		
 		for(biddingObjectDBIter_t i=bids2->begin(); i != bids2->end(); i++) {
             saveDelete(*i);
         }
         saveDelete(bids2);		
+        
 			
 	} catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;

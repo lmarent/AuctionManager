@@ -1,0 +1,40 @@
+<?xml version ="1.0" encoding="UTF-8"?>
+<!DOCTYPE AUCTIONSET SYSTEM "auctionfile.dtd"> 
+<!-- The Id must be an integer which represents the domain id-->
+<AUCTIONSET ID="1">
+  <!-- global part is the default for all auctions -->
+  <!-- overwritten by rule specific configuration -->
+  <GLOBAL>
+    <!-- how long the auctions are active - value in seconds-->
+    <PREF NAME="Duration">100000</PREF>
+
+    <!-- How often they should be run - value in seconds -->
+    <PREF NAME="Interval">10</PREF>
+  </GLOBAL>
+  <AUCTION ID="1" RESOURCE_ID="router2">
+    <ACTION NAME="libbas" DEFAULT="true">
+    <PREF NAME="Bandwidth" TYPE="Float32">8</PREF>
+    <PREF NAME="ReservePrice" TYPE="Float64">0.012</PREF>
+    </ACTION>
+
+	<FIELD NAME="quantity">
+	<TEMPLATE_FIELD OBJECT_TYPE = "BID" TEMPLATE_TYPE = "DATA"></TEMPLATE_FIELD>
+	<TEMPLATE_FIELD OBJECT_TYPE = "ALLOCATION" TEMPLATE_TYPE = "DATA"></TEMPLATE_FIELD>
+	</FIELD>
+
+	<FIELD NAME="unitbudget">
+	<TEMPLATE_FIELD OBJECT_TYPE = "BID" TEMPLATE_TYPE = "DATA"></TEMPLATE_FIELD>
+	</FIELD>
+    
+	<FIELD NAME="unitprice">
+	<TEMPLATE_FIELD OBJECT_TYPE = "BID" TEMPLATE_TYPE = "DATA"></TEMPLATE_FIELD>
+	<TEMPLATE_FIELD OBJECT_TYPE = "ALLOCATION" TEMPLATE_TYPE = "DATA"></TEMPLATE_FIELD>
+	</FIELD>
+
+	<FIELD NAME="biddingduration">
+	<TEMPLATE_FIELD OBJECT_TYPE = "BID" TEMPLATE_TYPE = "OPTION"></TEMPLATE_FIELD>
+	</FIELD>
+
+
+  </AUCTION>
+</AUCTIONSET>
