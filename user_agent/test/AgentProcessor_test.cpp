@@ -285,13 +285,10 @@ void AgentProcessor_Test::testBasicExecution()
 				}
 			}
         } 
-    }
-			
-		
-		} else {
+		else {
 			throw Error("Event was not generated");
 		}
-		
+					
 	} catch (Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
 		throw e;
