@@ -204,7 +204,8 @@ BiddingObjectManager::parseBiddingObjects(string fname)
         for(biddingObjectDBIter_t i=newBiddingObjects->begin(); i != newBiddingObjects->end(); i++) {
            saveDelete(*i);
         }
-        saveDelete(newBiddingObjects);
+        saveDelete(newBiddingObjects);        
+		log->dlog(ch, "Error: %s", e.getError().c_str());
         throw e;
     }
 }
@@ -230,6 +231,7 @@ BiddingObjectManager::parseBiddingObjectsBuffer(char *buf, int len)
             saveDelete(*i);
         }
         saveDelete(newBiddingObjects);
+		log->dlog(ch, "Error: %s", e.getError().c_str());
         throw e;
     }
 }
@@ -258,6 +260,7 @@ BiddingObjectManager::parseMessage(ipap_message *messageIn, ipap_template_contai
             saveDelete(*i);
         }
         saveDelete(newBiddingObjects);
+		log->dlog(ch, "Error: %s", e.getError().c_str());
         throw e;
     }
 }
@@ -294,6 +297,7 @@ void BiddingObjectManager::addBiddingObjects(biddingObjectDB_t * _biddingObjects
             saveDelete(b);
             // if only one rule return error
             if (_biddingObjects->size() == 1) {
+				log->dlog(ch, "Error: %s", e.getError().c_str());
                 throw e;
             }
             // FIXME else return number of successively installed bidding objects
@@ -401,7 +405,7 @@ void BiddingObjectManager::addBiddingObject(BiddingObject *b)
         // adding new BiddingObject failed in some component
         // something failed -> remove BiddingObject from database
         delBiddingObject(b->getBiddingObjectSet(), b->getBiddingObjectName(), NULL);
-	
+		log->dlog(ch, "Error: %s", e.getError().c_str());	
         throw e;
     }
 }
