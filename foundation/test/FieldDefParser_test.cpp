@@ -59,8 +59,10 @@ void FieldDefParser_Test::testParser()
 	fieldDefList_t *list = new fieldDefList_t();
 	
 	ptrFieldParsers->parse(list);
-		
-	CPPUNIT_ASSERT( list->size() == 29 );
+	
+	cout << "field list size:" << list->size() << endl;
+	
+	CPPUNIT_ASSERT( list->size() == 43 );
 	
 	delete(list);
 }

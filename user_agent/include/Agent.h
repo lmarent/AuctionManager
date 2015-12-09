@@ -85,8 +85,8 @@ class Agent
     auto_ptr<AuctionTimer>      					auct;
 	auto_ptr<ConfigManager>   						conf;
     auto_ptr<ResourceRequestManager>   				rreqm;
-    auto_ptr<BiddingObjectManager>     				bidm;
     auto_ptr<AuctionManager>   						aucm;
+    auto_ptr<BiddingObjectManager>     				bidm;
     auto_ptr<AgentSessionManager>   				asmp;
     auto_ptr<EventSchedulerAgent>  					evnt;
     auto_ptr<AnslpClient>							anslpc;

@@ -74,7 +74,7 @@ void BiddingObjectManager_Test::setUp()
 		const string fieldname = DEF_SYSCONFDIR "/fielddef.xml";
 		const string fieldValuename = DEF_SYSCONFDIR "/fieldval.xml";
 		
-		manager = new BiddingObjectManager(domain, fieldname, fieldValuename);
+		manager = new BiddingObjectManager(domain, fieldname, fieldValuename, "");
 
 		// Parse the bidding objects in file example_bids1.xml, it allocates the memory.
 		biddingObjectDB_t *new_bids = manager->parseBiddingObjects(filename);

@@ -71,7 +71,7 @@ AM_LDFLAGS = $(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libg
 			 $(top_builddir)/lib/httpd/libhttpd.a \
 			 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ $(LIBIPAP_LIBS) \
 			 $(LIBPROT_LIBS) $(LIBFASTQUEUE_LIBS) $(LIBGIST_LIBS) \
-			 $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS)
+			 $(LIBANSLP_MSG_LIBS) $(LIBANSLP_LIBS) $(PQXX_LIBS)
 			 
 			 	 
-LDADD = $(LIBIPAP_LIBS)
+LDADD = $(LIBIPAP_LIBS) $(PQXX_LIBS)

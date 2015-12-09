@@ -1333,7 +1333,7 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 			
 			// Add the bidding objects to the bidding object manager.
 			bidm->addBiddingObjects(bids, evnt.get());  
-										
+													
 			// Build the response for the originator agent.
 			ipap_message resp = ipap_message(domainId, IPAP_VERSION, true);
 			resp.set_seqno(s->getNextMessageId());
@@ -1397,7 +1397,11 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 									conf );
 			
 			}		
+			
+			bids->erase(bids->begin(), bids->end());
+			saveDelete(bids);
 
+			
 #ifdef DEBUG
 			log->dlog(ch,"Ending handle Auction Interaction" );
 #endif

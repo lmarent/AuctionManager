@@ -178,6 +178,7 @@ void MAPIBiddingObjectParser_Test::setUp()
 	}
 	catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
 	}
 }
 
