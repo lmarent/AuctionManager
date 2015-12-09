@@ -275,6 +275,18 @@ void AgentProcessor_Test::testBasicExecution()
 		
 			biddingObjectDB_t *new_bids = etmp->getBiddingObjects();
 			CPPUNIT_ASSERT( new_bids->size() == 1 );
+			
+			// Delete the bidding object created. 
+			 biddingObjectDBIter_t iter;
+		    for (iter = new_bids->begin(); iter != new_bids->end(); iter++) {
+				if (*iter != NULL) {
+					// delete rule
+					delete *iter;
+				}
+			}
+        } 
+    }
+			
 		
 		} else {
 			throw Error("Event was not generated");
