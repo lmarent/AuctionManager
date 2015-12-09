@@ -328,7 +328,7 @@ void Agent_Test::test()
 			
 			// Verify the auction depletion.
 			CPPUNIT_ASSERT( agentPtr->aucm->getNumAuctions() == 0);
-			
+			/*
 			evt = agentPtr->evnt.get()->getNextEvent();
 			RemoveBiddingObjectsEvent *rboe = dynamic_cast<RemoveBiddingObjectsEvent *>(evt);
 			CPPUNIT_ASSERT( rboe != NULL );
@@ -337,7 +337,7 @@ void Agent_Test::test()
 			agentPtr->handleEvent(evt, NULL);
 			
 			CPPUNIT_ASSERT( agentPtr->bidm->getNumBiddingObjects() == 0);
-			
+			*/
 			
 		}	
 		
