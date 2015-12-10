@@ -304,6 +304,8 @@ ResourceRequestFileParser::parse(fieldDefList_t *fieldDefs,
             string rname;
             resourceReqIntervalList_t intervals;
             fieldList_t fields;
+            
+            time_t start = time(NULL);
 
             rname = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
 			// use lower case internally
