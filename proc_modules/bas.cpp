@@ -359,8 +359,8 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 		
 	} while (it != orderedBids.begin());
 	
-	if (sellprice < reserve_price){
-		sellprice = reserve_price;
+	if (sellPrice < reserve_price){
+		sellPrice = reserve_price;
 	} 
 	
 #ifdef DEBUG	
