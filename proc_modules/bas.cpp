@@ -358,7 +358,11 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 		}
 		
 	} while (it != orderedBids.begin());
-
+	
+	if (sellprice < reserve_price){
+		sellprice = reserve_price;
+	} 
+	
 #ifdef DEBUG	
 	cout << "bas module: after executing the auction" << (int) bids->size() << endl;
 #endif
