@@ -142,20 +142,34 @@ public:
 	//! prepare the sql statement to save the hdr in the DB.
 	void prepare_insert_biddingObjectHdr(pqxx::connection_base &c);
 	
+	string execute_insert_biddingObjectHdr( void );
+	
 	//! prepare the sql statement to save elements in the DB.
 	void prepare_insert_biddingObjectElement(pqxx::connection_base &c);
+	
+	string execute_insert_biddingObjectElement( string elementName );
 	
 	//! prepare the sql statement to save element fields in the DB.
 	void prepare_insert_biddingObjectElementField(pqxx::connection_base &c);
 	
+	string execute_insert_biddingObjectElementField( string elementName, auction::field_t field );
+	
 	//! prepare the sql statement to save options in the DB.
 	void prepare_insert_biddingObjectOption(pqxx::connection_base &c);
+	
+	string execute_insert_biddingObjectOption( string optionName );
 	
 	//! prepare the sql statement to save option fields in the DB.
 	void prepare_insert_biddingObjectOptionField(pqxx::connection_base &c);
 	
+	string execute_insert_biddingObjectOptionField( string optionName, auction::field_t field );
+	
 	//! save the bidding object in the database.
-	void save(pqxx::connection_base &c);
+	void save_ver4(pqxx::connection_base &c);
+	
+	//! save the bidding object in the database.
+	void save_ver3(pqxx::connection_base &c);
+	
 	
 protected:
 	

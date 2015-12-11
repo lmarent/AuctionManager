@@ -27,6 +27,7 @@
 
 */
 
+#include "config.h"
 #include "ParserFcts.h"
 #include "BiddingObjectManager.h"
 #include "Constants.h"
@@ -655,7 +656,18 @@ void BiddingObjectManager::storeBiddingObjectAsDone(BiddingObject *r)
 #endif
 		// Store in the database
 		pqxx::connection c(connectionDBStr);
-		r->save(c);
+
+#ifdef DEBUG    
+		log->dlog(ch, "database connected");
+#endif
+
+#ifdef HAVE_PQXX40
+		r->save_ver4(c);
+#else
+		r->save_ver3(c);
+#endif
+
+
 
 		// release id
 		idSource.freeId(r->getUId());

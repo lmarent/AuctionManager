@@ -370,9 +370,44 @@ void BiddingObject::prepare_insert_biddingObjectHdr(pqxx::connection_base &c)
 	c.prepare("insertBO_HDR", "INSERT INTO biddingObjectHdr( auctionSet, auctionName, BiddingObjectSet, BiddingObjectName, sessionId, biddingObjectType, biddingobjectstatus) VALUES ($1, $2, $3, $4, $5, $6, $7 )");
 }
 
+string BiddingObject::execute_insert_biddingObjectHdr( void )
+{
+
+	std::string biddingObjectTypeStr = ipap_object_type_names[getType()];
+	std::string biddingtypeStateStr = AuctionObjectStateNames[getState()];
+
+	string sentence =  "INSERT INTO biddingObjectHdr( auctionSet, auctionName, BiddingObjectSet,";
+	sentence = sentence + " BiddingObjectName, sessionId, biddingObjectType, biddingobjectstatus) VALUES (";
+	sentence = sentence + "'" + auctionSet + "',";
+	sentence = sentence + "'" + auctionName + "',";
+	sentence = sentence + "'" + BiddingObjectSet + "',";
+	sentence = sentence + "'" + BiddingObjectName + "',";
+	sentence = sentence + "'" + sessionId + "',";
+	sentence = sentence + "'" + biddingObjectTypeStr + "',";
+	sentence = sentence + "'" + biddingtypeStateStr + "'";
+	sentence = sentence + ")";
+
+	return sentence;
+
+}
+
 void BiddingObject::prepare_insert_biddingObjectElement(pqxx::connection_base &c)
 {
 	c.prepare("insertBO_ELEMENT", "INSERT INTO biddingObjectElement( auctionSet, auctionName, BiddingObjectSet, BiddingObjectName, elementName) VALUES ($1, $2, $3, $4, $5 )");
+}
+
+string BiddingObject::execute_insert_biddingObjectElement( string elementName )
+{
+	string sentence = "INSERT INTO biddingObjectElement( auctionSet, auctionName, BiddingObjectSet,";
+	sentence = sentence + " BiddingObjectName, elementName) VALUES (";
+	sentence = sentence + "'" + auctionSet + "',";
+	sentence = sentence + "'" + auctionName + "',";
+	sentence = sentence + "'" + BiddingObjectSet + "',";
+	sentence = sentence + "'" + BiddingObjectName + "',";
+	sentence = sentence + "'" + elementName + "'";
+	sentence = sentence + ")";
+	
+	return sentence;
 }
 
 void BiddingObject::prepare_insert_biddingObjectElementField(pqxx::connection_base &c)
@@ -380,14 +415,72 @@ void BiddingObject::prepare_insert_biddingObjectElementField(pqxx::connection_ba
 	c.prepare("insertBO_ELEMENTFIELD", "INSERT INTO biddingObjectElementField(auctionSet, auctionName, BiddingObjectSet, BiddingObjectName, elementName, fieldName, fieldType, len, value) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)");
 }
 
+string BiddingObject::execute_insert_biddingObjectElementField( string elementName, auction::field_t field )
+{
+	string sentence = "INSERT INTO biddingObjectElementField(auctionSet, auctionName, ";
+	sentence = sentence + " BiddingObjectSet, BiddingObjectName, elementName, ";
+	sentence = sentence + " fieldName, fieldType, len, value) VALUES (";
+	sentence = sentence + "'" + auctionSet + "',";
+	sentence = sentence + "'" + auctionName + "',";
+	sentence = sentence + "'" + BiddingObjectSet + "',";
+	sentence = sentence + "'" + BiddingObjectName + "',";
+	sentence = sentence + "'" + elementName + "',";
+	sentence = sentence + "'" + field.name + "',";
+	sentence = sentence + "'" + field.type + "',";
+	ostringstream olen; 
+	olen << field.len;
+	sentence = sentence + olen.str() + ",";
+	sentence = sentence + "'" + (field.value[0]).getValue() + "'";
+	sentence = sentence + ")";
+
+	return sentence;
+	
+}
+
 void BiddingObject::prepare_insert_biddingObjectOption(pqxx::connection_base &c)
 {
 	c.prepare("insertBO_OPTION", "INSERT INTO biddingObjectOption(auctionSet, auctionName, BiddingObjectSet, BiddingObjectName, optionName) VALUES ($1, $2, $3, $4, $5)");
 }
 
+string BiddingObject::execute_insert_biddingObjectOption( string optionName)
+{
+	string sentence = "INSERT INTO biddingObjectOption(auctionSet, auctionName, BiddingObjectSet,";
+	sentence = sentence + " BiddingObjectName, optionName) VALUES (";
+	sentence = sentence + "'" + auctionSet + "',";
+	sentence = sentence + "'" + auctionName + "',";
+	sentence = sentence + "'" + BiddingObjectSet + "',";
+	sentence = sentence + "'" + BiddingObjectName + "',";
+	sentence = sentence + "'" + optionName + "'";
+	sentence = sentence + ")";
+
+	return sentence;
+	
+}
+
 void BiddingObject::prepare_insert_biddingObjectOptionField(pqxx::connection_base &c)
 {
 	c.prepare("insertBO_OPTIONFIELD", "INSERT INTO biddingObjectOptionField(auctionSet, auctionName, BiddingObjectSet, BiddingObjectName, optionName, fieldName, fieldType, len, value) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)");
+}
+
+string BiddingObject::execute_insert_biddingObjectOptionField( string optionName, auction::field_t field)
+{
+	string sentence = "INSERT INTO biddingObjectOptionField(auctionSet, auctionName,";
+	sentence = sentence + " BiddingObjectSet, BiddingObjectName, optionName, fieldName,";
+	sentence = sentence + " fieldType, len, value) VALUES (";
+	sentence = sentence + "'" + auctionSet + "',";
+	sentence = sentence + "'" + auctionName + "',";
+	sentence = sentence + "'" + BiddingObjectSet + "',";
+	sentence = sentence + "'" + BiddingObjectName + "',";
+	sentence = sentence + "'" + optionName + "',";
+	sentence = sentence + "'" + field.name + "',";
+	sentence = sentence + "'" + field.type + "',";
+	ostringstream olen; 
+	olen << field.len;
+	sentence = sentence + olen.str() + ",";
+	sentence = sentence + "'" + (field.value[0]).getValue() + "'";
+	sentence = sentence + ")";
+
+	return sentence;
 }
 
 
@@ -498,7 +591,7 @@ BiddingObject::calculateIntervals(time_t now, biddingObjectIntervalList_t *list)
 		
 }
 
-void BiddingObject::save(pqxx::connection_base &c)
+void BiddingObject::save_ver4(pqxx::connection_base &c)
 {
 
 #ifdef DEBUG
@@ -558,6 +651,76 @@ void BiddingObject::save(pqxx::connection_base &c)
 			for (fieldIter = (iterOpt->second).begin(); fieldIter != iterOpt->second.end(); ++fieldIter)
 			{
 				r = w.prepared("insertBO_OPTIONFIELD")(auctionSet)(auctionName)(BiddingObjectSet)(BiddingObjectName)(iterOpt->first)(fieldIter->name)(fieldIter->type)(fieldIter->len)(((fieldIter->value)[0]).getValue()).exec();
+			}
+
+		}
+		
+		w.commit();
+	
+	} catch (const pqxx::pqxx_exception & ex) {
+		w.abort();
+		throw Error(ex.base().what());
+	}
+
+}
+
+void BiddingObject::save_ver3(pqxx::connection_base &c)
+{
+
+#ifdef DEBUG
+    log->dlog(ch, "Start Save BiddingObject in version3: %s.%s - now:%s stop %s", getBiddingObjectSet().c_str(), 
+										getBiddingObjectName().c_str());
+#endif
+
+	
+	// Create a transaction object.
+	pqxx::work w(c);
+
+	try{
+		
+		string sql;
+		
+		sql = execute_insert_biddingObjectHdr();
+		pqxx::result r = w.exec(sql);
+		
+				
+#ifdef DEBUG
+		log->dlog(ch, "after header" );
+#endif
+		
+		elementListIter_t iter;
+		for (iter = elementList.begin(); iter != elementList.end(); ++iter ){
+				
+			sql = execute_insert_biddingObjectElement(iter->first);
+			pqxx::result r = w.exec(sql);
+	
+			fieldListIter_t fieldIter;
+			
+			for (fieldIter = (iter->second).begin(); fieldIter != iter->second.end(); ++fieldIter)
+			{
+				
+				sql = execute_insert_biddingObjectElementField(iter->first, *fieldIter);
+				pqxx::result r = w.exec(sql);
+			}
+
+		}
+		
+#ifdef DEBUG
+		log->dlog(ch, "after elements" );
+#endif
+			
+		optionListIter_t iterOpt;
+		for (iterOpt = optionList.begin(); iterOpt != optionList.end(); ++iterOpt ){
+
+			sql = execute_insert_biddingObjectOption(iterOpt->first);
+			pqxx::result r = w.exec(sql);
+
+			fieldListIter_t fieldIter;
+		
+			for (fieldIter = (iterOpt->second).begin(); fieldIter != iterOpt->second.end(); ++fieldIter)
+			{
+				sql = execute_insert_biddingObjectOptionField(iterOpt->first,*fieldIter);
+				pqxx::result r = w.exec(sql);
 			}
 
 		}
