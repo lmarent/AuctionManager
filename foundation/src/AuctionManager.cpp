@@ -384,6 +384,24 @@ string AuctionManager::getInfo(Auction *a)
 }
 
 
+Auction *
+AuctionManager::getAuctionDone(string sname, string rname)
+{
+
+#ifdef DEBUG
+    log->dlog(ch,"get Auction from Done %s.%s", sname.c_str(), rname.c_str());
+#endif		
+
+
+    for (auctionDoneIter_t i = auctionDone.begin(); i != auctionDone.end(); i++) {
+       if (((*i)->getAuctionName() == rname) && ((*i)->getSetName() == sname)) {
+           return *i;
+       }
+	}
+	
+	return NULL;
+}
+
 /* ------------------------- getInfo ------------------------- */
 
 string AuctionManager::getInfo(string sname, string rname)

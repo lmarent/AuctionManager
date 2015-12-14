@@ -1356,7 +1356,15 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 				BiddingObject *biddingObject = *iter;
 				Auction *a = aucm->getAuction(biddingObject->getAuctionSet(), 
 											biddingObject->getAuctionName());
-			
+				if (a == NULL){
+					// the auction was recently deleted because of its stop time, so search in the stored objects
+					a = aucm->getAuctionDone(biddingObject->getAuctionSet(), biddingObject->getAuctionName());
+					if (a == NULL){
+						throw Error("Auction :%s.%s was not found in the auction manager", 
+										biddingObject->getAuctionSet().c_str(),
+										biddingObject->getAuctionName().c_str());
+					}
+				}
 				// We obtain from the auction the connection settings for auctioning ( Ip address, port, Ip_version )
 				string sipv4Address = IpApMessageParser::getMiscVal(a->getMisc(), "dstip");
 				string sipv6Address = IpApMessageParser::getMiscVal(a->getMisc(), "dstip6");
