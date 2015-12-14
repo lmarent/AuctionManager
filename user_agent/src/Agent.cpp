@@ -600,6 +600,9 @@ void Agent::handleAddResourceRequests(Event *e, fd_sets_t *fds)
         saveDelete(new_requests);
 
    } catch (Error &err) {
+        
+        log->dlog( ch, err.getError().c_str() );
+        
         // error in resource request(s)
         if (new_requests) {
             saveDelete(new_requests);
@@ -723,6 +726,9 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 	#endif
 	
 	} catch(Error &err) {
+        
+        log->dlog( ch, err.getError().c_str() );
+        
         // error in resource request(s)
         if (mes) {
             saveDelete(mes);
@@ -926,6 +932,9 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 		}
 	}
 	catch (Error &err){
+		
+		log->dlog( ch, err.getError().c_str() );
+		
 		if (auctions){
 			saveDelete(auctions);
 		}
@@ -999,6 +1008,9 @@ void Agent::handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds)
 
 
     } catch (Error &e) {
+       
+       log->dlog( ch, e.getError().c_str() );
+       
        throw e;
     }	
 	
@@ -1024,7 +1036,7 @@ void Agent::handleActivateBiddingObjects(Event *e, fd_sets_t *fds)
 #endif		
 	}
 	catch (Error &err) {
-		log->dlog( ch, err.getError().c_str() );		
+		log->dlog( ch, err.getError().c_str() );
 	}
 
 
@@ -1121,6 +1133,9 @@ Agent::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 #endif
 		
 	} catch (Error &e){
+		
+		log->dlog( ch, e.getError().c_str() );
+		
 		throw e;
 	}
 }
@@ -1144,6 +1159,9 @@ void Agent::handleAddAuctions(Event *e, fd_sets_t *fds)
 
 
     } catch (Error &e) {
+        
+        log->dlog( ch, e.getError().c_str() );
+        
         // error in auctions(s)
         if (new_auctions) {
              saveDelete(new_auctions);
