@@ -105,7 +105,7 @@ Auction *AuctionManager::getAuction(string sname, string rname)
         else
         {
 #ifdef DEBUG
-    log->dlog(ch,"Auction Id not found");
+    log->dlog(ch,"Auction Id not found %s", rname.c_str());
 #endif		
 			
 		}
@@ -113,7 +113,7 @@ Auction *AuctionManager::getAuction(string sname, string rname)
     else
     {
 #ifdef DEBUG
-    log->dlog(ch,"Auction set not found");
+    log->dlog(ch,"Auction set not found %s", sname.c_str());
 #endif		
 	}
 
