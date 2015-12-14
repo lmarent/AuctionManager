@@ -155,12 +155,20 @@ AnslpClient::tg_create( const hostaddress &source_addr,
     vector<msg::anslp_mspec_object *> mspec_objects;
     mspec_objects.push_back(mess.copy());
 
+#ifdef DEBUG
+    log->dlog(ch,"message pushed");
+#endif
+
     // Create a new event for launching the configure event.
     event *e = new api_create_event(source_addr, destination_addr, source_port, 
    				       dest_port, protocol, mspec_objects, 
 				       session_lifetime, 
 				       selection_auctioning_entities::sme_any, 
 				       &ret);
+
+#ifdef DEBUG
+    log->dlog(ch,"api event created");
+#endif
 
     anslp_event_msg *msg = new anslp_event_msg(session_id(), e);
 
@@ -172,17 +180,16 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 
     anslp_event_msg *r = dynamic_cast<anslp_event_msg *>(ret_msg);
 
+#ifdef DEBUG
+    log->dlog(ch,"api event enqueued");
+#endif
+
 	time_t now;
 	struct tm *current;
 	now = time(0);
 	current = localtime(&now);
 	struct timeval detail_time;
 	gettimeofday(&detail_time,NULL);
-
-	cout << "hour: " << current->tm_hour 
-		 << "mins: " << current->tm_min
-		 << "sec: " << current->tm_sec 
-		 << "milli: " << detail_time.tv_usec/1000 << endl;	
 	
     anslp::session_id sid = r->get_session_id();
         
