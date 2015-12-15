@@ -166,11 +166,14 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 				       selection_auctioning_entities::sme_any, 
 				       &ret);
 
-#ifdef DEBUG
-    log->dlog(ch,"api event created");
-#endif
-
     anslp_event_msg *msg = new anslp_event_msg(session_id(), e);
+    
+#ifdef DEBUG
+    ostringstream o;
+    o << "api event created message:" << msg->get_id();
+    o << " session id:" << msg->get_session_id(); 
+    log->dlog(ch,"%s", o.str().c_str());
+#endif
 
 	anslp_daemon *anslpd = starter->get_thread_object();
 
