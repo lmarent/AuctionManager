@@ -182,7 +182,7 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 	
     int retry = 0;
     bool queued = false;
-    while (retry <= 3){
+    while (retry <= 10){
 		queued = anslpd->get_fqueue()->enqueue(msg);
 		retry = retry + 1;
 		if (queued == false){
