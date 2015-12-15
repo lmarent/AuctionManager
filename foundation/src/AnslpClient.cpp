@@ -180,10 +180,6 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 
     anslp_event_msg *r = dynamic_cast<anslp_event_msg *>(ret_msg);
 
-#ifdef DEBUG
-    log->dlog(ch,"api event enqueued");
-#endif
-
 	time_t now;
 	struct tm *current;
 	now = time(0);
@@ -191,16 +187,23 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 	struct timeval detail_time;
 	gettimeofday(&detail_time,NULL);
 	
-    anslp::session_id sid = r->get_session_id();
+	if (r != NULL){
+		anslp::session_id sid = r->get_session_id();
         
-    saveDelete(r);
+		saveDelete(r);
+		
+#ifdef DEBUG
+    log->dlog(ch,"api event enqueued");
+#endif		
+	} else {
 
 #ifdef DEBUG
-    log->dlog(ch,"Ending tg_create -Session configured");
-#endif        
-    
-    return sid;
-
+    log->dlog(ch,"error in api event enqueued");
+#endif	
+		throw Error("Error creating the api event");
+	}
+	
+	return sid;
 }
 
 void 
