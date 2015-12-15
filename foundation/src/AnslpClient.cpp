@@ -185,7 +185,7 @@ AnslpClient::tg_create( const hostaddress &source_addr,
     bool queued = false;
 
 #ifdef DEBUG
-		log->dlog(ch,"nbr of messages in queue:%ul", anslpd->get_fqueue()->size);
+		log->dlog(ch,"nbr of messages in queue: %lu", anslpd->get_fqueue()->size());
 #endif    
     queued = anslpd->get_fqueue()->enqueue(msg);
  
@@ -201,7 +201,7 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 	}
 
 #ifdef DEBUG
-		log->dlog(ch,"nbr of messages in queue after insert:%ul", anslpd->get_fqueue()->size);
+		log->dlog(ch,"nbr of messages in queue after insert: %lu", anslpd->get_fqueue()->size());
 #endif
     
     if ( queued ){
