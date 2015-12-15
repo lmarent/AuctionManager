@@ -31,6 +31,7 @@
 #include "logfile.h"
 #include "gist_conf.h"
 #include "AnslpClient.h"
+#include <time.h>
 
 
 using namespace protlib;
@@ -178,16 +179,20 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 	anslp_daemon *anslpd = starter->get_thread_object();
 	struct timespec ts;
 	ts.tv_sec = 0;
-    ts.tv_nsec = 10000000;
+    ts.tv_nsec = 300000000;
 	
     int retry = 0;
     bool queued = false;
-    while (retry <= 10){
-		queued = anslpd->get_fqueue()->enqueue(msg);
+    queued = anslpd->get_fqueue()->enqueue(msg);
+    while ((retry <= 10) && (queued == false)){
+
+#ifdef DEBUG
+		log->dlog(ch,"sleeping for 0.3 secs");
+#endif		
 		retry = retry + 1;
-		if (queued == false){
-			nanosleep(&ts, NULL);
-		}
+		nanosleep(&ts, NULL);
+		
+		queued = anslpd->get_fqueue()->enqueue(msg);
 	}
     
     if ( queued ){
