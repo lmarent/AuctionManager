@@ -183,7 +183,12 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 	
     int retry = 0;
     bool queued = false;
+
+#ifdef DEBUG
+		log->dlog(ch,"nbr of messages in queue:%ul", anslpd->get_fqueue()->size);
+#endif    
     queued = anslpd->get_fqueue()->enqueue(msg);
+ 
     while ((retry <= 10) && (queued == false)){
 
 #ifdef DEBUG
@@ -194,6 +199,10 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 		
 		queued = anslpd->get_fqueue()->enqueue(msg);
 	}
+
+#ifdef DEBUG
+		log->dlog(ch,"nbr of messages in queue after insert:%ul", anslpd->get_fqueue()->size);
+#endif
     
     if ( queued ){
 		protlib::message *ret_msg = ret.dequeue_timedwait(10000);
