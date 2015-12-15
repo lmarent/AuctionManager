@@ -696,16 +696,20 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 											   session->getReceiverPort(),
 											   session->getProtocol(),
 											   session->getLifetime(),
-											   *mes );
-			
-			session->setSessionId(sid.to_string());
-			
-			// Add the message as pending for ack.
-			session->addPendingMessage(*mes);
+											   mes->copy() );
 
 #ifdef DEBUG
-			log->dlog(ch,"Anslp Session Id:%s",  sid.to_string().c_str() );
+			log->dlog(ch,"Anslp after tg_create" );
 #endif
+			
+			session->setSessionId(sid.to_string());
+
+#ifdef DEBUG
+			log->dlog(ch,"Session id: %s", sid.to_string());
+#endif
+			
+			// Add the message as pending for ack.
+			session->addPendingMessage(mes->copy());
 			
 			// Set to the session the anslp session created by the client.
 			session->setAnlspSession(sid);
