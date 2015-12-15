@@ -176,39 +176,58 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 #endif
 
 	anslp_daemon *anslpd = starter->get_thread_object();
-
-    anslpd->get_fqueue()->enqueue(msg);
+	struct timespec ts;
+	ts.tv_sec = 0;
+    ts.tv_nsec = 10000000;
 	
-    protlib::message *ret_msg = ret.dequeue_timedwait(10000);
+    int retry = 0;
+    bool queued = false;
+    while (retry <= 3){
+		queued = anslpd->get_fqueue()->enqueue(msg);
+		retry = retry + 1;
+		if (queued == false){
+			nanosleep(&ts, NULL);
+		}
+	}
+    
+    if ( queued ){
+		protlib::message *ret_msg = ret.dequeue_timedwait(10000);
 
-    anslp_event_msg *r = dynamic_cast<anslp_event_msg *>(ret_msg);
+		anslp_event_msg *r = dynamic_cast<anslp_event_msg *>(ret_msg);
 
-	time_t now;
-	struct tm *current;
-	now = time(0);
-	current = localtime(&now);
-	struct timeval detail_time;
-	gettimeofday(&detail_time,NULL);
-	
-	if (r != NULL){
-		anslp::session_id sid = r->get_session_id();
-        
-		saveDelete(r);
+		time_t now;
+		struct tm *current;
+		now = time(0);
+		current = localtime(&now);
+		struct timeval detail_time;
+		gettimeofday(&detail_time,NULL);
 		
-		return sid;
-		
+		if (r != NULL){
+			anslp::session_id sid = r->get_session_id();
+			
+			saveDelete(r);
+
 #ifdef DEBUG
-    log->dlog(ch,"api event enqueued");
+			log->dlog(ch,"api event enqueued");
 #endif		
+			
+			return sid;
+			
+		} else {
+
+#ifdef DEBUG
+			log->dlog(ch,"error in api event enqueued");
+#endif	
+			throw Error("Error creating the api event");
+		}
 	} else {
 
 #ifdef DEBUG
-    log->dlog(ch,"error in api event enqueued");
+		log->dlog(ch,"Error creating enqueuing the api event");
 #endif	
-		throw Error("Error creating the api event");
+
+		throw Error("Error creating enqueuing the api event");
 	}
-	
-	
 }
 
 void 
