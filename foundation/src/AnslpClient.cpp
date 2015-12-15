@@ -192,6 +192,8 @@ AnslpClient::tg_create( const hostaddress &source_addr,
         
 		saveDelete(r);
 		
+		return sid;
+		
 #ifdef DEBUG
     log->dlog(ch,"api event enqueued");
 #endif		
@@ -203,7 +205,7 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 		throw Error("Error creating the api event");
 	}
 	
-	return sid;
+	
 }
 
 void 
