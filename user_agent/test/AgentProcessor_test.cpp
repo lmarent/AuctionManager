@@ -192,7 +192,7 @@ void AgentProcessor_Test::testBasicInsertDelete()
 		int index = 0;
 		// Build a new request process.
 		string sessionId = "session1";
-		index = agntProcessorPtr->addRequest( sessionId, fields, ptrAct1 );
+		index = agntProcessorPtr->addRequest( sessionId, fields, ptrAct1, ptrAct1->getStart(), ptrAct1->getStop() );
 		
 		// Add a new auction to the request process.
 		agntProcessorPtr->addAuctionRequest(index, ptrAct2 );
@@ -238,7 +238,7 @@ void AgentProcessor_Test::testException2()
 		int index = 0;
 		// Build a new request process.
 		string sessionId = "session1";
-		index = agntProcessorPtr->addRequest( sessionId, fields, ptrAct1 );
+		index = agntProcessorPtr->addRequest( sessionId, fields, ptrAct1, ptrAct1->getStart(), ptrAct1->getStop() );
 		
 		// Add a new auction to the request process.
 		agntProcessorPtr->addAuctionRequest(index, ptrAct1 );
@@ -251,7 +251,7 @@ void AgentProcessor_Test::testBasicExecution()
 		int index = 0;
 		// Build a new request process.
 		string sessionId = "session1";
-		index = agntProcessorPtr->addRequest( sessionId, fields, ptrAct1 );
+		index = agntProcessorPtr->addRequest( sessionId, fields, ptrAct1, ptrAct1->getStart(), ptrAct1->getStop() );
 				
 		agntProcessorPtr->executeRequest(index, evnt.get());
 		

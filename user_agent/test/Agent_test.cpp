@@ -101,9 +101,6 @@ void Agent_Test::test()
 	try
 	{
 			
-			
-		
-		cout << "Start the agent test " << endl;
         // going into main loop
         if (agentPtr != NULL){
 			
@@ -309,11 +306,29 @@ void Agent_Test::test()
 			}
 			
 			CPPUNIT_ASSERT( nbrRequest == 0 );
-
+			
+			time_t now = time(NULL);
+			now = now + 1;
+			
 			evt = agentPtr->evnt.get()->getNextEvent();
 			RemoveAuctionsEvent *rae = dynamic_cast<RemoveAuctionsEvent *>(evt);
 			CPPUNIT_ASSERT( rae != NULL );
+			
+			struct timeval before = rae->getTime();
+			agentPtr->evnt.get()->addEvent(rae);
+			
+			// Verify that auction's delete reschedule work.
+			if (rae->isIncluded(0)){
+				agentPtr->evnt.get()->rescheduleAuctionDelete(0, now);
+			}
+			
+			struct timeval after = rae->getTime();
+			CPPUNIT_ASSERT( before.tv_sec + 1 == after.tv_sec );
 
+			evt = agentPtr->evnt.get()->getNextEvent();
+			rae = dynamic_cast<RemoveAuctionsEvent *>(evt);
+			CPPUNIT_ASSERT( rae != NULL );
+						
 			auctionDB_t *auctions = rae->getAuctions();
 			auctionDBIter_t aucIter;
 			int numAuct = 0;

@@ -76,6 +76,7 @@ void EventSchedulerAgent::rescheduleAuctionDelete(int uid, time_t stop)
         tmp = iter;
         iter++;
         Event * ev = tmp->second;
+        
         if ( ev->getType() == REMOVE_AUCTIONS ){
            if (((RemoveAuctionsEvent *)ev)->isIncluded(uid) > 0){
 			   ev->setTime(stop);
