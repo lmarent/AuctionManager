@@ -244,7 +244,7 @@ void AgentProcessor::delRequest( int index )
 		// Release the used Id
 		idSource.freeId(index);
 	} else {
-		throw Error("Request index:%d not found", index);
+		log->dlog(ch, "Request index:%d not found", index);
 	}
 
 #ifdef DEBUG
