@@ -165,7 +165,10 @@ class Agent
 
     //! Execute the bid process.
     void handlePushExecution(Event *e, fd_sets_t *fds);
-
+	
+	//! Remove push execution event.
+	void handleRemovePushExecution(Event *e, fd_sets_t *fds);
+	
     //! handle the addition of generated bidding objects
     void handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds);
 

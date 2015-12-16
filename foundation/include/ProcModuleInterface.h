@@ -153,7 +153,8 @@ void execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *field
 
 */
 void execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
-				   fieldList_t *requestparams, auctionDB_t *auctions, biddingObjectDB_t **biddata );
+				   fieldList_t *requestparams, auctionDB_t *auctions, time_t start, 
+				   time_t stop, biddingObjectDB_t **biddata );
 
 
 /*! \short   dismantle the module
@@ -231,7 +232,8 @@ typedef struct {
 					 time_t stop, biddingObjectDB_t *bids, biddingObjectDB_t **allocationdata );
 
 	void (*execute_user)( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
-						  fieldList_t *requestparams, auctionDB_t *auctions, biddingObjectDB_t **biddata );	
+						  fieldList_t *requestparams, auctionDB_t *auctions, time_t start, 
+						  time_t stop, biddingObjectDB_t **biddata );	
 					 
     void (*destroy)( configParam_t *params );
 

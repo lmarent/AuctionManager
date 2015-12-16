@@ -64,6 +64,26 @@ struct timeval EventSchedulerAgent::getNextEventTime()
     return rv;
 }
 
+void EventSchedulerAgent::rescheduleAuctionDelete(int uid, time_t stop)
+{
+
+    int ret = 0;
+    eventListIter_t iter, tmp;
+
+    // search linearly through list for bid with given ID and delete entries
+    iter = events.begin();
+    while (iter != events.end()) {
+        tmp = iter;
+        iter++;
+        Event * ev = tmp->second;
+        if ( ev->getType() == REMOVE_AUCTIONS ){
+           if (((RemoveAuctionsEvent *)ev)->isIncluded(uid) > 0){
+			   ev->setTime(stop);
+		   }
+        } 
+    }
+}
+
 void EventSchedulerAgent::delResourceRequestEvents(int uid)
 {
     int ret = 0;

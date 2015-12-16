@@ -58,6 +58,7 @@ typedef enum
       ACTIVATE_RESOURCE_REQUEST_INTERVAL,
       REMOVE_RESOURCE_REQUEST_INTERVAL,
       PUSH_EXECUTION,
+      REMOVE_PUSH_EXECUTION,
       GET_INFO,
       GET_MODINFO,
       TEST,
@@ -91,6 +92,7 @@ const string eventNames[] =
       "Activate-ResourceRequests-Interval",
       "Delete-ResourceRequest-Interval",
       "Push-Execution",
+      "Remove-Push-Execution",
       "Get-info",
       "Get-module-info",
       "Test",
@@ -549,6 +551,21 @@ class RemoveAuctionsEvent : public Event
     {
         return &auctions;
     }
+    
+    int isIncluded(int uid)
+    {
+		int ret = 0;
+        auctionDBIter_t iter;
+        
+        for (iter=auctions.begin(); iter != auctions.end(); iter++) {
+            if ((*iter)->getUId() == uid) {
+                ret++;
+                break;
+            }   
+        }
+        
+        return ret;
+	}
     
     int deleteAuction(int uid)
     {

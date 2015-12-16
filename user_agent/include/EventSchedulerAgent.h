@@ -51,6 +51,8 @@ public:
     */
     void delResourceRequestEvents(int uid);
 	
+	
+	void rescheduleAuctionDelete(int uid, time_t stop);
 };
 
 }; // namespace auction

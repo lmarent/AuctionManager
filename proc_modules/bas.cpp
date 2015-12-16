@@ -408,7 +408,7 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 
 void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
 							auction::fieldList_t *requestparams, auction::auctionDB_t *auctions, 
-							auction::biddingObjectDB_t **biddata )
+							time_t start, time_t stop, auction::biddingObjectDB_t **biddata )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start execute_user \n");

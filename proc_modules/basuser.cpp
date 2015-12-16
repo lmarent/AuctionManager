@@ -187,7 +187,7 @@ void auction::execute (auction::fieldDefList_t *fieldDefs, auction::fieldValList
 
 void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
 							auction::fieldList_t *requestparams, auction::auctionDB_t *auctions, 
-							auction::biddingObjectDB_t **biddata )
+							time_t start, time_t stop, auction::biddingObjectDB_t **biddata )
 {
 
 #ifdef DEBUG
@@ -198,7 +198,6 @@ void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldVa
 	double budget, valuation;
 	double budgetByAuction, valuationByAuction;
 	float quantity;
-	time_t start, stop;
 	
 	int check_ret = check(fieldDefs, requestparams);
 	
@@ -217,23 +216,21 @@ void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldVa
 	   // start and stop time come from the auction, because they are replaced by the
 	   // interval definition.
 	   auctionDBIter_t firstAuct = auctions->begin();
-	   start = (*firstAuct)->getStart();
-	   stop = (*firstAuct)->getStop();
 		
-		budgetByAuction = budget / (int) auctions->size();
-		valuationByAuction = valuation / (int) auctions->size();
+	   budgetByAuction = budget / (int) auctions->size();
+	   valuationByAuction = valuation / (int) auctions->size();
 		
-		auctionDBIter_t auctIter;
-		for (auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter)
-		{
+	   auctionDBIter_t auctIter;
+	   for (auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter)
+	   {
 			auction::BiddingObject * bid = createBid( fieldDefs, fieldVals, *auctIter, quantity, 
 											budgetByAuction, valuationByAuction, 
 												start, stop );
 			(*biddata)->push_back(bid);
-		}
+	   }
 
 #ifdef DEBUG
-	fprintf( stdout, "bas module: in the middle 2 \n");
+	   fprintf( stdout, "bas module: in the middle 2 \n");
 #endif
 		
 	} else {

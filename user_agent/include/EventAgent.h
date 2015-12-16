@@ -295,6 +295,30 @@ class PushExecutionEvent : public Event
     }
 };
 
+
+class RemovePushExecutionEvent : public Event
+{
+  private:
+    int index;
+
+  public:
+
+    RemovePushExecutionEvent(struct timeval time, int _index, unsigned long ival=0, int align=0) 
+      : Event(REMOVE_PUSH_EXECUTION, time, ival, align), index(_index) {  }
+
+    RemovePushExecutionEvent(time_t offs_sec, int _index, unsigned long ival=0, int align=0) 
+      : Event(REMOVE_PUSH_EXECUTION, offs_sec, 0, ival, align), index(_index) { }
+
+    RemovePushExecutionEvent(int _index, unsigned long ival=0, int align=0) 
+      : Event(REMOVE_PUSH_EXECUTION, ival, align), index(_index) { }
+
+    int getIndex()
+    {
+        return index;
+    }
+};
+
+
 }; // namespace auction
 
 #endif // _EVENT_AGENT_H_

@@ -884,6 +884,9 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 			delete(a);
 			auctions->erase(auctIter);
 			auctions->push_back(a2);
+			
+			// Modify delete event for this auction.
+			evnt.get()->rescheduleAuctionDelete(a2->getUId(), interval->stop);
 					
 		} else {
 			a->setStart(interval->start);
@@ -919,28 +922,28 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 								
 			bool firstTime = true;
 			int index = 0;
-			time_t start;
 					
 			for (auctionDBIter_t auctIter2 = (splitByModuleIter->second).begin(); auctIter2 != (splitByModuleIter->second).end(); ++auctIter2){
 				if (firstTime == true){
 					// Create new request process for coming auctions.
-					index = proc->addRequest( sessionId, request->getFields(),*auctIter2 );
+					index = proc->addRequest( sessionId, request->getFields(),*auctIter2, 
+												interval->start, interval->stop );
 														
 					// Insert the index in the resource process set created. 
 					(interval->resourceProcesses).insert(index);
 								
-					start = (*auctIter2)->getStart();
 					firstTime = false;
 				} else {
-					proc->addAuctionRequest(index, *auctIter2  );
+					proc->addAuctionRequest(index, *auctIter2 );
 				}
 			}
 										
 			// Schedule the execution of the request.
-			evnt.get()->addEvent(new PushExecutionEvent(start - now, index)); 
+			evnt.get()->addEvent(new PushExecutionEvent(interval->start - now, index)); 
+
+			// Schedule the delete of the request.
+			evnt.get()->addEvent(new RemovePushExecutionEvent(interval->stop - now, index)); 
 			
-			// Observation: the removal of the resource process comes 
-			//				with the removal of those auctions in it.
 
 		}
 
@@ -1041,6 +1044,26 @@ Agent::handlePushExecution(Event *e, fd_sets_t *fds)
 #endif
 	
 }
+
+void 
+Agent::handleRemovePushExecution(Event *e, fd_sets_t *fds)
+{
+#ifdef DEBUG
+	log->dlog(ch,"Starting remove push execution " );
+#endif
+	
+	// Get the index to execute 
+	int index = ((RemovePushExecutionEvent *)e)->getIndex();
+	
+	// Call the execution of te request process
+	proc->delRequest( index );
+		              
+#ifdef DEBUG
+	log->dlog(ch,"Ending Remove Push Execution" );
+#endif
+	
+}
+
 
 void 
 Agent::handleAddBiddingObjects(Event *e, fd_sets_t *fds)
@@ -1572,7 +1595,11 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
     case PUSH_EXECUTION:
 		handlePushExecution(e,fds);
       break;
-
+	
+	case REMOVE_PUSH_EXECUTION:
+		handleRemovePushExecution(e, fds);
+	  break;
+	  
     case ADD_RESOURCEREQUESTS:
 		handleAddResourceRequests(e,fds);
       break;

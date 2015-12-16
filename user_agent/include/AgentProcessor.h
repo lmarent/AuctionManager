@@ -53,6 +53,12 @@ class requestProcess : public AuctionProcessObject
 		//! Name of the module;
 		string moduleName;			 		
 		
+		//! start time;
+		time_t start;
+		
+		//! end time;
+		time_t stop;
+		
 		//! Parameters for execution
 		fieldList_t *parameters; 	 		
 		
@@ -63,6 +69,14 @@ class requestProcess : public AuctionProcessObject
 			AuctionProcessObject(), moduleName(), parameters(_parameters){}
 		
 		~requestProcess(){}
+		
+		void setStart(time_t start_t){ start = start_t; }
+		
+		time_t getStart(void){ return start; }
+		
+		void setStop(time_t stop_t){ stop = stop_t; }
+		
+		time_t getStop(void){ return stop; }
 		
 		string getSession(){ return sessionId; }
 		
@@ -125,7 +139,7 @@ class AgentProcessor : public AuctionManagerComponent, public FieldDefManager
     virtual ~AgentProcessor();
 
     //! Add a new request to the list of request to execute.
-    int addRequest( string sessionId, auction::fieldList_t *parameters, Auction *auction );
+    int addRequest( string sessionId, auction::fieldList_t *parameters, Auction *auction, time_t start, time_t stop );
 
     //! delete request
     void delRequest( int index );

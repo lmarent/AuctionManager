@@ -91,7 +91,7 @@ AgentProcessor::~AgentProcessor()
 }
 
 /* ------------------------ addRequest -------------------------*/
-int AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, Auction *auction )
+int AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, Auction *auction, time_t start, time_t stop )
 {
 
 #ifdef DEBUG
@@ -139,6 +139,8 @@ int AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, Aucti
 
 			reqProcess.setParameters(parameters);
 			reqProcess.insertAuction(auction);
+			reqProcess.setStart(start);
+			reqProcess.setStop(stop);
 		}
 			
 		// Insert in the list of requests needing processing
@@ -294,6 +296,8 @@ AgentProcessor::executeRequest( int index, EventScheduler *e )
 										   FieldDefManager::getFieldVals(),
 										   (ret->second).getParameters(),
 										   (ret->second).getAuctions(),
+										   (ret->second).getStart(),
+										   (ret->second).getStop(),
 										   &ptr );
 		} catch (ProcError &e){
 			log->elog(ch,e.getError().c_str());
