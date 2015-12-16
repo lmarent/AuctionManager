@@ -590,5 +590,6 @@ void Auction::decrementSessionReferences(string sessionId)
 
 string Auction::getModuleName()
 {
-	 return action.name;
+	 string moduleName(action.name);
+	 return moduleName;
 }
