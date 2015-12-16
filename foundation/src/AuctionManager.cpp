@@ -614,7 +614,15 @@ void AuctionManager::getIds(auctionDB_t *_auctions, auctionSet_t &setParam)
     for (iter = _auctions->begin(); iter != _auctions->end(); iter++) {
         Auction *a = *iter;
         Auction *a2 = getAuction(a->getSetName(), a->getAuctionName());
-        setParam.insert(a2->getUId());
+        if (a2== NULL){
+#ifdef DEBUG    
+			log->dlog(ch, "GetId not found for auction %s.%s", 
+						a->getSetName().c_str(), a->getAuctionName().c_str());
+#endif
+			
+		} else {
+			setParam.insert(a2->getUId());
+		}
     }
 }
 
