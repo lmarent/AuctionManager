@@ -1370,8 +1370,11 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 			auctionSetIter_t iterAuctions;
 			for (iterAuctions = auctions.begin(); iterAuctions != auctions.end(); ++iterAuctions)
 			{
-				if (((aucm->getAuction(*iterAuctions))->getSessionReferences()) == 0){
-					auctionDb.push_back(aucm->getAuction(*iterAuctions));
+				Auction *auct = aucm->getAuction(*iterAuctions);
+				if (auct != NULL){ // The auction was not previously removed.
+					if (auct->getSessionReferences() == 0){
+						auctionDb.push_back(aucm->getAuction(*iterAuctions));
+					}
 				}
 			}
 			
