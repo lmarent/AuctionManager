@@ -62,6 +62,7 @@ Makefile
 config.h
 config.status
 configure
+.deps
 
 # Other Executables #
 ###################
