@@ -83,7 +83,9 @@ void EventSchedulerAgent::rescheduleAuctionDelete(int uid, time_t stop)
         
         if ( ev->getType() == REMOVE_AUCTIONS ){
            if (((RemoveAuctionsEvent *)ev)->isIncluded(uid) > 0){
+			   events.erase(tmp);
 			   ev->setTime(stop);
+			   events.insert(make_pair(ev->getTime(),ev));
 		   }
         } 
     }
