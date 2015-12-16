@@ -880,13 +880,15 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 			
 			if (a2->getStop() < interval->stop){
 				a2->setStop(interval->stop);
+				
+				// Modify delete event for this auction.
+				evnt.get()->rescheduleAuctionDelete(a2->getUId(), interval->stop);
+
 			}	
 			delete(a);
 			auctions->erase(auctIter);
 			auctions->push_back(a2);
 			
-			// Modify delete event for this auction.
-			evnt.get()->rescheduleAuctionDelete(a2->getUId(), interval->stop);
 					
 		} else {
 			a->setStart(interval->start);

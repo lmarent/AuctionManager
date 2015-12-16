@@ -67,6 +67,10 @@ struct timeval EventSchedulerAgent::getNextEventTime()
 void EventSchedulerAgent::rescheduleAuctionDelete(int uid, time_t stop)
 {
 
+#ifdef DEBUG
+    log->dlog(ch,"rescheduleAuctionDelete %d new time: %s", uid, (Timeval::toString(stop)).c_str() );
+#endif
+
     int ret = 0;
     eventListIter_t iter, tmp;
 
