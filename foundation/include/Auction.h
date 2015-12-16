@@ -271,6 +271,8 @@ class Auction : public AuctioningObject
 	
 	int getSessionReferences(){ return sessions.size(); } 
 	
+	//! get the Module name for the default action.
+	string getModuleName();
 };
 
 //! overload for <<, so that a Auction object can be thrown into an iostream

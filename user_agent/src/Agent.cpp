@@ -818,7 +818,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 				
 				for ( auctionDBIter_t auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter){
 					// Read the name of the module to load
-					sModuleName = (*auctIter)->getAction()->name;
+					sModuleName = (*auctIter)->getModuleName();
 					splitByModuleIter = splitByModule.find(sModuleName);
 
 					// Insert a pointer to the auction.

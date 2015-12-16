@@ -586,3 +586,9 @@ void Auction::decrementSessionReferences(string sessionId)
 	sessionListIter_t it = sessions.find(sessionId);
 	sessions.erase(it);
 }
+
+
+string Auction::getModuleName()
+{
+	 return action.name;
+}
