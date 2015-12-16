@@ -121,7 +121,7 @@ int AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, Aucti
 	try {
 				
 		// Read the name of the module to load
-		sModuleName = auction->getAction()->name;
+		sModuleName = auction->getModuleName;
 		sModuleName = sModuleName + "user";
 		requestProcess reqProcess;
 					
