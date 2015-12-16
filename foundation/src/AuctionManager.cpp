@@ -402,6 +402,25 @@ AuctionManager::getAuctionDone(string sname, string rname)
 	return NULL;
 }
 
+
+Auction *
+AuctionManager::getAuctionDone(int uid)
+{
+
+#ifdef DEBUG
+    log->dlog(ch,"get Auction from Done %d", uid);
+#endif		
+
+
+    for (auctionDoneIter_t i = auctionDone.begin(); i != auctionDone.end(); i++) {
+       if ((*i)->getUId() == uid) {
+           return *i;
+       }
+	}
+	
+	return NULL;
+}
+
 /* ------------------------- getInfo ------------------------- */
 
 string AuctionManager::getInfo(string sname, string rname)
@@ -644,6 +663,12 @@ void AuctionManager::decrementReferences(auctionSet_t & setParam, string session
 	{
 		int _uid = *iter;
 		Auction *a = getAuction(_uid);
-		a->decrementSessionReferences(sessionId);
+		
+		// A remove to the auction could be done before, so we have to find the auction in stored auctions. 
+		if (a == NULL)
+			a = getAuctionDone(_uid);
+		
+		if (a !=NULL)
+			a->decrementSessionReferences(sessionId);
 	}
 }

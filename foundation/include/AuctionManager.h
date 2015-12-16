@@ -149,6 +149,9 @@ class AuctionManager : public FieldDefManager
 	//! get auction with name rname and auctionset snamefrom the stored mark as done.
 	Auction *getAuctionDone(string sname, string rname);
 
+	//! get auction with id uid from the stored mark as done.
+	Auction *getAuctionDone(int uid);
+
     //! get all auctions in auctionset with name sname 
     auctionIndex_t *getAuctions(string sname);
 

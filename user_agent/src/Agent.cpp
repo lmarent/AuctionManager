@@ -1362,8 +1362,10 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 				proc->delRequest( *it );
 			}
 			
-			// Add a new reference to the auction (there is another session reference it).
-			aucm->decrementReferences(auctions, sessionId);
+			if (auctions.size() > 0){
+				// delete the reference to the auction (a session is not referencing it anymore).
+				aucm->decrementReferences(auctions, sessionId);
+			}
 						
 			auctionSetIter_t iterAuctions;
 			for (iterAuctions = auctions.begin(); iterAuctions != auctions.end(); ++iterAuctions)
