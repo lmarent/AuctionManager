@@ -322,6 +322,7 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 		{
 			double price = getDoubleField(&(elem_iter->second), "unitprice");
 			double quantity = getDoubleField(&(elem_iter->second), "quantity");
+			
 			alloc_proc_t alloc;
 		
 			alloc.bidSet = bid->getBiddingObjectSet();

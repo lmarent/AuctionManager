@@ -118,6 +118,10 @@ createBid( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVal
 	
 	auction::fieldList_t elementFields;
 	
+	if (unitbudget < unitprice){
+		unitprice = unitbudget;
+	}
+	
 	// Insert Record Id.
 	string recordId = "Unique";
 	fillField(fieldDefs, fieldVals, 0, IPAP_FT_IDRECORD, recordId, &elementFields);
@@ -128,11 +132,13 @@ createBid( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVal
 	string squantity = fQuantity.writeValue(fVQuantity);
 	fillField(fieldDefs, fieldVals, 0, IPAP_FT_QUANTITY, squantity, &elementFields);
 
+	/*
 	// Insert unit budget
 	ipap_field fUnitBudget = g_ipap_fields.get_field(0, IPAP_FT_UNITBUDGET);	
 	ipap_value_field fVUnitBudget = fUnitBudget.get_ipap_value_field( unitbudget );
 	string sunitbudget = fUnitBudget.writeValue(fVUnitBudget);
 	fillField(fieldDefs, fieldVals, 0, IPAP_FT_UNITBUDGET, sunitbudget, &elementFields);
+	*/
 	
 	// Insert unit price
 	ipap_field fUnitPrice = g_ipap_fields.get_field(0, IPAP_FT_UNITVALUE);	
