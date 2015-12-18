@@ -360,6 +360,12 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 		
 	} while (it != orderedBids.begin());
 	
+	// There are more units available than requested 
+	if ( qtyAvailable > 0 ){
+		sellPrice = reserve_price;
+	}
+	
+	// Selling price is less than reserve price, so let reserve price.
 	if (sellPrice < reserve_price){
 		sellPrice = reserve_price;
 	} 
