@@ -322,16 +322,18 @@ void SessionManager::delSession(string _sessionId, EventScheduler *e)
 void SessionManager::delSession(Session *s, EventScheduler *e)
 {
 #ifdef DEBUG    
-    log->dlog(ch, "removing Session with Id = '%s'", s->getSessionId().c_str());
+    log->dlog(ch, "removing Session with Id = '%s' uid:%d", s->getSessionId().c_str(), s->getUId());
 #endif
 
 	// remove Session from database and from index
+	int uid = s->getUId();
+	string sessionId = s->getSessionId();
 	storeSessionAsDone(s);
-	sessionDB[s->getUId()] = NULL;
-	sessionIndex.erase(s->getSessionId());
+	sessionDB[uid] = NULL;
+	sessionIndex.erase(sessionId);
 		
 	if (e != NULL) {
-		e->delSessionEvents(s->getUId());
+		e->delSessionEvents(uid);
 	}
 
 	sessions--;
@@ -355,6 +357,10 @@ void SessionManager::delSessions(sessionDB_t *sessions, EventScheduler *e)
 
 void SessionManager::storeSessionAsDone(Session *s)
 {
+
+#ifdef DEBUG    
+    log->dlog(ch, "store session as done id:%s, uid:%d", s->getSessionId().c_str(), s->getUId());
+#endif
     
     s->setState(SS_DONE);
     sessionsDone.push_back(s);
