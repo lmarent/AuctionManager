@@ -65,7 +65,8 @@ class AnslpClient
 		//! Pointer to anslp application configuration object.
 		anslp::anslp_config			*conf;
 
-
+		//! Pointer to the anslp deamon object .
+		anslp::anslp_daemon *anslpd; 
 
 	public:
 		
