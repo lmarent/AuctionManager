@@ -47,7 +47,8 @@ gistconf gconf;
 }
 
 
-AnslpClient::AnslpClient(string config_filename)
+AnslpClient::AnslpClient(string config_filename): 
+starter(NULL), conf(NULL), anslpd(NULL)
 {
 	using namespace std;
 
@@ -106,6 +107,8 @@ AnslpClient::AnslpClient(string config_filename)
 	
 	// returns after all threads have been started
 	starter->start_processing();
+
+	anslpd = starter->get_thread_object();
 
 	log->log(ch,"config file:%s", config_filename.c_str());
 
@@ -176,7 +179,6 @@ AnslpClient::tg_create( const hostaddress &source_addr,
     log->dlog(ch,"%s", o.str().c_str());
 #endif
 
-	anslp_daemon *anslpd = starter->get_thread_object();
 	struct timespec ts;
 	ts.tv_sec = 0;
     ts.tv_nsec = 300000000;
@@ -255,9 +257,7 @@ AnslpClient::tg_teardown(anslp::session_id *sid)
 	event *e = new api_teardown_event(sid);
 
 	anslp_event_msg *msg = new anslp_event_msg(*sid, e);
-	
-	anslp_daemon *anslpd = starter->get_thread_object();
-	
+		
 	anslpd->get_fqueue()->enqueue(msg);
 	
 #ifdef DEBUG
@@ -298,9 +298,6 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
     log->dlog(ch,"Message id: %lld", msg->get_id());
 #endif	
 	
-
-	anslp_daemon *anslpd = starter->get_thread_object();
-
     anslpd->get_fqueue()->enqueue(msg);
 	
         
