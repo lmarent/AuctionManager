@@ -6,12 +6,12 @@ if ENABLE_DEBUG
   AM_CXXFLAGS = -I$(top_srcdir)/lib/getopt_long \
 				-I$(top_srcdir)/lib/httpd \
 				-I$(top_srcdir)/foundation/include \
-				-g -fno-inline -ggdb -DDEBUG -DPROFILING
+				-g -fno-inline -ggdb -DDEBUG -DPROFILING -std=c++11
 else
   AM_CXXFLAGS = -O2  
 				-I$(top_srcdir)/lib/getopt_long \
 				-I$(top_srcdir)/lib/httpd \
-				-I$(top_srcdir)/foundation/include
+				-I$(top_srcdir)/foundation/include -std=c++11
 endif
 
 netagent_SOURCES =  ResourceRequest.cpp \
@@ -31,7 +31,7 @@ netagent_SOURCES =  ResourceRequest.cpp \
 					Agent.cpp \
 					main.cpp
 
-netagent_CPPFLAGS = -I$(top_srcdir)/lib/getopt_long \
+netagent_CPPFLAGS = -std=c++11 -I$(top_srcdir)/lib/getopt_long \
 					-I$(top_srcdir)/lib/httpd \
 					$(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) $(LIBFASTQUEUE_CFLAGS) \
 					$(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) $(LIBANSLP_CFLAGS) \
@@ -43,7 +43,7 @@ netagent_LDADD =  $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 				 $(abs_top_builddir)/foundation/src/libauctionfdtion.la \
 				 @PTHREADLIB@ @DLLIB@ @SSLLIB@ @XMLLIB@ @LIBUUID_LIBS@  $(PQXX_LIBS)
 
-netagent_LDFLAGS =  -export-dynamic -module \
+netagent_LDFLAGS =  -export-dynamic -module -std=c++11 \
 					$(CPPUNIT_LIBS) -ldl -lcppunit $(top_builddir)/lib/getopt_long/libgetopt_long.a \
 					$(top_builddir)/lib/httpd/libhttpd.a \
 					$(abs_top_builddir)/foundation/src/libauctionfdtion.la \
