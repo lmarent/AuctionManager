@@ -624,44 +624,45 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 
 	ipap_message *mes = NULL;
 	auction::AgentSession *session = NULL;
+	bool insertedSession = false;
 	
-	try{
-
-		time_t start = ((ActivateResourceRequestIntervalEvent *)e)->getStartTime();
-		resourceRequestDB_t *request = 
+	time_t start = ((ActivateResourceRequestIntervalEvent *)e)->getStartTime();
+	resourceRequestDB_t *request = 
 				((ActivateResourceRequestIntervalEvent *)e)->getResourceRequests();
 				
-		resourceRequestDBIter_t iter;
-		for (iter = request->begin(); iter != request->end(); ++iter)
-		{
-			ResourceRequest *req = *iter;
+	resourceRequestDBIter_t iter;
+	for (iter = request->begin(); iter != request->end(); ++iter)
+	{
+		ResourceRequest *req = *iter;
 						
-			/* TODO AM: for now we request all resources, 
-			 * 			resource management must be implemented */ 
-			string resourceId = "ANY"; 
+		/* TODO AM: for now we request all resources, 
+		 * 			resource management must be implemented */ 
+		string resourceId = "ANY"; 
 			
-			resourceReqIntervalListIter_t interval = req->getIntervalByStart(start);
+		resourceReqIntervalListIter_t interval = req->getIntervalByStart(start);
 
-			bool useIPV6 = false;
-			string _uIPV6, _sIPV6, _sIPV4;
-			_uIPV6 = conf->getValue("UseIPv6", "CONTROL");
-			if (ParserFcts::parseBool(_uIPV6) == 1){ 
-				useIPV6 = true;
-			}
+		bool useIPV6 = false;
+		string _uIPV6, _sIPV6, _sIPV4;
+		_uIPV6 = conf->getValue("UseIPv6", "CONTROL");
+		if (ParserFcts::parseBool(_uIPV6) == 1){ 
+			useIPV6 = true;
+		}
 		
-			if (useIPV6){
-				_sIPV6 = conf->getValue("LocalAddr-V6", "CONTROL");
-			}
-			else{
-				_sIPV4 = conf->getValue("LocalAddr-V4", "CONTROL");
-			}
+		if (useIPV6){
+			_sIPV6 = conf->getValue("LocalAddr-V6", "CONTROL");
+		}
+		else{
+			_sIPV4 = conf->getValue("LocalAddr-V4", "CONTROL");
+		}
 
-			string sPort = conf->getValue("ControlPort", "CONTROL");
-			int port = atoi(sPort.c_str());
-				  
+		string sPort = conf->getValue("ControlPort", "CONTROL");
+		int port = atoi(sPort.c_str());
+	
+		try{
+		  
 			// Get the auctions corresponding with this resource request interval
 			mes = rreqm->get_ipap_message( req, start, resourceId, useIPV6, _sIPV4, _sIPV6, port);
-			
+				
 			// Create a new session for sending the request with a temporary id. 
 			// It is replaced with the one given by the anslp client
 			
@@ -716,33 +717,38 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 			
 			// Store the session as new in the sessionManager
 			asmp->addSession(session);
+			insertedSession = true;
 			
 			// Assign the new session to the interval.
 			interval->sessionId = session->getSessionId();
 						
 			// free the memory assigned.
 			saveDelete(mes);
-				  
+
+
+		} catch(Error &err) {
+			
+			log->elog( ch, err.getError().c_str() );
+			
+			// error in resource request(s)
+			if (mes) {
+				saveDelete(mes);
+			}
+			if (session){
+				if (insertedSession){ 
+					asmp->delSession(session, evnt.get());
+				}
+				saveDelete(session);
+			}				
 		}
+				  
+	}
 
 	#ifdef DEBUG
 		log->dlog(ch,"Ending event activate resource request interval" );
 	#endif
 	
-	} catch(Error &err) {
-        
-        log->elog( ch, err.getError().c_str() );
-        
-        // error in resource request(s)
-        if (mes) {
-            saveDelete(mes);
-		}
-		if (session){
-			asmp->delSession(session, evnt.get());
-			saveDelete(session);
-		}	
-			
-    }
+
 }
 
 
