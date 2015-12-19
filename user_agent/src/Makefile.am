@@ -31,7 +31,7 @@ netagent_SOURCES =  ResourceRequest.cpp \
 					Agent.cpp \
 					main.cpp
 
-netagent_CPPFLAGS = -std=c++11 -I$(top_srcdir)/lib/getopt_long \
+netagent_CPPFLAGS = -I$(top_srcdir)/lib/getopt_long \
 					-I$(top_srcdir)/lib/httpd \
 					$(LIBGIST_CFLAGS) $(LIBPROT_CFLAGS) $(LIBFASTQUEUE_CFLAGS) \
 					$(LIBIPAP_CFLAGS) $(LIBANSLP_MSG_CFLAGS) $(LIBANSLP_CFLAGS) \

@@ -43,7 +43,6 @@
 #include "msg/anslp_ipap_message.h"
 
 
-
 namespace auction
 {
 

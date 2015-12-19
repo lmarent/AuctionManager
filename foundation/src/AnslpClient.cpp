@@ -32,6 +32,9 @@
 #include "gist_conf.h"
 #include "AnslpClient.h"
 #include <time.h>
+#include <pthread.h>
+#include "ni_session.h"
+
 
 
 using namespace protlib;
@@ -46,6 +49,9 @@ namespace ntlp {
 gistconf gconf;
 }
 
+namespace anslp{
+pthread_mutex_t execute_rules_lock;
+}
 
 AnslpClient::AnslpClient(string config_filename): 
 starter(NULL), conf(NULL), anslpd(NULL)
@@ -58,6 +64,12 @@ starter(NULL), conf(NULL), anslpd(NULL)
 #ifdef DEBUG
     log->dlog(ch,"Starting AnslpClient");
 #endif
+
+	if (pthread_mutex_init(&execute_rules_lock, NULL) != 0)
+    {
+        throw Error("Failed to create the lock for installing rules");
+        
+    }
 
 
 	hostaddress source;
@@ -163,6 +175,7 @@ AnslpClient::tg_create( const hostaddress &source_addr,
     log->dlog(ch,"message pushed");
 #endif
 
+	
     // Create a new event for launching the configure event.
     event *e = new api_create_event(source_addr, destination_addr, source_port, 
    				       dest_port, protocol, mspec_objects, 
@@ -189,22 +202,9 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 #ifdef DEBUG
 		log->dlog(ch,"nbr of messages in queue: %lu", anslpd->get_fqueue()->size());
 #endif    
+    pthread_mutex_lock(&execute_rules_lock);
     queued = anslpd->get_fqueue()->enqueue(msg);
- 
-    while ((retry <= 10) && (queued == false)){
-
-#ifdef DEBUG
-		log->dlog(ch,"sleeping for 0.3 secs");
-#endif		
-		retry = retry + 1;
-		nanosleep(&ts, NULL);
-		
-		queued = anslpd->get_fqueue()->enqueue(msg);
-	}
-
-#ifdef DEBUG
-		log->dlog(ch,"nbr of messages in queue after insert: %lu", anslpd->get_fqueue()->size());
-#endif
+	pthread_mutex_unlock(&execute_rules_lock);  
     
     if ( queued ){
 		protlib::message *ret_msg = ret.dequeue_timedwait(10000);

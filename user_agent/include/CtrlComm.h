@@ -35,7 +35,6 @@
 #include "AuctionManagerComponent.h"
 #include "AgentManagerInfo.h"
 #include "PageRepository.h"
-#include <mutex>
 
 
 namespace auction
@@ -44,8 +43,6 @@ namespace auction
 //! ctrlcomm flags 
 const int LOG_CONNECT = 0x1;
 const int LOG_COMMAND = 0x2;
-
-extern std::mutex execution_mutex;
 
 //! parameter list (name value pairs) 
 typedef map<string,string> paramList_t;
