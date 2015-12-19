@@ -1235,10 +1235,6 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 {
 
-#ifdef DEBUG
-	log->dlog(ch,"Starting handle Auction Interaction" );
-#endif
-
 	ipap_message *message = NULL;
 	biddingObjectDB_t *bids = NULL;
 	auction::Session *s = NULL;
@@ -1259,6 +1255,11 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 		
 		// Confirm the message arriving, if it is confirming a previous message. 
 		if (ackSeqNbr > 0){
+
+#ifdef DEBUG
+	log->dlog(ch,"handle Auction Interaction confirming message" );
+#endif
+			
 			s->confirmMessage(ackSeqNbr-1);
 
 			anslp::msg::anslp_ipap_xml_message mess;
@@ -1277,6 +1278,11 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 			
 		}	
 		else {
+
+#ifdef DEBUG
+	log->dlog(ch,"handle Auction Interaction bidding object" );
+#endif
+
 			// Bring the list of local templates
 			auctionerTemplateListIter_t templIter = auctionerTemplates.find(domainId);
 			if (templIter == auctionerTemplates.end()){

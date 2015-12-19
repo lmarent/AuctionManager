@@ -1382,36 +1382,42 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 			string sessionId = interval->sessionId;
 							
 			AgentSession *session = reinterpret_cast<AgentSession *>(asmp->getSession(sessionId));
-			auctionSet_t auctions = session->getAuctions();
 			
-			// teardown the session created.
-			anslpc->tg_teardown( new anslp::session_id(session->getAnlspSession())); 
-			
-			// Delete active request process associated with this request interval.
-			set<int> requestProcs = interval->resourceProcesses;
-			for ( set<int>::iterator it = requestProcs.begin(); it != requestProcs.end(); ++it){
-				proc->delRequest( *it );
-			}
-			
-			if (auctions.size() > 0){
-				// delete the reference to the auction (a session is not referencing it anymore).
-				aucm->decrementReferences(auctions, sessionId);
-			}
-						
-			auctionSetIter_t iterAuctions;
-			for (iterAuctions = auctions.begin(); iterAuctions != auctions.end(); ++iterAuctions)
-			{
-				Auction *auct = aucm->getAuction(*iterAuctions);
-				if (auct != NULL){ // The auction was not previously removed.
-					if (auct->getSessionReferences() == 0){
-						auctionDb.push_back(aucm->getAuction(*iterAuctions));
+			if (session != NULL){
+				auctionSet_t auctions = session->getAuctions();
+				
+				// teardown the session created.
+				anslpc->tg_teardown( new anslp::session_id(session->getAnlspSession())); 
+				
+				// Delete active request process associated with this request interval.
+				set<int> requestProcs = interval->resourceProcesses;
+				for ( set<int>::iterator it = requestProcs.begin(); it != requestProcs.end(); ++it){
+					proc->delRequest( *it );
+				}
+				
+				if (auctions.size() > 0){
+					// delete the reference to the auction (a session is not referencing it anymore).
+					aucm->decrementReferences(auctions, sessionId);
+				}
+							
+				auctionSetIter_t iterAuctions;
+				for (iterAuctions = auctions.begin(); iterAuctions != auctions.end(); ++iterAuctions)
+				{
+					Auction *auct = aucm->getAuction(*iterAuctions);
+					if (auct != NULL){ // The auction was not previously removed.
+						if (auct->getSessionReferences() == 0){
+							auctionDb.push_back(aucm->getAuction(*iterAuctions));
+						}
 					}
 				}
+				
+				if (auctionDb.size() > 0 )
+					// Remove auctions associated  with the resource interval
+					evnt->addEvent(new RemoveAuctionsEvent(auctionDb));
 			}
-			
-			if (auctionDb.size() > 0 )
-				// Remove auctions associated  with the resource interval
-				evnt->addEvent(new RemoveAuctionsEvent(auctionDb));
+			else {
+				log->elog(ch,"Could not find the session for the request" );
+			}
 		}
 
 #ifdef DEBUG
