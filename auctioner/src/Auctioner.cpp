@@ -326,10 +326,8 @@ Auctioner::Auctioner( int argc, char *argv[])
 
     } catch (Error &e) {
         
-        
-        
         if (log.get()) {
-            log->elog(ch, e);
+            log->elog(ch, e.getError().c_str());
         }  else {
 			 cout << e.getError().c_str() << endl;
 		}
@@ -557,7 +555,13 @@ void Auctioner::handleAddBiddingObjects(Event *e, fd_sets_t *fds)
         if (new_bids) {
 			saveDelete(new_bids);
 		}
-        throw e;
+
+        if (log.get()) {
+            log->elog(ch, e.getError().c_str());
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
+
     }
 }
 
@@ -615,7 +619,13 @@ void Auctioner::handleAddAuctions(Event *e, fd_sets_t *fds)
          if (new_auctions) {
 			 saveDelete(new_auctions);
          }
-         throw e;
+
+        if (log.get()) {
+            log->elog(ch, e.getError().c_str());
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
+
      }
 }
 
@@ -662,8 +672,13 @@ void Auctioner::handleAddBiddingObjectsAuction(Event *e, fd_sets_t *fds)
 #endif		  
 
 	}
-	catch (Error &err) {
-		log->dlog( ch, err.getError().c_str() );
+	catch (Error &e) {
+		
+        if (log.get()) {
+            log->elog(ch, e.getError().c_str());
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
 	}
 
 }
@@ -707,8 +722,14 @@ void Auctioner::handleActivateAuction(Event *e, fd_sets_t *fds)
 #endif
 
 	}
-	catch (Error &err) {
-		log->dlog( ch, err.getError().c_str() );
+	catch (Error &e) {
+
+        if (log.get()) {
+            log->elog(ch, e.getError().c_str());
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
+
 	}
 
 }
@@ -747,8 +768,13 @@ void Auctioner ::handleActivateBiddingObjects(Event *e, fd_sets_t *fds)
 #endif
 
 	}
-	catch (Error &err) {
-		log->dlog( ch, err.getError().c_str() );		
+	catch (Error &e) {
+
+        if (log.get()) {
+            log->elog(ch, e.getError().c_str());
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
 	}
 
 }
@@ -788,8 +814,13 @@ void Auctioner::handleRemoveBiddingObjects(Event *e, fd_sets_t *fds)
 		log->dlog(ch,"Ending event remove bidding Objects" );
 #endif		
 	}
-	catch (Error &err) {
-		log->dlog( ch, err.getError().c_str() );		
+	catch (Error &e) {
+
+        if (log.get()) {
+            log->elog(ch, e.getError().c_str() );
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
 	}
 }
 
@@ -812,11 +843,17 @@ void Auctioner::handleRemoveBiddingObjectsAuction(Event *e, fd_sets_t *fds)
 #ifdef DEBUG
 		log->dlog(ch,"Ending event remove bidding object from auction" );
 #endif		
-	} catch(Error &err) {
+	} catch(Error &e) {
 		if (bids){
 			saveDelete(bids);
 		}
-		log->dlog( ch, err.getError().c_str() );
+
+        if (log.get()) {
+            log->elog(ch, e.getError().c_str());
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
+
 	}  
 
 }
@@ -870,8 +907,14 @@ void Auctioner::handlePushExecution(Event *e, fd_sets_t *fds)
 		log->dlog(ch,"ending event push execution" );
 #endif
 
-	}  catch (Error &err) {
-		log->dlog( ch, err.getError().c_str() );		
+	}  catch (Error &e) {
+
+        if (log.get()) {
+            log->elog(ch, e.getError().c_str());
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
+
 	}
 }
 
@@ -992,8 +1035,15 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 		if (s){
 			saveDelete(s);
 		}
-		log->dlog( ch, err.getError().c_str() );	
+
+        if (log.get()) {
+            log->elog(ch, err.getError().c_str());
+        }  else {
+			 cout << err.getError().c_str() << endl;
+		}
+
 		comm->sendErrMsg(err.getError(), ((CreateCheckSessionEvent *)e)->getReq(), fds); 	
+
 	}
 }
 
@@ -1155,8 +1205,7 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 			}
 		}
 
-		
-
+	
 #ifdef DEBUG
 		log->dlog(ch,"Ending event create session" );
 #endif
@@ -1172,7 +1221,13 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 		if (s){
 			saveDelete(s);
 		}
-		log->dlog( ch, err.getError().c_str() );	
+
+        if (log.get()) {
+            log->elog(ch, err.getError().c_str());
+        }  else {
+			 cout << err.getError().c_str() << endl;
+		}
+
 		comm->sendErrMsg(err.getError(), ((CreateSessionEvent *)e)->getReq(), fds); 	
 	}
 }
@@ -1324,7 +1379,13 @@ void Auctioner::handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds)
 
 
     } catch (Error &e) {
-       throw e;
+
+        if (log.get()) {
+            log->elog(ch, e.getError().c_str());
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
+
     }	
 	
 }
@@ -1407,7 +1468,13 @@ Auctioner::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 		if (mes){
 			saveDelete(mes);
 		 }	
-		throw e;
+
+        if (log.get()) {
+            log->elog(ch, e.getError().c_str());
+        }  else {
+			 cout << e.getError().c_str() << endl;
+		}
+
 	}
 }
 
@@ -1496,10 +1563,13 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 		break;
 		
     default:
-#ifdef DEBUG
-        log->dlog(ch,"Unknown event %s", eventNames[e->getType()].c_str() );
-#endif
-        throw Error("unknown event");
+
+        if (log.get()) {
+            log->elog(ch, "Unknown event %s", eventNames[e->getType()].c_str());
+        }  else {
+			 cout << "Unknown event" << eventNames[e->getType()] << endl;
+		}
+
     }
 }
 

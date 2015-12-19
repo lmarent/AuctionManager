@@ -601,13 +601,13 @@ void Agent::handleAddResourceRequests(Event *e, fd_sets_t *fds)
 
    } catch (Error &err) {
         
-        log->dlog( ch, err.getError().c_str() );
+        log->elog( ch, err.getError().c_str() );
         
         // error in resource request(s)
         if (new_requests) {
             saveDelete(new_requests);
 		}
-        throw err;
+
    }
       
 #ifdef DEBUG
@@ -731,7 +731,7 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 	
 	} catch(Error &err) {
         
-        log->dlog( ch, err.getError().c_str() );
+        log->elog( ch, err.getError().c_str() );
         
         // error in resource request(s)
         if (mes) {
@@ -742,7 +742,6 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 			saveDelete(session);
 		}	
 			
-        throw err;
     }
 }
 
@@ -798,21 +797,17 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 			} 
 			saveDelete(auctions);
 		}
-			
-		
-		log->dlog( ch, err.getError().c_str() );
+					
+        log->elog( ch, err.getError().c_str() );
 		
 		if (((ResponseCreateSessionEvent *)e)->getReq() != NULL){ 
-			log->dlog( ch, err.getError().c_str() );
 			comm->sendErrMsg(err.getError(), ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
-		} else {
-			log->dlog( ch, err.getError().c_str() );
 		}
 	}
 	
 	if (auctions->size() == 0){
 		
-		throw Error("Agent: Invalid group of auctions given in the message");
+	    log->elog( ch, "Agent: Invalid group of auctions given in the message" );
 		
 	} 
 	
@@ -1013,7 +1008,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 
 	} catch (Error &err){
 		
-		log->dlog( ch, err.getError().c_str() );
+		log->elog( ch, err.getError().c_str() );
 		
 		if (auctions){
 			saveDelete(auctions);
@@ -1035,15 +1030,23 @@ Agent::handlePushExecution(Event *e, fd_sets_t *fds)
 	log->dlog(ch,"Starting push execution " );
 #endif
 	
-	// Get the index to execute 
-	int index = ((PushExecutionEvent *)e)->getIndex();
+	try {
 	
-	// Call the execution of te request process
-	proc->executeRequest( index, evnt.get() );
+		// Get the index to execute 
+		int index = ((PushExecutionEvent *)e)->getIndex();
+		
+		// Call the execution of te request process
+		proc->executeRequest( index, evnt.get() );
 		              
 #ifdef DEBUG
-	log->dlog(ch,"Ending Push Execution" );
+		log->dlog(ch,"Ending Push Execution" );
 #endif
+
+	} catch (Error &err) {
+		
+		log->elog( ch, err.getError().c_str() );
+	
+	}
 	
 }
 
@@ -1053,16 +1056,25 @@ Agent::handleRemovePushExecution(Event *e, fd_sets_t *fds)
 #ifdef DEBUG
 	log->dlog(ch,"Starting remove push execution " );
 #endif
+
+	try {
 	
-	// Get the index to execute 
-	int index = ((RemovePushExecutionEvent *)e)->getIndex();
-	
-	// Call the execution of te request process
-	proc->delRequest( index );
+		// Get the index to execute 
+		int index = ((RemovePushExecutionEvent *)e)->getIndex();
+		
+		// Call the execution of te request process
+		proc->delRequest( index );
 		              
 #ifdef DEBUG
 	log->dlog(ch,"Ending Remove Push Execution" );
 #endif
+
+	} catch (Error &err) {
+		
+		log->elog( ch, err.getError().c_str() );
+	
+	}
+
 	
 }
 
@@ -1110,9 +1122,8 @@ void Agent::handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds)
 
     } catch (Error &e) {
        
-       log->dlog( ch, e.getError().c_str() );
+       log->elog( ch, e.getError().c_str() );
        
-       throw e;
     }	
 	
 }
@@ -1137,10 +1148,8 @@ void Agent::handleActivateBiddingObjects(Event *e, fd_sets_t *fds)
 #endif		
 	}
 	catch (Error &err) {
-		log->dlog( ch, err.getError().c_str() );
+		log->elog( ch, err.getError().c_str() );
 	}
-
-
 
 #ifdef DEBUG
 	log->dlog(ch,"ending event Handle activate bidding Objects" );
@@ -1235,9 +1244,8 @@ Agent::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 		
 	} catch (Error &e){
 		
-		log->dlog( ch, e.getError().c_str() );
+		log->elog( ch, e.getError().c_str() );
 		
-		throw e;
 	}
 }
 
@@ -1261,13 +1269,13 @@ void Agent::handleAddAuctions(Event *e, fd_sets_t *fds)
 
     } catch (Error &e) {
         
-        log->dlog( ch, e.getError().c_str() );
+        log->elog( ch, e.getError().c_str() );
         
         // error in auctions(s)
         if (new_auctions) {
              saveDelete(new_auctions);
         }
-        throw e;
+
     }
 }
 
@@ -1277,51 +1285,68 @@ void Agent::handleActivateAuctions(Event *e)
 	log->dlog(ch,"Starting event activate auctions" );
 #endif
 
-    auctionDB_t *auctions = ((ActivateAuctionsEvent *)e)->getAuctions();
-    
-    // set the status to active
-    aucm->activateAuctions(auctions, evnt.get());
-    
+	try{
 
+		auctionDB_t *auctions = ((ActivateAuctionsEvent *)e)->getAuctions();
+		
+		// set the status to active
+		aucm->activateAuctions(auctions, evnt.get());
+    
 #ifdef DEBUG
-	log->dlog(ch,"Ending event activate auctions" );
+		log->dlog(ch,"Ending event activate auctions" );
 #endif
+
+    } catch (Error &e) {
+        
+        log->elog( ch, e.getError().c_str() );
+        
+    }
+
+
 }
 
 void Agent::handleRemoveAuctions(Event *e)
 {	
 	
-	// We assume that auctions have been already removed from the processor.
+	try{
 	
-	auctionDB_t *auctions = ((RemoveAuctionsEvent *)e)->getAuctions();
-	
-	// We remove the auction from all process requests.
-	proc->delAuctions(auctions);
-	
-	// In the client application, we delete bids associated with all auctions.
-	auctionDBIter_t  iter;
-	
-	for (iter = auctions->begin(); iter != auctions->end(); iter++) 
-	{
-		Auction *auct = *iter;
-		vector<int> bidList = bidm->getBiddingObjects(auct->getSetName(), 
-													 auct->getAuctionName());
-											
-		biddingObjectDB_t bids;
-		vector<int>::iterator bidListIter;
-		for (bidListIter = bidList.begin(); bidListIter != bidList.end(); ++bidListIter)
-		{
-			BiddingObject * bid = bidm->getBiddingObject(*bidListIter);
-			if (bid->getType() == IPAP_BID){
-				bids.push_back(bid);
-			}
-		}
+		// We assume that auctions have been already removed from the processor.	
+		auctionDB_t *auctions = ((RemoveAuctionsEvent *)e)->getAuctions();
 		
-		evnt->addEvent(new RemoveBiddingObjectsEvent(bids));
-	}
+		// We remove the auction from all process requests.
+		proc->delAuctions(auctions);
+		
+		// In the client application, we delete bids associated with all auctions.
+		auctionDBIter_t  iter;
+		
+		for (iter = auctions->begin(); iter != auctions->end(); iter++) 
+		{
+			Auction *auct = *iter;
+			vector<int> bidList = bidm->getBiddingObjects(auct->getSetName(), 
+														 auct->getAuctionName());
+												
+			biddingObjectDB_t bids;
+			vector<int>::iterator bidListIter;
+			for (bidListIter = bidList.begin(); bidListIter != bidList.end(); ++bidListIter)
+			{
+				BiddingObject * bid = bidm->getBiddingObject(*bidListIter);
+				if (bid->getType() == IPAP_BID){
+					bids.push_back(bid);
+				}
+			}
 			
-	// Remove the auction from the manager
-	aucm->delAuctions(auctions, evnt.get());
+			evnt->addEvent(new RemoveBiddingObjectsEvent(bids));
+		}
+				
+		// Remove the auction from the manager
+		aucm->delAuctions(auctions, evnt.get());
+
+    } catch (Error &e) {
+        
+        log->elog( ch, e.getError().c_str() );
+        
+    }
+
 	
 }
 
@@ -1383,12 +1408,13 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 				evnt->addEvent(new RemoveAuctionsEvent(auctionDb));
 		}
 
-	} catch (Error &err) {		
-		log->dlog( ch, err.getError().c_str() );	
-	}
 #ifdef DEBUG
 	log->dlog(ch,"Ending event remove resource request interval" );
 #endif
+
+	} catch (Error &err) {		
+		log->elog( ch, err.getError().c_str() );	
+	}
 	
 }
 
@@ -1397,14 +1423,22 @@ void Agent::handleRemoveBiddingObjects(Event *e)
 #ifdef DEBUG
 	log->dlog(ch,"Starting event remove bidding objects" );
 #endif
-    biddingObjectDB_t *bids = ((RemoveBiddingObjectsEvent *)e)->getBiddingObjects();
-	  	  
-    // now get rid of the expired bid
-    bidm->delBiddingObjects(bids, evnt.get());
+	
+	try{
+
+		biddingObjectDB_t *bids = ((RemoveBiddingObjectsEvent *)e)->getBiddingObjects();
+			  
+		// now get rid of the expired bid
+		bidm->delBiddingObjects(bids, evnt.get());
         
 #ifdef DEBUG
 	log->dlog(ch,"Ending event remove bidding objects" );
 #endif
+
+	} catch (Error &err) {		
+		log->elog( ch, err.getError().c_str() );	
+	}
+
 }
 
 
@@ -1540,7 +1574,7 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 			
 		}
 	} catch (Error &err){
-		log->dlog( ch, err.getError().c_str() );	
+		log->elog( ch, err.getError().c_str() );	
 		comm->sendErrMsg(err.getError(), ((AuctionInteractionEvent *)e)->getReq(), fds); 			
 	}
 
@@ -1629,9 +1663,8 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
 	  
     default:
 #ifdef DEBUG
-        log->dlog(ch,"Unknown event %s", eventNames[e->getType()].c_str() );
+        log->elog(ch,"Unknown event %s", eventNames[e->getType()].c_str() );
 #endif
-        throw Error("unknown event");
         break;
     }
 }
