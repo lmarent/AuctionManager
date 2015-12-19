@@ -43,6 +43,8 @@ logfile &protlib::log::DefaultLog(commonlog);
 int Agent::s_sigpipe[2];
 int Agent::enableCtrl = 0;
 
+std::mutex auction::execution_mutex;
+
 // global timeout flag
 int g_timeout = 0;
 
@@ -690,6 +692,7 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 			log->dlog(ch,xmlMessage3.c_str() );
 #endif
 			
+			execution_mutex.lock();
 			// Call the anslp client for sending the message.
 			anslp::session_id sid = anslpc->tg_create( session->getSenderAddress(), 
 											   session->getReceiverAddress(), 
@@ -698,6 +701,7 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 											   session->getProtocol(),
 											   session->getLifetime(),
 											   *mes );
+		    execution_mutex.unlock();
 
 #ifdef DEBUG
 			log->dlog(ch,"Anslp after tg_create" );

@@ -47,6 +47,8 @@
 #include "MAPIResourceRequestParser.h"
 #include "EventSchedulerAgent.h"
 #include "AgentSessionManager.h"
+#include <mutex>
+
 
 namespace auction
 {
@@ -56,15 +58,18 @@ typedef map<int, ipap_template_container* >::iterator   		agentTemplateListIter_
 typedef map<int, ipap_template_container* >::const_iterator    	agentTemplateListConstIter_t;
 
 
-
 /*! \short   Agent class description
   
     detailed Agent class description
 */
 
+extern std::mutex execution_mutex;
+
 class Agent
 {
   public:
+
+	
 
     // FIXME document!
     static int s_sigpipe[2];

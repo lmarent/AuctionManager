@@ -376,10 +376,12 @@ int CtrlComm::handleFDEvent(auction::eventVec_t *e, fd_set *rset, fd_set *wset, 
     retEvent = NULL;
     
     // check for incoming message
+    execution_mutex.lock();
     if (httpd_handle_event(rset, wset, fds) < 0) {
 		cout << "ERROR HANDLING THE EVENT" << endl;
         throw Error("ctrlcomm handle event error");
     }
+    execution_mutex.unlock();
 		
     // processCmd callback funtion is called in case of new request
 
