@@ -148,6 +148,20 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
    
     now = time(NULL);
 
+
+    time_t rnow;
+    struct tm tm;
+    struct timeval tnow;
+    gettimeofday(&tnow, NULL);
+    rnow = tnow.tv_sec;
+    char buf[300];
+        
+    strftime(buf, sizeof(buf), "%b %d %H:%M:%S.000", localtime_r(&rnow,&tm));
+        
+    long milliseconds = tnow.tv_usec / 1000; 
+        
+    fprintf(stdout, "%s.%03ld  %s  ", buf, milliseconds, LogLevel[lvl]) < 0);
+
     /* new connection ? */
     if ((rset != NULL) && FD_ISSET(slisten, rset)) {
         req = malloc(sizeof(struct REQUEST));
@@ -155,12 +169,15 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
             /* oom: let the request sit in the listen queue */
 #ifdef DEBUG
             fprintf(stderr,"oom\n");
+            fprintf(stdout,"oom\n");
 #endif
         } else {
             memset(req,0,sizeof(struct REQUEST));
             if ((req->fd = accept(slisten,NULL,&opt)) == -1) {
                 if (EAGAIN != errno) {
                     log_error_func(1, LOG_WARNING,"accept",NULL);
+                    fprintf(stdout,"accept");
+                    fprintf(stdout, "%s.%03ld  %s  ", buf, milliseconds, LogLevel[lvl]) < 0);
                 }
                 free(req);
             } else {
@@ -174,6 +191,9 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
                 curr_conn++;
 #ifdef DEBUG
                 fprintf(stderr,"%03d/%d: new request (%d)\n",req->fd,req->state,curr_conn);
+                fprintf(stdout,"%03d/%d: new request (%d)\n",req->fd,req->state,curr_conn);
+                fprintf(stdout, "%s.%03ld  %s  ", buf, milliseconds, LogLevel[lvl]) < 0);
+
 #endif
 #ifdef USE_SSL
                 if (with_ssl) {
@@ -183,6 +203,8 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
                 length = sizeof(req->peer);
                 if (getpeername(req->fd,(struct sockaddr*)&(req->peer),&length) == -1) {
                     log_error_func(1, LOG_WARNING,"getpeername",NULL);
+					fprintf("getpeername\n")
+					fprintf(stdout, "%s.%03ld  %s  ", buf, milliseconds, LogLevel[lvl]) < 0);
                     req->state = STATE_CLOSE;
                 }
                 getnameinfo((struct sockaddr*)&req->peer,length,
@@ -191,6 +213,9 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
 #ifdef DEBUG
                 fprintf(stderr,"%03d/%d: connect from (%s)\n",
                         req->fd,req->state,req->peerhost);
+				fprintf("connect from");
+				fprintf(stdout, "%s.%03ld  %s  ", buf, milliseconds, LogLevel[lvl]) < 0);
+
 #endif
 
                 /* host auth callback */
@@ -203,6 +228,9 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
                         mkerror(req,403,0);
                         write_request(req);	     
                         req->state = STATE_CLOSE;
+						fprintf("not pass access check");
+						fprintf(stdout, "%s.%03ld  %s  ", buf, milliseconds, LogLevel[lvl]) < 0);
+
                     }
                 }
 	 
@@ -262,6 +290,10 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
 
         /* parsing */
       parsing:
+
+
+		fprintf("parsing");
+		fprintf(stdout, "%s.%03ld  %s  ", buf, milliseconds, LogLevel[lvl]) < 0);
       
         if (req->state == STATE_PARSE_HEADER) {
             parse_request(req, server_host);
