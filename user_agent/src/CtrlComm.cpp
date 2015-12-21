@@ -408,6 +408,11 @@ parseReq_t CtrlComm::parseRequest(struct REQUEST *req)
 {
     parseReq_t preq;
 
+#ifdef DEBUG
+    log->log(ch, "Start parseRequest");
+#endif
+
+
     preq.comm = req->path;
 
     // parse headers
@@ -463,8 +468,12 @@ parseReq_t CtrlComm::parseRequest(struct REQUEST *req)
     }
 
 #ifdef DEBUG
+#ifdef DEBUG
+    log->log(ch, "End parseRequest");
+#endif
+
     for (paramListIter_t iter=preq.params.begin(); iter != preq.params.end(); iter++) {
-        log->log(ch, "%s :: %s", (iter->first).c_str(), (iter->second).c_str());
+        log->dlog(ch, "%s :: %s", (iter->first).c_str(), (iter->second).c_str());
     }
 #endif
 
