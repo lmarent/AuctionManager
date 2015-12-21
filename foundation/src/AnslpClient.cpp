@@ -115,7 +115,7 @@ starter(NULL), conf(NULL), anslpd(NULL)
 	 * threads it requires.
 	 */
 	anslp_daemon_param param("anslp", *conf);
-	starter = new protlib::ThreadStarter<anslp_daemon, anslp_daemon_param>(5, param);
+	starter = new protlib::ThreadStarter<anslp_daemon, anslp_daemon_param>(1, param);
 	
 	// returns after all threads have been started
 	starter->start_processing();
