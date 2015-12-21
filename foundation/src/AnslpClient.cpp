@@ -203,7 +203,7 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 		log->dlog(ch,"nbr of messages in queue: %lu", anslpd->get_fqueue()->size());
 #endif    
     pthread_mutex_lock(&execute_rules_lock);
-    log->dlog(ch,"it is going to create the session: ");
+    log->elog(ch,"it is going to create the session: ");
     queued = anslpd->get_fqueue()->enqueue(msg);
 	pthread_mutex_unlock(&execute_rules_lock);  
     
