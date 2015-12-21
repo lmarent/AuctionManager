@@ -202,7 +202,10 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 #ifdef DEBUG
 		log->dlog(ch,"nbr of messages in queue: %lu", anslpd->get_fqueue()->size());
 #endif    
+    pthread_mutex_lock(&execute_rules_lock);
+    log->dlog(ch,"it is going to create the session: ");
     queued = anslpd->get_fqueue()->enqueue(msg);
+	pthread_mutex_unlock(&execute_rules_lock);  
     
     if ( queued ){
 		protlib::message *ret_msg = ret.dequeue_timedwait(10000);
