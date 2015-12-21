@@ -33,6 +33,7 @@
 #include "EventAuctioner.h"
 #include "anslp_ipap_xml_message.h"
 #include "anslp_ipap_message.h"
+#include "anslp_ipap_exception.h" 
 #include <openssl/ssl.h>
 
 using namespace auction;
@@ -926,15 +927,30 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
     log->dlog(ch,"processing event create check session" );
 #endif
 	
-	ipap_message *message = NULL;
 	auctionDB_t *auctions = NULL;
 	auction::Session *s = NULL;
+
+	ipap_message message;
+
+	try {
+
+		string mesStr = ((CreateCheckSessionEvent *)e)->getMessage();
+		anslp::msg::anslp_ipap_xml_message mess;
+        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(mesStr);
+        message = ipap_mes->ip_message;
+        saveDelete(ipap_mes);
+		
+	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		// The message was not parse, we dont have to do anything. 
+		// We assumming that the sender will send the message again.		
+		throw Error(e.what());
+    }
+
 	
 	try{
 		
 		ostringstream os;
-		message = ((CreateCheckSessionEvent *)e)->getMessage();
-		auctions = proc->getApplicableAuctions(message);
+		auctions = proc->getApplicableAuctions(&message);
 		
 		// Verify that a session can be created with data provided
 		string sessionId = ((CreateSessionEvent *)e)->getSessionId();
@@ -970,7 +986,7 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 		//! Set sender port, which is my own auctioning port
 		s->setSenderPort(port);
 
-		map<ipap_field_key,string> dataSession = proc->getSessionInformation(message);
+		map<ipap_field_key,string> dataSession = proc->getSessionInformation(&message);
 		if ( dataSession.size() == (proc->getSetField(AUM_SESSION_FIELD_SET_NAME)).size() )
 		{
 			map<ipap_field_key,string>::iterator dataSessionIter;
@@ -1056,15 +1072,29 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
     log->dlog(ch,"processing event create session" );
 #endif
 	
-	ipap_message *message = NULL;
 	ipap_message *message_return = NULL;
 	auctionDB_t *auctions = NULL;
 	auction::Session *s = NULL;
+	ipap_message message;
+
+	try {
+
+		string mesStr = ((CreateSessionEvent *)e)->getMessage();
+		anslp::msg::anslp_ipap_xml_message mess;
+        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(mesStr);
+        message = ipap_mes->ip_message;
+        saveDelete(ipap_mes);
+		
+	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		// The message was not parse, we dont have to do anything. 
+		// We assumming that the sender will send the message again.		
+		throw Error(e.what());
+    }
+
 	
 	try{
 		
-		message = ((CreateSessionEvent *)e)->getMessage();
-		auctions = proc->getApplicableAuctions(message);
+		auctions = proc->getApplicableAuctions(&message);
 		
 #ifdef DEBUG
 		log->dlog(ch,"# returned auctions: %d", auctions->size() );
@@ -1101,7 +1131,7 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 		message_return = aucm->get_ipap_message(auctions, iter->second, useIPV6, 
 									sAddressIPV4, sAddressIPV6, port);
 		
-		uint32_t seqNo = message->get_seqno();
+		uint32_t seqNo = message.get_seqno();
 		message_return->set_ackseqno(seqNo + 1);
 		
 		
@@ -1136,7 +1166,7 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 			//! Set sender port, which is my own auctioning port
 			s->setSenderPort(port);
 
-			map<ipap_field_key,string> dataSession = proc->getSessionInformation(message);
+			map<ipap_field_key,string> dataSession = proc->getSessionInformation(&message);
 			if ( dataSession.size() == (proc->getSetField(AUM_SESSION_FIELD_SET_NAME)).size() )
 			{
 				map<ipap_field_key,string>::iterator dataSessionIter;
@@ -1235,23 +1265,37 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 {
 
-	ipap_message *message = NULL;
+	
 	biddingObjectDB_t *bids = NULL;
 	auction::Session *s = NULL;
+	ipap_message message;
 	
 	try {
 
-		string sessionId = ((AuctionInteractionEvent *)e)->getSessionId();
+		string mesStr = ((AuctionInteractionEvent *)e)->getMessage();
+		anslp::msg::anslp_ipap_xml_message mess;
+        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(mesStr);
+        message = ipap_mes->ip_message;
+        saveDelete(ipap_mes);
 		
+	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		// The message was not parse, we dont have to do anything. 
+		// We assumming that the sender will send the message again.
+		throw Error(e.what());
+    }
+
+
+	string sessionId = ((AuctionInteractionEvent *)e)->getSessionId();
+
+	try{
 		// Search for the session that is involved.
 		s = sesm->getSession(sessionId);
 		if (s == NULL)
 			throw Error("Session %s not found", sessionId.c_str());
 
-		message = ((AuctionInteractionEvent *)e)->getMessage();
 		// get the msgSeqNbr from the message
-		uint32_t seqNbr = message->get_seqno();
-		uint32_t ackSeqNbr = message->get_ackseqno();
+		uint32_t seqNbr = message.get_seqno();
+		uint32_t ackSeqNbr = message.get_ackseqno();
 		
 		// Confirm the message arriving, if it is confirming a previous message. 
 		if (ackSeqNbr > 0){
@@ -1261,20 +1305,10 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 #endif
 			
 			s->confirmMessage(ackSeqNbr-1);
-
-			anslp::msg::anslp_ipap_xml_message mess;
-			anslp::msg::anslp_ipap_message anlp_mess(*message);
-			string xmlMessage = mess.get_message(anlp_mess);
 			
 #ifdef DEBUG
 			log->dlog(ch,"Ending handle Auction Interaction" );
 #endif				
-			// Send the response message.
-			if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
-				comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
-			} else {
-				log->dlog(ch,"Message to send: %s", xmlMessage.c_str() );
-			}
 			
 		}	
 		else {
@@ -1289,7 +1323,7 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 				throw Error("Local templates not initialized with domain:%d", domainId);
 			} 
 			else {	
-				bids = bidm->parseMessage(message,templIter->second);
+				bids = bidm->parseMessage(&message,templIter->second);
 				
 				// Insert the session as part of the elements of bidding object
 				biddingObjectDBIter_t bidIter;
@@ -1300,24 +1334,7 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 				// Add the bidding objects to the bidding object manager.
 				bidm->addBiddingObjects(bids, evnt.get());  
 
-				// Build the response for the originator agent.
-				ipap_message resp = ipap_message(domainId, IPAP_VERSION, true);
-				resp.set_seqno(s->getNextMessageId());
-				resp.set_ackseqno(seqNbr+1);
-				resp.output();
-				
-				anslp::msg::anslp_ipap_xml_message mess;
-				anslp::msg::anslp_ipap_message anlp_mess(resp);
-				string xmlMessage = mess.get_message(anlp_mess);
-
-				// Send the response message.
-				if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
-					comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
-				} else {
-					log->dlog(ch,"Message to send: %s", xmlMessage.c_str() );
-				}
-
-
+				// We are assuming that a message with more than a bidding object its ok.
 				if ( bids->size() > 0 ){
 						
 					// Build the response for the originator agent.
@@ -1350,11 +1367,8 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 			}
 		}	
 			
-	} catch (Error &err){
+	} catch (Error &err) {
 		log->elog( ch, err.getError().c_str() );	
-		if (((AuctionInteractionEvent *)e)->getReq() != NULL ){
-			comm->sendErrMsg(err.getError(), ((AuctionInteractionEvent *)e)->getReq(), fds);
-		}
 	}
 
 }
@@ -1556,14 +1570,6 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 		handlePushExecution(e,fds);
 		break;
     
-    case CREATE_SESSION:
-		handleCreateSession(e,fds);
-		break;
-
-    case CREATE_CHECK_SESSION:
-		handleCreateCheckSession(e,fds);
-		break;
-
 	case AUCTION_INTERACTION_CTRLCOMM:
 		handleAuctioningInteraction(e,fds);
 		break;
@@ -1575,8 +1581,55 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
         }  else {
 			 cout << "Unknown event" << eventNames[e->getType()] << endl;
 		}
-
+		break;
     }
+}
+
+void Auctioner::send_immediate_respond(Event *retEvent, fd_sets_t *fds){
+
+
+#ifdef DEBUG
+    log->dlog(ch,"send inmediate respond" );
+#endif
+
+	if ( retEvent->getType() == AUCTION_INTERACTION_CTRLCOMM )
+	{
+	  
+		if (((AuctionInteractionEvent  *)retEvent)->getReq() != NULL){ 
+			string mesStr = ((AuctionInteractionEvent *)retEvent)->getMessage();
+			comm->sendMsg(mesStr.c_str(), ((AuctionInteractionEvent *)retEvent)->getReq(), fds);
+		}
+
+	}
+
+}
+
+bool Auctioner::handle_event_immediate_respond(Event *e, fd_sets_t *fds)
+{
+
+#ifdef DEBUG
+        log->dlog(ch,"Start handle event immediate respond" );
+#endif   
+   
+    bool pendingExec = true; // By default the event will remain pending.
+   
+    switch (e->getType()) {
+    
+    case CREATE_SESSION:
+		handleCreateSession(e,fds);
+		pendingExec = false;
+		break;
+
+    case CREATE_CHECK_SESSION:
+		handleCreateCheckSession(e,fds);
+		pendingExec = false;
+		break;
+
+    default:
+		break;
+    }
+    
+    return pendingExec;
 }
 
 
@@ -1695,13 +1748,24 @@ void Auctioner::run()
             if (!pprocThread) {
 				proc->handleFDEvent(&retEvents, NULL,NULL, NULL);
             }
-
+			
+			bool pendingExec = true;
+			
             // schedule events
             if (retEvents.size() > 0) {
                 for (eventVecIter_t iter = retEvents.begin();
                      iter != retEvents.end(); iter++) {
 
-                    evnt->addEvent(*iter);
+					// Execute events that require immediate response.
+					pendingExec = handle_event_immediate_respond(*iter, &fds);
+					
+					// Send the response message.
+					send_immediate_respond(*iter, &fds);
+
+                    if (pendingExec){
+						evnt->addEvent(*iter);
+					}
+					
                 }
                 retEvents.clear(); 
             }

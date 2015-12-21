@@ -115,7 +115,7 @@ class ActivateResourceRequestIntervalEvent : public Event
   public:
 
     ActivateResourceRequestIntervalEvent(struct timeval time, resourceRequestDB_t &r, time_t _startTime) 
-      : Event(REMOVE_RESOURCEREQUESTS, time), requests(r), startTime(_startTime) { cout << "new ActivateResourceRequestIntervalEvent" << endl; }
+      : Event(REMOVE_RESOURCEREQUESTS, time), requests(r), startTime(_startTime) {  }
 
     ActivateResourceRequestIntervalEvent(time_t offs_sec, resourceRequestDB_t &r, time_t _startTime) 
       : Event(ACTIVATE_RESOURCE_REQUEST_INTERVAL, offs_sec), requests(r), startTime(_startTime) {}
@@ -252,19 +252,19 @@ class ResponseCreateSessionEvent : public CtrlCommEvent
   private:
     
     string sessionId; 
-    ipap_message message;
+    string message;
 
   public:
 
-    ResponseCreateSessionEvent(string _sessionId, ipap_message _message) 
+    ResponseCreateSessionEvent(string _sessionId, string _message) 
       : CtrlCommEvent(RESPONSE_CREATE_SESSION), sessionId(_sessionId), message(_message) 
     {
         
     }
 
-    ipap_message * getMessage()
+    string  getMessage()
     {
-        return &message;
+        return message;
     }
     
     string getSession()

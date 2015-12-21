@@ -560,25 +560,12 @@ char *CtrlComm::processResponseSessionCreate(parseReq_t *preq)
         throw Error("processResponseSessionCreate: missing parameter 'Message'" );
     }
 
-	try
-	{
-		// read the message and process by the auction manager
-		string sMessage = message->second;
-		
-		anslp::msg::anslp_ipap_xml_message mess;
-		anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(sMessage);
-
-		retEvent = new auction::ResponseCreateSessionEvent(sessionId->second, ipap_mes->ip_message);
+	retEvent = new auction::ResponseCreateSessionEvent(sessionId->second,  message->second);
 
 #ifdef DEBUG
 		log->log(ch, "ending processResponseSessionCreate");
 #endif
-	
-	} catch (Error &e) {
-        log->elog( ch, e.getError().c_str() );
-        throw Error(e.getError().c_str());
-    }    
-    
+	    
     return NULL;
 
 }
@@ -586,17 +573,22 @@ char *CtrlComm::processResponseSessionCreate(parseReq_t *preq)
 
 /* ------------------ processResponseSessionRemove ------------------ */
 
-char *CtrlComm::processResponseSessionRemove(parseReq_t *preq )
+char *CtrlComm::processResponseSessionRemove(parseReq_t *preq)
 {
     paramListIter_t sessionId = preq->params.find("SessionID");
 
     if (sessionId == preq->params.end() ) {
         throw Error("processResponseSessionRemove: missing parameter 'SessionID'" );
     }
+
+    paramListIter_t message = preq->params.find("Message");
+    if (message == preq->params.end()) {
+        throw Error("processResponseSessionCreate: missing parameter 'Message'" );
+    }
     
     // remove the session from the list of active sessions.
     //retEvent = new auction::RemoveBidsCtrlEvent(id->second);
-  
+      
     return NULL;
 }
 
@@ -616,20 +608,15 @@ char *CtrlComm::processAuctionInteraction(parseReq_t *preq )
         throw Error("processAuctionInteraction: missing parameter 'Message'" );
     }
 
-    try {
-        // assume xml ipap_message def
-        anslp::msg::anslp_ipap_xml_message mess;
-        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(message->second);
-        retEvent = new AuctionInteractionEvent(sessionId->second, ipap_mes->ip_message);
-        
-    } catch(anslp::msg::anslp_ipap_bad_argument &e) {
-		log->elog( ch, e.what() );
-        throw Error(e.what());
-    }
-  
+    retEvent = new AuctionInteractionEvent(sessionId->second, message->second);
+			
+#ifdef DEBUG
+	log->dlog(ch,"Ending handle Auction Interaction" );
+#endif				
+
+          
     return NULL;
   
-    return NULL;
 }
 
 

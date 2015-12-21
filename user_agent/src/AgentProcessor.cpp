@@ -238,12 +238,14 @@ void AgentProcessor::delRequest( int index )
 	
 	requestProcessListIter_t ret = requests.find(index);	
 	if (ret != requests.end()){
+		
 		loader->releaseModule((ret->second).getModule());
 		
 		requests.erase(ret);		
 		// Release the used Id
 		idSource.freeId(index);
 	} else {
+		
 		log->dlog(ch, "Request index:%d not found", index);
 	}
 

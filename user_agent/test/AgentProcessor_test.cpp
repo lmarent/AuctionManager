@@ -22,7 +22,6 @@ class AgentProcessor_Test : public CppUnit::TestFixture {
 	CPPUNIT_TEST_SUITE( AgentProcessor_Test );
 
 	CPPUNIT_TEST( testBasicInsertDelete );
-	CPPUNIT_TEST_EXCEPTION( testException1, Error );
 	CPPUNIT_TEST_EXCEPTION( testException2, Error );
 	CPPUNIT_TEST( testBasicExecution );
 	CPPUNIT_TEST_SUITE_END();
@@ -31,7 +30,6 @@ class AgentProcessor_Test : public CppUnit::TestFixture {
 	void setUp();
 	void tearDown();
 	void testBasicInsertDelete();
-	void testException1();
 	void testException2();
 	void testBasicExecution();
 
@@ -219,15 +217,6 @@ void AgentProcessor_Test::testBasicInsertDelete()
 		throw e;
 	}
 	
-}
-
-void AgentProcessor_Test::testException1()
-{
-
-	// Test to delete a non existent request process.
-		
-	int index = 2;
-	agntProcessorPtr->delRequest(index);
 }
 
 void AgentProcessor_Test::testException2()

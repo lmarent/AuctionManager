@@ -197,7 +197,14 @@ class Agent
     
     //! handle the interaction arrived from a auctioneer system.
     void handleAuctioningInteraction(Event *e, fd_sets_t *fds);
-        
+    
+    //! This function echo the message as a response.
+    void send_immediate_respond(Event *, fd_sets_t *fds);
+
+	//! This function execute those events that require immediate execution.
+	bool handle_event_immediate_respond(Event *e, fd_sets_t *fds);
+
+		    
   public:
 
     /*! \short   construct and initialize a Agent Manager object

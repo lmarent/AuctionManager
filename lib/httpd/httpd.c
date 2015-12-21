@@ -177,9 +177,6 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
 #endif
 #ifdef USE_SSL
                 if (with_ssl) {
-					//TODO AM: remove this line.
-					fprintf(stdout, "opening a ssl session");
-					// END TODO AM
                     open_ssl_session(req);
                 }
 #endif
@@ -198,11 +195,7 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
 
                 /* host auth callback */
                 if (access_check_func != NULL) {
-					fprintf(stdout, "WE ARE IN ACCESS CHECK FUNC");
-					fprintf(stdout, "parameter:" );
-					fprintf(stdout, req->peerhost );
                     if (access_check_func(req->peerhost, NULL) < 0) {
-						fprintf(stdout, "func return negative number");
                         /* read request */
                         read_header(req,0);
                         req->ping = now;
@@ -211,7 +204,6 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
                         write_request(req);	     
                         req->state = STATE_CLOSE;
                     }
-                    fprintf(stdout, "func return a postive number");
                 }
 	 
                 FD_SET(req->fd, &fds->rset); 

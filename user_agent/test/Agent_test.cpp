@@ -42,6 +42,10 @@ class Agent_Test : public CppUnit::TestFixture {
 	void tearDown();
 	void test();
 	
+	void checkRemoveAuctionEvent(Event *evt);
+	void checkRemoveRequestEvent(Event *evt);
+	void checkRemoveBiddingObjectEvent(Event *evt);
+	
 
   private:
     
@@ -151,7 +155,7 @@ void Agent_Test::test()
 			}
 			CPPUNIT_ASSERT( nbrMessages == 1);
 			
-			// Confirm manually the message reading an constant response and changing the message number.
+			// Confirm manually the message reading a constant response and changing the message number.
 			std::ifstream t("../../etc/ResponseRequestMessage.xml");
 			std::string xmlMessage;
 			
@@ -165,15 +169,18 @@ void Agent_Test::test()
 			anslp::msg::anslp_ipap_xml_message messRes;
 			anslp::msg::anslp_ipap_message *ipapMesRes = messRes.from_message(xmlMessage);
 			(ipapMesRes->ip_message).set_ackseqno(seqNo);
+			std::string xmlRespMes = messRes.get_message(*ipapMesRes);
 			
-			agentPtr->evnt->addEvent( new ResponseCreateSessionEvent(sessionId, ipapMesRes->ip_message));
+			cout << "xmlResponse  Message:" << xmlRespMes << endl;
+			
+			agentPtr->evnt->addEvent( new ResponseCreateSessionEvent(sessionId, xmlRespMes));
 
 			evt = agentPtr->evnt.get()->getNextEvent();
 			ResponseCreateSessionEvent *rcs = dynamic_cast<ResponseCreateSessionEvent *>(evt);
 			CPPUNIT_ASSERT( rcs != NULL );
 
 			// Process the add Response create session event.
-			agentPtr->handleEvent(evt, NULL);
+			agentPtr->handle_event_immediate_respond(evt, NULL);
 			
 			// Verify that templates have been created.
 			agentTemplateListIter_t tmplIter = agentPtr->agentTemplates.find(1);
@@ -248,111 +255,68 @@ void Agent_Test::test()
 			agentPtr->handleEvent(evt, NULL);
 						
 			CPPUNIT_ASSERT( agentPtr->bidm->getNumBiddingObjects() == 1);
-			
-
+						
 			// Verify that a new activate bidding Object event was created.
 			evt = agentPtr->evnt.get()->getNextEvent();
-			ActivateBiddingObjectsEvent *aboe = dynamic_cast<ActivateBiddingObjectsEvent *>(evt);
-			CPPUNIT_ASSERT( aboe != NULL );
 			
-			numBids = 0;
-			new_bids = ((ActivateBiddingObjectsEvent *)evt)->getBiddingObjects();
-			for (bidIter = new_bids->begin(); bidIter != new_bids->end(); ++bidIter){
-				numBids++;
-			} 
-			
-			CPPUNIT_ASSERT( numBids == 1);
-			
-			// Handle the Activate-Bidding-Objects event.
-			agentPtr->handleEvent(evt, NULL);
-			
-			// Verify that a new transmit bidding Object event was created.
-			
-			evt = agentPtr->evnt.get()->getNextEvent();
-			TransmitBiddingObjectsEvent *tboe = dynamic_cast<TransmitBiddingObjectsEvent *>(evt);
-			CPPUNIT_ASSERT( tboe != NULL );
-			
-			numBids = 0;
-			new_bids = ((TransmitBiddingObjectsEvent *)evt)->getBiddingObjects();
-			for (bidIter = new_bids->begin(); bidIter != new_bids->end(); ++bidIter){
-				numBids++;
-			} 
-			
-			CPPUNIT_ASSERT( numBids == 1);
-
-			// Handle the Transmit-Bidding-Objects event.
-			agentPtr->handleEvent(evt, NULL);
-			
-			evt = agentPtr->evnt.get()->getNextEvent();
-			RemoveResourceRequestIntervalEvent *rrrie = dynamic_cast<RemoveResourceRequestIntervalEvent *>(evt);
-			CPPUNIT_ASSERT( rrrie != NULL );
-			
-			resourceRequestDB_t * requests = rrrie->getResourceRequests();
-			resourceRequestDBIter_t requestIter;
-			int reqNumber = 0;
-			for (requestIter = requests->begin(); requestIter != requests->end(); ++requestIter){
-				reqNumber++;
-			}
-			
-			CPPUNIT_ASSERT( reqNumber == 1);
-			
-			// Handle the Remove-Request-Interval event.
-			agentPtr->handleEvent(evt, NULL);
-
-			// Verify that a new request process was create
-			nbrRequest = 0;
-			for (reqIter = agentPtr->proc->begin(); reqIter != agentPtr->proc->end(); ++reqIter){
-				nbrRequest++;
-			}
-			
-			CPPUNIT_ASSERT( nbrRequest == 0 );
-			
-			time_t now = time(NULL);
-			now = now + 1;
-			
-			evt = agentPtr->evnt.get()->getNextEvent();
-			RemoveAuctionsEvent *rae = dynamic_cast<RemoveAuctionsEvent *>(evt);
-			CPPUNIT_ASSERT( rae != NULL );
-			
-			struct timeval before = rae->getTime();
-			agentPtr->evnt.get()->addEvent(rae);
-			
-			// Verify that auction's delete reschedule work.
-			if (rae->isIncluded(0)){
-				agentPtr->evnt.get()->rescheduleAuctionDelete(0, now);
-			}
-			
-			struct timeval after = rae->getTime();
-			CPPUNIT_ASSERT( before.tv_sec + 1 == after.tv_sec );
-
-			evt = agentPtr->evnt.get()->getNextEvent();
-			rae = dynamic_cast<RemoveAuctionsEvent *>(evt);
-			CPPUNIT_ASSERT( rae != NULL );
+			int numEvents = 0;
+			while (numEvents <=1){
+				// Depending on execution time, it can create first the activate event or the trasmit event
+				if (evt->getType() == TRANSMIT_BIDDING_OBJECTS) {
+					// Verify that a new transmit bidding Object event was created.
+					TransmitBiddingObjectsEvent *tboe = dynamic_cast<TransmitBiddingObjectsEvent *>(evt);
+					CPPUNIT_ASSERT( tboe != NULL );
 						
-			auctionDB_t *auctions = rae->getAuctions();
-			auctionDBIter_t aucIter;
-			int numAuct = 0;
-			for (aucIter = auctions->begin(); aucIter != auctions->end(); ++aucIter){
-				numAuct++;
-			} 
+					numBids = 0;
+					new_bids = ((TransmitBiddingObjectsEvent *)evt)->getBiddingObjects();
+					for (bidIter = new_bids->begin(); bidIter != new_bids->end(); ++bidIter){
+						numBids++;
+					} 
+						
+					CPPUNIT_ASSERT( numBids == 1);
+
+					// Handle the Transmit-Bidding-Objects event.
+					agentPtr->handleEvent(evt, NULL);
+				}	   
+				else if (evt->getType() == ACTIVATE_BIDDING_OBJECTS) {
+					ActivateBiddingObjectsEvent *aboe = dynamic_cast<ActivateBiddingObjectsEvent *>(evt);
+					CPPUNIT_ASSERT( aboe != NULL );
+						
+					numBids = 0;
+					new_bids = ((ActivateBiddingObjectsEvent *)evt)->getBiddingObjects();
+					for (bidIter = new_bids->begin(); bidIter != new_bids->end(); ++bidIter){
+						numBids++;
+					} 
+						
+					CPPUNIT_ASSERT( numBids == 1);
+						
+					// Handle the Activate-Bidding-Objects event.
+					agentPtr->handleEvent(evt, NULL);
+				}
+				else {	
+				   // We are expecting a transmit or activate bidding object 
+				   CPPUNIT_ASSERT( 1 == 0 );	
+				}
+				numEvents++;
+				evt = agentPtr->evnt.get()->getNextEvent();
+			}
 			
-			CPPUNIT_ASSERT( numAuct == 1 );
 			
-			// Handle the Remove-Auctions event.
-			agentPtr->handleEvent(evt, NULL);
-			
-			// Verify the auction depletion.
-			CPPUNIT_ASSERT( agentPtr->aucm->getNumAuctions() == 0);
-			
-			evt = agentPtr->evnt.get()->getNextEvent();
-			RemoveBiddingObjectsEvent *rboe = dynamic_cast<RemoveBiddingObjectsEvent *>(evt);
-			CPPUNIT_ASSERT( rboe != NULL );
-			
-			// Handle the Remove-Bidding Objects event.
-			agentPtr->handleEvent(evt, NULL);
-			
-			CPPUNIT_ASSERT( agentPtr->bidm->getNumBiddingObjects() == 0);
-			
+			numEvents = 0;
+			while (numEvents <=2){
+							
+				if (evt->getType() == REMOVE_RESOURCE_REQUEST_INTERVAL) {
+					checkRemoveRequestEvent(evt);
+				}		
+				else if (evt->getType() == REMOVE_AUCTIONS) {
+					checkRemoveAuctionEvent(evt);
+				}	
+				else if (evt->getType() == REMOVE_BIDDING_OBJECTS) {
+					checkRemoveBiddingObjectEvent(evt);
+				}	
+				numEvents++;
+				evt = agentPtr->evnt.get()->getNextEvent();
+			}
 			
 		}	
 		
@@ -363,4 +327,84 @@ void Agent_Test::test()
 	}
 
 
+}
+
+void Agent_Test::checkRemoveAuctionEvent(Event *evt)
+{
+
+	RemoveAuctionsEvent *rae = dynamic_cast<RemoveAuctionsEvent *>(evt);
+	CPPUNIT_ASSERT( rae != NULL );
+			
+	struct timeval before = rae->getTime();
+	agentPtr->evnt.get()->addEvent(rae);
+			
+	time_t now = time(NULL);
+	now = now + 1;
+
+	// Verify that auction's delete reschedule work.
+	if (rae->isIncluded(0)){
+		agentPtr->evnt.get()->rescheduleAuctionDelete(0, now);
+	}
+						
+	struct timeval after = rae->getTime();
+	CPPUNIT_ASSERT( before.tv_sec + 1 == after.tv_sec );
+
+	evt = agentPtr->evnt.get()->getNextEvent();
+	rae = dynamic_cast<RemoveAuctionsEvent *>(evt);
+	CPPUNIT_ASSERT( rae != NULL );
+						
+	auctionDB_t *auctions = rae->getAuctions();
+	auctionDBIter_t aucIter;
+	int numAuct = 0;
+	for (aucIter = auctions->begin(); aucIter != auctions->end(); ++aucIter){
+		numAuct++;
+	} 
+			
+	CPPUNIT_ASSERT( numAuct == 1 );
+		
+	// Handle the Remove-Auctions event.
+	agentPtr->handleEvent(evt, NULL);
+			
+	// Verify the auction depletion.
+	CPPUNIT_ASSERT( agentPtr->aucm->getNumAuctions() == 0);
+
+}
+
+void Agent_Test::checkRemoveRequestEvent(Event *evt)
+{
+	RemoveResourceRequestIntervalEvent *rrrie = dynamic_cast<RemoveResourceRequestIntervalEvent *>(evt);
+	CPPUNIT_ASSERT( rrrie != NULL );
+			
+	resourceRequestDB_t * requests = rrrie->getResourceRequests();
+	resourceRequestDBIter_t requestIter;
+	int reqNumber = 0;
+	for (requestIter = requests->begin(); requestIter != requests->end(); ++requestIter){
+		reqNumber++;
+	}
+			
+	CPPUNIT_ASSERT( reqNumber == 1);
+			
+	// Handle the Remove-Request-Interval event.
+	agentPtr->handleEvent(evt, NULL);
+
+	// Verify that a new request process was create
+	int nbrRequest = 0;
+	requestProcessListIter_t reqIter;
+	for (reqIter = agentPtr->proc->begin(); reqIter != agentPtr->proc->end(); ++reqIter){
+		nbrRequest++;
+	}
+			
+	CPPUNIT_ASSERT( nbrRequest == 0 );
+
+}
+
+void Agent_Test::checkRemoveBiddingObjectEvent(Event *evt)
+{
+	RemoveBiddingObjectsEvent *rboe = dynamic_cast<RemoveBiddingObjectsEvent *>(evt);
+	CPPUNIT_ASSERT( rboe != NULL );
+			
+	// Handle the Remove-Bidding Objects event.
+	agentPtr->handleEvent(evt, NULL);
+			
+	CPPUNIT_ASSERT( agentPtr->bidm->getNumBiddingObjects() == 0);
 }

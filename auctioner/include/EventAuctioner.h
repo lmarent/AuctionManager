@@ -49,16 +49,16 @@ class CreateSessionEvent : public CtrlCommEvent
 {
   private:
 	string sessionId;
-	ipap_message message;
+	string message;
     
   public:
 
-    CreateSessionEvent(string _sessionId, ipap_message &a) 
+    CreateSessionEvent(string _sessionId, string &a) 
       : CtrlCommEvent(CREATE_SESSION), sessionId(_sessionId), message(a) {  }
   
-	ipap_message  *getMessage()
+	string  getMessage()
 	{
-		return &message;
+		return message;
 	}
 	
 	string getSessionId()
@@ -71,16 +71,16 @@ class CreateCheckSessionEvent : public CtrlCommEvent
 {
   private:
 	string sessionId;
-	ipap_message message;
+	string message;
     
   public:
 
-    CreateCheckSessionEvent(string _sessionId, ipap_message &a) 
+    CreateCheckSessionEvent(string _sessionId, string &a) 
       : CtrlCommEvent(CREATE_CHECK_SESSION), sessionId(_sessionId), message(a) {  }
   
-	ipap_message  *getMessage()
+	string  getMessage()
 	{
-		return &message;
+		return message;
 	}
 	
 	string getSessionId()

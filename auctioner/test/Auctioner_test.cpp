@@ -155,24 +155,22 @@ void Auctioner_Test::test()
 			xmlMessage.replace(1568, 10, snow2);
 			
 			// check session creation.
-			anslp::msg::anslp_ipap_xml_message mess;
-			anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(xmlMessage);
-			auctionerPtr->evnt->addEvent( new CreateCheckSessionEvent(sessionId, ipap_mes->ip_message));
+			auctionerPtr->evnt->addEvent( new CreateCheckSessionEvent(sessionId, xmlMessage));
 
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 			CreateCheckSessionEvent *ccse = dynamic_cast<CreateCheckSessionEvent *>(evt);
 			CPPUNIT_ASSERT( ccse != NULL );
 			
-			auctionerPtr->handleEvent(evt, NULL);
+			auctionerPtr->handle_event_immediate_respond(evt, NULL);
 			
 			// once check the message, we proceed to create the session,
-			auctionerPtr->evnt->addEvent( new CreateSessionEvent(sessionId, ipap_mes->ip_message));
+			auctionerPtr->evnt->addEvent( new CreateSessionEvent(sessionId, xmlMessage));
 
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 			CreateSessionEvent *cse = dynamic_cast<CreateSessionEvent *>(evt);
 			CPPUNIT_ASSERT( cse != NULL );
 							
-			auctionerPtr->handleEvent(evt, NULL);
+			auctionerPtr->handle_event_immediate_respond(evt, NULL);
 			
 			// TODO AM: what to do if there is no auction satisfying the given parameters.
 			
@@ -194,9 +192,6 @@ void Auctioner_Test::test()
 				++nbrMessages;
 			}
 			CPPUNIT_ASSERT( nbrMessages == 1);
-
-			saveDelete(ipap_mes);
-
 
 			std::ifstream t2("../../etc/example_xml_biddingobject.xml");
 			std::string xmlMessage2;
@@ -222,8 +217,7 @@ void Auctioner_Test::test()
 
 
 			// Auction Interaction event.
-			ipap_mes = mess.from_message(xmlMessage2);
-			auctionerPtr->evnt->addEvent( new AuctionInteractionEvent(sessionId, ipap_mes->ip_message));
+			auctionerPtr->evnt->addEvent( new AuctionInteractionEvent(sessionId, xmlMessage2));
 
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 			AuctionInteractionEvent *aie = dynamic_cast<AuctionInteractionEvent *>(evt);

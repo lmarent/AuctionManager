@@ -582,24 +582,9 @@ char *CtrlComm::processCheckSession(parseReq_t *preq)
     if (message == preq->params.end() ) {
         throw Error("check_Session: missing parameter 'Message'" );
     }
-
-    try {
-        // assume xml ipap_message def
-        anslp::msg::anslp_ipap_xml_message mess;
-        ipap_mes = mess.from_message(message->second);
+ 
+    retEvent = new CreateCheckSessionEvent(sessionId->second, message->second);
         
-        retEvent = new CreateCheckSessionEvent(sessionId->second, ipap_mes->ip_message);
-        saveDelete(ipap_mes);
-        
-    } catch(anslp::msg::anslp_ipap_bad_argument &e) {
-		if (ipap_mes != NULL){
-			saveDelete(ipap_mes);
-		}
-			
-		log->elog( ch, e.what() );
-        throw Error(e.what());
-    }
-
     return NULL;
 }
 
@@ -626,17 +611,9 @@ char *CtrlComm::processAddSession(parseReq_t *preq)
         throw Error("add_Session: missing parameter 'Message'" );
     }
 
-    try {
-        // assume xml ipap_message def
-        anslp::msg::anslp_ipap_xml_message mess;
-        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(message->second);
-        retEvent = new CreateSessionEvent(sessionId->second, ipap_mes->ip_message);
+    // assume xml ipap_message def
+    retEvent = new CreateSessionEvent(sessionId->second, message->second);
         
-    } catch(anslp::msg::anslp_ipap_bad_argument &e) {
-		log->elog( ch, e.what() );
-        throw Error(e.what());
-    }
-
     return NULL;
 }
 
@@ -682,17 +659,8 @@ char *CtrlComm::processAuctionInteraction(parseReq_t *preq )
         throw Error("processAuctionInteraction: missing parameter 'Message'" );
     }
 
-    try {
-        // assume xml ipap_message def
-        anslp::msg::anslp_ipap_xml_message mess;
-        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(message->second);
-        retEvent = new AuctionInteractionEvent(sessionId->second, ipap_mes->ip_message);
-        
-    } catch(anslp::msg::anslp_ipap_bad_argument &e) {
-		log->elog( ch, e.what() );
-        throw Error(e.what());
-    }
-  
+    retEvent = new AuctionInteractionEvent(sessionId->second, message->second);
+          
     return NULL;
 }
 

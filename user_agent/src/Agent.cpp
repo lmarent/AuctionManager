@@ -32,6 +32,8 @@
 #include "ConstantsAgent.h"
 #include "anslp_ipap_message.h"
 #include "anslp_ipap_xml_message.h"
+#include "anslp_ipap_exception.h" 
+
 
 using namespace auction;
 
@@ -758,12 +760,28 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 	log->dlog(ch,"Starting event handleResponseCreateSession" );
 #endif
 
-	ipap_message *message = NULL;
 	auctionDB_t *auctions = NULL;
 	auctionDB_t auctionsInsert;
 	int domainId;
 	string sessionId;
 	uint32_t mid = 0;
+
+	ipap_message message;
+	
+	try {
+
+		string mesStr = ((AuctionInteractionEvent *)e)->getMessage();
+		anslp::msg::anslp_ipap_xml_message mess;
+        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(mesStr);
+        message = ipap_mes->ip_message;
+        saveDelete(ipap_mes);
+		
+	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		// The message was not parse, we dont have to do anything. 
+		// We assumming that the sender will send the message again.
+		throw Error(e.what());
+    }
+
 
 	try
 	{
@@ -771,11 +789,10 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 		sessionId = ((ResponseCreateSessionEvent *)e)->getSession();
 		
 		// Obtains the message 
-		message = ((ResponseCreateSessionEvent *)e)->getMessage();
-		mid = message->get_ackseqno();
+		mid = message.get_ackseqno();
 		
 		// Verifies if the domain is already in the agent template list
-		domainId = message->get_domain();
+		domainId = message.get_domain();
 		if (domainId > 0){
 		
 			agentTemplateListIter_t tmplIter;
@@ -786,7 +803,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 			
 			tmplIter = agentTemplates.find(domainId);
 				
-			auctions = aucm->parseMessage( message, tmplIter->second);
+			auctions = aucm->parseMessage( &message, tmplIter->second);
 			
 		} else {
 			throw Error("Agent: Invalid domain id associated with the message");
@@ -857,14 +874,11 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 			saveDelete(auctions);
 		}
 			
-		log->dlog( ch, err.getError().c_str() );
+		log->elog( ch, err.getError().c_str() );
 		
 		if (((ResponseCreateSessionEvent *)e)->getReq() != NULL){ 
-			log->dlog( ch, err.getError().c_str() );
 			comm->sendErrMsg(err.getError(), ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
-		} else {
-			log->dlog( ch, err.getError().c_str() );
-		}
+		} 
 	}
 	
 	// insert auctions in container ( this will trigger events to activate and remove)
@@ -991,7 +1005,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 		// Build the response for the originator agent.
 		ipap_message resp = ipap_message(domainId, IPAP_VERSION, true);
 		resp.set_seqno(session->getNextMessageId());
-		resp.set_ackseqno(message->get_seqno() + 1);
+		resp.set_ackseqno(message.get_seqno() + 1);
 		resp.output();
 
 #ifdef DEBUG
@@ -1020,11 +1034,8 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 			saveDelete(auctions);
 		}
 		if (((ResponseCreateSessionEvent *)e)->getReq() != NULL){ 
-			log->dlog( ch, err.getError().c_str() );
 			comm->sendErrMsg(err.getError(), ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
-		} else {
-			log->dlog( ch, err.getError().c_str() );
-		}
+		} 
 	}
 	
 }
@@ -1457,67 +1468,61 @@ void Agent::handleRemoveBiddingObjects(Event *e)
 void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 {
 
-	ipap_message *message = NULL;
 	biddingObjectDB_t *bids = NULL;
 	auction::Session *s = NULL;
+	ipap_message message;
+
+	try {
+
+		string mesStr = ((AuctionInteractionEvent *)e)->getMessage();
+		anslp::msg::anslp_ipap_xml_message mess;
+        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(mesStr);
+        message = ipap_mes->ip_message;
+        saveDelete(ipap_mes);
+		
+	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		// The message was not parse, we dont have to do anything. 
+		// We assumming that the sender will send the message again.		
+		throw Error(e.what());
+    }
+
+	string sessionId = ((AuctionInteractionEvent *)e)->getSessionId();
 	
 	try {
 
-		string sessionId = ((AuctionInteractionEvent *)e)->getSessionId();
-		
 		// Search for the session that is involved.
 		s = asmp->getSession(sessionId);
 		if (s == NULL)
 			throw Error("Session %s not found", sessionId.c_str());
-
-		// The message returned does not have memory allocated.
-		message = ((AuctionInteractionEvent *)e)->getMessage();
 		
 		// get the msgSeqNbr from the message
-		uint32_t seqNbr = message->get_seqno();
-		uint32_t ackSeqNbr = message->get_ackseqno();
+		uint32_t seqNbr = message.get_seqno();
+		uint32_t ackSeqNbr = message.get_ackseqno();
 		
 		// send the same message arriving, if it is confirming a previous message. 
 		if (ackSeqNbr > 0){
 			s->confirmMessage(ackSeqNbr-1);
 			
-			anslp::msg::anslp_ipap_xml_message mess;
-			anslp::msg::anslp_ipap_message anlp_mess(*message);
-			string xmlMessage = mess.get_message(anlp_mess);
-
 #ifdef DEBUG
 			log->dlog(ch,"Ending handle Auction Interaction" );
 #endif				
-			comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
+
 		} 
-		else {
+		else 
+		{
 		
-			int domainBidObj = message->get_domain();
+			int domainBidObj = message.get_domain();
 			// Search the domain in the template container
 			agentTemplateListIter_t iterCont = agentTemplates.find(domainBidObj);
 			if(iterCont == agentTemplates.end()){
 				throw Error("Bidding Object domain:%d not found in templates container", domainBidObj);
 			}
 			
-			bids = bidm->parseMessage(message,iterCont->second);
+			bids = bidm->parseMessage(&message,iterCont->second);
 			
 			// Add the bidding objects to the bidding object manager.
 			bidm->addBiddingObjects(bids, evnt.get());  
-													
-			// Build the response for the originator agent.
-			ipap_message resp = ipap_message(domainId, IPAP_VERSION, true);
-			resp.set_seqno(s->getNextMessageId());
-			resp.set_ackseqno(seqNbr+1);
-			resp.output();
-				
-			anslp::msg::anslp_ipap_xml_message mess;
-			anslp::msg::anslp_ipap_message anlp_mess(resp);
-			string xmlMessage = mess.get_message(anlp_mess);
-						
-			// Send the response message.
-			comm->sendMsg(xmlMessage.c_str(), ((AuctionInteractionEvent *)e)->getReq(), fds);
-			
-			
+																
 			// If the number of bids is greater than zero, then take the first bidding object
 			// to find the replying address.
 			
@@ -1587,7 +1592,25 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 		}
 	} catch (Error &err){
 		log->elog( ch, err.getError().c_str() );	
-		comm->sendErrMsg(err.getError(), ((AuctionInteractionEvent *)e)->getReq(), fds); 			
+	}
+
+}
+
+void Agent::send_immediate_respond(Event *retEvent, fd_sets_t *fds){
+
+
+#ifdef DEBUG
+    log->dlog(ch,"send inmediate respond" );
+#endif
+
+	if ( retEvent->getType() == AUCTION_INTERACTION_CTRLCOMM )
+	{
+	  
+		if (((AuctionInteractionEvent  *)retEvent)->getReq() != NULL){ 
+			string mesStr = ((AuctionInteractionEvent *)retEvent)->getMessage();
+			comm->sendMsg(mesStr.c_str(), ((AuctionInteractionEvent *)retEvent)->getReq(), fds);
+		}
+
 	}
 
 }
@@ -1631,15 +1654,15 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
 	
 	case ADD_GENERATED_BIDDING_OBJECTS:
 		handleAddGeneratedBiddingObjects(e,fds);
-		break;
+	  break;
 
 	case TRANSMIT_BIDDING_OBJECTS:
 		handleTransmitBiddingObjects(e,fds);
-		break;
+	  break;
       
 	case ACTIVATE_BIDDING_OBJECTS:
 		handleActivateBiddingObjects(e,fds);
-		break;
+	  break;
 		  
     case REMOVE_BIDDING_OBJECTS:
 		handleRemoveBiddingObjects(e);
@@ -1664,13 +1687,13 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
     case REMOVE_RESOURCE_REQUEST_INTERVAL:
 		handleRemoveResourceRequestInterval(e);
       break;
-
-	case RESPONSE_CREATE_SESSION:
-		handleResponseCreateSession(e, fds);
-	  break;
 	  
 	case AUCTION_INTERACTION_CTRLCOMM:
 		 handleAuctioningInteraction(e, fds);
+	  break;
+
+	case RESPONSE_CREATE_SESSION:
+		// Immediate execution, so it goes in the handle immediate response. 
 	  break;
 	  
     default:
@@ -1681,6 +1704,28 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
     }
 }
 
+bool Agent::handle_event_immediate_respond(Event *e, fd_sets_t *fds)
+{
+
+#ifdef DEBUG
+        log->dlog(ch,"Start handle event immediate respond" );
+#endif   
+
+    bool pendingExec = true; // By default the event will remain pending.
+   
+    switch (e->getType()) {
+
+		case RESPONSE_CREATE_SESSION:
+			handleResponseCreateSession(e, fds);
+			pendingExec = false;
+		  break;
+
+		default:
+			break;
+    }
+
+	return pendingExec;
+}
 
 /* ----------------------- run ----------------------------- */
 
@@ -1768,8 +1813,7 @@ void Agent::run()
                             if (e != NULL) {
                                 // FIXME hack
                                 if (e->getType() == CTRLCOMM_TIMER) {
-                                    comm->handleFDEvent(&retEvents, NULL, 
-                                                        NULL, &fds);
+                                    comm->handleFDEvent(&retEvents, NULL, NULL, &fds);
                                 } else {
                                     handleEvent(e, &fds);
                                 }
@@ -1794,11 +1838,19 @@ void Agent::run()
 				proc->handleFDEvent(&retEvents, NULL,NULL, NULL);
             }
 
+			bool pendingExec = true;
+
             // schedule events
             if (retEvents.size() > 0) {
                 for (eventVecIter_t iter = retEvents.begin();
                      iter != retEvents.end(); iter++) {
 
+					// Execute events that require immediate response.
+					pendingExec = handle_event_immediate_respond(*iter, &fds);
+					
+					// Send the response message.
+					send_immediate_respond(*iter, &fds);
+					
                     evnt->addEvent(*iter);
                 }
                 retEvents.clear(); 

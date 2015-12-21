@@ -731,16 +731,16 @@ class AuctionInteractionEvent : public CtrlCommEvent
 {
   private:
 	string sessionId;
-	ipap_message message;
+	string message;
     
   public:
 
-    AuctionInteractionEvent(string _sessionId, ipap_message &a) 
+    AuctionInteractionEvent(string _sessionId, string &a) 
       : CtrlCommEvent(AUCTION_INTERACTION_CTRLCOMM), sessionId(_sessionId), message(a) {  }
   
-	ipap_message *getMessage()
+	string getMessage()
 	{
-		return &message;
+		return message;
 	}
 	
 	string getSessionId()

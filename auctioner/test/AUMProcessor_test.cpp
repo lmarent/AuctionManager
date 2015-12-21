@@ -77,7 +77,7 @@ void AUMProcessor_Test::setUp()
 		const string fieldname = DEF_SYSCONFDIR "/fielddef.xml";
 		const string fieldValuename = DEF_SYSCONFDIR "/fieldval.xml";
 				
-		bidManagerPtr = new BiddingObjectManager(domain, fieldname,fieldValuename);
+		bidManagerPtr = new BiddingObjectManager(domain, fieldname,fieldValuename, "");
 
 		const string filenameAgent1 = "../../etc/example_bids2.xml";
 		biddingObjectDB_t *new_bidsAgent1 = bidManagerPtr->parseBiddingObjects(filenameAgent1);
