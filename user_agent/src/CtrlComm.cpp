@@ -409,7 +409,7 @@ parseReq_t CtrlComm::parseRequest(struct REQUEST *req)
     parseReq_t preq;
 
 #ifdef DEBUG
-    log->log(ch, "Start parseRequest");
+    log->dlog(ch, "Start parseRequest");
 #endif
 
 
@@ -468,9 +468,7 @@ parseReq_t CtrlComm::parseRequest(struct REQUEST *req)
     }
 
 #ifdef DEBUG
-#ifdef DEBUG
-    log->log(ch, "End parseRequest");
-#endif
+    log->dlog(ch, "End parseRequest");
 
     for (paramListIter_t iter=preq.params.begin(); iter != preq.params.end(); iter++) {
         log->dlog(ch, "%s :: %s", (iter->first).c_str(), (iter->second).c_str());
@@ -494,7 +492,7 @@ int CtrlComm::processCmd(struct REQUEST *req)
 #endif
 
 #ifdef DEBUG
-    log->log(ch, "client requested cmd:%s Params: %s Body:%s", 
+    log->dlog(ch, "client requested cmd:%s Params: %s Body:%s", 
 						req->path, req->query, req->post_body);
 #endif
 		
@@ -514,8 +512,8 @@ int CtrlComm::processCmd(struct REQUEST *req)
     string page = pcache.getPage(preq.comm); 
 
 #ifdef DEBUG
-    log->log(ch, "Command:%s Page:%s", (preq.comm).c_str(), page.c_str() );
-#endif			
+    log->dlog(ch, "Command:%s Page:%s", (preq.comm).c_str(), page.c_str() );
+#endif	
 
 
     try {
@@ -558,6 +556,11 @@ int CtrlComm::processCmd(struct REQUEST *req)
         retEvent->setReq(req);
         retEventVec->push_back(retEvent);
     }
+
+#ifdef DEBUG
+    log->dlog(ch, "ending processCmd");
+#endif	
+
 
     return 0;
 }

@@ -1813,6 +1813,9 @@ void Agent::run()
                             if (e != NULL) {
                                 // FIXME hack
                                 if (e->getType() == CTRLCOMM_TIMER) {
+#ifdef DEBUG			
+									log->dlog(ch,"Next Event is a control timer");
+#endif
                                     comm->handleFDEvent(&retEvents, NULL, NULL, &fds);
                                 } else {
                                     handleEvent(e, &fds);
@@ -1830,6 +1833,9 @@ void Agent::run()
                     }
                 } 
                 else {
+#ifdef DEBUG			
+				   log->dlog(ch,"Next Event is not call for control but not because a control timer");
+#endif					
                    comm->handleFDEvent(&retEvents, &rset, &wset, &fds);
                 }
 	        }	
