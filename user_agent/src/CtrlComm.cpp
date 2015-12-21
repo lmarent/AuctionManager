@@ -369,6 +369,12 @@ void CtrlComm::sendErrMsg(string msg, struct REQUEST *req, fd_sets_t *fds)
 
 int CtrlComm::handleFDEvent(auction::eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds)
 {
+
+#ifdef DEBUG
+    log->dlog(ch, "Starting handleFDEvent" );
+#endif
+
+
     assert(e != NULL);
 
     // make the pointer global for ctrlcomm
@@ -383,8 +389,16 @@ int CtrlComm::handleFDEvent(auction::eventVec_t *e, fd_set *rset, fd_set *wset, 
 		
     // processCmd callback funtion is called in case of new request
 
+#ifdef DEBUG
+    log->dlog(ch, "Ending handleFDEvent" );
+#endif
+
+
     // return resulting event (freed by event scheduler)
     return 0;
+
+
+
 }
 
 
