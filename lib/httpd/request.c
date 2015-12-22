@@ -172,6 +172,10 @@ int read_body(struct REQUEST *req, int pipelined)
         req->hdata += rc;
         req->hreq[req->hdata] = 0;
     }
+
+#ifdef DEBUG
+	slog(0, SLOG_INFO, "req len:%d,  number of bytes read:%d", req->clen, req->hdata - req->lreq);
+#endif
     
     /* body complete */ 
     if ((req->hdata - req->lreq) == req->clen) {
