@@ -473,6 +473,10 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
         }
     }
 
+#ifdef DEBUG
+	slog(2, SLOG_DEBUG, "ending httpd_handle_event:");
+#endif
+
     return 0;
 }
 
