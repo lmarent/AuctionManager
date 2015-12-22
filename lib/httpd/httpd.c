@@ -156,6 +156,12 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
 
     /* new connection ? */
     if ((rset != NULL) && FD_ISSET(slisten, rset)) {
+
+#ifdef DEBUG
+    slog(0, SLOG_INFO, "new connection");
+#endif
+
+		
         req = malloc(sizeof(struct REQUEST));
         if (NULL == req) {
             /* oom: let the request sit in the listen queue */
@@ -468,8 +474,13 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
             list_free(&tmp->header);
             free(tmp);
         } else {
-            prev = req;
-            req = req->next;
+            if (req->next == NULL){
+				// start it over.if it finish it takes the value null.
+				req = conns;
+			} else {	
+				prev = req;
+				req = req->next;
+			}
         }
     }
 
