@@ -192,6 +192,9 @@ int read_body(struct REQUEST *req, int pipelined)
     
     if (req->hdata == MAX_REQ) {
         /* oops: buffer full, but found no complete request ... */
+#ifdef DEBUG
+		slog(0, SLOG_INFO, "buffer full, but found no complete request");
+#endif        
         mkerror(req,400,0);
         return -1;
     }
