@@ -1645,6 +1645,7 @@ void Auctioner::run()
     int            stop = 0;
     eventVec_t     retEvents;
     Event         *e = NULL;
+    int receivinghttp = 0;
 
     try {
         // fill the fd set

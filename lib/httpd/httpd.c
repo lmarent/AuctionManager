@@ -152,7 +152,20 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
 
 #ifdef DEBUG
     slog(0, SLOG_INFO, "Start httpd_handle_event");
+    if (rset != NULL){
+		slog(0, SLOG_INFO, "rset is different from NULL");
+    }
+    
+	if ((rset != NULL) && FD_ISSET(slisten, rset)){
+		slog(0, SLOG_INFO, "slisten is part of rset");
+	}
+	
+	if (FD_ISSET(req->fd, rset)){
+		slog(0, SLOG_INFO, "red fd is part of rset");
+	}
+	
 #endif
+
 
     /* new connection ? */
     if ((rset != NULL) && FD_ISSET(slisten, rset)) {
@@ -222,8 +235,18 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
 
                     }
                 }
+
+#ifdef DEBUG
+				slog(0, SLOG_DEBUG, "after access check");
+#endif
 	 
                 FD_SET(req->fd, &fds->rset); 
+
+#ifdef DEBUG
+				slog(0, SLOG_DEBUG, "max fds:%d req fd:%d", fds->max, req->fd);
+#endif
+
+
                 if (req->fd > fds->max) {
                     fds->max = req->fd;
                 }
@@ -474,21 +497,24 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
             list_free(&tmp->header);
             free(tmp);
         } else {
-            if (req->next == NULL){
-				// start it over.if it finish it takes the value null.
-				req = conns;
-			} else {	
-				prev = req;
-				req = req->next;
-			}
+			prev = req;
+			req = req->next;
         }
     }
 
+	int conn_reading = 0;
+	for (req = conns, prev = NULL; req != NULL;) {
+		if (req->state <= STATE_READ_BODY){
+			conn_reading++;
+		}
+		req = req->next;
+	}
+
 #ifdef DEBUG
-	slog(2, SLOG_DEBUG, "ending httpd_handle_event:");
+	slog(2, SLOG_DEBUG, "ending httpd_handle_event: %d", conn_reading);
 #endif
 
-    return 0;
+    return conn_reading;
 }
 
 /* initialize http server */

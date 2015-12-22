@@ -33,11 +33,14 @@ $Id: CtrlComm.cpp 748 2015-07-31 9:25:00 amarentes $
 #include "EventAuctioner.h"
 #include "Constants.h"
 #include "anslp_ipap_exception.h" 
+#include "Auctioner.h"
 
 using namespace auction;
 
 CtrlComm *CtrlComm::s_instance = NULL;
 
+// min timeout for select() in us (10ms minimum on current UNIX!)
+const int CNTRL_AUCTIONER_MIN_TIMEOUT = 100000;
 
 /* ------------------------- CtrlComm ------------------------- */
 
@@ -386,14 +389,42 @@ int CtrlComm::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t
     // make the pointer global for ctrlcomm
     retEventVec = e;
     retEvent = NULL;
+    int    cnt = 0;
+    fd_set rset2, wset2;
+    char c = 'A';
+
+	// min timeout for select() in us (10ms minimum on current UNIX!)
+	struct timeval rv = {0, CNTRL_AUCTIONER_MIN_TIMEOUT};
     
     // check for incoming message
-    if (httpd_handle_event(rset, wset, fds) < 0) {
-		cout << "ERROR HANDLING THE EVENT" << endl;
-        throw Error("ctrlcomm handle event error");
-    }
-	
+    int http_handle = httpd_handle_event(rset, wset, fds);
+    
+    while (http_handle > 0){
+    
+        rset2 = fds->rset;
+        wset2 = fds->wset;
 
+        // note: under most unix the minimal sleep time of select is
+        // 10ms which means an event may be executed 10ms after expiration!
+        if ((cnt = select(fds->max+1, &rset2, &wset2, NULL, &rv)) < 0) {
+            if (errno != EINTR) {
+				throw Error("select error: %s", strerror(errno));
+            }
+        }
+		
+		if (cnt > 0){
+			http_handle = httpd_handle_event(&rset2, &wset2, fds);
+			
+			// write(Auctioner::s_sigpipe[1], &c, 1);
+			
+			if (http_handle < 0) {
+				cout << "ERROR HANDLING THE EVENT" << endl;
+				throw Error("ctrlcomm handle event error");
+			} else {
+				log->dlog(ch, "Ending handleFDEvent count:%d", http_handle);
+			}	
+		}
+	}
 #ifdef DEBUG
     log->dlog(ch, "Ending handleFDEvent" );
 #endif		
