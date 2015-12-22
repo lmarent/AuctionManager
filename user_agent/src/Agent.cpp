@@ -1786,7 +1786,7 @@ void Agent::run()
             if (cnt > 0)  {
 
 #ifdef DEBUG			
-				log->dlog(ch,"In check FD events");
+				log->dlog(ch,"In check FD events time:%s", (Timeval::toString(tv)).c_str());
 #endif
 
                 if (FD_ISSET( s_sigpipe[0], &rset)) {
