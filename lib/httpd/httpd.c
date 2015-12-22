@@ -159,11 +159,7 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
 	if ((rset != NULL) && FD_ISSET(slisten, rset)){
 		slog(0, SLOG_INFO, "slisten is part of rset");
 	}
-	
-	if (FD_ISSET(req->fd, rset)){
-		slog(0, SLOG_INFO, "red fd is part of rset");
-	}
-	
+
 #endif
 
 
