@@ -116,11 +116,18 @@ int read_header(struct REQUEST *req, int pipelined)
         /* first part of body */
         req->lbreq = req->hdata - req->lreq;
 
+#ifdef DEBUG
+		slog(2, LOG_ERR, "Header len: %d, DATA:%s", req->lreq, req->hreq);
+#endif
         return 0;
     }
     
     if (req->hdata == MAX_REQ) {
         /* oops: buffer full, but found no complete request ... */
+#ifdef DEBUG
+		slog(2, LOG_ERR, "The buffer is full");
+#endif
+
         mkerror(req,400,0);
         return -1;
     }
