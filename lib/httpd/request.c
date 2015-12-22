@@ -43,6 +43,7 @@
 #include <netinet/in.h>
 
 #include "httpd.h"
+#include "slog.h"
 
 /* ---------------------------------------------------------------------- */
 
@@ -130,6 +131,10 @@ int read_body(struct REQUEST *req, int pipelined)
 {
     int rc;
 
+#ifdef DEBUG
+    slog(0, SLOG_INFO, "start read_body");
+#endif
+
   restart:
 #ifdef USE_SSL
     if (with_ssl) {
@@ -167,6 +172,10 @@ int read_body(struct REQUEST *req, int pipelined)
         req->breq[req->clen] = 0;
         req->lbreq = req->clen;
 
+#ifdef DEBUG
+		slog(0, SLOG_INFO, "read_body complete");
+#endif
+
         return 0;
     }
     
@@ -175,6 +184,7 @@ int read_body(struct REQUEST *req, int pipelined)
         mkerror(req,400,0);
         return -1;
     }
+
     return rc;
 }
 
@@ -183,6 +193,11 @@ int read_body(struct REQUEST *req, int pipelined)
 
 static time_t parse_date(char *line)
 {
+	
+#ifdef DEBUG
+    slog(0, SLOG_INFO, "Start parse_date");
+#endif
+	
     static char *m[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
                          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
     char month[3];
@@ -224,6 +239,10 @@ static time_t parse_date(char *line)
     if (tm.tm_year > 1900) {
         tm.tm_year -= 1900;
     }
+
+#ifdef DEBUG
+    slog(0, SLOG_INFO, "end parse_date");
+#endif
 
     return mktime(&tm);
 }
@@ -377,8 +396,9 @@ void parse_request(struct REQUEST *req, char *server_host)
     /*struct passwd *pw=NULL;*/
     
 #ifdef DEBUG
-	fprintf(stderr,"%s\n",req->hreq);
+    slog(0, SLOG_INFO, "start parse request:%s", req->hreq);
 #endif
+
     /* parse request. Hehe, scanf is powerfull :-) */
     if (4 != sscanf(req->hreq, "%4[A-Z] %2048[^ \t\r\n] HTTP/%d.%d",
                     req->type,filename,&(req->major),&(req->minor))) {
@@ -407,8 +427,9 @@ void parse_request(struct REQUEST *req, char *server_host)
 
     unquote(req->path,req->query,req->uri);
     fixpath(req->path);
+    
 #ifdef DEBUG
-	fprintf(stderr,"%03d/%d: %s \"%s\" HTTP/%d.%d\n",
+    slog(0, SLOG_INFO, "%03d/%d: %s \"%s\" HTTP/%d.%d\n",
             req->fd, req->state, req->type, req->path, req->major, req->minor);
 #endif
 
@@ -457,7 +478,7 @@ void parse_request(struct REQUEST *req, char *server_host)
             if ((t = parse_date(h+19)) != -1) {
                 req->if_modified = t;
 #ifdef DEBUG
-                fprintf(stderr,"%03d/%d: if-modified-since: %s",
+			slog(0, SLOG_INFO, "%03d/%d: if-modified-since: %s",
                         req->fd,req->state,ctime(&t));
 #endif
             }
@@ -466,7 +487,7 @@ void parse_request(struct REQUEST *req, char *server_host)
             if ((t = parse_date(h+21)) != -1) {
                 req->if_unmodified = t;
 #ifdef DEBUG
-                fprintf(stderr,"%03d/%d: if-unmodified-since: %s",
+				slog(0, SLOG_INFO, "%03d/%d: if-unmodified-since: %s",
                         req->fd,req->state,ctime(&t));
 #endif
             }
@@ -475,14 +496,14 @@ void parse_request(struct REQUEST *req, char *server_host)
             if ((t = parse_date(h+10)) != -1) {
                 req->if_range = t;
 #ifdef DEBUG
-                fprintf(stderr,"%03d/%d: if-range: %s\n",req->fd,req->state,ctime(&t));
+				slog(0, SLOG_INFO, "%03d/%d: if-range: %s\n",req->fd,req->state,ctime(&t));
 #endif
             }
 
         } else if (strncasecmp(h,"Authorization: Basic ",21) == 0) {
             decode_base64(req->auth,h+21,63);
 #ifdef DEBUG
-            fprintf(stderr,"%03d/%d: auth: %s\n",req->fd,req->state,req->auth);
+			slog(0, SLOG_INFO, "%03d/%d: auth: %s\n",req->fd,req->state,req->auth);
 #endif
 	    
         } else if (strncasecmp(h,"Range: bytes=",13) == 0) {
@@ -566,19 +587,45 @@ void parse_request(struct REQUEST *req, char *server_host)
 
     /* no file handling anymore... */
 
+#ifdef DEBUG
+	slog(0, SLOG_INFO, "finishing parse request");
+#endif
+
+
     return;
 }
 
 void parse_request_body(struct REQUEST *req)
 {
+
+#ifdef DEBUG
+	slog(0, SLOG_INFO, "starting parse_request_body");
+#endif
+
+
     /* unquote body */
     unquote2(req->post_body,req->breq);
 
     /* request callback */
     if (parse_request_func != NULL) {
+
+#ifdef DEBUG
+		slog(0, SLOG_INFO, "call back function defined");
+#endif
+
         if (parse_request_func(req) < 0) {
             mkerror(req,404,1);
             return;
         }
+    } else {
+#ifdef DEBUG
+       slog(1, SLOG_WARN, "call back function not defined");
+#endif
+		
     }
+
+#ifdef DEBUG
+	slog(0, SLOG_INFO, "ending parse_request_body");
+#endif
+
 }

@@ -51,6 +51,8 @@
 #include <netdb.h>
 
 #include "httpd.h"
+#include "slog.h"
+#include "http_constants.c"
 
 /* public variables - server configuration */
 
@@ -148,19 +150,9 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
    
     now = time(NULL);
 
-
-    time_t rnow;
-    struct tm tm;
-    struct timeval tnow;
-    gettimeofday(&tnow, NULL);
-    rnow = tnow.tv_sec;
-    char buf[300];
-        
-    strftime(buf, sizeof(buf), "%b %d %H:%M:%S.000", localtime_r(&rnow,&tm));
-        
-    long milliseconds = tnow.tv_usec / 1000; 
-        
-    fprintf(stdout, "Start httpd_handle_event: %s.%03ld  ", buf, milliseconds);
+#ifdef DEBUG
+    slog(0, SLOG_INFO, "Start httpd_handle_event");
+#endif
 
     /* new connection ? */
     if ((rset != NULL) && FD_ISSET(slisten, rset)) {
@@ -168,16 +160,15 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
         if (NULL == req) {
             /* oom: let the request sit in the listen queue */
 #ifdef DEBUG
-            fprintf(stderr,"oom\n");
-            fprintf(stdout,"oom\n");
+            slog(0, SLOG_WARN, "Request null");
 #endif
+
         } else {
             memset(req,0,sizeof(struct REQUEST));
             if ((req->fd = accept(slisten,NULL,&opt)) == -1) {
                 if (EAGAIN != errno) {
                     log_error_func(1, LOG_WARNING,"accept",NULL);
-                    fprintf(stdout,"accept");
-                    fprintf(stdout, "%s.%03ld   ", buf, milliseconds);
+                    slog(0, SLOG_WARN, "accept");
                 }
                 free(req);
             } else {
@@ -190,11 +181,9 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
                 conns = req;
                 curr_conn++;
 #ifdef DEBUG
-                fprintf(stderr,"%03d/%d: new request (%d)\n",req->fd,req->state,curr_conn);
-                fprintf(stdout,"%03d/%d: new request (%d)\n",req->fd,req->state,curr_conn);
-                fprintf(stdout, "%s.%03ld   ", buf, milliseconds);
-
+                slog(0, SLOG_INFO, "%03d/%d: new request (%d)", req->fd,req->state,curr_conn);
 #endif
+
 #ifdef USE_SSL
                 if (with_ssl) {
                     open_ssl_session(req);
@@ -203,19 +192,14 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
                 length = sizeof(req->peer);
                 if (getpeername(req->fd,(struct sockaddr*)&(req->peer),&length) == -1) {
                     log_error_func(1, LOG_WARNING,"getpeername",NULL);
-					fprintf(stdout, "getpeername\n");
-					fprintf(stdout, "%s.%03ld  ", buf, milliseconds);
+                    slog(0, SLOG_WARN, "getpeername");
                     req->state = STATE_CLOSE;
                 }
                 getnameinfo((struct sockaddr*)&req->peer,length,
                             req->peerhost,64,req->peerserv,8,
                             NI_NUMERICHOST | NI_NUMERICSERV);
 #ifdef DEBUG
-                fprintf(stderr,"%03d/%d: connect from (%s)\n",
-                        req->fd,req->state,req->peerhost);
-				fprintf(stdout, "connect from");
-				fprintf(stdout, "%s.%03ld ", buf, milliseconds);
-
+				slog(0, SLOG_DEBUG, "%03d/%d: connect from (%s)", req->fd,req->state,req->peerhost);
 #endif
 
                 /* host auth callback */
@@ -228,8 +212,7 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
                         mkerror(req,403,0);
                         write_request(req);	     
                         req->state = STATE_CLOSE;
-						fprintf(stdout, "not pass access check");
-						fprintf(stdout, "%s.%03ld ", buf, milliseconds);
+						slog(0, SLOG_INFO, "request does not pass access check");
 
                     }
                 }
@@ -273,6 +256,7 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
                 curr_conn > max_conn * 9 / 10) {
 #ifdef DEBUG
                 fprintf(stderr,"%03d/%d: keepalive timeout\n",req->fd,req->state);
+				slog(0, SLOG_ERROR, "%03d/%d: keepalive timeout",req->fd,req->state);
 #endif
                 req->state = STATE_CLOSE;
             }
@@ -283,6 +267,7 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
                     mkerror(req,408,0);
                 } else {
                     log_error_func(0,LOG_INFO,"network timeout",req->peerhost);
+					slog(2, SLOG_INFO, "network timeout");
                     req->state = STATE_CLOSE;
                 }
             }
@@ -292,8 +277,9 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
       parsing:
 
 
-		fprintf(stdout, "parsing");
-		fprintf(stdout, "%s.%03ld ", buf, milliseconds);
+#ifdef DEBUG
+        slog(2, SLOG_DEBUG, "It is going to parse");
+#endif
       
         if (req->state == STATE_PARSE_HEADER) {
             parse_request(req, server_host);
@@ -312,7 +298,9 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
             write_request(req);
         }
         
-        fprintf(stdout, "parsing message abc \n");
+#ifdef DEBUG
+        slog(2, SLOG_DEBUG, "parsing message - reqState:%d",req->state);
+#endif
 
         /* handle finished requests */
         if (req->state == STATE_FINISHED && !req->keep_alive) {
@@ -375,7 +363,7 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
             if (req->hdata == (req->lreq + req->lbreq)) {
                 /* ok, wait for the next one ... */
 #ifdef DEBUG
-                fprintf(stderr,"%03d/%d: keepalive wait\n",req->fd,req->state);
+                slog(2, SLOG_DEBUG, "%03d/%d: keepalive wait",req->fd,req->state);
 #endif
                 req->state = STATE_KEEPALIVE;
                 req->hdata = 0;
@@ -386,7 +374,7 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
                 if (req->tcp_cork == 1) {
                     req->tcp_cork = 0;
 #ifdef DEBUG
-                    fprintf(stderr,"%03d/%d: tcp_cork=%d\n",req->fd,req->state,req->tcp_cork);
+                    slog(2, SLOG_DEBUG, "%03d/%d: tcp_cork=%d",req->fd,req->state,req->tcp_cork);
 #endif
                     setsockopt(req->fd,SOL_TCP,TCP_CORK,&req->tcp_cork,sizeof(int));
                 }
@@ -394,7 +382,7 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
             } else {
                 /* there is a pipelined request in the queue ... */
 #ifdef DEBUG
-                fprintf(stderr,"%03d/%d: keepalive pipeline\n",req->fd,req->state);
+				slog(2, SLOG_DEBUG, "%03d/%d: keepalive pipeline",req->fd,req->state);
 #endif
                 req->state = STATE_READ_HEADER;
                 memmove(req->hreq,req->hreq + req->lreq + req->lbreq,
@@ -405,9 +393,11 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
                 goto parsing;
             }
         }
-      
-        fprintf(stdout, "to close connection");
-      
+			
+#ifdef DEBUG
+		slog(2, SLOG_DEBUG, "to close connection");
+#endif
+            
         /* connections to close */
         if (req->state == STATE_CLOSE) {
             /* access log hook */
@@ -437,7 +427,7 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
 	
             curr_conn--;
 #ifdef DEBUG
-            fprintf(stderr,"%03d/%d: done (%d)\n",req->fd,req->state,curr_conn);
+			slog(2, SLOG_DEBUG, "%03d/%d: done (%d)\n",req->fd,req->state,curr_conn);
 #endif
             /* unlink from list */
             tmp = req;
@@ -478,7 +468,18 @@ int httpd_init(int sport, char *sname, int use_ssl,  const char *certificate,
                const char *password, int use_v6)
 {
     
-	fprintf(stdout, "httpd_init");
+    /* 
+     * slog_init - Initialise slog 
+     * First argument is log filename 
+     * Second argument is config file
+     * Third argument is max log level 
+     * Fouth is thread safe flag.
+     */
+	slog_init(HTTP_LOG_FILE, HTTP_CONFIG_LOG_FILE, 3, 1);
+
+    /* Log and print something with level 2 */
+    slog(2, SLOG_INFO, "http_init");
+
     struct addrinfo ask,*res = NULL;
     struct sockaddr_storage  ss;
     int opt, rc, ss_len, v4 = 1, v6 = 0;
@@ -532,6 +533,8 @@ int httpd_init(int sport, char *sname, int use_ssl,  const char *certificate,
         rc = getaddrinfo(listen_ip, listen_port, &ask, &res);
         if (g_timeout) {
             log_error_func(1, LOG_ERR,"getaddrinfo (ipv6): DNS timeout",NULL);  
+			slog(0, SLOG_ERROR, "getaddrinfo (ipv6): DNS timeout");
+
         }
         alarm(0);
 
@@ -539,9 +542,11 @@ int httpd_init(int sport, char *sname, int use_ssl,  const char *certificate,
             if ((slisten = socket(res->ai_family, res->ai_socktype,
                                   res->ai_protocol)) == -1) {
                 log_error_func(1, LOG_ERR,"socket (ipv6)",NULL);
+				slog(0, SLOG_ERROR,"socket (ipv6)");
             }
         } else {
             log_error_func(1, LOG_ERR, "getaddrinfo (ipv6)", NULL);
+			slog(0, SLOG_ERROR,"getaddrinfo (ipv6)");
         }
     }
 	
@@ -557,6 +562,7 @@ int httpd_init(int sport, char *sname, int use_ssl,  const char *certificate,
         rc = getaddrinfo(listen_ip, listen_port, &ask, &res);
         if (g_timeout) {
             log_error_func(1, LOG_ERR,"getaddrinfo (ipv4): DNS timeout",NULL);  
+			slog(0, SLOG_ERROR,"getaddrinfo (ipv4): DNS timeout");
             return -1;
         }
         alarm(0);
@@ -565,10 +571,12 @@ int httpd_init(int sport, char *sname, int use_ssl,  const char *certificate,
             if ((slisten = socket(res->ai_family, res->ai_socktype,
                                   res->ai_protocol)) == -1) {
                 log_error_func(1, LOG_ERR,"socket (ipv4)",NULL);
+				slog(0, SLOG_ERROR,"socket (ipv4)");
                 return -1;
             }
         } else {
             log_error_func(1, LOG_ERR, "getaddrinfo (ipv4)", NULL);
+			slog(0, SLOG_ERROR,"getaddrinfo (ipv4)");
             return -1;
         }
     }
@@ -586,6 +594,7 @@ int httpd_init(int sport, char *sname, int use_ssl,  const char *certificate,
                           host,INET6_ADDRSTRLEN,serv,15,
                           NI_NUMERICHOST | NI_NUMERICSERV)) != 0) {
         log_error_func(1, LOG_ERR, "getnameinfo", NULL);
+		slog(0, SLOG_ERROR,"getnameinfo");
         return -1;
     }
 
@@ -608,10 +617,12 @@ int httpd_init(int sport, char *sname, int use_ssl,  const char *certificate,
    
     if (bind(slisten, (struct sockaddr*) &ss, ss_len) == -1) {
         log_error_func(1, LOG_ERR,"bind",NULL);
+		slog(0, SLOG_ERROR,"bind");
         return -1;
     }
     if (listen(slisten, 2*max_conn) == -1) {
         log_error_func(1, LOG_ERR,"listen",NULL);
+		slog(0, SLOG_ERROR,"listen");
         return -1;
     }
 
