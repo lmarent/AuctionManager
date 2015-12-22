@@ -534,6 +534,11 @@ void parse_request(struct REQUEST *req, char *server_host)
 		fprintf(stdout, "user given:" );
 		fprintf(stdout, req->auth );
         if (access_check_func(NULL, req->auth) < 0) {
+
+#ifdef DEBUG
+			slog(0, SLOG_WARN, "auth failed returning 401");
+#endif
+
             mkerror(req,401,1);
             return;
         }
@@ -541,6 +546,10 @@ void parse_request(struct REQUEST *req, char *server_host)
    
     /* generate the resource name */
     h = filename -1 +sprintf(filename,"%s", req->path);
+
+#ifdef DEBUG
+	slog(0, SLOG_INFO, "it is going to read body");
+#endif
 
     /* immediatly read available body (part) */
     while (read_body(req, 0) > 0);
@@ -550,12 +559,27 @@ void parse_request(struct REQUEST *req, char *server_host)
             if (req->lbreq < req->clen) {
                 /* read rest of body */
                 req->state = STATE_READ_BODY;
+      
+#ifdef DEBUG
+				slog(0, SLOG_WARN, "body read quoted, new state STATE_READ_BODY");
+#endif
+      
                 return;
             }
             /* else unquote body and proceed */
             unquote2(req->post_body,req->breq);
+#ifdef DEBUG
+			slog(0, SLOG_WARN, "body read unquoted, new state STATE_PROCESS");
+#endif
+
+
             req->state = STATE_PROCESS;
         } else {
+
+#ifdef DEBUG
+			slog(0, SLOG_WARN, "Error reading the body return 500");
+#endif
+
             mkerror(req,500,1);
             return;
         }
@@ -572,6 +596,10 @@ void parse_request(struct REQUEST *req, char *server_host)
 
     if (req->range_hdr) {
         if (0 != (rc = parse_ranges(req))) {
+#ifdef DEBUG
+			slog(0, SLOG_WARN, "Error parseing ranges, return:%d," rc);
+#endif
+
             mkerror(req,rc,1);
             return;
         }
@@ -579,7 +607,17 @@ void parse_request(struct REQUEST *req, char *server_host)
 
     /* request callback */
     if (parse_request_func != NULL) {
+
+#ifdef DEBUG
+		slog(0, SLOG_INFO, "parse request func != NULL");
+#endif
+
+
         if (parse_request_func(req) < 0) {
+#ifdef DEBUG
+			slog(0, SLOG_WARN, "Error when calling the parse_request_func, retrun 404");
+#endif
+
             mkerror(req,404,1);
             return;
         }

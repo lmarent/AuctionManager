@@ -278,17 +278,25 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
 
 
 #ifdef DEBUG
-        slog(2, SLOG_DEBUG, "It is going to parse");
+        slog(2, SLOG_DEBUG, "It is going to parse:%d", req->state);
 #endif
       
         if (req->state == STATE_PARSE_HEADER) {
             parse_request(req, server_host);
         }
 
+#ifdef DEBUG
+        slog(2, SLOG_DEBUG, "after parse header:%d", req->state);
+#endif
+
         /* body parsing */
         if (req->state == STATE_PARSE_BODY) {
             parse_request_body(req);
         }
+
+#ifdef DEBUG
+        slog(2, SLOG_DEBUG, "after parse body:%d", req->state);
+#endif
 
         if (req->state == STATE_WRITE_HEADER) {
             /* switch to writing */
