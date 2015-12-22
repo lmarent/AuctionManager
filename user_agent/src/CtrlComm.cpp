@@ -43,6 +43,7 @@ using namespace auction;
 
 
 CtrlComm *CtrlComm::s_instance = NULL;
+const int CNTRL_AGNT_MIN_TIMEOUT = 100000;
 
 
 /* ------------------------- CtrlComm ------------------------- */
@@ -375,7 +376,6 @@ int CtrlComm::handleFDEvent(auction::eventVec_t *e, fd_set *rset, fd_set *wset, 
 #endif
 
 
-    int http_handle;
     assert(e != NULL);
 
     // make the pointer global for ctrlcomm
@@ -383,10 +383,9 @@ int CtrlComm::handleFDEvent(auction::eventVec_t *e, fd_set *rset, fd_set *wset, 
     retEvent = NULL;
     
     fd_set rset2, wset2;
-    char c = 'A';
-
+	int    cnt = 0;
 	// min timeout for select() in us (10ms minimum on current UNIX!)
-	struct timeval rv = {0, CNTRL_AUCTIONER_MIN_TIMEOUT};
+	struct timeval rv = {0, CNTRL_AGNT_MIN_TIMEOUT};
     
     // check for incoming message
     int http_handle = httpd_handle_event(rset, wset, fds);
@@ -407,7 +406,6 @@ int CtrlComm::handleFDEvent(auction::eventVec_t *e, fd_set *rset, fd_set *wset, 
 		if (cnt > 0){
 			http_handle = httpd_handle_event(&rset2, &wset2, fds);
 			
-			// write(Auctioner::s_sigpipe[1], &c, 1);
 			
 			if (http_handle < 0) {
 				cout << "ERROR HANDLING THE EVENT" << endl;
