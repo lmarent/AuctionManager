@@ -570,6 +570,12 @@ void parse_request(struct REQUEST *req, char *server_host)
 
     if (strcmp(req->type,"POST") == 0) {
         if (strcmp(req->ctype,"application/x-www-form-urlencoded") == 0) {
+
+#ifdef DEBUG
+			slog(0, SLOG_WARN, "body read:%s", req->breq);
+#endif
+
+
             if (req->lbreq < req->clen) {
                 /* read rest of body */
                 req->state = STATE_READ_BODY;
