@@ -597,7 +597,7 @@ void parse_request(struct REQUEST *req, char *server_host)
     if (req->range_hdr) {
         if (0 != (rc = parse_ranges(req))) {
 #ifdef DEBUG
-			slog(0, SLOG_WARN, "Error parseing ranges, return:%d," rc);
+			slog(0, SLOG_WARN, "Error parseing ranges, return: %d", rc);
 #endif
 
             mkerror(req,rc,1);
