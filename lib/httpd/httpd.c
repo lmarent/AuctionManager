@@ -224,9 +224,15 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
             }
         }
     }
+
     
     /* check active connections */
     for (req = conns, prev = NULL; req != NULL;) {
+
+#ifdef DEBUG
+		slog(2, SLOG_DEBUG, "new iteration req state: %d", req->state);
+#endif
+
 
         /* I/O */
         if ((rset != NULL) && FD_ISSET(req->fd, rset)) {
@@ -403,7 +409,7 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
         }
 			
 #ifdef DEBUG
-		slog(2, SLOG_DEBUG, "to close connection");
+		slog(2, SLOG_DEBUG, "req state: %d", req->state);
 #endif
             
         /* connections to close */
