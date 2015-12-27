@@ -190,9 +190,16 @@ AnslpClient::tg_create( const hostaddress &source_addr,
     bool queued = false;
 
 #ifdef DEBUG
-		log->dlog(ch,"nbr of messages in queue: %lu", anslpd->get_fqueue()->size());
+		log->dlog(ch,"nbr of messages in queue:%s %lu", anslpd->get_fqueue()->get_name(), anslpd->get_fqueue()->size());
 #endif    
-    log->elog(ch,"it is going to create the session: ");
+
+	pthread_id_np_t   tid;
+	pthread_t         self;
+	self = pthread_self();
+	pthread_getunique_np(&self, &tid);
+
+    log->dlog(ch,"it is going to create the session - threadid:%d", tid);
+    
     queued = anslpd->get_fqueue()->enqueue(msg);
     
     if ( queued ){

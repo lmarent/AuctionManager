@@ -822,11 +822,10 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 				  
 	}
 
-	#ifdef DEBUG
+#ifdef DEBUG
 		log->dlog(ch,"Ending event activate resource request interval" );
-	#endif
+#endif
 	
-
 }
 
 
@@ -839,6 +838,10 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 	int domainId;
 	uint32_t mid = 0;
 	ipap_message message;
+
+#ifdef DEBUG
+	log->dlog(ch,"Starting handleSingleCreateSession" );
+#endif
 
 
 	try

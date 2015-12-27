@@ -46,7 +46,7 @@ AnslpProcessor::AnslpProcessor(ConfigManager *cnf, int threaded )
     log->dlog(ch,"Starting ANSLP Processor");
 #endif
 	
-	FastQueue *_queue = new anslp::FastQueue();
+	FastQueue *_queue = new anslp::FastQueue("IncomingRequestsQueue");
 	queue = _queue;
 	
 	assert(_queue != NULL);

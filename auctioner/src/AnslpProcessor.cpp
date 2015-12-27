@@ -106,6 +106,7 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 		anslp::AddSessionEvent *ase =
 			dynamic_cast<AddSessionEvent *>(evt);
 
+		string sessionId = ase->getSession();
 		CreateSessionEvent *retEvent = new CreateSessionEvent(sessionId, ase->getQueue());
 		
 		anslp::objectList_t *objects = ase->getObjects();
@@ -114,7 +115,6 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 			retEvent->setObject(it->first,it->second->copy());
 		}
 		
-		string sessionId = ase->getSession();
 		e->push_back(retEvent);	
 		
 		return;
@@ -142,6 +142,7 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 		anslp::AuctionInteractionEvent *aie =
 			dynamic_cast<anslp::AuctionInteractionEvent *>(evt);
 
+		string sessionId = aie->getSession();
 		AuctionInteractionEvent *retEvent = new AuctionInteractionEvent(sessionId);
 
 		anslp::objectList_t *objects = aie->getObjects();
@@ -150,7 +151,6 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 			retEvent->setObject(it->first, it->second->copy());
 		}
 
-		string sessionId = aie->getSession();
 		e->push_back(retEvent);	
 		
 		return;
