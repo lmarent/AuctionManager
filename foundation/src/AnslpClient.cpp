@@ -194,11 +194,6 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 		log->dlog(ch,"nbr of messages in queue:%s - %lu", anslpd->get_fqueue()->get_name(), anslpd->get_fqueue()->size());
 #endif    
 
-	pthread_id_np_t   tid;
-	pthread_t         self;
-	self = pthread_self();
-	pthread_getunique_np(&self, &tid);
-
     log->dlog(ch,"it is going to create the session - procid:%d - getthread_self:%lu tid:%lu", 
 					getpid(), pthread_self(), syscall(SYS_gettid));
     
