@@ -1981,7 +1981,9 @@ void Agent::run()
 					// Execute events that require immediate response.
 					pendingExec = handle_event_immediate_respond(*iter, &fds);
 										
-                    evnt->addEvent(*iter);
+                    if (pendingExec){
+						evnt->addEvent(*iter);
+					}
                 }
                 retEvents.clear(); 
             }

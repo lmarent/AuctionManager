@@ -145,9 +145,20 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 		string sessionId = aie->getSession();
 		AuctionInteractionEvent *retEvent = new AuctionInteractionEvent(sessionId);
 
+		assert(retEvent != NULL);
+
 		anslp::objectList_t *objects = aie->getObjects();
 		anslp::objectListIter_t it;
 		for (it = objects->begin(); it != objects->end(); ++it){
+			
+#ifdef DEBUG
+    log->dlog(ch,"objectId: %s", (it->first).to_string().c_str());
+#endif		
+			assert(it->second != NULL);
+
+#ifdef DEBUG
+    log->dlog(ch,"after assert");
+#endif		
 			retEvent->setObject(it->first, it->second->copy());
 		}
 
