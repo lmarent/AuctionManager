@@ -961,6 +961,8 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 
 	try{
 
+		message = ipap_mes->ip_message;
+
 		ostringstream os;
 		auctions = proc->getApplicableAuctions(&message);
 			
@@ -1076,7 +1078,6 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 	anslp::FastQueue *retQueue = NULL;
 	anslp::ResponseCheckSessionEvent *resCheck = NULL;
 	
-	ipap_message message;
 	string sessionId;
 	
 	try {
@@ -1299,7 +1300,6 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 	anslp::objectList_t *objList = NULL;
 	anslp::FastQueue *retQueue = NULL;
 	
-	ipap_message message;
 	string sessionId;
 
 	anslp::ResponseAddSessionEvent *resCreate = NULL;
