@@ -153,9 +153,17 @@ void Auctioner_Test::test()
 			a2 << now2;
 			string snow2 = a2.str();
 			xmlMessage.replace(1568, 10, snow2);
+
+			anslp::msg::anslp_ipap_xml_message messChec;
+			anslp::msg::anslp_ipap_message *ipapMesChec = messChec.from_message(xmlMessage);
+			anslp::objectList_t *objectsCheck = new anslp::objectList_t();
+			anslp::mspec_rule_key key;
+			(*objectsCheck)[key] = ipapMesChec;
+
+			anslp::FastQueue queueCheck;
 			
 			// check session creation.
-			auctionerPtr->evnt->addEvent( new CreateCheckSessionEvent(sessionId, xmlMessage));
+			auctionerPtr->evnt->addEvent( new CreateCheckSessionEvent(sessionId, objectsCheck, &queueCheck));
 
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 			CreateCheckSessionEvent *ccse = dynamic_cast<CreateCheckSessionEvent *>(evt);
@@ -163,14 +171,21 @@ void Auctioner_Test::test()
 			
 			auctionerPtr->handle_event_immediate_respond(evt, NULL);
 			
+			CPPUNIT_ASSERT( queueCheck.size() == 1 );
+			
 			// once check the message, we proceed to create the session,
-			auctionerPtr->evnt->addEvent( new CreateSessionEvent(sessionId, xmlMessage));
-
+			auctionerPtr->evnt->addEvent( new CreateSessionEvent(sessionId, objectsCheck, &queueCheck));
+		
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 			CreateSessionEvent *cse = dynamic_cast<CreateSessionEvent *>(evt);
 			CPPUNIT_ASSERT( cse != NULL );
 							
 			auctionerPtr->handle_event_immediate_respond(evt, NULL);
+			
+			// Verify that it creates a new event in the queue.
+			CPPUNIT_ASSERT( queueCheck.size() == 2 );
+			
+			saveDelete(objectsCheck);
 			
 			// TODO AM: what to do if there is no auction satisfying the given parameters.
 			
@@ -215,15 +230,22 @@ void Auctioner_Test::test()
 			string snow4 = a4.str();
 			xmlMessage2.replace(2349, 10, snow4);
 
-
+			anslp::msg::anslp_ipap_xml_message messAuct;
+			anslp::msg::anslp_ipap_message *ipapMesAuct = messAuct.from_message(xmlMessage2);
+			anslp::objectList_t *objectsAuctInter = new anslp::objectList_t();
+			anslp::mspec_rule_key key2;
+			(*objectsAuctInter)[key2] = ipapMesAuct;
+			
 			// Auction Interaction event.
-			auctionerPtr->evnt->addEvent( new AuctionInteractionEvent(sessionId, xmlMessage2));
+			auctionerPtr->evnt->addEvent( new AuctionInteractionEvent(sessionId, objectsAuctInter));
 
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 			AuctionInteractionEvent *aie = dynamic_cast<AuctionInteractionEvent *>(evt);
 			CPPUNIT_ASSERT( aie != NULL );
 			
-			auctionerPtr->handleEvent(evt, NULL);
+			auctionerPtr->handleEvent(evt, NULL);			
+			
+			saveDelete(objectsAuctInter);
 			
 			// Verify that a new bidding object was created.
 			CPPUNIT_ASSERT( auctionerPtr->bidm->getNumBiddingObjects() == 1 );

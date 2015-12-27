@@ -37,6 +37,7 @@
 #include "AgentManagerInfo.h"
 #include "Auction.h"
 #include "Event.h"
+#include "aqueue.h"
 
 namespace auction
 {
@@ -105,6 +106,26 @@ class AddResourceRequestsEvent : public Event
         return fileName;
     }
 };
+
+class AddResourceRequestsCtrlCommEvent : public CtrlCommEvent
+{
+  private:
+    string xml;
+
+  public:
+
+    AddResourceRequestsCtrlCommEvent(string xml) 
+      : CtrlCommEvent(ADD_RESOURCEREQUESTS_CTRLCOMM), xml(xml) 
+    {
+        
+    }
+
+    string getMessage()
+    {
+        return xml;
+    }
+};
+
 
 class ActivateResourceRequestIntervalEvent : public Event
 {
@@ -247,30 +268,38 @@ class RemoveResourceRequestsEvent : public Event
     }
 };
 
-class ResponseCreateSessionEvent : public CtrlCommEvent
+class CreateSessionEvent : public Event
 {
   private:
     
     string sessionId; 
-    string message;
+    anslp::objectList_t *objects;
+    anslp::FastQueue *ret;
 
   public:
 
-    ResponseCreateSessionEvent(string _sessionId, string _message) 
-      : CtrlCommEvent(RESPONSE_CREATE_SESSION), sessionId(_sessionId), message(_message) 
+    CreateSessionEvent(string _sessionId, anslp::objectList_t *_objects,
+						anslp::FastQueue *_ret, unsigned long ival=0, int align=0) 
+      : Event(CREATE_SESSION, ival, align), sessionId(_sessionId), objects(_objects), ret(_ret) 
     {
         
     }
 
-    string  getMessage()
+    anslp::objectList_t *  getObjects()
     {
-        return message;
+        return objects;
     }
     
-    string getSession()
+    string getSessionId()
     {
 		return sessionId;
 	}
+
+	anslp::FastQueue * getQueue()
+	{
+		return ret;
+	}
+	
 };
 
 class PushExecutionEvent : public Event

@@ -45,6 +45,8 @@
 #include "AUMProcessor.h"
 #include "IpAp_template_container.h"
 #include "AnslpClient.h"
+#include "AnslpProcessor.h"
+
 
 /*! \short   Auctioner class description
   
@@ -90,6 +92,7 @@ class Auctioner
     
     auto_ptr<AUMProcessor> 				proc;    
     auto_ptr<CtrlComm>        			comm;
+    auto_ptr<AnslpProcessor>        	anslproc;
 
     //! logging channel number used by objects of this class
     int ch;
@@ -102,6 +105,9 @@ class Auctioner
 
     //! 1 if the procedure for applying executing auctions runs in a separate thread
     int pprocThread;
+    
+    //! 1 if the procedure for applying receiving events from the anslp component runs in a separate thread
+    int aprocThread;
 
     //! 1 if remote control interface is enabled
     static int enableCtrl;
@@ -157,18 +163,25 @@ class Auctioner
 
 	void handlePushExecution(Event *e, fd_sets_t *fds);
 
+	void handleSingleCheckSession(string sessionId, 
+			anslp::mspec_rule_key key, anslp::anslp_ipap_message *ipap_mes, 
+			anslp::ResponseCheckSessionEvent *resCheck);
+
 	void handleCreateCheckSession(Event *e, fd_sets_t *fds);
 	
+	void handleSingleCreateSession(string sessionId,
+				anslp::mspec_rule_key key, anslp::anslp_ipap_message *ipap_mes, 
+				anslp::ResponseAddSessionEvent *resCreate);
+	
 	void handleCreateSession(Event *e, fd_sets_t *fds);
+
+	void handleSingleObjectAuctioningInteraction( string sessionId, anslp::anslp_ipap_message *ipap_mes);
 
 	void handleAuctioningInteraction(Event *e, fd_sets_t *fds);
 	
 	void handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds);
     
     void handleTransmitBiddingObjects(Event *e, fd_sets_t *fds);
-
-    //! This function echo the message as a response.
-    void send_immediate_respond(Event *e, fd_sets_t *fds);
 	
 	//! This function execute those events that require immediate execution.
 	bool handle_event_immediate_respond(Event *e, fd_sets_t *fds);

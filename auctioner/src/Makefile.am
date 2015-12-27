@@ -18,6 +18,7 @@ auctionManager_SOURCES =  EventSchedulerAuctioner.cpp \
 						  CtrlComm.cpp \
 						  AUMProcessor.cpp \
 						  Auctioner.cpp \
+						  AnslpProcessor.cpp \
 						  main.cpp
 
 auctionManager_CPPFLAGS = -I$(top_srcdir)/lib/getopt_long \

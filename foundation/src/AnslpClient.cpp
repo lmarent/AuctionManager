@@ -49,11 +49,7 @@ namespace ntlp {
 gistconf gconf;
 }
 
-namespace anslp{
-pthread_mutex_t execute_rules_lock;
-}
-
-AnslpClient::AnslpClient(string config_filename): 
+AnslpClient::AnslpClient(string config_filename, anslp::FastQueue *installQueue): 
 starter(NULL), conf(NULL), anslpd(NULL)
 {
 	using namespace std;
@@ -64,12 +60,6 @@ starter(NULL), conf(NULL), anslpd(NULL)
 #ifdef DEBUG
     log->dlog(ch,"Starting AnslpClient");
 #endif
-
-	if (pthread_mutex_init(&execute_rules_lock, NULL) != 0)
-    {
-        throw Error("Failed to create the lock for installing rules");
-        
-    }
 
 
 	hostaddress source;
@@ -114,7 +104,7 @@ starter(NULL), conf(NULL), anslpd(NULL)
 	 * Start the A-NSLP daemon thread. It will in turn start the other
 	 * threads it requires.
 	 */
-	anslp_daemon_param param("anslp", *conf);
+	anslp_daemon_param param("anslp", *conf, installQueue);
 	starter = new protlib::ThreadStarter<anslp_daemon, anslp_daemon_param>(1, param);
 	
 	// returns after all threads have been started
@@ -165,7 +155,7 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 
 	anslp_ipap_message mess(message);    
          
-    FastQueue ret;
+    protlib::FastQueue ret;
 	    
     // Build the vector of objects to be configured.
     vector<msg::anslp_mspec_object *> mspec_objects;

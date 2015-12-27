@@ -173,14 +173,23 @@ void Agent_Test::test()
 			
 			cout << "xmlResponse  Message:" << xmlRespMes << endl;
 			
-			agentPtr->evnt->addEvent( new ResponseCreateSessionEvent(sessionId, xmlRespMes));
+			anslp::objectList_t *objects = new anslp::objectList_t();
+			anslp::mspec_rule_key key;
+			(*objects)[key] = ipapMesRes;
+			anslp::FastQueue retQueue;
+			agentPtr->evnt->addEvent( new CreateSessionEvent(sessionId, objects, &retQueue));
 
 			evt = agentPtr->evnt.get()->getNextEvent();
-			ResponseCreateSessionEvent *rcs = dynamic_cast<ResponseCreateSessionEvent *>(evt);
+			CreateSessionEvent *rcs = dynamic_cast<CreateSessionEvent *>(evt);
 			CPPUNIT_ASSERT( rcs != NULL );
 
 			// Process the add Response create session event.
 			agentPtr->handle_event_immediate_respond(evt, NULL);
+			
+			// Verify that it creates a new event in the queue.
+			CPPUNIT_ASSERT( retQueue.size() == 1 );
+			
+			saveDelete(objects);
 			
 			// Verify that templates have been created.
 			agentTemplateListIter_t tmplIter = agentPtr->agentTemplates.find(1);
@@ -195,7 +204,7 @@ void Agent_Test::test()
 			// Verify that a new auction was created.
 			CPPUNIT_ASSERT( agentPtr->aucm->getNumAuctions() == 1);
 			
-			// Verify that a new request process was create
+			// Verify that a new request process was created
 			requestProcessListIter_t reqIter;
 			int nbrRequest = 0;
 			for (reqIter = agentPtr->proc->begin(); reqIter != agentPtr->proc->end(); ++reqIter){

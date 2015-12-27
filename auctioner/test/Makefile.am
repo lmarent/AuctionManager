@@ -8,8 +8,10 @@ test_runner_SOURCES = 	@top_srcdir@/auctioner/src/PageRepository.cpp \
 						@top_srcdir@/auctioner/src/CtrlComm.cpp \
 						@top_srcdir@/auctioner/src/EventSchedulerAuctioner.cpp \
 						@top_srcdir@/auctioner/src/AUMProcessor.cpp \
+						@top_srcdir@/auctioner/src/AnslpProcessor.cpp \
 						@top_srcdir@/auctioner/src/Auctioner.cpp \
 						@top_srcdir@/auctioner/test/AUMProcessor_test.cpp \
+						@top_srcdir@/auctioner/test/AnslpProcessor_test.cpp \
 						@top_srcdir@/auctioner/test/Auctioner_test.cpp \
 						@top_srcdir@/auctioner/test/test_runner.cpp
 

@@ -498,19 +498,11 @@ int httpd_handle_event(fd_set *rset, fd_set *wset, fd_sets_t *fds)
         }
     }
 
-	int conn_reading = 0;
-	for (req = conns, prev = NULL; req != NULL;) {
-		if (req->state <= STATE_READ_BODY){
-			conn_reading++;
-		}
-		req = req->next;
-	}
-
 #ifdef DEBUG
-	slog(2, SLOG_DEBUG, "ending httpd_handle_event: %d", conn_reading);
+	slog(2, SLOG_DEBUG, "ending httpd_handle_event");
 #endif
 
-    return conn_reading;
+    return 0;
 }
 
 /* initialize http server */

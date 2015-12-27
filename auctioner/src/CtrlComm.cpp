@@ -389,42 +389,15 @@ int CtrlComm::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t
     // make the pointer global for ctrlcomm
     retEventVec = e;
     retEvent = NULL;
-    int    cnt = 0;
-    fd_set rset2, wset2;
-    char c = 'A';
-
-	// min timeout for select() in us (10ms minimum on current UNIX!)
-	struct timeval rv = {0, CNTRL_AUCTIONER_MIN_TIMEOUT};
     
     // check for incoming message
     int http_handle = httpd_handle_event(rset, wset, fds);
     
-    while (http_handle > 0){
-    
-        rset2 = fds->rset;
-        wset2 = fds->wset;
+	if (http_handle < 0) {
+		cout << "ERROR HANDLING THE EVENT" << endl;
+		throw Error("ctrlcomm handle event error");
+	}	
 
-        // note: under most unix the minimal sleep time of select is
-        // 10ms which means an event may be executed 10ms after expiration!
-        if ((cnt = select(fds->max+1, &rset2, &wset2, NULL, &rv)) < 0) {
-            if (errno != EINTR) {
-				throw Error("select error: %s", strerror(errno));
-            }
-        }
-		
-		if (cnt > 0){
-			http_handle = httpd_handle_event(&rset2, &wset2, fds);
-			
-			// write(Auctioner::s_sigpipe[1], &c, 1);
-			
-			if (http_handle < 0) {
-				cout << "ERROR HANDLING THE EVENT" << endl;
-				throw Error("ctrlcomm handle event error");
-			} else {
-				log->dlog(ch, "Ending handleFDEvent count:%d", http_handle);
-			}	
-		}
-	}
 #ifdef DEBUG
     log->dlog(ch, "Ending handleFDEvent" );
 #endif		
@@ -561,14 +534,8 @@ int CtrlComm::processCmd(struct REQUEST *req)
             processGetInfo(&preq);
         } else if (preq.comm == "/get_modinfo") {
             processGetModInfo(&preq);
-        } else if (preq.comm == "/check_session") {
-			processCheckSession(&preq); 
-        } else if (preq.comm == "/add_session") {
-            processAddSession(&preq);
-        } else if (preq.comm == "/del_session") {
-            processDelSession(&preq);
-        } else if (preq.comm == "/auct_interact") {
-            processAuctionInteraction(&preq);
+        } else if (preq.comm == "/add_auction") {
+			processAddAuction(&preq); 
         } else {
             // unknown command will produce a 404 http error
             return -1;
@@ -592,106 +559,24 @@ int CtrlComm::processCmd(struct REQUEST *req)
     return 0;
 }
 
-/* ------------------------- processAddSessionCmd ------------------------- */
+/* ------------------------- processAddAuction ------------------------- */
 
-char *CtrlComm::processCheckSession(parseReq_t *preq)
+char *CtrlComm::processAddAuction(parseReq_t *preq)
 {
 
 #ifdef DEBUG
-    log->dlog(ch, "Starting processCheckSession" );
+    log->dlog(ch, "Starting processAddAuction" );
 #endif	
-	anslp::msg::anslp_ipap_message *ipap_mes = NULL;
 	
-    paramListIter_t sessionId = preq->params.find("SessionID");
-
-    if (sessionId == preq->params.end()) {
-        throw Error("check_Session: missing parameter 'SessionID'" );
-    }
-
     paramListIter_t message = preq->params.find("Message");
 
     if (message == preq->params.end() ) {
-        throw Error("check_Session: missing parameter 'Message'" );
+        throw Error("Process Add Auction : missing parameter 'Message'" );
     }
- 
-    retEvent = new CreateCheckSessionEvent(sessionId->second, message->second);
-        
-    return NULL;
-}
-
-
-
-/* ------------------------- processAddSessionCmd ------------------------- */
-
-char *CtrlComm::processAddSession(parseReq_t *preq)
-{
-
-#ifdef DEBUG
-    log->dlog(ch, "Starting processAddSession" );
-#endif	
-	
-    paramListIter_t sessionId = preq->params.find("SessionID");
-
-    if (sessionId == preq->params.end()) {
-        throw Error("add_Session: missing parameter 'SessionID'" );
-    }
-
-    paramListIter_t message = preq->params.find("Message");
-
-    if (message == preq->params.end() ) {
-        throw Error("add_Session: missing parameter 'Message'" );
-    }
-
-    // assume xml ipap_message def
-    retEvent = new CreateSessionEvent(sessionId->second, message->second);
-        
-    return NULL;
-}
-
-
-/* ------------------------- processDelSessionCmd ------------------------- */
-
-char *CtrlComm::processDelSession(parseReq_t *preq )
-{
-	
-#ifdef DEBUG
-    log->dlog(ch, "Starting processDelSession" );
-#endif	
-	
-    paramListIter_t sessionid = preq->params.find("SessionID");
-
-    if (sessionid == preq->params.end() ) {
-        throw Error("rm_session: missing parameter 'SessionID'" );
-    }
+	char *mes = strdup(message->second.c_str());
+    retEvent = new AddAuctionsCtrlEvent(mes, message->second.size(), 0);
+    free(mes);
     
-    retEvent = new RemoveSessionEvent(sessionid->second);
-  
-    return NULL;
-}
-
-/* ---------------------- processAuctionInteractionCmd --------------------- */
-
-char *CtrlComm::processAuctionInteraction(parseReq_t *preq )
-{
-	
-#ifdef DEBUG
-    log->dlog(ch, "Starting processAuctionInteraction" );
-#endif
-	
-    paramListIter_t sessionId = preq->params.find("SessionID");
-
-    if (sessionId == preq->params.end() ) {
-        throw Error("processAuctionInteraction: missing parameter 'SessionID'" );
-    }
-    
-    paramListIter_t message = preq->params.find("Message");
-
-    if (message == preq->params.end() ) {
-        throw Error("processAuctionInteraction: missing parameter 'Message'" );
-    }
-
-    retEvent = new AuctionInteractionEvent(sessionId->second, message->second);
-          
     return NULL;
 }
 

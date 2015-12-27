@@ -109,8 +109,6 @@ class CtrlComm : public AuctionManagerComponent
     */
 
     static inline int s_access_check(char *host, char *user) {
-        std::cout << "host" << host << std::endl;
-        std::cout << "user" << user << std::endl;
         return s_instance->accessCheck( host, user );
     }
 
@@ -174,16 +172,8 @@ class CtrlComm : public AuctionManagerComponent
     */
     int processCmd(struct REQUEST *req );
 
-	char *processCheckSession(parseReq_t *preq); 
-
-    //! add a session to the currently active sessions
-    char *processAddSession(parseReq_t *preq );
-
-    //! delete a session from the currently active sessions
-    char *processDelSession(parseReq_t *preq );
-
-    //! execute an auction interaction for a currently active sessions
-    char *processAuctionInteraction(parseReq_t *preq );
+    //! add an auction to the current list of auctions
+    char *processAddAuction(parseReq_t *preq );
 
     //! return auction information (bidlist,status,modlist)
     char *processGetInfo(parseReq_t *preq );

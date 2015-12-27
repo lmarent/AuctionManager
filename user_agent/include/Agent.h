@@ -47,6 +47,7 @@
 #include "MAPIResourceRequestParser.h"
 #include "EventSchedulerAgent.h"
 #include "AgentSessionManager.h"
+#include "AnslpProcessor.h"
 
 
 
@@ -98,8 +99,7 @@ class Agent
     
     auto_ptr<AgentProcessor> 						proc;    
     auto_ptr<CtrlComm>        						comm;
-    
-
+    auto_ptr<AnslpProcessor>        				anslproc;
     
     //! logging channel number used by objects of this class
     int ch;
@@ -112,6 +112,9 @@ class Agent
 
     //! 1 if the procedure for applying executing auctions runs in a separate thread
     int pprocThread;
+
+    //! 1 if the procedure for applying receiving events from the anslp component runs in a separate thread
+    int aprocThread;
 
     //! 1 if remote control interface is enabled
     static int enableCtrl;
@@ -151,13 +154,18 @@ class Agent
     string getAgentManagerInfo(agentInfoList_t *i);
     
     void handleGetInfo(Event *e, fd_sets_t *fds);
-    
-            
+       
     //! handle the addition of resource requests.
     void handleAddResourceRequests(Event *e, fd_sets_t *fds);
-
+	
+	//! handle the addition of resource request through control comm
+	void handleAddResourceRequestsCntrlComm(Event *e, fd_sets_t *fds);
+	
     //! handle the activation of resource request intervals.
     void handleActivateResourceRequestInterval(Event *e);
+
+	void handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key, 
+					anslp::anslp_ipap_message *ipap_mes, anslp::ResponseAddSessionEvent *resCreate);
 
 	//! handle the response for a session creation previously sent.
 	void handleResponseCreateSession(Event *e, fd_sets_t *fds);
@@ -195,12 +203,12 @@ class Agent
     //! handle the remove of resource request intervals.
     void handleRemoveResourceRequestInterval(Event *e);
     
+    void handleSingleObjectAuctioningInteraction(string sessionId, 
+							anslp::anslp_ipap_message *ipap_mes);
+    
     //! handle the interaction arrived from a auctioneer system.
     void handleAuctioningInteraction(Event *e, fd_sets_t *fds);
     
-    //! This function echo the message as a response.
-    void send_immediate_respond(Event *, fd_sets_t *fds);
-
 	//! This function execute those events that require immediate execution.
 	bool handle_event_immediate_respond(Event *e, fd_sets_t *fds);
 

@@ -286,12 +286,31 @@ Agent::Agent( int argc, char *argv[])
         proc = _proc;
         proc->mergeFDs(&fdList);
 
+#ifdef ENABLE_THREADS
+
+        auto_ptr<AnslpProcessor> _anslproc( new AnslpProcessor(conf.get(),
+											conf->isTrue("Thread","ANSLP_PROCESSOR")
+									   ));
+									   
+        aprocThread = conf->isTrue("Thread", "ANSLP_PROCESSOR");
+#else
+        
+        auto_ptr<AnslpProcessor> _anslproc(new AnslpProcessor(conf.get(), 0 ));
+        aprocThread = 0;
+		
+        if (conf->isTrue("Thread", "ANSLP_PROCESSOR") ) {
+            log->wlog(ch, "Threads enabled in config file but executable is compiled without thread support");
+        }
+#endif
+        anslproc = _anslproc;
+        anslproc->mergeFDs(&fdList);
+
 		string anslpConfFile = conf->getValue("AnslpConfFile", "MAIN");
 
 #ifdef DEBUG
 		log->dlog(ch,"Anslp client conf file:%s", anslpConfFile.c_str() );
 #endif
-		auto_ptr<AnslpClient> _anslpc(new AnslpClient(anslpConfFile));
+		auto_ptr<AnslpClient> _anslpc(new AnslpClient(anslpConfFile, anslproc->get_fqueue()));
 					
 		anslpc = _anslpc;
 #ifdef DEBUG
@@ -618,6 +637,63 @@ void Agent::handleAddResourceRequests(Event *e, fd_sets_t *fds)
 
 }
 
+
+void Agent::handleAddResourceRequestsCntrlComm(Event *e, fd_sets_t *fds)
+{
+
+#ifdef DEBUG
+	log->dlog(ch,"Processing add resource request Cntrl Comm" );
+#endif
+
+	resourceRequestDB_t *new_requests = NULL;
+
+   	try{
+		// Read the resource request from the given xml file
+		string message = ((AddResourceRequestsCtrlCommEvent *)e)->getMessage();
+        char *buf = strdup ( message.c_str() );
+        new_requests = rreqm->parseResourceRequestsBuffer(buf, message.size(), 0);
+        
+        // no error so lets add the resource requests, 
+        // also schedule them for activation and removal
+        rreqm->addResourceRequests(new_requests, evnt.get());
+		
+		// Activates resource request.
+		/*
+		 * The above 'addResourceRequests' produces an 
+		 * ResourceRequestActivation event.
+		 * 
+		 * If Resource request addition shall be performed 
+		 * _immediately_ (fds == NULL), then we need to execute this
+		 * activation event _now_ and not wait for the EventScheduler 
+		 * to do this some time later.
+		*/
+		if (fds == NULL ) {
+			Event *e = evnt->getNextEvent();
+			handleEvent(e, NULL);
+			saveDelete(e);
+		}
+			  
+        saveDelete(new_requests);
+        free(buf);
+
+   } catch (Error &err) {
+        
+        log->elog( ch, err.getError().c_str() );
+        
+        // error in resource request(s)
+        if (new_requests) {
+            saveDelete(new_requests);
+		}
+
+   }
+      
+#ifdef DEBUG
+   log->dlog(ch,"Ending add Resource request " );
+#endif
+
+}
+
+
 void Agent::handleActivateResourceRequestInterval(Event *e)
 {
 #ifdef DEBUG
@@ -754,40 +830,22 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 }
 
 
-void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
+void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key, 
+					anslp::anslp_ipap_message *ipap_mes, anslp::ResponseAddSessionEvent *resCreate)
 {
-#ifdef DEBUG
-	log->dlog(ch,"Starting event handleResponseCreateSession" );
-#endif
 
 	auctionDB_t *auctions = NULL;
 	auctionDB_t auctionsInsert;
 	int domainId;
-	string sessionId;
 	uint32_t mid = 0;
-
 	ipap_message message;
-	
-	try {
-
-		string mesStr = ((AuctionInteractionEvent *)e)->getMessage();
-		anslp::msg::anslp_ipap_xml_message mess;
-        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(mesStr);
-        message = ipap_mes->ip_message;
-        saveDelete(ipap_mes);
-		
-	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
-		// The message was not parse, we dont have to do anything. 
-		// We assumming that the sender will send the message again.
-		throw Error(e.what());
-    }
 
 
 	try
 	{
+	
+		message = ipap_mes->ip_message;
 
-		sessionId = ((ResponseCreateSessionEvent *)e)->getSession();
-		
 		// Obtains the message 
 		mid = message.get_ackseqno();
 		
@@ -823,14 +881,14 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 					
         log->elog( ch, err.getError().c_str() );
 		
-		if (((ResponseCreateSessionEvent *)e)->getReq() != NULL){ 
-			comm->sendErrMsg(err.getError(), ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
-		}
+		//TODO AM: implement return codes. 
+		// for now it generates the error not including in the final event.
 	}
 	
 	if (auctions->size() == 0){
 		
 	    log->elog( ch, "Agent: Invalid group of auctions given in the message" );
+		// TODO AM: Generate the error. For now no message means error. 
 		
 	} 
 	
@@ -875,10 +933,8 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 		}
 			
 		log->elog( ch, err.getError().c_str() );
+		// TODO AM: Generate the error. For now no message means error. 
 		
-		if (((ResponseCreateSessionEvent *)e)->getReq() != NULL){ 
-			comm->sendErrMsg(err.getError(), ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
-		} 
 	}
 	
 	// insert auctions in container ( this will trigger events to activate and remove)
@@ -1020,11 +1076,9 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 								session->getProtocol(), 
 								resp );
 
-		if (((ResponseCreateSessionEvent *)e)->getReq() != NULL){
-				comm->sendMsg("", ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
-		} else {
-			log->dlog( ch, "Ok" );
-		}
+		
+		anslp::anslp_ipap_message ipap_mes_return(resp);
+		resCreate->setObject(key, ipap_mes_return.copy());
 
 	} catch (Error &err){
 		
@@ -1033,10 +1087,62 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 		if (auctions){
 			saveDelete(auctions);
 		}
-		if (((ResponseCreateSessionEvent *)e)->getReq() != NULL){ 
-			comm->sendErrMsg(err.getError(), ((ResponseCreateSessionEvent *)e)->getReq(), fds); 
-		} 
+		
+		// TODO AM: Generate the error. For now no message means error. 
 	}
+
+
+}
+
+void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
+{
+#ifdef DEBUG
+	log->dlog(ch,"Starting event handleResponseCreateSession" );
+#endif
+
+
+
+	anslp::objectList_t *objList = NULL;
+	anslp::FastQueue *retQueue = NULL;
+	
+	string sessionId;
+
+	anslp::ResponseAddSessionEvent *resCreate = NULL;
+	
+	try {
+		anslp::objectListIter_t it;
+		
+		sessionId = ((CreateSessionEvent *)e)->getSessionId();
+		objList = ((CreateSessionEvent *)e)->getObjects();
+		retQueue = ((CreateSessionEvent *)e)->getQueue();
+				
+	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		// The message was not parse, we dont have to do anything. 
+		// We assumming that the sender will send the message again.
+		throw Error(e.what());
+	}
+	
+    resCreate = new anslp::ResponseAddSessionEvent();
+
+    if (objList != NULL){
+		
+		anslp::objectListIter_t it;
+		for (it = objList->begin(); it != objList->end(); ++it){
+				
+			anslp::mspec_rule_key key = it->first;
+			anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
+			if (ipap_mes != NULL)
+				handleSingleCreateSession(sessionId, key, ipap_mes, resCreate);
+					
+		}
+	} else {
+		log->elog(ch, "The event does not have a valid list of objects");
+	}
+
+	// Send the response for every request.
+	if (retQueue != NULL){
+		retQueue->enqueue(resCreate);
+	}	
 	
 }
 
@@ -1465,7 +1571,7 @@ void Agent::handleRemoveBiddingObjects(Event *e)
 }
 
 
-void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
+void Agent::handleSingleObjectAuctioningInteraction(string sessionId, anslp::anslp_ipap_message *ipap_mes)
 {
 
 	biddingObjectDB_t *bids = NULL;
@@ -1474,21 +1580,8 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 
 	try {
 
-		string mesStr = ((AuctionInteractionEvent *)e)->getMessage();
-		anslp::msg::anslp_ipap_xml_message mess;
-        anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(mesStr);
-        message = ipap_mes->ip_message;
-        saveDelete(ipap_mes);
-		
-	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
-		// The message was not parse, we dont have to do anything. 
-		// We assumming that the sender will send the message again.		
-		throw Error(e.what());
-    }
-
-	string sessionId = ((AuctionInteractionEvent *)e)->getSessionId();
-	
-	try {
+		assert(ipap_mes != NULL);	
+		message = ipap_mes->ip_message;
 
 		// Search for the session that is involved.
 		s = asmp->getSession(sessionId);
@@ -1596,25 +1689,48 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 
 }
 
-void Agent::send_immediate_respond(Event *retEvent, fd_sets_t *fds){
+void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
+{
 
 
-#ifdef DEBUG
-    log->dlog(ch,"send inmediate respond" );
-#endif
+	anslp::objectList_t *objList = NULL;
+	string sessionId;
+		
+	try {
+		
+		sessionId = ((AuctionInteractionEvent *)e)->getSessionId();
+		objList = ((AuctionInteractionEvent *)e)->getObjects();
+				
+	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		// The message was not parse, we dont have to do anything. 
+		// We assumming that the sender will send the message again.
+		throw Error(e.what());
+    }
+    
+    try{
 
-	if ( retEvent->getType() == AUCTION_INTERACTION_CTRLCOMM )
-	{
-	  
-		if (((AuctionInteractionEvent  *)retEvent)->getReq() != NULL){ 
-			string mesStr = ((AuctionInteractionEvent *)retEvent)->getMessage();
-			comm->sendMsg(mesStr.c_str(), ((AuctionInteractionEvent *)retEvent)->getReq(), fds);
+		if (objList != NULL){
+			
+			anslp::objectListIter_t it;
+			for (it = objList->begin(); it != objList->end(); ++it){
+				
+				anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
+				if (ipap_mes != NULL)
+					handleSingleObjectAuctioningInteraction(sessionId, ipap_mes);
+					
+			}
+		} else {
+			log->elog(ch, "The event does not have a valid list of objects");
 		}
-
+		
+    } catch (Error &err) {
+		log->elog( ch, err.getError().c_str() );	
 	}
 
-}
 
+	
+
+}
 
 /* -------------------- handleEvent -------------------- */
 
@@ -1679,6 +1795,10 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
     case ADD_RESOURCEREQUESTS:
 		handleAddResourceRequests(e,fds);
       break;
+
+    case ADD_RESOURCEREQUESTS_CTRLCOMM:
+		handleAddResourceRequestsCntrlComm(e,fds);
+      break;
 	    	   
     case ACTIVATE_RESOURCE_REQUEST_INTERVAL:
 		handleActivateResourceRequestInterval(e);
@@ -1688,7 +1808,7 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
 		handleRemoveResourceRequestInterval(e);
       break;
 	  
-	case AUCTION_INTERACTION_CTRLCOMM:
+	case AUCTION_INTERACTION:
 		 handleAuctioningInteraction(e, fds);
 	  break;
 
@@ -1715,7 +1835,7 @@ bool Agent::handle_event_immediate_respond(Event *e, fd_sets_t *fds)
    
     switch (e->getType()) {
 
-		case RESPONSE_CREATE_SESSION:
+		case CREATE_SESSION:
 			handleResponseCreateSession(e, fds);
 			pendingExec = false;
 		  break;
@@ -1843,7 +1963,11 @@ void Agent::run()
             if (!pprocThread) {
 				proc->handleFDEvent(&retEvents, NULL,NULL, NULL);
             }
-
+			
+			if (!aprocThread) {
+				anslproc->handleFDEvent(&retEvents, NULL,NULL, NULL);
+			}
+			
 			bool pendingExec = true;
 
             // schedule events
@@ -1853,10 +1977,7 @@ void Agent::run()
 
 					// Execute events that require immediate response.
 					pendingExec = handle_event_immediate_respond(*iter, &fds);
-					
-					// Send the response message.
-					send_immediate_respond(*iter, &fds);
-					
+										
                     evnt->addEvent(*iter);
                 }
                 retEvents.clear(); 
@@ -1864,6 +1985,7 @@ void Agent::run()
         } while (!stop);
 
 		proc->waitUntilDone();
+		anslproc->waitUntilDone();
 
 		anslp::cleanup_framework();
 

@@ -34,6 +34,7 @@
 #include "ProcModuleInterface.h"
 #include "AuctionFileParser.h"
 #include "AuctionManagerInfo.h"
+#include "auction_rule.h"
 #include "Auction.h"
 #include "BiddingObject.h"
 
@@ -71,7 +72,8 @@ typedef enum
       RESPONSE_CREATE_SESSION,
       RESPONSE_CREATE_CHECK_SESSION,
       REMOVE_SESSION,
-      AUCTION_INTERACTION_CTRLCOMM    
+      AUCTION_INTERACTION,
+      ADD_RESOURCEREQUESTS_CTRLCOMM
 } event_t;
 
 //! event names for dump method
@@ -106,6 +108,7 @@ const string eventNames[] =
       "Response-Create-Check-Session",
       "Remove-Session",
       "Auction-Interaction",
+      "Add-ResourceRequests-ctrlcomm",
 };
 
 /* ------------------------- Event class ------------------------- */
@@ -259,6 +262,7 @@ class CtrlCommEvent: public Event
 	req = r;
     }
 };
+
 
 //! test event
 class TestEvent : public Event
@@ -727,20 +731,20 @@ class RemoveAuctionsCtrlEvent : public CtrlCommEvent
     }
 };
 
-class AuctionInteractionEvent : public CtrlCommEvent
+class AuctionInteractionEvent : public Event
 {
   private:
 	string sessionId;
-	string message;
+	anslp::objectList_t *objects;
     
   public:
 
-    AuctionInteractionEvent(string _sessionId, string &a) 
-      : CtrlCommEvent(AUCTION_INTERACTION_CTRLCOMM), sessionId(_sessionId), message(a) {  }
+    AuctionInteractionEvent(string _sessionId, anslp::objectList_t *_objects, unsigned long ival=0, int align=0) 
+      : Event(AUCTION_INTERACTION, ival, align), sessionId(_sessionId), objects(_objects) {  }
   
-	string getMessage()
+	anslp::objectList_t *  getObjects()
 	{
-		return message;
+		return objects;
 	}
 	
 	string getSessionId()

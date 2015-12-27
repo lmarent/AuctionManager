@@ -27,6 +27,7 @@ netagent_SOURCES =  ResourceRequest.cpp \
 					AgentManagerInfo.cpp \
 					AgentSessionManager.cpp \
 					AgentProcessor.cpp \
+					AnslpProcessor.cpp \
 					ConstantsAgent.cpp \
 					Agent.cpp \
 					main.cpp

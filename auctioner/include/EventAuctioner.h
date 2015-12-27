@@ -39,66 +39,82 @@
 #include "AuctionManagerInfo.h"
 #include "Auction.h"
 #include "Event.h"
+#include "aqueue.h"
 
 namespace auction
 {
 
 /* --------------------------------- events ------------------------------ */
 
-class CreateSessionEvent : public CtrlCommEvent
+class CreateSessionEvent : public Event
 {
   private:
 	string sessionId;
-	string message;
+	anslp::objectList_t *objects;
+	anslp::FastQueue *ret;
     
   public:
 
-    CreateSessionEvent(string _sessionId, string &a) 
-      : CtrlCommEvent(CREATE_SESSION), sessionId(_sessionId), message(a) {  }
+    CreateSessionEvent(string _sessionId, anslp::objectList_t *_objects, 
+					   anslp::FastQueue *_ret, unsigned long ival=0, int align=0) 
+      : Event(CREATE_SESSION, ival, align), sessionId(_sessionId), objects(_objects), ret(_ret) {  }
   
-	string  getMessage()
+	anslp::objectList_t *  getObjects()
 	{
-		return message;
+		return objects;
 	}
 	
 	string getSessionId()
 	{
 		return sessionId;
 	}
+	
+	anslp::FastQueue * getQueue()
+	{
+		return ret;
+	}
 };
 
-class CreateCheckSessionEvent : public CtrlCommEvent
+class CreateCheckSessionEvent : public Event
 {
   private:
 	string sessionId;
-	string message;
+	anslp::objectList_t *objects;
+	anslp::FastQueue *ret;
     
   public:
 
-    CreateCheckSessionEvent(string _sessionId, string &a) 
-      : CtrlCommEvent(CREATE_CHECK_SESSION), sessionId(_sessionId), message(a) {  }
+    CreateCheckSessionEvent(string _sessionId, anslp::objectList_t *_objects, 
+							anslp::FastQueue *_ret, unsigned long ival=0, int align=0) 
+      : Event(CREATE_CHECK_SESSION, ival, align), sessionId(_sessionId), objects(_objects), ret(_ret){  }
   
-	string  getMessage()
+	anslp::objectList_t *  getObjects()
 	{
-		return message;
+		return objects;
 	}
 	
 	string getSessionId()
 	{
 		return sessionId;
 	}
+	
+	anslp::FastQueue * getQueue()
+	{
+		return ret;
+	}
+
 };
 
 
-class RemoveSessionEvent : public CtrlCommEvent
+class RemoveSessionEvent : public Event
 {
   private:
 	string sessionId;
     
   public:
 
-    RemoveSessionEvent(string _sessionId) 
-      : CtrlCommEvent(REMOVE_SESSION), sessionId(_sessionId) {  }
+    RemoveSessionEvent(string _sessionId, unsigned long ival=0, int align=0) 
+      : Event(REMOVE_SESSION, ival, align), sessionId(_sessionId) {  }
  	
 	string getSessionId()
 	{
@@ -134,9 +150,6 @@ class PushExecutionEvent : public Event
 	}
     
 };
-
-
-
 
 class ProcTimerEvent : public Event
 {

@@ -17,6 +17,7 @@ test_runner_SOURCES = 	@top_srcdir@/user_agent/src/ResourceRequest.cpp \
 						@top_srcdir@/user_agent/src/AgentSession.cpp \
 						@top_srcdir@/user_agent/src/AgentSessionManager.cpp \
 						@top_srcdir@/user_agent/src/PageRepository.cpp \
+						@top_srcdir@/user_agent/src/AnslpProcessor.cpp \
 						@top_srcdir@/user_agent/src/CtrlComm.cpp \
 						@top_srcdir@/user_agent/src/Agent.cpp \
 						@top_srcdir@/user_agent/test/ResourceRequest_test.cpp \

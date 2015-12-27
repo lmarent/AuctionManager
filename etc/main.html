@@ -20,40 +20,17 @@ Type =
   <option>use_ssl</option>
   <option>hello</option>
   <option>modlist</option>
-  <option>add_session</option>
-  <option>auction_interaction</option>
-  <option>remove_session</option>
+  <option>add_auction</option>
 </select>
 <br>
 Param = <input type=text name=IParam><br>
 <input value="get info" type=submit>
 </form><br>
 
-/check_session?SessionID=&lt;sessionid&gt;Message=&lt;message&gt;: check a new session<br><br>
-<form method=post action=/check_session>
-SessionID = <input type=text name=SessionID><br>	
+/add_auction?Message=&lt;message&gt;: Add a new auction<br><br>
+<form method=post action=/add_auction>
 Message = <textarea col=400 rows=10 name=Message></textarea><br>
-<input value="check session" type=submit>
-</form><br>
-
-/add_session?SessionID=&lt;sessionid&gt;Message=&lt;message&gt;: add a new session<br><br>
-<form method=post action=/add_session>
-SessionID = <input type=text name=SessionID><br>	
-Message = <textarea col=400 rows=10 name=Message></textarea><br>
-<input value="add session" type=submit>
-</form><br>
-
-/auction_interaction?SessionID=&lt;sessionid&gt;Message=&lt;message&gt;: auction interaction<br><br>
-<form method=post action=/auct_interact>
-SessionID = <input type=text name=SessionID><br>	
-Message = <textarea col=400 rows=10 name=Message></textarea><br>
-<input value="Auction Interaction" type=submit>
-</form><br>
-
-/del_session?SessionID=&lt;sessionid&gt;: delete session<br><br>
-<form method=post action=/del_session>
-SessionID = <input type=text name=SessionID><br>	
-<input value="delete session" type=submit>
+<input value="add auction" type=submit>
 </form><br>
 
 

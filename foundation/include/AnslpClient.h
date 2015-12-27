@@ -69,7 +69,7 @@ class AnslpClient
 
 	public:
 		
-		AnslpClient(string config_filename);
+		AnslpClient(string config_filename, anslp::FastQueue *installQueue=NULL);
 		
 		~AnslpClient();
 		
