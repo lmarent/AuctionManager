@@ -273,21 +273,44 @@ class CreateSessionEvent : public Event
   private:
     
     string sessionId; 
-    anslp::objectList_t *objects;
+    anslp::objectList_t objects;
     anslp::FastQueue *ret;
 
   public:
 
-    CreateSessionEvent(string _sessionId, anslp::objectList_t *_objects,
-						anslp::FastQueue *_ret, unsigned long ival=0, int align=0) 
-      : Event(CREATE_SESSION, ival, align), sessionId(_sessionId), objects(_objects), ret(_ret) 
+    CreateSessionEvent(string _sessionId, anslp::FastQueue *_ret, unsigned long ival=0, int align=0) 
+      : Event(CREATE_SESSION, ival, align), sessionId(_sessionId), ret(_ret) 
     {
         
     }
 
+    ~CreateSessionEvent() 
+    {
+		anslp::objectListIter_t it;
+		for ( it = objects.begin(); it != objects.end(); it++)
+		{
+			if (it->second != NULL)
+				delete(it->second);
+		}
+	}
+
+	void setObject(anslp::mspec_rule_key key, anslp::msg::anslp_mspec_object *obj)
+	{
+		if ( obj == NULL )
+		return;
+
+		anslp::msg::anslp_mspec_object *old = objects[key];
+
+		if ( old )
+			delete old;
+
+		objects[key] = obj;
+
+	}
+
     anslp::objectList_t *  getObjects()
     {
-        return objects;
+        return &objects;
     }
     
     string getSessionId()

@@ -74,6 +74,11 @@ AnslpProcessor::~AnslpProcessor()
 
 void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 {
+
+#ifdef DEBUG
+    log->dlog(ch,"Starting ANSLP Processor - process");
+#endif
+
 	assert( evt != NULL );
 	
 	string sessionId;
@@ -83,7 +88,15 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 			dynamic_cast<CheckEvent *>(evt);
 				
 		sessionId = che->getSession();
-		auction::CreateCheckSessionEvent *retEvent = new CreateCheckSessionEvent(sessionId, che->getObjects(), che->getQueue());
+
+		auction::CreateCheckSessionEvent *retEvent = new CreateCheckSessionEvent(sessionId, che->getQueue());
+				
+		anslp::objectList_t *objects = che->getObjects();
+		anslp::objectListIter_t it;
+		for (it = objects->begin(); it != objects->end(); ++it){
+			retEvent->setObject(it->first, it->second->copy());
+		}
+		
 		e->push_back(retEvent);	
 				
 		return;
@@ -92,9 +105,16 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 	if ( is_addsession_event(evt) ) {
 		anslp::AddSessionEvent *ase =
 			dynamic_cast<AddSessionEvent *>(evt);
+
+		CreateSessionEvent *retEvent = new CreateSessionEvent(sessionId, ase->getQueue());
+		
+		anslp::objectList_t *objects = ase->getObjects();
+		anslp::objectListIter_t it;
+		for (it = objects->begin(); it != objects->end(); ++it){
+			retEvent->setObject(it->first,it->second->copy());
+		}
 		
 		string sessionId = ase->getSession();
-		CreateSessionEvent *retEvent = new CreateSessionEvent(sessionId, ase->getObjects(), ase->getQueue());
 		e->push_back(retEvent);	
 		
 		return;
@@ -122,17 +142,34 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 		anslp::AuctionInteractionEvent *aie =
 			dynamic_cast<anslp::AuctionInteractionEvent *>(evt);
 
+		AuctionInteractionEvent *retEvent = new AuctionInteractionEvent(sessionId);
+
+		anslp::objectList_t *objects = aie->getObjects();
+		anslp::objectListIter_t it;
+		for (it = objects->begin(); it != objects->end(); ++it){
+			retEvent->setObject(it->first, it->second->copy());
+		}
+
 		string sessionId = aie->getSession();
-		AuctionInteractionEvent *retEvent = new AuctionInteractionEvent(sessionId, aie->getObjects());
 		e->push_back(retEvent);	
 		
 		return;
 	}
+
+#ifdef DEBUG
+    log->dlog(ch,"Ending ANSLP Processor - process");
+#endif
+
+
 }
 
 int 
 AnslpProcessor::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds)
 {
+
+#ifdef DEBUG
+    log->dlog(ch,"Starting ANSLP Processor handleFDEvent");
+#endif
 	
 	assert( e != NULL );
 
@@ -145,6 +182,10 @@ AnslpProcessor::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets
 	if ( evt == NULL ){
 		return 0;	// no message in the queue
 	}
+
+#ifdef DEBUG
+    log->dlog(ch,"ANSLP Processor: message in queue");
+#endif
 			
 	MP(benchmark_journal::PRE_PROCESSING);
 
@@ -157,6 +198,11 @@ AnslpProcessor::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets
 	}
 
 	MP(benchmark_journal::POST_PROCESSING);
+
+#ifdef DEBUG
+    log->dlog(ch,"ending ANSLP Processor handleFDEvent");
+#endif
+
 	
 	return 0;
 		
