@@ -669,12 +669,19 @@ void Auctioner::handleAddBiddingObjectsAuction(Event *e, fd_sets_t *fds)
 		
 		bids = ((InsertBiddingObjectsAuctionEvent *) e)->getBiddingObjects();
 		
+		assert( bids != NULL);
+		
 	    // Verifies that every auction is included in the container
 	    biddingObjectDBIter_t iter;
 	    for (iter = bids->begin(); iter != bids->end(); ++iter)
 	    {	
-			string aSet = (*iter)->getAuctionSet();
-			string aName = (*iter)->getAuctionName();
+			
+			BiddingObject *bidObject = *iter;
+			
+			assert(bidObject != NULL);
+			
+			string aSet = bidObject->getAuctionSet();
+			string aName = bidObject->getAuctionName();
 			Auction * a = aucm->getAuction(aSet, aName);
 		
 			if ((a == NULL) || (a->getState() != AO_ACTIVE)){

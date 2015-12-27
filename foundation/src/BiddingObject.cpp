@@ -575,7 +575,7 @@ BiddingObject::calculateIntervals(time_t now, biddingObjectIntervalList_t *list)
 			
 		// do we have a stop time defined that is in the past ?
 		if ((biddingObjectInterval.stop != 0) && (biddingObjectInterval.stop <= now)) {
-			throw Error(300, "BiddingObject running time is already over");
+			log->dlog(ch, "Bidding object running time is already over");
 		}
 		
 		if (biddingObjectInterval.start < now) {
