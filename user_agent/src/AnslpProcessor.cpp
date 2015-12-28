@@ -151,7 +151,7 @@ AnslpProcessor::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets
 	FastQueue *anslp_input = get_fqueue();
 
 	// A timeout makes sure the loop condition is checked regularly.
-	AnslpEvent *evt = anslp_input->dequeue_timedwait(1000);
+	AnslpEvent *evt = anslp_input->dequeue_timedwait(10);
 		
 	if ( evt == NULL ){
 		return 0;	// no message in the queue

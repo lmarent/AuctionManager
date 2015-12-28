@@ -178,17 +178,13 @@ int
 AnslpProcessor::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds)
 {
 
-#ifdef DEBUG
-    log->dlog(ch,"Starting ANSLP Processor handleFDEvent");
-#endif
-	
 	assert( e != NULL );
 
 	// Takes from the queue.
 	anslp::FastQueue *anslp_input = get_fqueue();
 
 	// A timeout makes sure the loop condition is checked regularly.
-	anslp::AnslpEvent *evt = anslp_input->dequeue_timedwait(1000);
+	anslp::AnslpEvent *evt = anslp_input->dequeue_timedwait(10);
 		
 	if ( evt == NULL ){
 		return 0;	// no message in the queue

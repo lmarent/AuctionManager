@@ -1765,13 +1765,20 @@ void Auctioner::run()
 #ifdef DEBUG
         log->dlog(ch,"------- Auction Manager is running -------");
 #endif
-
+		// Establish the maximum timeout for waiting during select.
+		struct timeval tv_anslp = {0,10000};
+		
+		
         do {
 			// select
             rset = fds.rset;
             wset = fds.wset;
-	    
+	    			
 			tv = evnt->getNextEventTime();
+			
+			// Calculates the min between the event timeout and the anslp queu timeout 
+			if (Timeval::cmp(tv_anslp, tv) < 0) 
+				tv = tv_anslp;
 
             // note: under most unix the minimal sleep time of select is
             // 10ms which means an event may be executed 10ms after expiration!
@@ -1783,10 +1790,6 @@ void Auctioner::run()
 
             // check FD events
             if (cnt > 0)  {
-
-#ifdef DEBUG			
-				log->dlog(ch,"In check FD events time:%s", (Timeval::toString(tv)).c_str());
-#endif
 
                 if (FD_ISSET( s_sigpipe[0], &rset)) {
                     // handle sig action
@@ -1812,8 +1815,7 @@ void Auctioner::run()
                             if (e != NULL) {
                                 // FIXME hack
                                 if (e->getType() == CTRLCOMM_TIMER) {
-                                    comm->handleFDEvent(&retEvents, NULL, 
-                                                        NULL, &fds);
+                                    comm->handleFDEvent(&retEvents, NULL, NULL, &fds);
                                 } else {
                                     handleEvent(e, &fds);
                                 }
@@ -1837,13 +1839,24 @@ void Auctioner::run()
                 }
 	        }	
 
+#ifdef DEBUG			
+			log->dlog(ch,"before proc handleFDEvent");
+#endif
             if (!pprocThread) {
 				proc->handleFDEvent(&retEvents, NULL,NULL, NULL);
             }
 
+#ifdef DEBUG			
+			log->dlog(ch,"after proc handleFDEvent");
+#endif
 			if (!aprocThread) {
 				anslproc->handleFDEvent(&retEvents, NULL,NULL, NULL);
 			}
+
+#ifdef DEBUG			
+			log->dlog(ch,"after anslp proc handleFDEvent");
+#endif
+
 			
 			bool pendingExec = true;
 			
@@ -1862,6 +1875,11 @@ void Auctioner::run()
                 }
                 retEvents.clear(); 
             }
+
+#ifdef DEBUG			
+			log->dlog(ch,"it is going to start again");
+#endif
+
         } while (!stop);
 
 		proc->waitUntilDone();

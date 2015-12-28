@@ -1890,6 +1890,9 @@ void Agent::run()
         log->dlog(ch,"------- Agent Manager is running -------");
 #endif
 
+		// Establish the maximum timeout for waiting during select.
+		struct timeval tv_anslp = {0,10000};
+
         do {
 			// select
             rset = fds.rset;
@@ -1897,6 +1900,10 @@ void Agent::run()
 	    
 			tv = evnt->getNextEventTime();
 
+			// Calculates the min between the event timeout and the anslp queu timeout 
+			if (Timeval::cmp(tv_anslp, tv) < 0) 
+				tv = tv_anslp;
+				
             // note: under most unix the minimal sleep time of select is
             // 10ms which means an event may be executed 10ms after expiration!
             if ((cnt = select(fds.max+1, &rset, &wset, NULL, &tv)) < 0) {
