@@ -48,6 +48,13 @@
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="55">ReservePrice03</DEF>
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="56">ReservePrice04</DEF>
   <DEF LENGTH="8" TYPE="Double" ENO="0" FTYPE="57">ReservePrice05</DEF>
+  <!-- Subsidy fields -->
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="68">Subsidy</DEF>
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="69">Subsidy01</DEF>
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="70">Subsidy02</DEF>
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="71">Subsidy03</DEF>
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="72">Subsidy04</DEF>
+  <DEF LENGTH="4" TYPE="Float" ENO="0" FTYPE="73">Subsidy05</DEF>
   <!-- Algorithm data -->
   <DEF TYPE="String" ENO="0" FTYPE="31">AlgorithmName</DEF>
   <!-- Template list for an auction -->  
