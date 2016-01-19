@@ -654,25 +654,29 @@ void BiddingObjectManager::storeBiddingObjectAsDone(BiddingObject *r)
 #ifdef DEBUG    
 		log->dlog(ch, "connection Str = '%s'", connectionDBStr.c_str());
 #endif
-		// Store in the database
-		pqxx::connection c(connectionDBStr);
+		
+		try
+		{
+			// Store in the database
+			pqxx::connection c(connectionDBStr);
 
 #ifdef DEBUG    
-		log->dlog(ch, "database connected");
+			log->dlog(ch, "database connected");
 #endif
 
 #ifdef HAVE_PQXX40
-		r->save_ver4(c);
+			r->save_ver4(c);
 #else
-		r->save_ver3(c);
+			r->save_ver3(c);
 #endif
-
-
-
-		// release id
-		idSource.freeId(r->getUId());
-		// remove rule
-		saveDelete(r);
+		
+			// release id
+			idSource.freeId(r->getUId());
+			// remove rule
+			saveDelete(r);
+		} catch(const std::exception &e){
+			throw Error("Error connecting to the database %s", e.what());
+		}
 
 	}
 }
