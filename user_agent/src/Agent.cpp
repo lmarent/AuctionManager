@@ -951,7 +951,7 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 			if (a2->getStart() > interval->start){
 				a2->setStart(interval->start);
 			}
-			
+						
 			if (a2->getStop() < interval->stop){
 				a2->setStop(interval->stop);
 				
@@ -965,8 +965,18 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 			
 					
 		} else {
+			
+			interval_t intervalAuct = a->getInterval();
+			
 			a->setStart(interval->start);
 			a->setStop(interval->stop);
+
+			// If the requested time is less than the minimal interval for the auction, 
+			// we have to request te minimal interval.
+			if (intervalAuct.interval > (a->getStop() - a->getStart())){
+				a->setStop(a->getStart() + intervalAuct.interval);
+			}
+			
 			auctionsInsert.push_back(a);
 		}
 	}
