@@ -396,7 +396,10 @@ ResourceRequestFileParser::parse(fieldDefList_t *fieldDefs,
 				// debug info
 				log->dlog(ch, "parsed resource request %s.%s", rset.c_str(), rname.c_str());
 #endif
+                
                 requests->push_back(r);
+                start = time(NULL);
+                
             } catch (Error &e) {
                 log->elog(ch, e);
                 
