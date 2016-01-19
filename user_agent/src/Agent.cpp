@@ -1014,7 +1014,7 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 				if (firstTime == true){
 					// Create new request process for coming auctions.
 					index = proc->addRequest( sessionId, request->getFields(),*auctIter2, 
-												interval->start, interval->stop );
+												(*auctIter2)->getStart(), (*auctIter2)->getStop() );
 														
 					// Insert the index in the resource process set created. 
 					(interval->resourceProcesses).insert(index);
