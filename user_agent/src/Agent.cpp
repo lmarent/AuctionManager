@@ -1057,7 +1057,8 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
    					  req_end = req_start + (maxInterval * (bidIntervals + 1));
 
 #ifdef DEBUG
-		log->dlog(ch, "new request time: %lu", maxInterval * (bidIntervals + 1));
+					 long durationlog = maxInterval * (bidIntervals + 1);
+					 log->dlog(ch, "new request time: %lu", durationlog);
 #endif
 					}
 					
