@@ -1050,8 +1050,6 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 					
 					if (maxInterval > 0){
 
-
-						
 					  bidIntervals =  floor ( (req_end - req_start) / maxInterval );
 					  modulus = (req_end - req_start) % maxInterval;
 					  long duration = maxInterval * (bidIntervals + 1);
