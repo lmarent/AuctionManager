@@ -838,6 +838,8 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 	int domainId;
 	uint32_t mid = 0;
 	ipap_message message;
+	double modulus = 0;
+	double bidIntervals = 0;
 
 #ifdef DEBUG
 	log->dlog(ch,"Starting handleSingleCreateSession" );
@@ -940,14 +942,24 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 		
 	}
 	
+	// This variable maintains the auction with the maximal duration interval, so
+	// The request should last at least an interval multiple. 
+	unsigned long maxInterval = 0;
+	
 	// insert auctions in container ( this will trigger events to activate and remove)
 	// First loop though the auctions to see if there is already an auction in the container, in that case bring the auction
 	// from the container update the stop time if it greater that the previous time and destroy the new object.
 	for ( auctionDBIter_t auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter)
 	{
+		bidIntervals = 1;
+		modulus = 0;
 		Auction *a = *auctIter;
+		
 		Auction *a2 = aucm->getAuction(a->getSetName(), a->getAuctionName());
 		if (a2 != NULL){
+			
+			interval_t intervalAuct = a2->getInterval();
+						
 			if (a2->getStart() > interval->start){
 				a2->setStart(interval->start);
 			}
@@ -959,23 +971,38 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 				evnt.get()->rescheduleAuctionDelete(a2->getUId(), interval->stop);
 
 			}	
+			
+			// Update the maximum interval for the auction.
+			if (maxInterval < intervalAuct.interval) {
+				maxInterval = intervalAuct.interval;
+			}
+
+			
 			delete(a);
 			auctions->erase(auctIter);
 			auctions->push_back(a2);
 			
-					
 		} else {
 			
-			interval_t intervalAuct = a->getInterval();
-			
+			interval_t intervalAuct = a->getInterval();			
 			a->setStart(interval->start);
 			a->setStop(interval->stop);
-
+			
+			if (intervalAuct.interval > 0){
+			  bidIntervals =  floor ( (a->getStop() - a->getStart()) / intervalAuct.interval );
+			  modulus = (a->getStop() - a->getStart()) % intervalAuct.interval;
+			} 	
 			// If the requested time is less than the minimal interval for the auction, 
 			// we have to request te minimal interval.
-			if (intervalAuct.interval > (a->getStop() - a->getStart())){
-				time_t newStop = a->getStart() + intervalAuct.interval;				
+			if ( modulus > 0 ){
+				time_t newStop = a->getStart() + 
+									(intervalAuct.interval * (bidIntervals + 1));
 				a->setStop(newStop);
+			}
+
+			// Update the maximum interval for the auction.
+			if (maxInterval < intervalAuct.interval) {
+				maxInterval = intervalAuct.interval;
 			}
 			
 			auctionsInsert.push_back(a);
@@ -1000,6 +1027,8 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 	}
 						
 	time_t now = time(NULL);
+	time_t req_start = interval->start;
+	time_t req_end = interval->stop;
 	
 	try 
 	{				
@@ -1012,9 +1041,22 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 					
 			for (auctionDBIter_t auctIter2 = (splitByModuleIter->second).begin(); auctIter2 != (splitByModuleIter->second).end(); ++auctIter2){
 				if (firstTime == true){
+
+#ifdef DEBUG			
+		log->dlog(ch, "auction interval - start:%s stop:%s", 
+							Timeval::toString(interval->start).c_str(),
+								Timeval::toString(interval->stop).c_str());
+#endif
+					
+					if (maxInterval > 0){
+					  bidIntervals =  floor ( (req_end - req_start) / maxInterval );
+					  modulus = (req_end - req_start) % maxInterval;
+   					  req_end = req_start + (maxInterval * (bidIntervals + 1));
+					}
+					
 					// Create new request process for coming auctions.
 					index = proc->addRequest( sessionId, request->getFields(),*auctIter2, 
-												(*auctIter2)->getStart(), (*auctIter2)->getStop() );
+												req_start, req_end );
 														
 					// Insert the index in the resource process set created. 
 					(interval->resourceProcesses).insert(index);
@@ -1026,10 +1068,10 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 			}
 										
 			// Schedule the execution of the request.
-			evnt.get()->addEvent(new PushExecutionEvent(interval->start - now, index)); 
+			evnt.get()->addEvent(new PushExecutionEvent(req_start - now, index)); 
 
 			// Schedule the delete of the request.
-			evnt.get()->addEvent(new RemovePushExecutionEvent(interval->stop - now, index)); 
+			evnt.get()->addEvent(new RemovePushExecutionEvent(req_end - now, index)); 
 			
 
 		}
