@@ -1042,16 +1042,23 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 			for (auctionDBIter_t auctIter2 = (splitByModuleIter->second).begin(); auctIter2 != (splitByModuleIter->second).end(); ++auctIter2){
 				if (firstTime == true){
 
-#ifdef DEBUG			
-		log->dlog(ch, "auction interval - start:%s stop:%s", 
+#ifdef DEBUG
+		log->dlog(ch, "auction interval - start:%s stop:%s maxInterval:%lu", 
 							Timeval::toString(interval->start).c_str(),
-								Timeval::toString(interval->stop).c_str());
+								Timeval::toString(interval->stop).c_str(), maxInterval);
 #endif
 					
 					if (maxInterval > 0){
+
+
+						
 					  bidIntervals =  floor ( (req_end - req_start) / maxInterval );
 					  modulus = (req_end - req_start) % maxInterval;
    					  req_end = req_start + (maxInterval * (bidIntervals + 1));
+
+#ifdef DEBUG
+		log->dlog(ch, "new request time: %lu", maxInterval * (bidIntervals + 1));
+#endif
 					}
 					
 					// Create new request process for coming auctions.
