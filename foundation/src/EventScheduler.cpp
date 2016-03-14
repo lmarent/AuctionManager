@@ -89,7 +89,8 @@ void EventScheduler::addEvent(Event *ev)
 #endif
     
     events.insert(make_pair(ev->getTime(),ev));
-    
+
+/*    
 #ifdef DEBUG
     log->dlog(ch,"nbr of events active after inserting:", events.size());
     eventListIter_t iter;
@@ -102,6 +103,7 @@ void EventScheduler::addEvent(Event *ev)
     }
     
 #endif
+*/
     
 }
 
