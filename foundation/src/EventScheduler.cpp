@@ -204,6 +204,7 @@ void EventScheduler::reschedNextEvent(Event *ev)
     log->dlog(ch,"starting requeue event %s", eventNames[ev->getType()].c_str());
 #endif
 
+/*
 #ifdef DEBUG     
 	eventListIter_t iter;
 	
@@ -214,7 +215,7 @@ void EventScheduler::reschedNextEvent(Event *ev)
 					eventNames[iter->second->getType()].c_str());        
     }
 #endif
-
+*/
     assert(ev != NULL);
    
     if (ev->getIval() > 0) {
@@ -305,7 +306,7 @@ struct timeval EventScheduler::getNextEventTime()
         // be 100us fuzzy
         if ((rv.tv_sec == 0) && (rv.tv_usec<100)) {
 #ifdef DEBUG
-            log->dlog(ch,"expired event kjfgdlfkjg %s", eventNames[ev->getType()].c_str());
+            log->dlog(ch,"expired event %s", eventNames[ev->getType()].c_str());
 #endif
            //!* This lines activates the file descriptor being tracked by the 
            //!* the execution class. this methos should be redefined in every 
