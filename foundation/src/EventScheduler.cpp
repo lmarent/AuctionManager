@@ -238,6 +238,7 @@ void EventScheduler::reschedNextEvent(Event *ev)
         // and requeue it
         events.insert(make_pair(ev->getTime(),ev));
 
+/*
 #ifdef DEBUG     
 	log->dlog(ch,"after reschule the event");
 	eventListIter_t iter;
@@ -249,7 +250,7 @@ void EventScheduler::reschedNextEvent(Event *ev)
 					eventNames[iter->second->getType()].c_str());        
     }
 #endif
-        
+*/        
     } else {
 #ifdef DEBUG
         log->dlog(ch,"remove event %s", eventNames[ev->getType()].c_str());
