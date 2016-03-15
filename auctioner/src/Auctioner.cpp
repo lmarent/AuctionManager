@@ -1404,6 +1404,11 @@ Auctioner::handleSingleObjectAuctioningInteraction( string sessionId, anslp::ans
 			biddingObjectDBIter_t bidIter;
 			for (bidIter = bids->begin(); bidIter != bids->end(); ++bidIter){
 				(*bidIter)->setSession(sessionId);
+				
+#ifdef DEBUG
+				log->dlog(ch, "New BiddingObject After handle iteraction: %s.%s", (*bidIter)->getBiddingObjectSet().c_str(), 
+					(*bidIter)->getBiddingObjectName().c_str());
+#endif				
 			}
 				
 			// Add the bidding objects to the bidding object manager.
