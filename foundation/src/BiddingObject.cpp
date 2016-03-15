@@ -595,7 +595,7 @@ void BiddingObject::save_ver4(pqxx::connection_base &c)
 {
 
 #ifdef DEBUG
-    log->dlog(ch, "Start Save BiddingObject: %s.%s - now:%s stop %s", getBiddingObjectSet().c_str(), 
+    log->dlog(ch, "Start Save BiddingObject: %s.%s", getBiddingObjectSet().c_str(), 
 										getBiddingObjectName().c_str());
 #endif
 

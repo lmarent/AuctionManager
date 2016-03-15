@@ -305,8 +305,22 @@ AgentProcessor::executeRequest( int index, EventScheduler *e )
 			log->elog(ch,e.getError().c_str());
 			throw Error(e.getError().c_str());
 		}
+
+#ifdef DEBUG
+		biddingObjectDBIter_t        iter;
+		for (iter = bids.begin(); iter != bids.end();++iter) {
+			BiddingObject *b = (*iter);
+			if (b != NULL){
+				log->dlog(ch, "New BiddingObject After Push Execution: %s.%s", b->getBiddingObjectSet().c_str(), 
+					b->getBiddingObjectName().c_str());
+			}	
+		}	
+#endif
+
 		// Add the Bids (bidding objects) created to the local container.
 		e->addEvent(new AddGeneratedBiddingObjectsEvent(index, bids));
+
+
 		
 	} else {
 		throw Error("Request with index:%d was not found", index);
