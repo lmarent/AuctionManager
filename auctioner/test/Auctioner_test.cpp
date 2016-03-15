@@ -163,7 +163,9 @@ void Auctioner_Test::test()
 			anslp::FastQueue queueCheck;
 			
 			// check session creation.
-			auctionerPtr->evnt->addEvent( new CreateCheckSessionEvent(sessionId, objectsCheck, &queueCheck));
+			CreateCheckSessionEvent *ccs = new CreateCheckSessionEvent(sessionId, &queueCheck);
+			ccs->setObject( key, ipapMesChec);
+			auctionerPtr->evnt->addEvent(ccs);
 
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 			CreateCheckSessionEvent *ccse = dynamic_cast<CreateCheckSessionEvent *>(evt);
@@ -174,7 +176,9 @@ void Auctioner_Test::test()
 			CPPUNIT_ASSERT( queueCheck.size() == 1 );
 			
 			// once check the message, we proceed to create the session,
-			auctionerPtr->evnt->addEvent( new CreateSessionEvent(sessionId, objectsCheck, &queueCheck));
+			CreateSessionEvent *cse1 = new CreateSessionEvent(sessionId, &queueCheck);
+			cse1->setObject( key, ipapMesChec);
+			auctionerPtr->evnt->addEvent(cse1);
 		
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 			CreateSessionEvent *cse = dynamic_cast<CreateSessionEvent *>(evt);
@@ -237,7 +241,9 @@ void Auctioner_Test::test()
 			(*objectsAuctInter)[key2] = ipapMesAuct;
 			
 			// Auction Interaction event.
-			auctionerPtr->evnt->addEvent( new AuctionInteractionEvent(sessionId, objectsAuctInter));
+			AuctionInteractionEvent *aie2 =  new AuctionInteractionEvent(sessionId);
+			aie2->setObject(key2, ipapMesAuct);
+			auctionerPtr->evnt->addEvent(aie2);
 
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 			AuctionInteractionEvent *aie = dynamic_cast<AuctionInteractionEvent *>(evt);
@@ -326,8 +332,31 @@ void Auctioner_Test::test()
 			while ( evt != NULL ){
 				cout << eventNames[evt->getType()].c_str() << "time:" << Timeval::toString(evt->getTime()) << endl;
 				evt = auctionerPtr->evnt.get()->getNextEvent();
+
 			}			
 					
+
+			//Remove the session
+			
+			sessions = auctionerPtr->sesm->getSessions();
+			for (sesIter = sessions.begin(); sesIter != sessions.end(); ++sesIter){
+				ses = *sesIter;
+					
+				// Remove session creation.
+				RemoveSessionEvent *ccs = new RemoveSessionEvent(ses->getSessionId(), &queueCheck);
+				auctionerPtr->evnt->addEvent(ccs);
+
+				evt = auctionerPtr->evnt.get()->getNextEvent();
+				RemoveSessionEvent *rse = dynamic_cast<RemoveSessionEvent *>(evt);
+				CPPUNIT_ASSERT( rse != NULL );
+								
+				auctionerPtr->handle_event_immediate_respond(evt, NULL);
+
+				// Verify that it creates a new event in the queue.
+				CPPUNIT_ASSERT( queueCheck.size() == 3 );
+				
+				break;
+			}
 			
 		 }
 		
