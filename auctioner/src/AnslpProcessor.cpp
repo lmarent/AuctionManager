@@ -84,8 +84,8 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 	string sessionId;
 	
 	if ( is_check_event(evt) ) {
-		CheckEvent *che =
-			dynamic_cast<CheckEvent *>(evt);
+		anslp::CheckEvent *che =
+			dynamic_cast<anslp::CheckEvent *>(evt);
 				
 		sessionId = che->getSession();
 
@@ -104,7 +104,7 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 
 	if ( is_addsession_event(evt) ) {
 		anslp::AddSessionEvent *ase =
-			dynamic_cast<AddSessionEvent *>(evt);
+			dynamic_cast<anslp::AddSessionEvent *>(evt);
 
 		string sessionId = ase->getSession();
 		CreateSessionEvent *retEvent = new CreateSessionEvent(sessionId, ase->getQueue());
@@ -122,7 +122,7 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 
 	if ( is_response_addsession_event(evt) ) {
 		anslp::ResponseAddSessionEvent *ras =
-			dynamic_cast<ResponseAddSessionEvent *>(evt);
+			dynamic_cast<anslp::ResponseAddSessionEvent *>(evt);
 		
 		// This message type must not be comming, log the error.
 		log->elog(ch,"Received message response add session which is not expected");
@@ -131,11 +131,28 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 
 	if ( is_response_checksession_event(evt) ) {
 		anslp::ResponseCheckSessionEvent *rcs =
-			dynamic_cast<ResponseCheckSessionEvent *>(evt);
+			dynamic_cast<anslp::ResponseCheckSessionEvent *>(evt);
 			
 		// This message type must not be comming, log the error.
 		log->elog(ch,"Received message response check session which is not expected");									
 		return;
+	}
+
+	if ( is_removesession_event(evt) ) {
+		anslp::RemoveSessionEvent *rse =
+			dynamic_cast<anslp::RemoveSessionEvent *>(evt);
+			
+		string sessionId = rse->getSession();
+		RemoveSessionEvent *retEvent = new auction::RemoveSessionEvent(sessionId, rse->getQueue());
+		
+		anslp::objectList_t *objects = rse->getObjects();
+		anslp::objectListIter_t it;
+		for (it = objects->begin(); it != objects->end(); ++it){
+			retEvent->setObject(it->first,it->second->copy());
+		}
+		
+		e->push_back(retEvent);	
+
 	}
 
 	if ( is_auction_interaction_event(evt) ) {

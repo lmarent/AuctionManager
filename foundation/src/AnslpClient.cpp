@@ -267,6 +267,7 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
 						uint8_t protocol, ipap_message &message)
 {
 
+
 #ifdef DEBUG
     log->dlog(ch,"Starting tg_bidding ");
 #endif        
@@ -296,9 +297,7 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
         
 #ifdef DEBUG
     log->dlog(ch,"Ending tg_bidding ");
-#endif        
-    
-
+#endif  
 
 }
 

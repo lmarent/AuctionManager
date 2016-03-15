@@ -1325,7 +1325,7 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 	}
 	
     resCreate = new anslp::ResponseAddSessionEvent();
-
+	
     if (objList != NULL){
 		
 		anslp::objectListIter_t it;
@@ -1345,7 +1345,65 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 	if (retQueue != NULL){
 		retQueue->enqueue(resCreate);
 	}	
+
 }
+
+
+void Auctioner::handleRemoveSession(Event *e, fd_sets_t *fds)
+{
+
+#ifdef DEBUG
+    log->dlog(ch,"processing event remove session" );
+#endif
+
+	anslp::objectList_t *objList = NULL;
+	anslp::FastQueue *retQueue = NULL;
+	
+	string sessionId;
+
+	anslp::ResponseRemoveSessionEvent *resRemove = NULL;
+	
+	try {
+		anslp::objectListIter_t it;
+		
+		sessionId = ((RemoveSessionEvent *)e)->getSessionId();
+		objList = ((RemoveSessionEvent *)e)->getObjects();
+		retQueue = ((RemoveSessionEvent *)e)->getQueue();
+				
+	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		// The message was not parse, we dont have to do anything. 
+		// We assumming that the sender will send the message again.
+		throw Error(e.what());
+	}
+	
+    resRemove = new anslp::ResponseRemoveSessionEvent();
+
+	// Remove the session from the container.
+	sesm->delSession(sessionId, evnt.get());
+
+    if (objList != NULL){
+		
+		anslp::objectListIter_t it;
+		for (it = objList->begin(); it != objList->end(); ++it){
+				
+			anslp::mspec_rule_key key = it->first;
+			anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
+			if (ipap_mes != NULL)
+				resRemove->setObject(key, ipap_mes->copy());			
+					
+		}
+	} else {
+		log->elog(ch, "The event does not have a valid list of objects");
+	}
+
+	// Send the response for every request.
+	if (retQueue != NULL){
+		retQueue->enqueue(resRemove);
+	}	
+}
+
+
+
 
 void 
 Auctioner::handleSingleObjectAuctioningInteraction( string sessionId, anslp::anslp_ipap_message *ipap_mes)
@@ -1539,9 +1597,6 @@ Auctioner::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 	try{
 		biddingObjectDB_t *new_bids = ((TransmitBiddingObjectsEvent *)e)->getBiddingObjects();
 		
-		// get the auction process index 
-		int index = ((TransmitBiddingObjectsEvent *)e)->getIndex();
-
 		// Bring the list of local templates
 		auctionerTemplateListIter_t templIter = auctionerTemplates.find(domainId);
 		if (templIter != auctionerTemplates.end()){
@@ -1719,6 +1774,11 @@ bool Auctioner::handle_event_immediate_respond(Event *e, fd_sets_t *fds)
 
     case CREATE_CHECK_SESSION:
 		handleCreateCheckSession(e,fds);
+		pendingExec = false;
+		break;
+
+    case REMOVE_SESSION:
+		handleRemoveSession(e,fds);
 		pendingExec = false;
 		break;
 

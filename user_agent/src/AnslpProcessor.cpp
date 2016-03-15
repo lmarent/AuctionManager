@@ -121,6 +121,25 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 		return;
 	}
 
+	if ( is_removesession_event(evt) ) {
+		anslp::RemoveSessionEvent *che =
+			dynamic_cast<anslp::RemoveSessionEvent *>(evt);
+			
+		// This message type must not be comming, log the error.
+		log->elog(ch,"Received message remove session, which is not expected");	
+		return;
+	}
+
+	if ( is_response_removesession_event(evt) ) {
+		anslp::ResponseRemoveSessionEvent *che =
+			dynamic_cast<anslp::ResponseRemoveSessionEvent *>(evt);
+			
+		// This message type must not be comming, log the error.
+		log->elog(ch,"Received message response Remove session, which is not expected");	
+		return;
+	}
+
+
 	if ( is_auction_interaction_event(evt) ) {
 		anslp::AuctionInteractionEvent *aie =
 			dynamic_cast<anslp::AuctionInteractionEvent *>(evt);
