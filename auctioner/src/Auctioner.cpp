@@ -1611,7 +1611,15 @@ Auctioner::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 				string sessionId = biddingObject->getSession();
 				
 				Session *session = sesm->getSession(sessionId);
-			
+				
+				// the session is in the storage
+				if (session == NULL){
+					session = sesm->findSessionInStorage(sessionId);
+				}	
+				
+				if (session == NULL)
+					throw Error("Session not found");
+					
 				Auction *a = aucm->getAuction(biddingObject->getAuctionSet(), 
 												biddingObject->getAuctionName());
 				

@@ -159,6 +159,7 @@ class SessionManager
     //! dump a SessionManager object
     void dump( ostream &os );
 
+	Session * findSessionInStorage(string sessionId);
     
 };
 

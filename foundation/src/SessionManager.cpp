@@ -375,6 +375,27 @@ void SessionManager::storeSessionAsDone(Session *s)
 }
 
 
+Session *SessionManager::findSessionInStorage(string sessionId)
+{
+
+#ifdef DEBUG    
+    log->dlog(ch, "find session in storage id:%s", sessionId.c_str());
+#endif
+
+
+	sessionDoneIter_t iter;
+	for (iter = sessionsDone.begin(); iter != sessionsDone.end(); ++iter)
+	{
+		Session *session = *iter;
+		if (session->getSessionId() == sessionId){
+			return session;
+		}
+	}
+	
+	return NULL;
+
+}
+
 /* ------------------------- dump ------------------------- */
 
 void SessionManager::dump( ostream &os )

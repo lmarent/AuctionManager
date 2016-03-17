@@ -175,6 +175,8 @@ class Auctioner
 	
 	void handleCreateSession(Event *e, fd_sets_t *fds);
 
+	void handleRemoveSession(Event *e, fd_sets_t *fds);
+
 	void handleSingleObjectAuctioningInteraction( string sessionId, anslp::anslp_ipap_message *ipap_mes);
 
 	void handleAuctioningInteraction(Event *e, fd_sets_t *fds);

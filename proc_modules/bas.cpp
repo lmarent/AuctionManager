@@ -8,6 +8,7 @@
 #include "stdincpp.h"
 #include "ProcError.h"
 #include "ProcModule.h"
+#include <fstream>
 
 const int MOD_INIT_REQUIRED_PARAMS = 1;
 
@@ -295,6 +296,37 @@ void incrementQuantityAllocation(auction::fieldValList_t *fieldVals,
 	
 }
 
+int calculateRequestedQuantities(auction::biddingObjectDB_t *bids)
+{
+
+#ifdef DEBUG
+	cout << "bas module: starting calculateRequestedQuantities" << endl;
+#endif	
+	
+	int sumQuantity = 0;
+	
+	auction::biddingObjectDBIter_t bid_iter; 
+	for (bid_iter = bids->begin(); bid_iter != bids->end(); ++bid_iter){
+		auction::BiddingObject * bid = *bid_iter;
+		auction::elementList_t *elems = bid->getElements();
+		auction::elementListIter_t elem_iter;
+		
+		for ( elem_iter = elems->begin(); elem_iter != elems->end(); ++elem_iter )
+		{
+			int quantity = floor(getDoubleField(&(elem_iter->second), "quantity"));
+			sumQuantity = sumQuantity + quantity;
+		}
+	}
+
+#ifdef DEBUG
+	cout << "bas module: ending calculateRequestedQuantities" << sumQuantity << endl;
+#endif
+	
+	return sumQuantity;
+}
+
+
+
 void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,  
 					   auction::configParam_t *params, string aset, string aname, time_t start, 
 					   time_t stop, auction::biddingObjectDB_t *bids, 
@@ -304,7 +336,8 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 #ifdef DEBUG
 	cout << "bas module: start execute" << (int) bids->size() << endl;
 #endif
-
+    
+	int totDemand = calculateRequestedQuantities(bids);
 	bandwidth_to_sell = getResourceAvailability(params);
 	reserve_price = getReservePrice( params );	
 
@@ -345,31 +378,31 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 	do
 	{ 
 	    --it;
+
+		if 	(it->first < reserve_price){
+			(it->second).quantity = 0;
+		}
+		else {
                 
-        if ( qtyAvailable < (it->second).quantity){
-			(it->second).quantity = qtyAvailable;
-			if (qtyAvailable > 0){
-				sellPrice = it->first; 
-				qtyAvailable = 0;
-			 }
+			if ( qtyAvailable < (it->second).quantity){
+				(it->second).quantity = qtyAvailable;
+				if (qtyAvailable > 0){
+					sellPrice = it->first; 
+					qtyAvailable = 0;
+				 }
+			}
+			else{
+				qtyAvailable = qtyAvailable - (it->second).quantity;
+				sellPrice = it->first;
+			}
 		}
-		else{
-			qtyAvailable = qtyAvailable - (it->second).quantity;
-			sellPrice = it->first;
-		}
-		
 	} while (it != orderedBids.begin());
 	
 	// There are more units available than requested 
 	if ( qtyAvailable > 0 ){
 		sellPrice = reserve_price;
 	}
-	
-	// Selling price is less than reserve price, so let reserve price.
-	if (sellPrice < reserve_price){
-		sellPrice = reserve_price;
-	} 
-	
+		
 #ifdef DEBUG	
 	cout << "bas module: after executing the auction" << (int) bids->size() << endl;
 #endif
@@ -406,6 +439,17 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 				alloc_iter != allocations.end(); ++alloc_iter )
 	{
 		(*allocationdata)->push_back(alloc_iter->second);
+	}
+
+	// Write a log with data of the auction
+    std::ofstream fs;
+    string filename = aset + "_" + aname + "_" + "_bas.txt";
+    fs.open(filename.c_str(),ios::app);
+	if (!fs.fail()){
+		fs << "starttime:" << start << ":endtime:" << stop;
+		fs << ":demand:" << totDemand << ":qty_sell:" << bandwidth_to_sell - qtyAvailable;
+		fs << ":reservedPrice:" << reserve_price  << ":sell price:" << sellPrice << "\n"; 
+		fs.close( );  
 	}
 	
 #ifdef DEBUG	
