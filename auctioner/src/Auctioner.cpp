@@ -910,9 +910,9 @@ void Auctioner::handleProcModeleTimer(Event *e, fd_sets_t *fds)
 void Auctioner::handlePushExecution(Event *e, fd_sets_t *fds)
 {
 
-#ifdef DEBUG
-    log->dlog(ch,"processing event push execution" );
-#endif
+//#ifdef DEBUG
+    log->log(ch,"processing event push execution" );
+//#endif
 
 	try {
         
@@ -936,9 +936,9 @@ void Auctioner::handlePushExecution(Event *e, fd_sets_t *fds)
 			evnt.get()->reschedNextEvent(e);
         }
               
-#ifdef DEBUG
-		log->dlog(ch,"ending event push execution" );
-#endif
+//#ifdef DEBUG
+		log->log(ch,"ending event push execution" );
+//#endif
 
 	}  catch (Error &e) {
 
@@ -956,9 +956,9 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 			anslp::anslp_ipap_message *ipap_mes, anslp::ResponseCheckSessionEvent *resCheck )
 {
 
-#ifdef DEBUG
-	log->dlog(ch,"Starting handling single check session" );
-#endif
+//#ifdef DEBUG
+	log->log(ch,"Starting handling single check session" );
+//#endif
 
 	auctionDB_t *auctions = NULL;
 	auction::Session *s = NULL;
@@ -1043,6 +1043,13 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 
 			anslp::anslp_ipap_message ipap_mes_return(*message_return);
 			resCheck->setObject(key, ipap_mes_return.copy());
+
+//#ifdef DEBUG
+			anslp::msg::anslp_ipap_xml_message xmlMesdebug;
+			string xmlMessagedebug = xmlMesdebug.get_message(ipap_mes_return);
+			log->log(ch,xmlMessagedebug.c_str() );
+//#endif
+
 			
 			saveDelete(message_return);
 			
@@ -1051,9 +1058,9 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 		saveDelete(s);
 		saveDelete(auctions);
 			
-#ifdef DEBUG
-		log->dlog(ch,"Ending handling single check session" );
-#endif
+//#ifdef DEBUG
+		log->log(ch,"Ending handling single check session" );
+//#endif
 
 	}  catch (Error &err) {
 		if (auctions){
@@ -1077,9 +1084,9 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 {
 
-#ifdef DEBUG
-    log->dlog(ch,"starting event create check session" );
-#endif
+//#ifdef DEBUG
+    
+//#endif
 
 	anslp::objectList_t *objList = NULL;
 	anslp::FastQueue *retQueue = NULL;
@@ -1089,6 +1096,9 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 	
 	try {
 		sessionId = ((CreateCheckSessionEvent *)e)->getSessionId();
+		
+		log->log(ch,"starting event create check session %s", sessionId.c_str() );
+		
 		objList = ((CreateCheckSessionEvent *)e)->getObjects();
 		retQueue = ((CreateCheckSessionEvent *)e)->getQueue();
 				
@@ -1270,6 +1280,15 @@ Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key
 			saveDelete(auctions);
 
 			resCreate->setObject(key, ipap_mes_return.copy());			
+
+
+//#ifdef DEBUG
+			anslp::msg::anslp_ipap_message messagedebug(ipap_mes_return.copy());
+			anslp::msg::anslp_ipap_xml_message xmlMesdebug;
+			string xmlMessagedebug = xmlMesdebug.get_message(messagedebug);
+			log->log(ch,xmlMessagedebug.c_str() );
+//#endif
+
 			
 		} else {	
 				
@@ -1300,9 +1319,9 @@ Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key
 void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 {
 
-#ifdef DEBUG
-    log->dlog(ch,"processing event create session" );
-#endif
+//#ifdef DEBUG
+    log->log(ch,"Starting event create session" );
+//#endif
 
 	anslp::objectList_t *objList = NULL;
 	anslp::FastQueue *retQueue = NULL;
@@ -1313,10 +1332,13 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 	
 	try {
 		anslp::objectListIter_t it;
-		
+				
 		sessionId = ((CreateSessionEvent *)e)->getSessionId();
 		objList = ((CreateSessionEvent *)e)->getObjects();
 		retQueue = ((CreateSessionEvent *)e)->getQueue();
+		
+		log->log(ch,"starting event create session %s", sessionId.c_str() );
+		
 				
 	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
 		// The message was not parse, we dont have to do anything. 
@@ -1339,12 +1361,20 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 		}
 	} else {
 		log->elog(ch, "The event does not have a valid list of objects");
+		log->log(ch,"ending with null event create session %s ", sessionId.c_str() );
 	}
 
 	// Send the response for every request.
 	if (retQueue != NULL){
 		retQueue->enqueue(resCreate);
+		log->log(ch,"ending with value event create session %s ", sessionId.c_str() );
+	} else {
+		log->log(ch,"ending with null event create session %s ", sessionId.c_str() );
 	}	
+
+//#ifdef DEBUG
+    log->log(ch,"Ending event create session" );
+//#endif
 
 }
 
@@ -1881,9 +1911,9 @@ void Auctioner::run()
                             // check Event Scheduler events
                             e = evnt->getNextEvent();
 
-#ifdef DEBUG			
-							log->dlog(ch,"Next Event %s", eventNames[e->getType()].c_str());
-#endif     
+//#ifdef DEBUG			
+//							log->dlog(ch,"Next Event %s", eventNames[e->getType()].c_str());
+//#endif     
 
                             if (e != NULL) {
                                 // FIXME hack
@@ -1949,9 +1979,9 @@ void Auctioner::run()
                 retEvents.clear(); 
             }
 
-#ifdef DEBUG			
-			log->dlog(ch,"it is going to start again");
-#endif
+//#ifdef DEBUG			
+//			log->dlog(ch,"it is going to start again");
+//#endif
 
         } while (!stop);
 

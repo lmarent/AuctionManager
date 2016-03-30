@@ -181,9 +181,9 @@ Event *EventScheduler::getNextEvent()
 
         ev = events.begin()->second;
 
-#ifdef DEBUG
-        log->dlog(ch,"get Next Event %s", eventNames[ev->getType()].c_str());
-#endif	
+//#ifdef DEBUG
+//        log->dlog(ch,"get Next Event %s", eventNames[ev->getType()].c_str());
+//#endif	
 
 
         // dequeue event
