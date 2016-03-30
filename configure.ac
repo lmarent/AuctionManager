@@ -307,7 +307,7 @@ AC_SUBST(PQXX_CFLAGS)
 AC_SUBST(PQXX_LIBS)
 
    
-PKG_CHECK_MODULES(OPENSSL, openssl,
+PKG_CHECK_MODULES(OPENSSL, openssl  >= 0.9.8,
         CXXFLAGS="$CXXFLAGS `pkg-config --cflags openssl`";
         LIBS="$LIBS -lcrypto `pkg-config --libs-only-L --libs-only-other openssl`")
         
