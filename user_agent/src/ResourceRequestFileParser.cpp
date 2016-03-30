@@ -165,7 +165,7 @@ ResourceRequestFileParser::parseTime(string timestr)
 
 
 time_t 
-ResourceRequestFileParser::calculateInterval(time_t start, miscList_t *miscList, 
+ResourceRequestFileParser::calculateInterval(time_t start,  miscList_t *miscList, 
 							resourceReq_interval_t *resInterval)
 {
 
@@ -406,7 +406,6 @@ ResourceRequestFileParser::parse(fieldDefList_t *fieldDefs,
                 throw e;
             }
         }
-        
         cur = cur->next;
     }
 }

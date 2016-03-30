@@ -176,7 +176,7 @@ Agent::Agent( int argc, char *argv[])
         
 #ifdef DEBUG
         log->log(ch,"configfilename used is: '%s'", configFileName.c_str());
-        log->dlog(ch,"------- startup -------" );
+        log->log(ch,"------- startup -------" );
 #endif
 
 		// Initialize The openssl framework.
@@ -254,7 +254,7 @@ Agent::Agent( int argc, char *argv[])
 
 
 #ifdef DEBUG
-		log->dlog(ch,"------- eventSchedulerAgent loaded-------" );
+		log->log(ch,"------- eventSchedulerAgent loaded-------" );
 #endif
 													 
         // Startup Processing Components
@@ -308,13 +308,13 @@ Agent::Agent( int argc, char *argv[])
 		string anslpConfFile = conf->getValue("AnslpConfFile", "MAIN");
 
 #ifdef DEBUG
-		log->dlog(ch,"Anslp client conf file:%s", anslpConfFile.c_str() );
+		log->log(ch,"Anslp client conf file:%s", anslpConfFile.c_str() );
 #endif
 		auto_ptr<AnslpClient> _anslpc(new AnslpClient(anslpConfFile, anslproc->get_fqueue()));
 					
 		anslpc = _anslpc;
 #ifdef DEBUG
-		log->dlog(ch,"------- anslp client loaded-------" );
+		log->log(ch,"------- anslp client loaded-------" );
 #endif
 
 		readDefaultData();
@@ -337,7 +337,7 @@ Agent::Agent( int argc, char *argv[])
 		comm->mergeFDs(&fdList);
 
 #ifdef DEBUG
-        log->dlog(ch,"------- end Agent constructor -------" );
+        log->log(ch,"------- end Agent constructor -------" );
 #endif
 
 
@@ -364,7 +364,7 @@ Agent::~Agent()
 	}
 
 #ifdef DEBUG
-		log->dlog(ch,"------- end shutdown -------" );
+		log->log(ch,"------- end shutdown -------" );
 #endif
     
 }
@@ -374,7 +374,7 @@ Agent::readDefaultData(void)
 {
 
 #ifdef DEBUG
-		log->dlog(ch,"Starting readDefaultData" );
+		log->log(ch,"Starting readDefaultData" );
 #endif
 
 	bool bresult;
@@ -451,7 +451,7 @@ Agent::readDefaultData(void)
 	}
 
 #ifdef DEBUG
-		log->dlog(ch,"Ending readDefaultData" );
+		log->log(ch,"Ending readDefaultData" );
 #endif
 
 } 
@@ -562,7 +562,7 @@ void Agent::handleGetInfo(Event *e, fd_sets_t *fds)
 {
 
 #ifdef DEBUG
-	log->dlog(ch,"Starting event Get info" );
+	log->log(ch,"Starting event Get info" );
 #endif
 
 	// get info types from event
@@ -578,7 +578,7 @@ void Agent::handleGetInfo(Event *e, fd_sets_t *fds)
     }
 
 #ifdef DEBUG
-	log->dlog(ch,"Ending event Get info" );
+	log->log(ch,"Ending event Get info" );
 #endif
 }
 
@@ -705,13 +705,10 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 	bool insertedSession = false;
 	
 	time_t start = ((ActivateResourceRequestIntervalEvent *)e)->getStartTime();
-	resourceRequestDB_t *request = 
-				((ActivateResourceRequestIntervalEvent *)e)->getResourceRequests();
+	ResourceRequest *req = 
+				((ActivateResourceRequestIntervalEvent *)e)->getResourceRequest();
 				
-	resourceRequestDBIter_t iter;
-	for (iter = request->begin(); iter != request->end(); ++iter)
-	{
-		ResourceRequest *req = *iter;
+	if (req != NULL){
 						
 		/* TODO AM: for now we request all resources, 
 		 * 			resource management must be implemented */ 
@@ -737,7 +734,7 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 		int port = atoi(sPort.c_str());
 	
 		try{
-		  
+			
 			// Get the auctions corresponding with this resource request interval
 			mes = rreqm->get_ipap_message( req, start, resourceId, useIPV6, _sIPV4, _sIPV6, port);
 				
@@ -748,7 +745,9 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 												defaultDestinAddr, defaultSourcePort, 
 												defaultDestinPort, defaultProtocol,
 												defaultLifeTime  );
-												
+			
+			// Sets the session as not inserted in the container
+			insertedSession = false;									
 			uint32_t mid = session->getNextMessageId();
 			mes->set_seqno(mid);
 			mes->set_ackseqno(0);
@@ -764,8 +763,9 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 			anslp::msg::anslp_ipap_message message(*mes);
 			anslp::msg::anslp_ipap_xml_message xmlMes;
 			string xmlMessage3 = xmlMes.get_message(message);
+			
 #ifdef DEBUG
-			log->dlog(ch,xmlMessage3.c_str() );
+			log->dlog(ch,"Anslp before tg_create" );
 #endif
 			
 			// Call the anslp client for sending the message.
@@ -803,6 +803,10 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 			// free the memory assigned.
 			saveDelete(mes);
 
+#ifdef DEBUG
+	log->dlog(ch,"Ending event activate resource request interval" );
+#endif
+
 
 		} catch(Error &err) {
 			
@@ -817,13 +821,16 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 					asmp->delSession(session, evnt.get());
 				}
 				saveDelete(session);
-			}				
+			}
+			
+			
+			throw Error(err.getError().c_str());
 		}
 				  
 	}
 
 #ifdef DEBUG
-		log->dlog(ch,"Ending event activate resource request interval" );
+	log->dlog(ch,"Ending event activate resource request interval" );
 #endif
 	
 }
@@ -842,7 +849,7 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 	double bidIntervals = 0;
 
 #ifdef DEBUG
-	log->dlog(ch,"Starting handleSingleCreateSession" );
+	log->dlog(ch,"Starting handleSingleCreateSession session id:%s", sessionId.c_str() );
 #endif
 
 
@@ -850,6 +857,13 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 	{
 	
 		message = ipap_mes->ip_message;
+
+#ifdef DEBUG
+		anslp::msg::anslp_ipap_message messagedebug(message);
+		anslp::msg::anslp_ipap_xml_message xmlMesdebug;
+		string xmlMessagedebug = xmlMesdebug.get_message(messagedebug);
+		log->dlog(ch,xmlMessagedebug.c_str() );
+#endif
 
 		// Obtains the message 
 		mid = message.get_ackseqno();
@@ -886,6 +900,7 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 					
         log->elog( ch, err.getError().c_str() );
 		
+		throw Error(err.getError().c_str());
 		//TODO AM: implement return codes. 
 		// for now it generates the error not including in the final event.
 	}
@@ -908,7 +923,10 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 		ses = asmp->getSession(sessionId);
 		// Bring the session from that create the initial request.
 		session = reinterpret_cast<AgentSession*>(ses);
-								
+		
+		if (session == NULL){
+			throw Error("Session Id:%s not found", sessionId.c_str());
+		}	
 		// Bring the request.
 		request = rreqm->getResourceRequest(session->getResourceRequestSet(), 
 																	session->getResourceRequestName());
@@ -939,7 +957,7 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 			
 		log->elog( ch, err.getError().c_str() );
 		// TODO AM: Generate the error. For now no message means error. 
-		
+		throw Error(err.getError().c_str());
 	}
 	
 	// This variable maintains the auction with the maximal duration interval, so
@@ -1151,9 +1169,13 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 			saveDelete(auctions);
 		}
 		
+		throw Error(err.getError().c_str());
 		// TODO AM: Generate the error. For now no message means error. 
 	}
 
+#ifdef DEBUG
+	log->dlog(ch,"Sucessfully ending handleSingleCreateSession" );
+#endif
 
 }
 
@@ -1186,27 +1208,32 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 	}
 	
     resCreate = new anslp::ResponseAddSessionEvent();
-
-    if (objList != NULL){
-		
-		anslp::objectListIter_t it;
-		for (it = objList->begin(); it != objList->end(); ++it){
-				
-			anslp::mspec_rule_key key = it->first;
-			anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
-			if (ipap_mes != NULL)
-				handleSingleCreateSession(sessionId, key, ipap_mes, resCreate);
-					
-		}
-	} else {
-		log->elog(ch, "The event does not have a valid list of objects");
-	}
-
-	// Send the response for every request.
-	if (retQueue != NULL){
-		retQueue->enqueue(resCreate);
-	}	
 	
+	try {
+		if (objList != NULL){
+			
+			anslp::objectListIter_t it;
+			for (it = objList->begin(); it != objList->end(); ++it){
+					
+				anslp::mspec_rule_key key = it->first;
+				anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
+				if (ipap_mes != NULL)
+					handleSingleCreateSession(sessionId, key, ipap_mes, resCreate);
+						
+			}
+		} else {
+			log->elog(ch, "The event does not have a valid list of objects");
+		}
+	
+		// Send the response for every request.
+		if (retQueue != NULL){
+			retQueue->enqueue(resCreate);
+		}	
+	} catch(Error &err){
+		
+		log->elog( ch, err.getError().c_str() );
+		throw Error(err.getError().c_str());
+	}
 }
 
 void 
@@ -1231,7 +1258,7 @@ Agent::handlePushExecution(Event *e, fd_sets_t *fds)
 	} catch (Error &err) {
 		
 		log->elog( ch, err.getError().c_str() );
-	
+		throw Error(err.getError().c_str());
 	}
 	
 }
@@ -1258,9 +1285,8 @@ Agent::handleRemovePushExecution(Event *e, fd_sets_t *fds)
 	} catch (Error &err) {
 		
 		log->elog( ch, err.getError().c_str() );
-	
+		throw Error(err.getError().c_str());
 	}
-
 	
 }
 
@@ -1285,7 +1311,7 @@ void Agent::handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds)
 {
 
 #ifdef DEBUG
-       log->dlog(ch,"processing event add generated bidding objects" );
+    log->dlog(ch,"processing event add generated bidding objects" );
 #endif
 
 	biddingObjectDB_t *new_bids = NULL;
@@ -1309,13 +1335,14 @@ void Agent::handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds)
     } catch (Error &e) {
        
        log->elog( ch, e.getError().c_str() );
-       
+       throw Error(e.getError().c_str());
     }	
 	
 }
 
 void Agent::handleActivateBiddingObjects(Event *e, fd_sets_t *fds)
 {
+
 #ifdef DEBUG
 	log->dlog(ch,"Starting event Handle activate bidding Objects" );
 #endif
@@ -1545,24 +1572,22 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 
 	time_t stop = ((RemoveResourceRequestIntervalEvent *)e)->getStopTime();
 	
-	resourceRequestDB_t *request = 
-				((RemoveResourceRequestIntervalEvent *)e)->getResourceRequests();
+	ResourceRequest *request = 
+				((RemoveResourceRequestIntervalEvent *)e)->getResourceRequest();
 
 	try{
 
-		resourceRequestDBIter_t iter;
-		for (iter = request->begin(); iter != request->end(); ++iter)
-		{
-			
+		if (request != NULL){
+
 			auctionDB_t auctionDb;
 			
-			resourceReqIntervalListIter_t interval = (*iter)->getIntervalByEnd(stop);
+			resourceReqIntervalListIter_t interval = (request)->getIntervalByEnd(stop);
 			
 			// Get the auctions corresponding with this resource request interval
 			string sessionId = interval->sessionId;
-							
+						
 			AgentSession *session = reinterpret_cast<AgentSession *>(asmp->getSession(sessionId));
-			
+		
 			if (session != NULL){
 				auctionSet_t auctions = session->getAuctions();
 				
@@ -1599,7 +1624,9 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 				log->elog(ch,"Could not find the session for the request" );
 			}
 		}
-
+		else {
+			// Nothing to do
+		}
 #ifdef DEBUG
 	log->dlog(ch,"Ending event remove resource request interval" );
 #endif
@@ -1947,7 +1974,7 @@ void Agent::run()
         proc->run();
 
 #ifdef DEBUG
-        log->dlog(ch,"------- Agent Manager is running -------");
+        log->log(ch,"------- Agent Manager is running -------");
 #endif
 
 		// Establish the maximum timeout for waiting during select.
@@ -1975,9 +2002,9 @@ void Agent::run()
             // check FD events
             if (cnt > 0)  {
 
-#ifdef DEBUG			
-				log->dlog(ch,"In check FD events time:%s", (Timeval::toString(tv)).c_str());
-#endif
+//#ifdef DEBUG			
+				log->log(ch,"In check FD events time:%s", (Timeval::toString(tv)).c_str());
+//#endif
 
                 if (FD_ISSET( s_sigpipe[0], &rset)) {
                     // handle sig action
@@ -2062,10 +2089,7 @@ void Agent::run()
 		anslp::cleanup_framework();
 
 		log->log(ch,"NetAgent going down on Ctrl-C" );
-
-#ifdef DEBUG
-		log->dlog(ch,"------- shutdown -------" );
-#endif
+		log->log(ch,"------- shutdown -------" );
 
 
     } catch (Error &err) {

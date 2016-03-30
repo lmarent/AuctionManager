@@ -106,7 +106,7 @@ starter(NULL), conf(NULL), anslpd(NULL)
 	 * threads it requires.
 	 */
 	anslp_daemon_param param("anslp", *conf, installQueue);
-	starter = new protlib::ThreadStarter<anslp_daemon, anslp_daemon_param>(1, param);
+	starter = new protlib::ThreadStarter<anslp_daemon, anslp_daemon_param>(3, param);
 	
 	// returns after all threads have been started
 	starter->start_processing();
@@ -194,12 +194,15 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 		log->dlog(ch,"nbr of messages in queue:%s - %lu", anslpd->get_fqueue()->get_name(), anslpd->get_fqueue()->size());
 #endif    
 
-    log->dlog(ch,"it is going to create the session - procid:%d - getthread_self:%lu tid:%lu", 
+    log->log(ch,"it is going to create the session - procid:%d - getthread_self:%lu tid:%lu", 
 					getpid(), pthread_self(), syscall(SYS_gettid));
     
     queued = anslpd->get_fqueue()->enqueue(msg);
     
     if ( queued ){
+       log->log(ch,"it is going to create the session - procid:%d - getthread_self:%lu tid:%lu", 
+					getpid(), pthread_self(), syscall(SYS_gettid));
+					
 		protlib::message *ret_msg = ret.dequeue_timedwait(10000);
 
 		anslp_event_msg *r = dynamic_cast<anslp_event_msg *>(ret_msg);
