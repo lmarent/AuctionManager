@@ -500,6 +500,7 @@ BiddingObject::calculateIntervals(time_t now, biddingObjectIntervalList_t *list)
 	for (iter = optionList.begin(); iter != optionList.end(); ++iter)
 	{
 		
+		duration = 0;
 		biddingObjectInterval_t biddingObjectInterval;
 		biddingObjectInterval.start = 0;
 		biddingObjectInterval.stop = 0;
@@ -734,3 +735,50 @@ void BiddingObject::save_ver3(pqxx::connection_base &c)
 
 }
 
+void 
+BiddingObject::setBiddingObjectSet(string _BiddingObjectset)
+{
+	 BiddingObjectSet = _BiddingObjectset; 
+}	
+
+string 
+BiddingObject::getBiddingObjectSet() 
+{ 
+	return BiddingObjectSet; 
+}
+
+string 
+BiddingObject::getBiddingObjectName()
+{ 
+	return BiddingObjectName; 
+}
+
+void 
+BiddingObject::setBiddingObjectName(string _BiddingObjectName)
+{ 
+	BiddingObjectName = _BiddingObjectName; 
+}
+
+void 
+BiddingObject::setAuctionSet(string _auctionset)
+{ 
+	auctionSet = _auctionset; 
+}	
+
+string 
+BiddingObject::getAuctionSet()
+{ 
+	return auctionSet; 
+}
+
+void 
+BiddingObject::setAuctionName(string _auctionName) 
+{ 
+	auctionName = _auctionName; 
+}
+
+string 
+BiddingObject::getAuctionName()
+{ 
+	return auctionName; 
+}

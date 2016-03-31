@@ -131,13 +131,10 @@ time_t getTime( auction::configParam_t *params, string name )
 void auction::initModule( auction::configParam_t *params )
 {
 
-	cout <<  "bas module: start init module" << endl;
-
 	// Bring fields defined for ipap_messages;
 	g_ipap_fields.initialize_forward();
     g_ipap_fields.initialize_reverse();
 	
-	cout << "bas module: end init module" << endl;
 
 }
 

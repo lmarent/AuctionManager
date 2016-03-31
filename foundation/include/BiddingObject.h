@@ -82,21 +82,21 @@ public:
 
 	~BiddingObject();
 
-    inline void setBiddingObjectSet(string _BiddingObjectset){ 	BiddingObjectSet = _BiddingObjectset; }	
+    void setBiddingObjectSet(string _BiddingObjectset);
 
-    inline string getBiddingObjectSet() { return BiddingObjectSet; }
+    string getBiddingObjectSet();
 
-	inline void setBiddingObjectName(string _BiddingObjectName){ BiddingObjectName = _BiddingObjectName; }
+	void setBiddingObjectName(string _BiddingObjectName);
 
-    inline string getBiddingObjectName(){ return BiddingObjectName; }
+    string getBiddingObjectName();
 
-    inline void setAuctionSet(string _auctionset){ auctionSet = _auctionset; }	
+    void setAuctionSet(string _auctionset);	
 
-    inline string getAuctionSet(){ return auctionSet; }
+    string getAuctionSet();
 
-	inline void setAuctionName(string _auctionName) { auctionName = _auctionName; }
+	void setAuctionName(string _auctionName);
 
-    inline string getAuctionName(){ return auctionName; }
+    string getAuctionName();
 
     /*! \short   get the Id to be used when transfering the object in a ipap_message
      *   \arg domain - domain to use in case that the BiddingObject does not have a group.

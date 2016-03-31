@@ -42,6 +42,8 @@ int main(int argc, char *argv[])
         // going into main loop
         auction->run();
 		
+		saveDelete(auction);
+		
 		cout << "finishing program" << endl;  
 		
     } catch (Error &e) {

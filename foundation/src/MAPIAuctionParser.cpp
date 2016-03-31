@@ -494,6 +494,8 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
     log->dlog(ch, "Starting get_ipap_message");
 #endif
 
+	char *valueChr=NULL;
+
 	ipap_field_container g_ipap_fields;
 	
     g_ipap_fields.initialize_forward();
@@ -604,17 +606,18 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 
 	// Add the data record template associated with the data auction template
 	ipap_field idAuctionF = mes->get_field_definition( 0, IPAP_FT_IDAUCTION );
-	ipap_value_field fvalue0 = idAuctionF.get_ipap_value_field( 
-								strdup( auctionPtr->getIpApId(getDomain()).c_str() ), 
-										auctionPtr->getIpApId(getDomain()).size() );
+	valueChr = strdup( auctionPtr->getIpApId(getDomain()).c_str() );
+	ipap_value_field fvalue0 = idAuctionF.get_ipap_value_field( valueChr,  auctionPtr->getIpApId(getDomain()).size() );
+	free(valueChr);
 	
 	ipap_data_record data(auctionTemplateId);
 	data.insert_field(0, IPAP_FT_IDAUCTION, fvalue0);
 
 	// Add the Record Id
 	ipap_field idRecordIdF = mes->get_field_definition( 0, IPAP_FT_IDRECORD );
-	ipap_value_field fvalue1 = idRecordIdF.get_ipap_value_field( 
-									strdup(recordId.c_str()), recordId.size() );
+	valueChr = strdup(recordId.c_str());
+	ipap_value_field fvalue1 = idRecordIdF.get_ipap_value_field( valueChr, recordId.size() );
+	free(valueChr);
 	data.insert_field(0, IPAP_FT_IDRECORD, fvalue1);
 
 	// Add the Status
@@ -717,14 +720,16 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 
 	// Add the Record Id.
 	ipap_field optRecordIdF = mes->get_field_definition( 0, IPAP_FT_IDRECORD );
-	ipap_value_field fvalue5 = optRecordIdF.get_ipap_value_field( 
-									strdup(recordId.c_str()), recordId.size() );
+	valueChr = strdup(recordId.c_str());
+	ipap_value_field fvalue5 = optRecordIdF.get_ipap_value_field( valueChr , recordId.size() );
+	free(valueChr);
 	dataOpt.insert_field(0, IPAP_FT_IDRECORD, fvalue5);
 						
 	// Add the action.
 	ipap_field idActionF =  mes->get_field_definition(0, IPAP_FT_AUCTIONINGALGORITHMNAME);
-	ipap_value_field fvalue6 = idActionF.get_ipap_value_field( strdup(action->name.c_str()), 
-										action->name.size() );
+	valueChr = strdup(action->name.c_str());
+	ipap_value_field fvalue6 = idActionF.get_ipap_value_field( valueChr, action->name.size() );
+	free(valueChr);
 	dataOpt.insert_field(0, IPAP_FT_AUCTIONINGALGORITHMNAME, fvalue6);
 	
 	set<ipap_field_key> optionFields = ipap_template::getTemplateTypeMandatoryFields(IPAP_OPTNS_AUCTION_TEMPLATE);	

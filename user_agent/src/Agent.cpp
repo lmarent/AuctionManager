@@ -1927,6 +1927,7 @@ bool Agent::handle_event_immediate_respond(Event *e, fd_sets_t *fds)
 
 		case CREATE_SESSION:
 			handleResponseCreateSession(e, fds);
+			delete e;
 			pendingExec = false;
 		  break;
 
@@ -1949,6 +1950,10 @@ void Agent::run()
     int            stop = 0;
     eventVec_t     retEvents;
     Event         *e = NULL;
+
+	protlib::log::DefaultLog.set_filter(DEBUG_LOG, LOG_CRIT);
+	protlib::log::DefaultLog.set_filter(EVENT_LOG, LOG_CRIT);
+
 
     try {
         // fill the fd set

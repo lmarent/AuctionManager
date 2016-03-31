@@ -48,7 +48,7 @@ Session::Session(string _sessionId):
  */
 Session::~Session()
 {
-	
+	pendingMessages.clear();
 }
 
 std::ostream& operator<<(std::ostream &out, const Session &obj) 

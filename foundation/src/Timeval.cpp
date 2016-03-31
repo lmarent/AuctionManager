@@ -134,7 +134,7 @@ ssize_t Timeval::format_timeval(const struct timeval *tv, char *buf, size_t sz)
 
 	if (gm)
 	{
-		written = (ssize_t)strftime(buf, sz, "%Y-%m-%d %H:%M:%S", gm);
+		written = (ssize_t) strftime(buf, sz, "%Y-%m-%d %H:%M:%S", gm);
 		if ((written > 0) && ((size_t)written < sz))
 		{
 			int w = snprintf(buf+written, sz-(size_t)written, ".%06dZ", tv->tv_usec);
@@ -148,6 +148,9 @@ ssize_t Timeval::format_timeval(const struct timeval *tv, char *buf, size_t sz)
 std::string Timeval::toString(const struct timeval tv)
 {
 	char buf[28];
+	
+	memset (buf,'\0',sizeof(buf));
+	
 	if (format_timeval(&tv, buf, sizeof(buf)) > 0) {
 		string val_return(buf);
 		return val_return;
@@ -161,6 +164,9 @@ std::string Timeval::toString(const struct timeval tv)
 std::string Timeval::toString(time_t t)
 {
 	char buf[28];
+	
+	memset (buf,'\0',sizeof(buf));
+	
 	if (format_timeval2(t, buf, sizeof(buf)) > 0) {
 		std::string val_return(buf);
 		return val_return;

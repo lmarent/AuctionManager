@@ -211,8 +211,8 @@ configParam_t *ConfigManager::getParamList( configItemList_t &list )
         i++;
     }
     
-    params[i].name = NULL;
-    params[i].value = NULL;
+    params[list.size()].name = NULL;
+    params[list.size()].value = NULL;
 	
 	fprintf(stdout, "getParamList - item size: %d \n",  i );
 

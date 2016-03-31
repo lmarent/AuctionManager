@@ -26,7 +26,6 @@
 
 
 #include "ParserFcts.h"
-#include "logfile.h"
 #include "httpd.h"
 #include "Auctioner.h"
 #include "ConstantsAum.h"
@@ -34,12 +33,17 @@
 #include "anslp_ipap_xml_message.h"
 #include "anslp_ipap_message.h"
 #include "anslp_ipap_exception.h" 
+#include "logfile.h"
 #include <openssl/ssl.h>
 
 using namespace auction;
 
 protlib::log::logfile commonlog("Auctioneer.log", anslp::anslp_config::USE_COLOURS);
 protlib::log::logfile &protlib::log::DefaultLog(commonlog);
+
+
+
+
 
 // globals in AuctionManager class
 int Auctioner::s_sigpipe[2];
@@ -658,9 +662,9 @@ void Auctioner::handleAddAuctions(Event *e, fd_sets_t *fds)
 void Auctioner::handleAddBiddingObjectsAuction(Event *e, fd_sets_t *fds)
 {
 
-#ifdef DEBUG
-	log->dlog(ch,"processing event add bidding Objects to auction" );
-#endif		  
+//#ifdef DEBUG
+	log->log(ch,"processing event add bidding Objects to auction" );
+//#endif		  
 
 	biddingObjectDB_t *bids = NULL;
 
@@ -671,6 +675,8 @@ void Auctioner::handleAddBiddingObjectsAuction(Event *e, fd_sets_t *fds)
 		
 		assert( bids != NULL);
 		
+		log->log(ch,"processing event add bidding Objects to auction 01" );
+		
 	    // Verifies that every auction is included in the container
 	    biddingObjectDBIter_t iter;
 	    for (iter = bids->begin(); iter != bids->end(); ++iter)
@@ -678,18 +684,33 @@ void Auctioner::handleAddBiddingObjectsAuction(Event *e, fd_sets_t *fds)
 			
 			BiddingObject *bidObject = *iter;
 			
-			assert(bidObject != NULL);
-			
-			string aSet = bidObject->getAuctionSet();
-			string aName = bidObject->getAuctionName();
-			Auction * a = aucm->getAuction(aSet, aName);
+			if (bidObject != NULL){
+				log->log(ch,"processing event add bidding Objects to auction 02" );
+				
+				string aSet = bidObject->getAuctionSet();
+				
+				log->log(ch,"processing event add bidding Objects to auction 03" );
+				
+				string aName = bidObject->getAuctionName();
+				
+				log->log(ch,"processing event add bidding Objects to auction 02" );
+				
+				Auction *a = aucm->getAuction(aSet, aName);
 		
-			if ((a == NULL) || (a->getState() != AO_ACTIVE)){
-				log->dlog( ch, "Auction %s.%s not found in auction manager container", aSet.c_str(), aName.c_str() );
-				throw Error("Auction %s.%s not found in auction manager container", aSet.c_str(), aName.c_str());
-			}	
+				if (a == NULL){
+					log->dlog( ch, "Auction %s.%s not found in auction manager container", aSet.c_str(), aName.c_str() );
+					throw Error("Auction %s.%s not found in auction manager container", aSet.c_str(), aName.c_str());
+				}	
+				
+				if (a->getState() != AO_ACTIVE){
+					log->dlog( ch, "Auction %s.%s is not active", aSet.c_str(), aName.c_str() );
+					throw Error("Auction %s.%s is not active", aSet.c_str(), aName.c_str());
+				}	
+			}
 		}
-
+		
+		log->log(ch,"processing event add bidding Objects to auction 1" );
+		
 	    // Proceed to insert the bid to its corresponding auction
 	    for (iter = bids->begin(); iter != bids->end(); ++iter)
 	    {
@@ -700,9 +721,9 @@ void Auctioner::handleAddBiddingObjectsAuction(Event *e, fd_sets_t *fds)
 		}
 		
 		
-#ifdef DEBUG
-	log->dlog(ch,"Ending event add bidding Object to auction" );
-#endif		  
+//#ifdef DEBUG
+	log->log(ch,"Ending event add bidding Object to auction" );
+//#endif		  
 
 	}
 	catch (Error &e) {
@@ -964,11 +985,9 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 	auction::Session *s = NULL;
 	ipap_message *message_return = NULL;
 
-	ipap_message message;
-
 	try{
 
-		message = ipap_mes->ip_message;
+		ipap_message message = ipap_mes->ip_message;
 
 		ostringstream os;
 		auctions = proc->getApplicableAuctions(&message);
@@ -1044,11 +1063,11 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 			anslp::anslp_ipap_message ipap_mes_return(*message_return);
 			resCheck->setObject(key, ipap_mes_return.copy());
 
-//#ifdef DEBUG
+#ifdef DEBUG
 			anslp::msg::anslp_ipap_xml_message xmlMesdebug;
 			string xmlMessagedebug = xmlMesdebug.get_message(ipap_mes_return);
-			log->log(ch,xmlMessagedebug.c_str() );
-//#endif
+			log->dlog(ch,xmlMessagedebug.c_str() );
+#endif
 
 			
 			saveDelete(message_return);
@@ -1058,9 +1077,9 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 		saveDelete(s);
 		saveDelete(auctions);
 			
-//#ifdef DEBUG
-		log->log(ch,"Ending handling single check session" );
-//#endif
+#ifdef DEBUG
+		log->dlog(ch,"Ending handling single check session" );
+#endif
 
 	}  catch (Error &err) {
 		if (auctions){
@@ -1142,7 +1161,6 @@ Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key
 			anslp::anslp_ipap_message *ipap_mes, anslp::ResponseAddSessionEvent *resCreate)
 {
 
-	ipap_message message;
 	ipap_message *message_return = NULL;
 	auctionDB_t *auctions = NULL;
 	auction::Session *s = NULL;
@@ -1153,7 +1171,7 @@ Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key
 
 	try{
     
-		message = ipap_mes->ip_message;
+		ipap_message message = ipap_mes->ip_message;
 
 		auctions = proc->getApplicableAuctions(&message);
 
@@ -1271,7 +1289,6 @@ Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key
 				
 			anslp::anslp_ipap_message ipap_mes_return(*message_return);
 			
-			saveDelete(message_return);
 			string xmlMessage = mess.get_message(anlp_mess);
 
 			// Add the new session to session manager.
@@ -1282,13 +1299,13 @@ Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key
 			resCreate->setObject(key, ipap_mes_return.copy());			
 
 
-//#ifdef DEBUG
-			anslp::msg::anslp_ipap_message messagedebug(ipap_mes_return.copy());
+#ifdef DEBUG
+			anslp::msg::anslp_ipap_message messagedebug(ipap_mes_return);
 			anslp::msg::anslp_ipap_xml_message xmlMesdebug;
 			string xmlMessagedebug = xmlMesdebug.get_message(messagedebug);
-			log->log(ch,xmlMessagedebug.c_str() );
-//#endif
-
+			log->dlog(ch,xmlMessagedebug.c_str() );
+#endif
+			saveDelete(message_return);
 			
 		} else {	
 				
@@ -1447,8 +1464,7 @@ Auctioner::handleSingleObjectAuctioningInteraction( string sessionId, anslp::ans
 
 	assert(ipap_mes != NULL);
 	
-	ipap_message message;
-    message = ipap_mes->ip_message;
+    ipap_message message = ipap_mes->ip_message;
 
 	// Search for the session that is involved.
 	s = sesm->getSession(sessionId);
@@ -1807,16 +1823,19 @@ bool Auctioner::handle_event_immediate_respond(Event *e, fd_sets_t *fds)
     
     case CREATE_SESSION:
 		handleCreateSession(e,fds);
+		delete e;
 		pendingExec = false;
 		break;
 
     case CREATE_CHECK_SESSION:
 		handleCreateCheckSession(e,fds);
+		delete e;
 		pendingExec = false;
 		break;
 
     case REMOVE_SESSION:
 		handleRemoveSession(e,fds);
+		delete e;
 		pendingExec = false;
 		break;
 
@@ -1840,6 +1859,9 @@ void Auctioner::run()
     int            stop = 0;
     eventVec_t     retEvents;
     Event         *e = NULL;
+
+	protlib::log::DefaultLog.set_filter(DEBUG_LOG, LOG_CRIT);
+	protlib::log::DefaultLog.set_filter(EVENT_LOG, LOG_CRIT);
 
     try {
         // fill the fd set
@@ -1973,7 +1995,7 @@ void Auctioner::run()
 					
                     if (pendingExec){
 						evnt->addEvent(*iter);
-					}
+					} 
 					
                 }
                 retEvents.clear(); 

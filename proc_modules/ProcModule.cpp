@@ -234,9 +234,7 @@ double getDoubleField(auction::fieldList_t *fields, string name)
 		
 	for (field_iter = fields->begin(); field_iter != fields->end(); ++field_iter )
 	{
-	
-	    fprintf(stdout, "field:%s", (field_iter->name).c_str());
-	
+		
 		if ((field_iter->name).compare(name) == 0 ){
 			return parseDouble( ((field_iter->value)[0]).getValue());
 		}

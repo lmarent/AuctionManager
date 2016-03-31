@@ -54,28 +54,33 @@ void MAPIBiddingObjectParser::addDataRecord(fieldDefList_t *fieldDefs,
 #ifdef DEBUG
     log->dlog(ch, "Starting addDataRecord");
 #endif
-
+	
+	char *valueChr=NULL;
+	
 	ipap_data_record data(templateId);
 
 	// Add the auction Id
 	ipap_field idAuctionF = mes->get_field_definition( 0, IPAP_FT_IDAUCTION );
-	ipap_value_field fvalue3 = idAuctionF.get_ipap_value_field( 
-									strdup((biddingObjectPtr->getAuctionIpAPId()).c_str()), 
+	valueChr = strdup((biddingObjectPtr->getAuctionIpAPId()).c_str());
+	ipap_value_field fvalue3 = idAuctionF.get_ipap_value_field( valueChr, 
 										( biddingObjectPtr->getAuctionIpAPId()).size() );
+	free(valueChr);
 										
 	data.insert_field(0, IPAP_FT_IDAUCTION, fvalue3);
 	
 	// Add the BiddingObject Id
 	ipap_field idBidF = mes->get_field_definition( 0, IPAP_FT_IDBIDDINGOBJECT );
-	ipap_value_field fvalue1 = idBidF.get_ipap_value_field( 
-									strdup((biddingObjectPtr->getIpApId(getDomain())).c_str()), 
+	valueChr = strdup((biddingObjectPtr->getIpApId(getDomain())).c_str());
+	ipap_value_field fvalue1 = idBidF.get_ipap_value_field( valueChr,  
 										(biddingObjectPtr->getIpApId(getDomain())).size() );
+	free(valueChr);
 	data.insert_field(0, IPAP_FT_IDBIDDINGOBJECT, fvalue1);
 
 	// Add the Record Id
 	ipap_field idRecordIdF = mes->get_field_definition( 0, IPAP_FT_IDRECORD );
-	ipap_value_field fvalue2 = idRecordIdF.get_ipap_value_field( 
-									strdup(recordId.c_str()), recordId.size() );
+	valueChr = strdup(recordId.c_str());
+	ipap_value_field fvalue2 = idRecordIdF.get_ipap_value_field( valueChr, recordId.size() );
+	free(valueChr);
 	data.insert_field(0, IPAP_FT_IDRECORD, fvalue2);	
 
 	// Add the Status
@@ -137,29 +142,31 @@ void MAPIBiddingObjectParser::addOptionRecord(fieldDefList_t *fieldDefs, Bidding
 #ifdef DEBUG
     log->dlog(ch, "Starting addOptionRecord");
 #endif
-
+	
+	char *valueChr=NULL;
 	ipap_data_record data(templateId);
 
 	// Add the auction Id
 	ipap_field idAuctionF = mes->get_field_definition( 0, IPAP_FT_IDAUCTION );
-	ipap_value_field fvalue3 = idAuctionF.get_ipap_value_field( 
-									strdup((biddingObjectPtr->getAuctionIpAPId()).c_str()), 
+	valueChr = strdup((biddingObjectPtr->getAuctionIpAPId()).c_str());
+	ipap_value_field fvalue3 = idAuctionF.get_ipap_value_field( valueChr, 
 										( biddingObjectPtr->getAuctionIpAPId()).size() );
-
+	free(valueChr);
 	data.insert_field(0, IPAP_FT_IDAUCTION, fvalue3);
 	
 	// Add the BiddingObject Id
 	ipap_field idBidF = mes->get_field_definition( 0, IPAP_FT_IDBIDDINGOBJECT );
-	ipap_value_field fvalue1 = idBidF.get_ipap_value_field( 
-									strdup((biddingObjectPtr->getIpApId(getDomain())).c_str()), 
+	valueChr = strdup((biddingObjectPtr->getIpApId(getDomain())).c_str());
+	ipap_value_field fvalue1 = idBidF.get_ipap_value_field( valueChr, 
 										(biddingObjectPtr->getIpApId(getDomain())).size() );
-										
+	free(valueChr);									
 	data.insert_field(0, IPAP_FT_IDBIDDINGOBJECT, fvalue1);
 
 	// Add the Record Id
 	ipap_field idRecordIdF = mes->get_field_definition( 0, IPAP_FT_IDRECORD );
-	ipap_value_field fvalue2 = idRecordIdF.get_ipap_value_field( 
-									strdup(recordId.c_str()), recordId.size() );
+	valueChr = strdup(recordId.c_str());
+	ipap_value_field fvalue2 = idRecordIdF.get_ipap_value_field( valueChr, recordId.size() );
+	free(valueChr);
 	data.insert_field(0, IPAP_FT_IDRECORD, fvalue2);	
 
 	//Add start y stop information which are mandatory.
@@ -303,6 +310,8 @@ void
 MAPIBiddingObjectParser::verifyInsertTemplates(ipap_template *templData, ipap_template *templOption, 
 									 ipap_template_container *templatesOut)
 {
+	
+	
 	// Verifies that both templates have been included
 	if (templData == NULL){ 
 		return;
@@ -597,6 +606,7 @@ MAPIBiddingObjectParser::get_ipap_message(fieldDefList_t *fieldDefs,
 		i = i + 1;
 	}
 	
+	saveDelete(intervalList);
 	
 #ifdef DEBUG
     log->dlog(ch, "Ending get_ipap_message");

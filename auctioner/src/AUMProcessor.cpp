@@ -523,6 +523,8 @@ AUMProcessor::getApplicableAuctions(ipap_message *message)
 				
 			}
 		}	
+		
+		saveDelete(templOptAuct);
 	}
 
 #ifdef DEBUG
@@ -574,6 +576,8 @@ AUMProcessor::getSessionInformation(ipap_message *message)
 				break;				
 			}
 		}	
+		
+		saveDelete(templOptAuct);
 	}
 	
 	return sessionInfo;

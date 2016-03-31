@@ -32,6 +32,7 @@
 
 #include <iostream>
 #include "Error.h"
+#include "logfile.h"
 #include "Logger.h"
 #include "CommandLineArgs.h"
 #include "ConfigManager.h"

@@ -238,10 +238,10 @@ void XMLParser::XMLWarningCB(void *ctx, const char *msg, ...)
 
 string XMLParser::xmlCharToString(xmlChar *in)
 {
-    string out = "";
+    string out;
 
     if (in != NULL) {
-        out = (char *) in;
+        out = std::string((char *) in);
         xmlFree(in);
     }
 

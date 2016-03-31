@@ -37,7 +37,7 @@ AuctionFileParser::AuctionFileParser(int domain, string filename)
     : XMLParser(AUCTIONFILE_DTD, filename, "AUCTIONSET") , IpApMessageParser(domain)
 {
     log = Logger::getInstance();
-    ch = log->createChannel("AuctionFileParser" );
+    ch = log->createChannel("AuctionFileParser");
 }
 
 
