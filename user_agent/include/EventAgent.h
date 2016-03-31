@@ -130,23 +130,23 @@ class AddResourceRequestsCtrlCommEvent : public CtrlCommEvent
 class ActivateResourceRequestIntervalEvent : public Event
 {
   private:
-    resourceRequestDB_t requests;
+    ResourceRequest *request;
     time_t startTime;
 
   public:
 
-    ActivateResourceRequestIntervalEvent(struct timeval time, resourceRequestDB_t &r, time_t _startTime) 
-      : Event(REMOVE_RESOURCEREQUESTS, time), requests(r), startTime(_startTime) {  }
+    ActivateResourceRequestIntervalEvent(struct timeval time, ResourceRequest *request, time_t _startTime) 
+      : Event(ACTIVATE_RESOURCE_REQUEST_INTERVAL, time), request(request), startTime(_startTime) {  }
 
-    ActivateResourceRequestIntervalEvent(time_t offs_sec, resourceRequestDB_t &r, time_t _startTime) 
-      : Event(ACTIVATE_RESOURCE_REQUEST_INTERVAL, offs_sec), requests(r), startTime(_startTime) {}
+    ActivateResourceRequestIntervalEvent(time_t offs_sec, time_t offs_usec, ResourceRequest *request, time_t _startTime) 
+      : Event(ACTIVATE_RESOURCE_REQUEST_INTERVAL, offs_sec, offs_usec), request(request), startTime(_startTime) {}
 
-    ActivateResourceRequestIntervalEvent(resourceRequestDB_t &r,  time_t _startTime) 
-      : Event(REMOVE_RESOURCEREQUESTS), requests(r), startTime(_startTime) {}
+    ActivateResourceRequestIntervalEvent(ResourceRequest *request,  time_t _startTime) 
+      : Event(ACTIVATE_RESOURCE_REQUEST_INTERVAL), request(request), startTime(_startTime) {}
 
-     resourceRequestDB_t *getResourceRequests()
+     ResourceRequest *getResourceRequest()
      {
-         return &requests;
+         return request;
      }
      
      time_t getStartTime()
@@ -157,20 +157,12 @@ class ActivateResourceRequestIntervalEvent : public Event
      int deleteResourceRequest(int uid)
      {
          int ret = 0;
-         resourceRequestDBIter_t iter;
-           
-         for (iter=requests.begin(); iter != requests.end(); iter++) {
-             if ((*iter)->getUId() == uid) {
-                 requests.erase(iter);
-                 ret++;
-                 break;
-             }   
-         }
          
-         if (requests.empty()) {
-             return ++ret;
+         if (request != NULL){
+			if ((request)->getUId() == uid){
+				request = NULL;
+			}
          }
-         
          return ret;
      }
 };
@@ -179,23 +171,23 @@ class ActivateResourceRequestIntervalEvent : public Event
 class RemoveResourceRequestIntervalEvent : public Event
 {
   private:
-    resourceRequestDB_t requests;
+    ResourceRequest *request;
     time_t stopTime;
 
   public:
 
-    RemoveResourceRequestIntervalEvent(struct timeval time, resourceRequestDB_t &r, time_t _stoptime) 
-      : Event(REMOVE_RESOURCEREQUESTS, time), requests(r), stopTime(_stoptime) {}
+    RemoveResourceRequestIntervalEvent(struct timeval time, ResourceRequest *r, time_t _stoptime) 
+      : Event(REMOVE_RESOURCEREQUESTS, time), request(r), stopTime(_stoptime) {}
 
-    RemoveResourceRequestIntervalEvent(time_t offs_sec, resourceRequestDB_t &r, time_t _stoptime) 
-      : Event(REMOVE_RESOURCE_REQUEST_INTERVAL, offs_sec), requests(r), stopTime(_stoptime) {}
+    RemoveResourceRequestIntervalEvent(time_t offs_sec, time_t offs_usec,  ResourceRequest *r, time_t _stoptime) 
+      : Event(REMOVE_RESOURCE_REQUEST_INTERVAL, offs_sec, offs_usec), request(r), stopTime(_stoptime) {}
 
-    RemoveResourceRequestIntervalEvent(resourceRequestDB_t &r, time_t _stoptime) 
-      : Event(REMOVE_RESOURCEREQUESTS), requests(r), stopTime(_stoptime) {}
+    RemoveResourceRequestIntervalEvent(ResourceRequest *r, time_t _stoptime) 
+      : Event(REMOVE_RESOURCEREQUESTS), request(r), stopTime(_stoptime) {}
 
-     resourceRequestDB_t *getResourceRequests()
+     ResourceRequest *getResourceRequest()
      {
-         return &requests;
+         return request;
      }
 
      time_t getStopTime()
@@ -206,20 +198,12 @@ class RemoveResourceRequestIntervalEvent : public Event
      int deleteResourceRequest(int uid)
      {
          int ret = 0;
-         resourceRequestDBIter_t iter;
-           
-         for (iter=requests.begin(); iter != requests.end(); iter++) {
-             if ((*iter)->getUId() == uid) {
-                 requests.erase(iter);
-                 ret++;
-                 break;
-             }   
-         }
          
-         if (requests.empty()) {
-             return ++ret;
+         if (request != NULL){
+			if ((request)->getUId() == uid){
+				request = NULL;
+			}
          }
-         
          return ret;
      }
 };
