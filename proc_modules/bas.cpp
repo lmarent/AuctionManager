@@ -325,6 +325,52 @@ int calculateRequestedQuantities(auction::biddingObjectDB_t *bids)
 	return sumQuantity;
 }
 
+double getBidPrice(auction::BiddingObject *bid)
+{
+	
+	double unitPrice = -1;
+	auction::elementList_t *elems = bid->getElements();
+				
+	auction::elementListIter_t elem_iter;
+	for ( elem_iter = elems->begin(); elem_iter != elems->end(); ++elem_iter )
+	{
+		unitPrice = getDoubleField(&(elem_iter->second), "unitprice");
+		break;
+	}
+	
+	return unitPrice;
+	
+}
+
+
+void separateBids(auction::biddingObjectDB_t *bids,double bl, double bh, 
+					auction::biddingObjectDB_t *bids_low, auction::biddingObjectDB_t *bids_high)
+{
+
+#ifdef DEBUG
+	cout << "Starting separateBids" << endl;
+#endif
+
+	auction::biddingObjectDB_t::iterator iter;
+	for (iter = bids->begin();iter != bids->end(); ++iter){
+		auction::BiddingObject *bid = *iter;
+		double price = getBidPrice(bid);
+		
+		if (price >= 0){
+			if (price >bl){
+				bids_high->push_back(bid);
+			}	
+			else{ 
+				bids_low->push_back(bid);
+			}
+		}
+	}
+
+#ifdef DEBUG
+	cout << "Ending separateBids" << endl;
+#endif		
+
+}
 
 
 void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,  
@@ -340,6 +386,16 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 	int totDemand = calculateRequestedQuantities(bids);
 	bandwidth_to_sell = getResourceAvailability(params);
 	reserve_price = getReservePrice( params );	
+
+	auction::biddingObjectDB_t *bids_low_rct = new auction::biddingObjectDB_t();
+	auction::biddingObjectDB_t *bids_high_rct = new auction::biddingObjectDB_t();
+		
+	// Order bids classifying them by whether they compete on the low and high auction.
+	separateBids(bids,0.5, 1, bids_low_rct, bids_high_rct);
+		
+	// Calculate the number of bids on both auctions.
+	int nl = calculateRequestedQuantities(bids_low_rct);
+	int nh = calculateRequestedQuantities(bids_high_rct);
 
 	std::multimap<double, alloc_proc_t>  orderedBids;
 	// Order Bids by elements.
@@ -447,10 +503,15 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
     fs.open(filename.c_str(),ios::app);
 	if (!fs.fail()){
 		fs << "starttime:" << start << ":endtime:" << stop;
-		fs << ":demand:" << totDemand << ":qty_sell:" << bandwidth_to_sell - qtyAvailable;
+		fs << ":demand:" << totDemand << ":demand_low:" << nl << ":demand_high:" << nh;
+		fs << ":qty_sell:" << bandwidth_to_sell - qtyAvailable;
 		fs << ":reservedPrice:" << reserve_price  << ":sell price:" << sellPrice << "\n"; 
 		fs.close( );  
 	}
+
+	delete bids_low_rct;
+	delete bids_high_rct;
+
 	
 #ifdef DEBUG	
 	cout << "bas module: end execute" <<  endl;

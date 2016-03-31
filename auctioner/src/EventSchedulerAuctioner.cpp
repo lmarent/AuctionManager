@@ -46,16 +46,16 @@ struct timeval EventSchedulerAuctioner::getNextEventTime()
     struct timeval now;
     char c = 'A';
 
-#ifdef DEBUG     
-	eventListIter_t iter;
-	
-    // output all scheduled Events to ostream
-    for (iter = events.begin(); iter != events.end(); iter++) {
-        struct timeval rv = iter->first;
-        log->dlog(ch,"Time:%s event:%s", (Timeval::toString(rv)).c_str(), 
-					eventNames[iter->second->getType()].c_str());        
-    }
-#endif
+//#ifdef DEBUG     
+//	eventListIter_t iter;
+//	
+//    // output all scheduled Events to ostream
+//    for (iter = events.begin(); iter != events.end(); iter++) {
+//        struct timeval rv = iter->first;
+//        log->dlog(ch,"Time:%s event:%s", (Timeval::toString(rv)).c_str(), 
+//					eventNames[iter->second->getType()].c_str());        
+//    }
+// #endif
 
     if (events.begin() != events.end()) {
         Event *ev = events.begin()->second;
@@ -63,16 +63,17 @@ struct timeval EventSchedulerAuctioner::getNextEventTime()
 		
         rv = Timeval::sub0(ev->getTime(), now);
 
-#ifdef DEBUG
-            log->dlog(ch,"Evaluating event %s remaining time sec:%d mil:%d", 
-						eventNames[ev->getType()].c_str(), rv.tv_sec, rv.tv_usec);
-#endif
+//#ifdef DEBUG
+//            log->dlog(ch,"Evaluating event %s remaining time sec:%d mil:%d", 
+//						eventNames[ev->getType()].c_str(), rv.tv_sec, rv.tv_usec);
+//#endif
         
         // be 100us fuzzy
         if ((rv.tv_sec == 0) && (rv.tv_usec<100)) {
-#ifdef DEBUG
-            log->dlog(ch,"expired event %s", eventNames[ev->getType()].c_str());
-#endif
+
+//#ifdef DEBUG
+//            log->dlog(ch,"expired event %s", eventNames[ev->getType()].c_str());
+// #endif
            write(Auctioner::s_sigpipe[1], &c, 1);
         }
     } 
