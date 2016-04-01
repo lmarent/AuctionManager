@@ -291,7 +291,6 @@ AgentProcessor::executeRequest( int index, EventScheduler *e )
 			
 				((ret->second).getMAPI())->reset( params );
 
-				saveDelete(params);
 			}
 			
 			((ret->second).getMAPI())->execute_user( FieldDefManager::getFieldDefs(), 
@@ -301,6 +300,9 @@ AgentProcessor::executeRequest( int index, EventScheduler *e )
 										   (ret->second).getStart(),
 										   (ret->second).getStop(),
 										   &ptr );
+			
+			delete[] params;
+			
 		} catch (ProcError &e){
 			log->elog(ch,e.getError().c_str());
 			throw Error(e.getError().c_str());

@@ -758,12 +758,7 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 										
 			session->setStart(interval->start);
 			session->setStop(interval->stop);
-			
-			// Convert the request to xml
-			anslp::msg::anslp_ipap_message message(*mes);
-			anslp::msg::anslp_ipap_xml_message xmlMes;
-			string xmlMessage3 = xmlMes.get_message(message);
-			
+						
 #ifdef DEBUG
 			log->dlog(ch,"Anslp before tg_create" );
 #endif
@@ -844,19 +839,19 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 	auctionDB_t auctionsInsert;
 	int domainId;
 	uint32_t mid = 0;
-	ipap_message message;
+	
 	double modulus = 0;
 	double bidIntervals = 0;
 
 #ifdef DEBUG
 	log->dlog(ch,"Starting handleSingleCreateSession session id:%s", sessionId.c_str() );
 #endif
-
+	
+	ipap_message message = ipap_mes->ip_message;
 
 	try
 	{
 	
-		message = ipap_mes->ip_message;
 
 #ifdef DEBUG
 		anslp::msg::anslp_ipap_message messagedebug(message);
@@ -1229,6 +1224,11 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 		if (retQueue != NULL){
 			retQueue->enqueue(resCreate);
 		}	
+
+#ifdef DEBUG
+	log->dlog(ch,"Ending event handleResponseCreateSession" );
+#endif
+
 	} catch(Error &err){
 		
 		log->elog( ch, err.getError().c_str() );
@@ -1666,12 +1666,12 @@ void Agent::handleSingleObjectAuctioningInteraction(string sessionId, anslp::ans
 
 	biddingObjectDB_t *bids = NULL;
 	auction::Session *s = NULL;
-	ipap_message message;
+	
 
 	try {
 
 		assert(ipap_mes != NULL);	
-		message = ipap_mes->ip_message;
+		ipap_message message = ipap_mes->ip_message;
 
 		// Search for the session that is involved.
 		s = asmp->getSession(sessionId);
@@ -1747,14 +1747,7 @@ void Agent::handleSingleObjectAuctioningInteraction(string sessionId, anslp::ans
 				conf.set_seqno(s->getNextMessageId());
 				conf.set_ackseqno(seqNbr+1);
 				conf.output();
-				
-#ifdef DEBUG
-				// Activate to see the message to send.
-				anslp::msg::anslp_ipap_xml_message mess2;
-				anslp::msg::anslp_ipap_message anlp_mess2(conf);
-				string confXmlMessage = mess2.get_message(anlp_mess2);
-#endif
-			
+							
 				// Finally send the message through the anslp client application.
 				anslpc->tg_bidding( new anslp::session_id(sessionId), 
 									s->getSenderAddress(), destinAddr, 
@@ -1807,7 +1800,7 @@ void Agent::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 				anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
 				if (ipap_mes != NULL)
 					handleSingleObjectAuctioningInteraction(sessionId, ipap_mes);
-					
+				
 			}
 		} else {
 			log->elog(ch, "The event does not have a valid list of objects");

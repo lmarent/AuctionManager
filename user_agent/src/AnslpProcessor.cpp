@@ -88,10 +88,12 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 	if ( is_addsession_event(evt) ) {
 		anslp::AddSessionEvent *ase =
 			dynamic_cast<anslp::AddSessionEvent *>(evt);
+			
+		log->log(ch,"starting to process add session event in anslp processor");
 		
 		string sessionId = ase->getSession();
 		auction::CreateSessionEvent *retEvent = new auction::CreateSessionEvent(sessionId, ase->getQueue());
-
+		
 		anslp::objectList_t *objects = ase->getObjects();
 		anslp::objectListIter_t it;
 		for (it = objects->begin(); it != objects->end(); ++it){
@@ -99,6 +101,7 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 		}
 		
 		e->push_back(retEvent);	
+		log->log(ch,"put in the vector add session event in anslp processor");
 		
 		return;
 	}
@@ -170,7 +173,7 @@ AnslpProcessor::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets
 	FastQueue *anslp_input = get_fqueue();
 
 	// A timeout makes sure the loop condition is checked regularly.
-	AnslpEvent *evt = anslp_input->dequeue_timedwait(10);
+	AnslpEvent *evt = anslp_input->dequeue_timedwait(100);
 		
 	if ( evt == NULL ){
 		return 0;	// no message in the queue
