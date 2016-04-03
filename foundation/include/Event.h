@@ -73,7 +73,8 @@ typedef enum
       RESPONSE_CREATE_CHECK_SESSION,
       REMOVE_SESSION,
       AUCTION_INTERACTION,
-      ADD_RESOURCEREQUESTS_CTRLCOMM
+      ADD_RESOURCEREQUESTS_CTRLCOMM,
+      CONFIGURE_SESSION
 } event_t;
 
 //! event names for dump method

@@ -77,11 +77,11 @@ class AnslpClient
 		
 		uint32_t getInitiatorLifetime(void);
 		 
-		anslp::session_id tg_create( const protlib::hostaddress &source_addr, 
-									 const protlib::hostaddress &destination_addr,
-									 uint16_t source_port, uint16_t dest_port, 
-									 uint8_t protocol, uint32_t session_lifetime,
-									 ipap_message &message );
+		void tg_create( const protlib::hostaddress &source_addr, 
+			    		const protlib::hostaddress &destination_addr,
+						uint16_t source_port, uint16_t dest_port, 
+						uint8_t protocol, uint32_t session_lifetime,
+						ipap_message &message );
 
 		void tg_teardown(anslp::session_id *sid);
 

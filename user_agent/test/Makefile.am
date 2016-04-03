@@ -25,6 +25,7 @@ test_runner_SOURCES = 	@top_srcdir@/user_agent/src/ResourceRequest.cpp \
 						@top_srcdir@/user_agent/test/ResourceRequestManager_test.cpp \
 						@top_srcdir@/user_agent/test/AgentProcessor_test.cpp \
 						@top_srcdir@/user_agent/test/Agent_test.cpp \
+						@top_srcdir@/user_agent/test/AgentThreaded_test.cpp \
 						@top_srcdir@/user_agent/test/test_runner.cpp
 
 if ENABLE_DEBUG

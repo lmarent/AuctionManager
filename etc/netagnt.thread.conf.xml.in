@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE CONFIG SYSTEM "netagnt.conf.dtd"> 
+<CONFIG>
+  <MAIN>
+    <!-- verbose level for logging -->
+    <PREF NAME="VerboseLevel" TYPE="UInt8">4</PREF>
+    <!-- log file name -->
+    <PREF NAME="LogFile">@DEF_STATEDIR@/log/netagent_thread.log</PREF>
+    <!-- pid file location -->
+    <PREF NAME="PidFile">/tmp/netagent_thread.pid</PREF>
+    <!-- ansl-client configuration file -->    
+    <PREF NAME="AnslpConfFile">@DEF_SYSCONFDIR@/../a-nslp/nsis.ka.conf</PREF>
+    <PREF NAME="Domain">6</PREF>       
+    <!-- field attribute definition file -->    
+    <PREF NAME="FieldDefFile">@DEF_SYSCONFDIR@/fielddef.xml</PREF>
+    <!-- filter constant file -->
+    <PREF NAME="FieldConstFile">@DEF_SYSCONFDIR@/fieldval.xml</PREF>     
+    <!-- auction file to load at start -->
+    <PREF NAME="ResourceRequestFile">@DEF_SYSCONFDIR@/example_resource_request1.xml</PREF>
+    <!-- Target defaults -->
+    <PREF NAME="DefaultDestinAddr" TYPE="IPAddr">192.168.3.3</PREF>
+    <PREF NAME="DefaultDestinPort" TYPE="UInt16">80</PREF>
+    <!-- Tcp by default -->
+    <PREF NAME="DefaultProtocol" TYPE="UInt8">6</PREF>    
+    <!-- It is normally the same defined to be the control port -->
+    <PREF NAME="DefaultSourcePort" TYPE="UInt16">12248</PREF>    
+  </MAIN>
+  <CONTROL>
+    <!-- port for control connections -->
+    <PREF NAME="ControlPort" TYPE="UInt16">12248</PREF>
+    <!-- use SSL encryption -->
+    <PREF NAME="UseSSL" TYPE="Bool">no</PREF>
+    <!-- use IPv6 (if no IPv6 interface present IP4 will be used) -->
+    <PREF NAME="UseIPv6" TYPE="Bool">no</PREF>
+    <!-- log all incoming control requests -->
+    <PREF NAME="LogOnConnect" TYPE="Bool">yes</PREF>
+    <!-- log all agent commands -->
+    <PREF NAME="LogCommand" TYPE="Bool">yes</PREF>   
+    <PREF NAME="LocalAddr-V4" TYPE="IPAddr">192.168.2.11</PREF>
+    <PREF NAME="LocalAddr-V6" TYPE="IP6Addr">0:0:0:0:0:0:0:0</PREF>     
+    <!-- access list -->
+    <ACCESS>
+      <ALLOW TYPE="Host">All</ALLOW>
+      <ALLOW TYPE="User">admin:admin</ALLOW>
+      <DENY>All</DENY>
+    </ACCESS>
+  </CONTROL>
+  <AGENT_PROCESSOR>
+    <!-- run as separate thread -->
+    <PREF NAME="Thread" TYPE="Bool">no</PREF>
+    <PREF NAME="ModuleDir">/usr/local/lib/auctionmanager</PREF>
+    <!-- allow on-demand loading i.e. when new module is used in rule definition --> 
+    <PREF NAME="ModuleDynamicLoad" TYPE="Bool">yes</PREF>
+  </AGENT_PROCESSOR>  
+  <ANSLP_PROCESSOR>
+    <!-- run as separate thread -->
+    <PREF NAME="Thread" TYPE="Bool">yes</PREF>
+  </ANSLP_PROCESSOR>
+</CONFIG>

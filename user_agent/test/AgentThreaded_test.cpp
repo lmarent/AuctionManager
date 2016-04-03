@@ -12,7 +12,7 @@
 #include "Agent.h"
 #include "anslp_ipap_xml_message.h"
 
-class Agent_Test;
+class AgentThreaded_Test;
 
 using namespace auction;
 
@@ -21,18 +21,18 @@ using namespace auction;
  * way the test cases have access to protected methods and they don't have
  * to be public in mnslp_ipfix_fields.
  */
-class agent_test : public Agent {
+class agentthreaded_test : public Agent {
   public:
-	agent_test( int _argc, char *_argv[] )
+	agentthreaded_test( int _argc, char *_argv[] )
 		: Agent( _argc, _argv)  { }
 
-	friend class Agent_Test;
+	friend class AgentThreaded_Test;
 };
 
 
-class Agent_Test : public CppUnit::TestFixture {
+class AgentThreaded_Test : public CppUnit::TestFixture {
 
-	CPPUNIT_TEST_SUITE( Agent_Test );
+	CPPUNIT_TEST_SUITE( AgentThreaded_Test );
 
     CPPUNIT_TEST( test );
 	CPPUNIT_TEST_SUITE_END();
@@ -49,18 +49,18 @@ class Agent_Test : public CppUnit::TestFixture {
 
   private:
     
-	agent_test *agentPtr;
+	agentthreaded_test *agentPtr;
     
 };
 
-CPPUNIT_TEST_SUITE_REGISTRATION( Agent_Test );
+CPPUNIT_TEST_SUITE_REGISTRATION( AgentThreaded_Test );
 
 
-void Agent_Test::setUp() 
+void AgentThreaded_Test::setUp() 
 {
 
 
-	string commandLine = "netagent -c /usr/local/etc/auctionmanager/netagnt.conf.xml";
+	string commandLine = "netagent -c /usr/local/etc/auctionmanager/netagnt.thread.conf.xml";
 	char *cstr = new char[commandLine.length() + 1];
 	strcpy(cstr, commandLine.c_str());
 	
@@ -79,7 +79,7 @@ void Agent_Test::setUp()
 	try
 	{
         // start up the netagent (this blocks until Ctrl-C !)
-        agentPtr = new agent_test(argc, argv);
+        agentPtr = new agentthreaded_test(argc, argv);
         
     } catch (Error &e) {
         cout << "Terminating netAgent on error: " << e.getError() << endl;
@@ -90,7 +90,7 @@ void Agent_Test::setUp()
 				
 }
 
-void Agent_Test::tearDown() 
+void AgentThreaded_Test::tearDown() 
 {
 	cout << "Teardown agent test " << endl;
 	
@@ -99,7 +99,7 @@ void Agent_Test::tearDown()
 
 }
 
-void Agent_Test::test() 
+void AgentThreaded_Test::test() 
 {
 
 	try
@@ -172,16 +172,6 @@ void Agent_Test::test()
 			std::string xmlRespMes = messRes.get_message(*ipapMesRes);
 			
 			cout << "xmlResponse  Message:" << xmlRespMes << endl;
-			
-			// Now we create the message to configure the session.
-			auction::ConfigureSessionEvent *evConf = 
-				new auction::ConfigureSessionEvent(sessionId, anslp::session_id());
-			
-			agentPtr->evnt->addEvent( evConf );
-			
-			evt = agentPtr->evnt.get()->getNextEvent();
-			ConfigureSessionEvent *evConf2 = dynamic_cast<ConfigureSessionEvent *>(evt);
-			CPPUNIT_ASSERT( evConf2 != NULL );
 			
 			anslp::mspec_rule_key key;
 			anslp::FastQueue retQueue;
@@ -348,7 +338,7 @@ void Agent_Test::test()
 
 }
 
-void Agent_Test::checkRemoveAuctionEvent(Event *evt)
+void AgentThreaded_Test::checkRemoveAuctionEvent(Event *evt)
 {
 
 	RemoveAuctionsEvent *rae = dynamic_cast<RemoveAuctionsEvent *>(evt);
@@ -389,7 +379,7 @@ void Agent_Test::checkRemoveAuctionEvent(Event *evt)
 
 }
 
-void Agent_Test::checkRemoveRequestEvent(Event *evt)
+void AgentThreaded_Test::checkRemoveRequestEvent(Event *evt)
 {
 	RemoveResourceRequestIntervalEvent *rrrie = dynamic_cast<RemoveResourceRequestIntervalEvent *>(evt);
 	CPPUNIT_ASSERT( rrrie != NULL );
@@ -412,7 +402,7 @@ void Agent_Test::checkRemoveRequestEvent(Event *evt)
 
 }
 
-void Agent_Test::checkRemoveBiddingObjectEvent(Event *evt)
+void AgentThreaded_Test::checkRemoveBiddingObjectEvent(Event *evt)
 {
 	RemoveBiddingObjectsEvent *rboe = dynamic_cast<RemoveBiddingObjectsEvent *>(evt);
 	CPPUNIT_ASSERT( rboe != NULL );

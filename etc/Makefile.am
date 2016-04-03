@@ -7,9 +7,9 @@ dist_sysconf_DATA = auctionfile.dtd bidfile.dtd fielddef.xml \
 					main.html main_agnt.html example_resource_request1.xml \
 					resourcerequestfile.dtd slog.cfg
 		    
-nodist_sysconf_DATA = netaum.conf.xml netagnt.conf.xml 
+nodist_sysconf_DATA = netaum.conf.xml netagnt.conf.xml netagnt.thread.conf.xml
 
-DISTCLEANFILES = gen_cert.sh netaum.conf.xml netagnt.conf.xml
+DISTCLEANFILES = gen_cert.sh netaum.conf.xml netagnt.conf.xml netagnt.thread.conf.xml
 
 if ENABLE_SSL
   nodist_bin_SCRIPTS = gen_cert.sh 

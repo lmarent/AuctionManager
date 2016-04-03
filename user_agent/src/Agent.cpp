@@ -302,6 +302,11 @@ Agent::Agent( int argc, char *argv[])
             log->wlog(ch, "Threads enabled in config file but executable is compiled without thread support");
         }
 #endif
+
+//#ifdef DEBUG
+		log->log(ch,"Anslp Processor threaded: %d", aprocThread );
+//#endif
+
         anslproc = _anslproc;
         anslproc->mergeFDs(&fdList);
 
@@ -363,9 +368,9 @@ Agent::~Agent()
 		delete(iter->second);
 	}
 
-#ifdef DEBUG
+//#ifdef DEBUG
 		log->log(ch,"------- end shutdown -------" );
-#endif
+//#endif
     
 }
 
@@ -764,37 +769,30 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 #endif
 			
 			// Call the anslp client for sending the message.
-			anslp::session_id sid = anslpc->tg_create( session->getSenderAddress(), 
-											   session->getReceiverAddress(), 
-											   session->getSenderPort(),
-											   session->getReceiverPort(),
-											   session->getProtocol(),
-											   session->getLifetime(),
-											   *mes );
+			anslpc->tg_create( session->getSessionId(),
+							   session->getSenderAddress(), 
+							   session->getReceiverAddress(), 
+							   session->getSenderPort(),
+							   session->getReceiverPort(),
+							   session->getProtocol(),
+							   session->getLifetime(),
+							   *mes );
 
 #ifdef DEBUG
 			log->dlog(ch,"Anslp after tg_create" );
 #endif
 			
-			session->setSessionId(sid.to_string());
-
-#ifdef DEBUG
-			log->dlog(ch,"Session id: %s", sid.to_string().c_str());
-#endif
 			
 			// Add the message as pending for ack.
 			session->addPendingMessage( *mes );
 			
-			// Set to the session the anslp session created by the client.
-			session->setAnlspSession(sid);
-			
 			// Store the session as new in the sessionManager
 			asmp->addSession(session);
 			insertedSession = true;
-			
+
 			// Assign the new session to the interval.
 			interval->sessionId = session->getSessionId();
-						
+									
 			// free the memory assigned.
 			saveDelete(mes);
 
@@ -818,7 +816,6 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 				saveDelete(session);
 			}
 			
-			
 			throw Error(err.getError().c_str());
 		}
 				  
@@ -830,6 +827,50 @@ void Agent::handleActivateResourceRequestInterval(Event *e)
 	
 }
 
+void Agent::handleActivateSession(Event *e, fd_sets_t *fds)
+{
+
+#ifdef DEBUG
+	log->dlog(ch,"Starting  event activate session" );
+#endif
+	string sessionId;
+	anslp::session_id sid;
+
+	Session *ses = NULL;
+	AgentSession *session = NULL; 
+
+	try {
+		anslp::objectListIter_t it;
+		
+		sessionId = ((ConfigureSessionEvent *)e)->getSessionId();
+		sid = ((ConfigureSessionEvent *)e)->getAnslpSession();
+		
+		ses = asmp->getSession(sessionId);
+		
+		if (ses != NULL){
+			session = reinterpret_cast<AgentSession*>(ses);
+		
+			// Set to the session the anslp session created by the client.
+			session->setAnlspSession(sid);
+			asmp->indexActiveSession(sessionId, sid.to_string()); 
+		
+			session->setState(SS_ACTIVE); 
+		
+		} else {
+			throw Error("Session %s not found in manager", sessionId.c_str());
+		}
+				
+	} catch(Error &err) {
+		// The message was not parse, we dont have to do anything. 
+		// We assumming that the sender will send the message again.
+		log->elog( ch, err.getError().c_str() );
+	}
+
+#ifdef DEBUG
+	log->dlog(ch,"Ending event activate session" );
+#endif
+
+}
 
 void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key, 
 					anslp::anslp_ipap_message *ipap_mes, anslp::ResponseAddSessionEvent *resCreate)
@@ -895,7 +936,6 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 					
         log->elog( ch, err.getError().c_str() );
 		
-		throw Error(err.getError().c_str());
 		//TODO AM: implement return codes. 
 		// for now it generates the error not including in the final event.
 	}
@@ -915,7 +955,7 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 	// So far, so good. we can proceed to check for session and request data.
 	try 
 	{	
-		ses = asmp->getSession(sessionId);
+		ses = asmp->getAnslpSession(sessionId);
 		// Bring the session from that create the initial request.
 		session = reinterpret_cast<AgentSession*>(ses);
 		
@@ -1164,7 +1204,6 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 			saveDelete(auctions);
 		}
 		
-		throw Error(err.getError().c_str());
 		// TODO AM: Generate the error. For now no message means error. 
 	}
 
@@ -1176,9 +1215,9 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 
 void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 {
-#ifdef DEBUG
-	log->dlog(ch,"Starting event handleResponseCreateSession" );
-#endif
+//#ifdef DEBUG
+	log->log(ch,"Starting event handleResponseCreateSession" );
+//#endif
 
 
 
@@ -1199,7 +1238,8 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
 		// The message was not parse, we dont have to do anything. 
 		// We assumming that the sender will send the message again.
-		throw Error(e.what());
+		log->elog( ch, e.getError().c_str() );	
+		return;
 	}
 	
     resCreate = new anslp::ResponseAddSessionEvent();
@@ -1225,14 +1265,13 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 			retQueue->enqueue(resCreate);
 		}	
 
-#ifdef DEBUG
-	log->dlog(ch,"Ending event handleResponseCreateSession" );
-#endif
+//#ifdef DEBUG
+	log->log(ch,"Ending event handleResponseCreateSession" );
+//#endif
 
 	} catch(Error &err){
 		
 		log->elog( ch, err.getError().c_str() );
-		throw Error(err.getError().c_str());
 	}
 }
 
@@ -1258,7 +1297,6 @@ Agent::handlePushExecution(Event *e, fd_sets_t *fds)
 	} catch (Error &err) {
 		
 		log->elog( ch, err.getError().c_str() );
-		throw Error(err.getError().c_str());
 	}
 	
 }
@@ -1285,7 +1323,6 @@ Agent::handleRemovePushExecution(Event *e, fd_sets_t *fds)
 	} catch (Error &err) {
 		
 		log->elog( ch, err.getError().c_str() );
-		throw Error(err.getError().c_str());
 	}
 	
 }
@@ -1335,7 +1372,6 @@ void Agent::handleAddGeneratedBiddingObjects(Event *e, fd_sets_t *fds)
     } catch (Error &e) {
        
        log->elog( ch, e.getError().c_str() );
-       throw Error(e.getError().c_str());
     }	
 	
 }
@@ -1665,7 +1701,8 @@ void Agent::handleSingleObjectAuctioningInteraction(string sessionId, anslp::ans
 {
 
 	biddingObjectDB_t *bids = NULL;
-	auction::Session *s = NULL;
+	Session *ses = NULL;
+	AgentSession *session = NULL; 
 	
 
 	try {
@@ -1673,9 +1710,11 @@ void Agent::handleSingleObjectAuctioningInteraction(string sessionId, anslp::ans
 		assert(ipap_mes != NULL);	
 		ipap_message message = ipap_mes->ip_message;
 
-		// Search for the session that is involved.
-		s = asmp->getSession(sessionId);
-		if (s == NULL)
+		// Search for the anslp session that is involved.
+		ses = asmp->getAnslpSession(sessionId);		
+		session = reinterpret_cast<AgentSession *>(ses);
+
+		if (session == NULL)
 			throw Error("Session %s not found", sessionId.c_str());
 		
 		// get the msgSeqNbr from the message
@@ -1684,7 +1723,7 @@ void Agent::handleSingleObjectAuctioningInteraction(string sessionId, anslp::ans
 		
 		// send the same message arriving, if it is confirming a previous message. 
 		if (ackSeqNbr > 0){
-			s->confirmMessage(ackSeqNbr-1);
+			session->confirmMessage(ackSeqNbr-1);
 			
 #ifdef DEBUG
 			log->dlog(ch,"Ending handle Auction Interaction" );
@@ -1749,10 +1788,10 @@ void Agent::handleSingleObjectAuctioningInteraction(string sessionId, anslp::ans
 				conf.output();
 							
 				// Finally send the message through the anslp client application.
-				anslpc->tg_bidding( new anslp::session_id(sessionId), 
-									s->getSenderAddress(), destinAddr, 
-									s->getSenderPort(), iport,
-									s->getProtocol(), 
+				anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession().to_string()), 
+									session->getSenderAddress(), destinAddr, 
+									session->getSenderPort(), iport,
+									session->getProtocol(), 
 									conf );
 			
 			}		
@@ -1767,7 +1806,7 @@ void Agent::handleSingleObjectAuctioningInteraction(string sessionId, anslp::ans
 			
 		}
 	} catch (Error &err){
-		log->elog( ch, err.getError().c_str() );	
+		log->elog( ch, err.getError().c_str() );
 	}
 
 }
@@ -1898,6 +1937,10 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
 	case RESPONSE_CREATE_SESSION:
 		// Immediate execution, so it goes in the handle immediate response. 
 	  break;
+	
+	case CONFIGURE_SESSION:
+		handleActivateSession(e,fds);
+	  break;
 	  
     default:
 #ifdef DEBUG
@@ -1910,9 +1953,9 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
 bool Agent::handle_event_immediate_respond(Event *e, fd_sets_t *fds)
 {
 
-#ifdef DEBUG
-        log->dlog(ch,"Start handle event immediate respond" );
-#endif   
+//#ifdef DEBUG
+   log->log(ch,"Start handle event immediate respond" );
+//#endif   
 
     bool pendingExec = true; // By default the event will remain pending.
    
@@ -2064,9 +2107,12 @@ void Agent::run()
 			}
 			
 			bool pendingExec = true;
-
+			
+			log->log(ch,"after handleFDEvent events: %d", retEvents.size());
+			
             // schedule events
             if (retEvents.size() > 0) {
+				
                 for (eventVecIter_t iter = retEvents.begin();
                      iter != retEvents.end(); iter++) {
 
@@ -2191,7 +2237,7 @@ int Agent::alreadyRunning()
 	
 	cout << AGNT_LOCK_FILE.c_str() << endl;
 	
-    // no lock file and no running meter process
+    // no lock file and no running process
     // write new lock file and continue
     file = fopen(AGNT_LOCK_FILE.c_str(), "wt" );
     if (file == NULL) {

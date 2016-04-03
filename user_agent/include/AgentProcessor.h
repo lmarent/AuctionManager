@@ -29,10 +29,7 @@
 #define _AGENT_PROCESSOR_H_
 
 
-#include "stdincpp.h"
 #include "AuctionManagerComponent.h"
-#include "Error.h"
-#include "Logger.h"
 #include "IdSource.h"
 #include "EventScheduler.h"
 #include "ProcModule.h"

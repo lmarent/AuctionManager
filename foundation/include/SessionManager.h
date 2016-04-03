@@ -77,6 +77,9 @@ class SessionManager
 	//! index by sessioId
 	sessionIndex_t sessionIndex;
 	
+	//! index by anslp session id
+	sessionIndex_t sessionAnslpIndex;
+	
     //! list with sessions done
     sessionDone_t sessionsDone;
 
@@ -113,7 +116,13 @@ class SessionManager
 
     //! get Session from sessionId 
     Session *getSession(string _sessionId);
-
+	
+	//! index active session
+	void indexActiveSession(string sessionId, string anslpSessionId);
+	
+	//! get Session from anslp sessionid.
+	Session *getAnslpSession(string anslpSessionId);
+	
     //! get all sessions
     sessionDB_t getSessions();
 

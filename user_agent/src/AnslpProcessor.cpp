@@ -101,9 +101,26 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 		}
 		
 		e->push_back(retEvent);	
-		log->log(ch,"put in the vector add session event in anslp processor");
+		
+		log->log(ch,"put in the vector add session event in anslp processor %d", e->size());
 		
 		return;
+	}
+
+	if ( is_add_anslp_session_event(evt) ) {
+		anlsp::AddAnslpSessionEvent *aase = 
+			dynamic_cast<anslp::AddAnslpSessionEvent *>(evt);
+			
+		log->log(ch,"starting to process add anslp session event in anslp processor");
+		
+
+		auction::ConfigureSessionEvent *retEvent = 
+				new auction::ConfigureSessionEvent(aase->getSession(), aase->getAnslpSession());
+
+		e->push_back(retEvent);	
+		
+		log->log(ch,"put in the vector add session event in anslp processor %d", e->size());
+			
 	}
 
 	if ( is_response_addsession_event(evt) ) {
@@ -161,6 +178,7 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 		
 		return;
 	}
+	
 }
 
 int 
@@ -190,6 +208,8 @@ AnslpProcessor::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets
 	}
 
 	MP(benchmark_journal::POST_PROCESSING);
+	
+	log->log(ch,"Finishing handleFDEvent anslp processor %d", e->size());
 	
 	return 0;
 }

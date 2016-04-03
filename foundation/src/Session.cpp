@@ -37,7 +37,7 @@ using namespace auction;
  *
  */
 Session::Session(string _sessionId):
-	sessionId(_sessionId), mId()
+	state(SS_NEW), sessionId(_sessionId), mId()
 {
 	
 }

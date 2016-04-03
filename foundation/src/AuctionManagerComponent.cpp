@@ -27,7 +27,7 @@
 */
 
 #include "ParserFcts.h"
-#include "AuctionManagerComponent.h"
+#include "AuctionManagerComponent.h" 
 
 using namespace auction;
 

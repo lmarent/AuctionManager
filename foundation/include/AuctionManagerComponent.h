@@ -30,6 +30,7 @@
 #define _AUCTIONMANAGERCOMPONENT_H_
 
 
+#include "config.h"
 #include "stdincpp.h"
 #include "Error.h"
 #include "Logger.h"
@@ -37,7 +38,6 @@
 #include "CommandLineArgs.h"
 #include "ConfigManager.h"
 #include "Event.h"
-#include "Threads.h"
 #include "httpd.h"
 
 

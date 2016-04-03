@@ -29,6 +29,7 @@
 #include <unistd.h>
 
 #include "logfile.h"
+#include "fqueue.h"
 #include "gist_conf.h"
 #include "AnslpClient.h"
 #include <time.h>
@@ -106,7 +107,7 @@ starter(NULL), conf(NULL), anslpd(NULL)
 	 * threads it requires.
 	 */
 	anslp_daemon_param param("anslp", *conf, installQueue);
-	starter = new protlib::ThreadStarter<anslp_daemon, anslp_daemon_param>(1, param);
+	starter = new protlib::ThreadStarter<anslp_daemon, anslp_daemon_param>(3, param);
 	
 	// returns after all threads have been started
 	starter->start_processing();
@@ -142,8 +143,9 @@ AnslpClient::~AnslpClient()
 
 }
 
-anslp::session_id
-AnslpClient::tg_create( const hostaddress &source_addr, 
+void
+AnslpClient::tg_create( const string sessionId, 
+						const hostaddress &source_addr, 
 						const hostaddress &destination_addr,
 					    uint16_t source_port, uint16_t dest_port, 
 						uint8_t protocol, uint32_t session_lifetime, 
@@ -152,12 +154,7 @@ AnslpClient::tg_create( const hostaddress &source_addr,
 #ifdef DEBUG
     log->dlog(ch,"Starting tg_create");
 #endif
-	
-
-	anslp_ipap_message mess(message);    
-         
-    protlib::FastQueue ret;
-	    
+		
     // Build the vector of objects to be configured.
     vector<msg::anslp_mspec_object *> mspec_objects;
     mspec_objects.push_back(mess.copy());
@@ -166,22 +163,21 @@ AnslpClient::tg_create( const hostaddress &source_addr,
     log->dlog(ch,"message pushed");
 #endif
 
-	
     // Create a new event for launching the configure event.
-    event *e = new api_create_event(source_addr, destination_addr, source_port, 
+    event *e = new api_create_event(sessionId, source_addr, destination_addr, source_port, 
    				       dest_port, protocol, mspec_objects, 
 				       session_lifetime, 
 				       selection_auctioning_entities::sme_any, 
-				       &ret);
+					   anslpd->installQueue);
 
     anslp_event_msg *msg = new anslp_event_msg(session_id(), e);
-    
-#ifdef DEBUG
+        
+//#ifdef DEBUG
     ostringstream o;
     o << "api event created message:" << msg->get_id();
-    o << " session id:" << msg->get_session_id(); 
-    log->dlog(ch,"%s", o.str().c_str());
-#endif
+    o << " session id:" << msg->get_session_id().to_string(); 
+    log->log(ch,"%s", o.str().c_str());
+//#endif
 
 	struct timespec ts;
 	ts.tv_sec = 0;
@@ -199,47 +195,11 @@ AnslpClient::tg_create( const hostaddress &source_addr,
     
     queued = anslpd->get_fqueue()->enqueue(msg);
     
-    if ( queued ){
-       log->log(ch,"it is going to create the session - procid:%d - getthread_self:%lu tid:%lu", 
-					getpid(), pthread_self(), syscall(SYS_gettid));
-					
-		protlib::message *ret_msg = ret.dequeue_timedwait(10000);
-
-		anslp_event_msg *r = dynamic_cast<anslp_event_msg *>(ret_msg);
-
-		time_t now;
-		struct tm *current;
-		now = time(0);
-		current = localtime(&now);
-		struct timeval detail_time;
-		gettimeofday(&detail_time,NULL);
+    if ( ! queued ){
 		
-		if (r != NULL){
-			anslp::session_id sid = r->get_session_id();
+		throw Error("Error creating the api event");		
 			
-			saveDelete(r);
-
-#ifdef DEBUG
-			log->dlog(ch,"api event enqueued");
-#endif		
-			
-			return sid;
-			
-		} else {
-
-#ifdef DEBUG
-			log->dlog(ch,"error in api event enqueued");
-#endif	
-			throw Error("Error creating the api event");
-		}
-	} else {
-
-#ifdef DEBUG
-		log->dlog(ch,"Error creating enqueuing the api event");
-#endif	
-
-		throw Error("Error creating enqueuing the api event");
-	}
+	} 
 }
 
 void 

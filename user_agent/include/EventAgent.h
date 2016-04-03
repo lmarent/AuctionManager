@@ -309,6 +309,40 @@ class CreateSessionEvent : public Event
 	
 };
 
+class ConfigureSessionEvent() : public Event
+{
+  private:
+    
+    string sessionId; 
+    anslp::session_id sid;
+
+  public:
+
+    ConfigureSessionEvent(string _sessionId, anslp::session_id _sid, unsigned long ival=0, int align=0) 
+      : Event(CONFIGURE_SESSION, ival, align), sessionId(_sessionId), sid(_sid) 
+    {
+        
+    }
+
+    ~ConfigureSessionEvent() 
+    {
+
+	}
+    
+    string getSessionId()
+    {
+		return sessionId;
+	}
+
+	anslp::session_id getAnslpSession()
+	{
+		return sid;
+	}
+	
+};
+
+
+
 class PushExecutionEvent : public Event
 {
   private:

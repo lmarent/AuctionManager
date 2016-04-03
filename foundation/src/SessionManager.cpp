@@ -105,6 +105,40 @@ Session *SessionManager::getSession(string _sessionId)
     return NULL;
 }
 
+void SessionManager::indexActiveSession(string sessionId, string anslpSessionId)
+{
+	
+	Session *session = getSession(sessionId);
+	
+	if (session != NULL){
+		if (!anslpSessionId.empty()){
+	
+			// add new extry to anslp index, if not defined it is not inserted
+			sessionAnslpIndex[anslpSessionId] = session->getUId();
+		}
+	}
+}
+
+//! get Session from anslp sessionid.
+Session *SessionManager::getAnslpSession(string anslpSessionId)
+{
+
+	sessionIndexIter_t iter;
+
+    iter = sessionAnslpIndex.find(anslpSessionId);
+    if (iter != sessionAnslpIndex.end()) {		
+        return getSession(iter->second);
+    }
+    else
+    {
+#ifdef DEBUG
+    log->dlog(ch,"Session Id not found %s", anslpSessionId.c_str());
+#endif		
+	}
+	
+	return NULL;
+
+}
 
 sessionDB_t 
 SessionManager::getSessions()
@@ -195,6 +229,8 @@ SessionManager::addSession(Session *session)
         // add new entry in index
         sessionIndex[session->getSessionId()] = session->getUId();
 	
+		// The index to anslp sessions in updated when the session is put in active
+		
         sessions++;
 
 #ifdef DEBUG    

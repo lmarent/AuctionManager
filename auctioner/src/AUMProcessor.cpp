@@ -610,9 +610,7 @@ AUMProcessor::waitUntilDone(void)
     AUTOLOCK(threaded, &maccess);
 
     if (threaded) {
-      while (queue->getUsedBuffers() > 0) {
-        threadCondWait(&doneCond, &maccess);
-      }
+		// Not implemented.
     }
 #endif
 }

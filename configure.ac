@@ -442,6 +442,7 @@ AC_CONFIG_FILES([Makefile \
 				 etc/Makefile \
 				 etc/netaum.conf.xml \
 				 etc/netagnt.conf.xml \
+				 etc/netagnt.thread.conf.xml \
 				 nagtrsh/Makefile \
 				 foundation/src/Makefile \
 				 foundation/test/Makefile \
