@@ -834,7 +834,7 @@ void Agent::handleActivateSession(Event *e, fd_sets_t *fds)
 	log->dlog(ch,"Starting  event activate session" );
 #endif
 	string sessionId;
-	anslp::session_id sid;
+	string anslpSessionId;
 
 	Session *ses = NULL;
 	AgentSession *session = NULL; 
@@ -843,16 +843,21 @@ void Agent::handleActivateSession(Event *e, fd_sets_t *fds)
 		anslp::objectListIter_t it;
 		
 		sessionId = ((ConfigureSessionEvent *)e)->getSessionId();
-		sid = ((ConfigureSessionEvent *)e)->getAnslpSession();
+		anslpSessionId = ((ConfigureSessionEvent *)e)->getAnslpSession();
 		
 		ses = asmp->getSession(sessionId);
+
+//#ifdef DEBUG
+		log->log(ch,"Activate session %s - anslp sessionId: %s", 
+							sessionId.c_str(), anslpSessionId.c_str() );
+//#endif
 		
 		if (ses != NULL){
 			session = reinterpret_cast<AgentSession*>(ses);
 		
 			// Set to the session the anslp session created by the client.
-			session->setAnlspSession(sid);
-			asmp->indexActiveSession(sessionId, sid.to_string()); 
+			session->setAnlspSession(anslpSessionId);
+			asmp->indexActiveSession(sessionId, anslpSessionId); 
 		
 			session->setState(SS_ACTIVE); 
 		
@@ -873,7 +878,9 @@ void Agent::handleActivateSession(Event *e, fd_sets_t *fds)
 }
 
 void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key, 
-					anslp::anslp_ipap_message *ipap_mes, anslp::ResponseAddSessionEvent *resCreate)
+					anslp::anslp_ipap_message *ipap_mes, 
+					std::vector<anslp::msg::anslp_mspec_object *> *mspec_objects,
+					std::vector<anslp::anslp_event_msg *> *events)
 {
 
 	auctionDB_t *auctions = NULL;
@@ -1115,7 +1122,7 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 					}
 					
 					// Create new request process for coming auctions.
-					index = proc->addRequest( sessionId, request->getFields(),*auctIter2, 
+					index = proc->addRequest( session->getSessionId(), request->getFields(),*auctIter2, 
 												req_start, req_end );
 														
 					// Insert the index in the resource process set created. 
@@ -1145,7 +1152,7 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 		aucm->getIds(auctions, setAuc);
 								
 		// Add a new reference to the auction (there is another session reference it).
-		aucm->incrementReferences(setAuc, sessionId );
+		aucm->incrementReferences(setAuc, session->getSessionId() );
 					
 		// Add related auctions to session object.
 		session->setAuctions(setAuc);
@@ -1184,17 +1191,16 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 		log->dlog(ch,"Ending event handleResponseCreateSession - auctions number:%d sessionId:%s", 
 						auctions->size(),session->getAnlspSession().to_string().c_str()  );
 #endif
-					
+							
 		// Finally send the message through the anslp client application.
-		anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession().to_string()), 
-								session->getSenderAddress(), destinAddr, 
-								session->getSenderPort(), iport,
-								session->getProtocol(), 
-								resp );
+		events->push_back(anslpc->delayed_tg_bidding( new anslp::session_id(session->getAnlspSession()), 
+									session->getSenderAddress(), destinAddr, 
+									session->getSenderPort(), iport,
+									session->getProtocol(), 
+									resp ));
 
-		
-		anslp::anslp_ipap_message ipap_mes_return(resp);
-		resCreate->setObject(key, ipap_mes_return.copy());
+		anslp::anslp_ipap_message ipap_mes_return(resp);		
+		mspec_objects->push_back(ipap_mes_return.copy());
 
 	} catch (Error &err){
 		
@@ -1215,18 +1221,15 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 
 void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 {
-//#ifdef DEBUG
-	log->log(ch,"Starting event handleResponseCreateSession" );
-//#endif
+#ifdef DEBUG
+	log->dlog(ch,"Starting event handleResponseCreateSession" );
+#endif
 
 
 
-	anslp::objectList_t *objList = NULL;
+	anslp::objectList_t *objList = NULL;	
 	anslp::FastQueue *retQueue = NULL;
-	
 	string sessionId;
-
-	anslp::ResponseAddSessionEvent *resCreate = NULL;
 	
 	try {
 		anslp::objectListIter_t it;
@@ -1241,8 +1244,13 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 		log->elog( ch, e.getError().c_str() );	
 		return;
 	}
+
+//#ifdef DEBUG
+	log->log(ch,"Starting event handleResponseCreateSession %s", sessionId.c_str() );
+//#endif
 	
-    resCreate = new anslp::ResponseAddSessionEvent();
+	std::vector<anslp::msg::anslp_mspec_object *> mspec_objects;
+	std::vector<anslp::anslp_event_msg *> events;
 	
 	try {
 		if (objList != NULL){
@@ -1252,22 +1260,23 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 					
 				anslp::mspec_rule_key key = it->first;
 				anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
-				if (ipap_mes != NULL)
-					handleSingleCreateSession(sessionId, key, ipap_mes, resCreate);
-						
+				if (ipap_mes != NULL){
+					handleSingleCreateSession(sessionId, key, ipap_mes, &mspec_objects, &events);
+				}		
 			}
 		} else {
 			log->elog(ch, "The event does not have a valid list of objects");
 		}
 	
-		// Send the response for every request.
-		if (retQueue != NULL){
-			retQueue->enqueue(resCreate);
-		}	
+		// Confirm for the anslp application installed objects.
+		anslpc->tg_install( sessionId, mspec_objects);
+		
+		// Send confirmation to every auction server involved.
+		anslpc->tg_bidding(&events);
 
-//#ifdef DEBUG
-	log->log(ch,"Ending event handleResponseCreateSession" );
-//#endif
+#ifdef DEBUG
+	log->dlog(ch,"Ending event handleResponseCreateSession" );
+#endif
 
 	} catch(Error &err){
 		
@@ -1424,7 +1433,7 @@ Agent::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 		// Search for the corresponding session for this connection
 		string sessionId = proc->getSession(index);
 		AgentSession *session = reinterpret_cast<AgentSession *>(asmp->getSession(sessionId));
-				
+						
 		biddingObjectDBIter_t iter;
 		for (iter = new_bids->begin(); iter != new_bids->end(); ++iter)
 		{
@@ -1478,7 +1487,7 @@ Agent::handleTransmitBiddingObjects(Event *e, fd_sets_t *fds)
 			
 			
 			// Finally send the message through the anslp client application.
-			anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession().to_string()), 
+			anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession()), 
 								session->getSenderAddress(), destinAddr, 
 								session->getSenderPort(), iport,
 								session->getProtocol(), 
@@ -1621,11 +1630,15 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 			
 			// Get the auctions corresponding with this resource request interval
 			string sessionId = interval->sessionId;
+			
+			cout << "session inside the resource request interval:" << sessionId << endl;
 						
 			AgentSession *session = reinterpret_cast<AgentSession *>(asmp->getSession(sessionId));
 		
 			if (session != NULL){
 				auctionSet_t auctions = session->getAuctions();
+				
+				cout << "session inside the resource request interval:" << sessionId << endl;
 				
 				// teardown the session created.
 				anslpc->tg_teardown( new anslp::session_id(session->getAnlspSession())); 
@@ -1636,10 +1649,14 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 					proc->delRequest( *it );
 				}
 				
+				cout << "session inside the resource request interval 1:" << sessionId << endl;
+				
 				if (auctions.size() > 0){
 					// delete the reference to the auction (a session is not referencing it anymore).
 					aucm->decrementReferences(auctions, sessionId);
 				}
+				
+				cout << "session inside the resource request interval 2:" << sessionId << endl;
 							
 				auctionSetIter_t iterAuctions;
 				for (iterAuctions = auctions.begin(); iterAuctions != auctions.end(); ++iterAuctions)
@@ -1655,6 +1672,8 @@ void Agent::handleRemoveResourceRequestInterval(Event *e)
 				if (auctionDb.size() > 0 )
 					// Remove auctions associated  with the resource interval
 					evnt->addEvent(new RemoveAuctionsEvent(auctionDb));
+				
+				cout << "session inside the resource request interval 3:" << sessionId << endl;
 			}
 			else {
 				log->elog(ch,"Could not find the session for the request" );
@@ -1783,12 +1802,12 @@ void Agent::handleSingleObjectAuctioningInteraction(string sessionId, anslp::ans
 			
 				// Build the response for the originator agent.
 				ipap_message conf = ipap_message(domainId, IPAP_VERSION, true);
-				conf.set_seqno(s->getNextMessageId());
+				conf.set_seqno(session->getNextMessageId());
 				conf.set_ackseqno(seqNbr+1);
 				conf.output();
 							
 				// Finally send the message through the anslp client application.
-				anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession().to_string()), 
+				anslpc->tg_bidding( new anslp::session_id(session->getAnlspSession()), 
 									session->getSenderAddress(), destinAddr, 
 									session->getSenderPort(), iport,
 									session->getProtocol(), 
@@ -1934,8 +1953,8 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
 		 handleAuctioningInteraction(e, fds);
 	  break;
 
-	case RESPONSE_CREATE_SESSION:
-		// Immediate execution, so it goes in the handle immediate response. 
+	case CREATE_SESSION:
+		handleResponseCreateSession(e, fds);
 	  break;
 	
 	case CONFIGURE_SESSION:
@@ -1948,30 +1967,6 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
 #endif
         break;
     }
-}
-
-bool Agent::handle_event_immediate_respond(Event *e, fd_sets_t *fds)
-{
-
-//#ifdef DEBUG
-   log->log(ch,"Start handle event immediate respond" );
-//#endif   
-
-    bool pendingExec = true; // By default the event will remain pending.
-   
-    switch (e->getType()) {
-
-		case CREATE_SESSION:
-			handleResponseCreateSession(e, fds);
-			delete e;
-			pendingExec = false;
-		  break;
-
-		default:
-			break;
-    }
-
-	return pendingExec;
 }
 
 /* ----------------------- run ----------------------------- */
@@ -2043,9 +2038,9 @@ void Agent::run()
             // check FD events
             if (cnt > 0)  {
 
-//#ifdef DEBUG			
-				log->log(ch,"In check FD events time:%s", (Timeval::toString(tv)).c_str());
-//#endif
+#ifdef DEBUG			
+				log->dlog(ch,"In check FD events time:%s", (Timeval::toString(tv)).c_str());
+#endif
 
                 if (FD_ISSET( s_sigpipe[0], &rset)) {
                     // handle sig action
@@ -2108,16 +2103,13 @@ void Agent::run()
 			
 			bool pendingExec = true;
 			
-			log->log(ch,"after handleFDEvent events: %d", retEvents.size());
+			log->dlog(ch,"after handleFDEvent events: %d", retEvents.size());
 			
             // schedule events
             if (retEvents.size() > 0) {
 				
                 for (eventVecIter_t iter = retEvents.begin();
                      iter != retEvents.end(); iter++) {
-
-					// Execute events that require immediate response.
-					pendingExec = handle_event_immediate_respond(*iter, &fds);
 										
                     if (pendingExec){
 						evnt->addEvent(*iter);

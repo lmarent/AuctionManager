@@ -52,4 +52,8 @@
     <!-- allow on-demand loading i.e. when new module is used in rule definition --> 
     <PREF NAME="ModuleDynamicLoad" TYPE="Bool">yes</PREF>
   </AGENT_PROCESSOR>  
+  <ANSLP_PROCESSOR>
+    <!-- run as separate thread -->
+    <PREF NAME="Thread" TYPE="Bool">no</PREF>
+  </ANSLP_PROCESSOR>  
 </CONFIG>

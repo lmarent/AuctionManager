@@ -164,8 +164,13 @@ class Agent
     //! handle the activation of resource request intervals.
     void handleActivateResourceRequestInterval(Event *e);
 
+	//! handle the session activation after the anslpd process sends the event.
+	void handleActivateSession(Event *e, fd_sets_t *fds);
+
 	void handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key, 
-					anslp::anslp_ipap_message *ipap_mes, anslp::ResponseAddSessionEvent *resCreate);
+					anslp::anslp_ipap_message *ipap_mes, 
+					std::vector<anslp::msg::anslp_mspec_object *> *mspec_objects,
+					std::vector<anslp::anslp_event_msg *> *events);
 
 	//! handle the response for a session creation previously sent.
 	void handleResponseCreateSession(Event *e, fd_sets_t *fds);
@@ -208,11 +213,7 @@ class Agent
     
     //! handle the interaction arrived from a auctioneer system.
     void handleAuctioningInteraction(Event *e, fd_sets_t *fds);
-    
-	//! This function execute those events that require immediate execution.
-	bool handle_event_immediate_respond(Event *e, fd_sets_t *fds);
-
-		    
+    		    
   public:
 
     /*! \short   construct and initialize a Agent Manager object

@@ -309,17 +309,17 @@ class CreateSessionEvent : public Event
 	
 };
 
-class ConfigureSessionEvent() : public Event
+class ConfigureSessionEvent : public Event
 {
   private:
     
     string sessionId; 
-    anslp::session_id sid;
+    string anslpSessionId;
 
   public:
 
-    ConfigureSessionEvent(string _sessionId, anslp::session_id _sid, unsigned long ival=0, int align=0) 
-      : Event(CONFIGURE_SESSION, ival, align), sessionId(_sessionId), sid(_sid) 
+    ConfigureSessionEvent(string _sessionId, string _sid, unsigned long ival=0, int align=0) 
+      : Event(CONFIGURE_SESSION, ival, align), sessionId(_sessionId), anslpSessionId(_sid) 
     {
         
     }
@@ -334,9 +334,9 @@ class ConfigureSessionEvent() : public Event
 		return sessionId;
 	}
 
-	anslp::session_id getAnslpSession()
+	string getAnslpSession()
 	{
-		return sid;
+		return anslpSessionId;
 	}
 	
 };

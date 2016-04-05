@@ -75,9 +75,11 @@ class AnslpClient
 		
 		string getLocalAddress(void);
 		
+		inline anslp::anslp_daemon * getAnslpDeamon(){ return anslpd; }
+		
 		uint32_t getInitiatorLifetime(void);
 		 
-		void tg_create( const protlib::hostaddress &source_addr, 
+		void tg_create( const string sessionId,  const protlib::hostaddress &source_addr, 
 			    		const protlib::hostaddress &destination_addr,
 						uint16_t source_port, uint16_t dest_port, 
 						uint8_t protocol, uint32_t session_lifetime,
@@ -85,11 +87,24 @@ class AnslpClient
 
 		void tg_teardown(anslp::session_id *sid);
 
+		void tg_install(string sessionId, 
+						vector<anslp::msg::anslp_mspec_object *> mspec_objects);
+
 		void tg_bidding(anslp::session_id *sid, 
 						const protlib::hostaddress &source_addr, 
 						const protlib::hostaddress &destination_addr,
 					    uint16_t source_port, uint16_t dest_port, 
 						uint8_t protocol, ipap_message &message);
+
+		anslp::anslp_event_msg *
+		delayed_tg_bidding(anslp::session_id *sid, 
+						   const protlib::hostaddress &source_addr, 
+						   string destination_addr,
+						   uint16_t source_port, uint16_t dest_port, 
+						   uint8_t protocol, ipap_message &message);
+
+		//! Send delayed events for the anslp queue for processing.
+		void tg_bidding(std::vector<anslp::anslp_event_msg *> *events);
 
 		void tg_bidding(anslp::session_id *sid, 
 						const protlib::hostaddress &source_addr, 

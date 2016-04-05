@@ -145,9 +145,9 @@ public:
 	uint32_t getNextMessageId();
 	
 	//! Set a-nslp application sessionId 
-	void setAnlspSession(anslp::session_id _sid);	
+	void setAnlspSession(string _sid);	
 	
-	anslp::session_id getAnlspSession(){ return sid; }
+	string getAnlspSession(){ return sid; }
 		
 	//! Confirm the response of the message with id mid.
 	void confirmMessage(uint32_t mid);
@@ -171,7 +171,7 @@ protected:
 	string sessionId;
 
 	//! Session id in the a-nslp application
-	anslp::session_id sid;
+	string sid;
 
 	//! List of messages pending for confirmation.
 	pendingMessageList_t pendingMessages;

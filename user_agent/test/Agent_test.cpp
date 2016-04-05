@@ -116,6 +116,8 @@ void Agent_Test::test()
 			AddResourceRequestsEvent *arre = dynamic_cast<AddResourceRequestsEvent *>(evt);
 			CPPUNIT_ASSERT( arre != NULL );
 			
+			cout << "nbr queue:" << agentPtr->anslpc->getAnslpDeamon()->getInstallQueue()->size() << endl;
+			
 			// Process the add resource request message
 			agentPtr->handleEvent(evt, NULL);
 						
@@ -144,6 +146,8 @@ void Agent_Test::test()
 			sessions.clear();
 			
 			string sessionId = ses->getSessionId();
+			
+			cout << "session id created:" << sessionId << endl; 
 						
 			uint32_t seqNo = ses->getNextMessageId();
 			
@@ -164,18 +168,28 @@ void Agent_Test::test()
 			t.seekg(0, std::ios::beg);
 			xmlMessage.assign((std::istreambuf_iterator<char>(t)),std::istreambuf_iterator<char>());
 			
-			cout << "xml Message:" << xmlMessage << endl;
+			//cout << "xml Message:" << xmlMessage << endl;
 			
 			anslp::msg::anslp_ipap_xml_message messRes;
 			anslp::msg::anslp_ipap_message *ipapMesRes = messRes.from_message(xmlMessage);
 			(ipapMesRes->ip_message).set_ackseqno(seqNo);
 			std::string xmlRespMes = messRes.get_message(*ipapMesRes);
 			
-			cout << "xmlResponse  Message:" << xmlRespMes << endl;
+			//cout << "xmlResponse  Message:" << xmlRespMes << endl;
 			
 			// Now we create the message to configure the session.
+									
+			anslp::AnslpEvent *evtAddRet = agentPtr->anslpc->getAnslpDeamon()->getInstallQueue()->dequeue_timedwait(1000);
+
+			anslp::AddAnslpSessionEvent *aase = 
+					dynamic_cast<anslp::AddAnslpSessionEvent *>(evtAddRet);			
+			
 			auction::ConfigureSessionEvent *evConf = 
-				new auction::ConfigureSessionEvent(sessionId, anslp::session_id());
+				new auction::ConfigureSessionEvent(aase->getSession(), aase->getAnslpSession());
+			
+			string anslpsession = aase->getAnslpSession();
+			
+			cout << "anslpsession:" << anslpsession << endl;
 			
 			agentPtr->evnt->addEvent( evConf );
 			
@@ -183,10 +197,28 @@ void Agent_Test::test()
 			ConfigureSessionEvent *evConf2 = dynamic_cast<ConfigureSessionEvent *>(evt);
 			CPPUNIT_ASSERT( evConf2 != NULL );
 			
+			// Handle the activate session event.
+			agentPtr->handleEvent(evt, NULL);			
+			
+			// Verify the active session handler.
+			sessions = agentPtr->asmp->getSessions();
+			for (sesIter = sessions.begin(); sesIter != sessions.end(); ++sesIter){
+				ses = *sesIter;
+				asession = dynamic_cast<AgentSession *>(ses);
+				CPPUNIT_ASSERT( asession->getResourceRequestSet() == "set1");
+				CPPUNIT_ASSERT( asession->getResourceRequestName() == "1");
+				CPPUNIT_ASSERT( asession->getState() == SS_ACTIVE );
+				CPPUNIT_ASSERT( asession->getAnlspSession() == anslpsession );
+			}
+			
+			sessions.clear();
+						
+			// Get the response from the anslp application.
+			
 			anslp::mspec_rule_key key;
 			anslp::FastQueue retQueue;
 			
-			CreateSessionEvent *rcs3 = new CreateSessionEvent(sessionId, &retQueue);
+			CreateSessionEvent *rcs3 = new CreateSessionEvent(anslpsession, &retQueue);
 			rcs3->setObject(key, ipapMesRes);
 			
 			agentPtr->evnt->addEvent( rcs3 );
@@ -194,13 +226,10 @@ void Agent_Test::test()
 			evt = agentPtr->evnt.get()->getNextEvent();
 			CreateSessionEvent *rcs = dynamic_cast<CreateSessionEvent *>(evt);
 			CPPUNIT_ASSERT( rcs != NULL );
-
-			// Process the add Response create session event.
-			agentPtr->handle_event_immediate_respond(evt, NULL);
 			
-			// Verify that it creates a new event in the queue.
-			CPPUNIT_ASSERT( retQueue.size() == 1 );
-						
+			// Process the add Response create session event.
+			agentPtr->handleEvent(evt, NULL);
+								
 			// Verify that templates have been created.
 			agentTemplateListIter_t tmplIter = agentPtr->agentTemplates.find(1);
 		
@@ -245,6 +274,8 @@ void Agent_Test::test()
 				++nbrMessages;
 			}
 			
+			cout << "Here I am 4" << endl;
+			
 			CPPUNIT_ASSERT( nbrMessages == 0);
 						
 			// Verify that a new Push execute event was created.
@@ -280,24 +311,37 @@ void Agent_Test::test()
 			
 			int numEvents = 0;
 			while (numEvents <=1){
+				
 				// Depending on execution time, it can create first the activate event or the trasmit event
 				if (evt->getType() == TRANSMIT_BIDDING_OBJECTS) {
+					
+					cout << "Here I am 4c" << endl;
+					
 					// Verify that a new transmit bidding Object event was created.
 					TransmitBiddingObjectsEvent *tboe = dynamic_cast<TransmitBiddingObjectsEvent *>(evt);
 					CPPUNIT_ASSERT( tboe != NULL );
+					
+					cout << "Here I am 4c2" << endl;
 						
 					numBids = 0;
 					new_bids = ((TransmitBiddingObjectsEvent *)evt)->getBiddingObjects();
 					for (bidIter = new_bids->begin(); bidIter != new_bids->end(); ++bidIter){
 						numBids++;
 					} 
+					
+					cout << "Here I am 4c3" << endl;
 						
 					CPPUNIT_ASSERT( numBids == 1);
 
 					// Handle the Transmit-Bidding-Objects event.
 					agentPtr->handleEvent(evt, NULL);
+					
+					cout << "Here I am 4c4" << endl;
 				}	   
 				else if (evt->getType() == ACTIVATE_BIDDING_OBJECTS) {
+					
+					cout << "Here I am 4d" << endl;
+					
 					ActivateBiddingObjectsEvent *aboe = dynamic_cast<ActivateBiddingObjectsEvent *>(evt);
 					CPPUNIT_ASSERT( aboe != NULL );
 						
@@ -320,22 +364,31 @@ void Agent_Test::test()
 				evt = agentPtr->evnt.get()->getNextEvent();
 			}
 			
+			cout << "Here I am 5" << endl;
 			
 			numEvents = 0;
 			while (numEvents <=2){
 							
 				if (evt->getType() == REMOVE_RESOURCE_REQUEST_INTERVAL) {
+					cout << "Here I am 6" << endl;
 					checkRemoveRequestEvent(evt);
+					cout << "Here I am 6a" << endl;
 				}		
 				else if (evt->getType() == REMOVE_AUCTIONS) {
+					cout << "Here I am 7" << endl;
 					checkRemoveAuctionEvent(evt);
+					cout << "Here I am 7a" << endl;
 				}	
 				else if (evt->getType() == REMOVE_BIDDING_OBJECTS) {
+					cout << "Here I am 8" << endl;
 					checkRemoveBiddingObjectEvent(evt);
+					cout << "Here I am 8a" << endl;
 				}	
 				numEvents++;
 				evt = agentPtr->evnt.get()->getNextEvent();
 			}
+			
+			cout << "Here I am 6" << endl;
 			
 		}	
 		

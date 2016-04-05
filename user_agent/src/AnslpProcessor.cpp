@@ -76,10 +76,7 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 {
 	assert( evt != NULL );
 	
-	if ( is_check_event(evt) ) {
-		anslp::CheckEvent *che =
-			dynamic_cast<anslp::CheckEvent *>(evt);
-		
+	if ( is_check_event(evt) ) {		
 		// This message type must not be comming, log the error.
 		log->elog(ch,"Received message check session, which is not expected");
 		return;
@@ -102,16 +99,16 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 		
 		e->push_back(retEvent);	
 		
-		log->log(ch,"put in the vector add session event in anslp processor %d", e->size());
+		log->dlog(ch,"put in the vector add session event in anslp processor %d", e->size());
 		
 		return;
 	}
 
 	if ( is_add_anslp_session_event(evt) ) {
-		anlsp::AddAnslpSessionEvent *aase = 
+		anslp::AddAnslpSessionEvent *aase = 
 			dynamic_cast<anslp::AddAnslpSessionEvent *>(evt);
 			
-		log->log(ch,"starting to process add anslp session event in anslp processor");
+		log->dlog(ch,"starting to process add anslp session event in anslp processor");
 		
 
 		auction::ConfigureSessionEvent *retEvent = 
@@ -119,22 +116,17 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 
 		e->push_back(retEvent);	
 		
-		log->log(ch,"put in the vector add session event in anslp processor %d", e->size());
+		log->dlog(ch,"put in the vector add session event in anslp processor %d", e->size());
 			
 	}
 
-	if ( is_response_addsession_event(evt) ) {
-		anslp::ResponseAddSessionEvent *ras =
-			dynamic_cast<anslp::ResponseAddSessionEvent *>(evt);
-		
+	if ( is_response_addsession_event(evt) ) {		
 		// This message type must not be comming, log the error.
 		log->elog(ch,"Received message response add session, which is not expected");
 		return;
 	}	
 
 	if ( is_response_checksession_event(evt) ) {
-		anslp::ResponseCheckSessionEvent *che =
-			dynamic_cast<anslp::ResponseCheckSessionEvent *>(evt);
 			
 		// This message type must not be comming, log the error.
 		log->elog(ch,"Received message response check session, which is not expected");	
@@ -142,18 +134,13 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 	}
 
 	if ( is_removesession_event(evt) ) {
-		anslp::RemoveSessionEvent *che =
-			dynamic_cast<anslp::RemoveSessionEvent *>(evt);
 			
 		// This message type must not be comming, log the error.
 		log->elog(ch,"Received message remove session, which is not expected");	
 		return;
 	}
 
-	if ( is_response_removesession_event(evt) ) {
-		anslp::ResponseRemoveSessionEvent *che =
-			dynamic_cast<anslp::ResponseRemoveSessionEvent *>(evt);
-			
+	if ( is_response_removesession_event(evt) ) {			
 		// This message type must not be comming, log the error.
 		log->elog(ch,"Received message response Remove session, which is not expected");	
 		return;
@@ -209,7 +196,7 @@ AnslpProcessor::handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets
 
 	MP(benchmark_journal::POST_PROCESSING);
 	
-	log->log(ch,"Finishing handleFDEvent anslp processor %d", e->size());
+	log->dlog(ch,"Finishing handleFDEvent anslp processor %d", e->size());
 	
 	return 0;
 }

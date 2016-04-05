@@ -171,7 +171,7 @@ Session::getNextMessageId()
 }
 
 void 
-Session::setAnlspSession(anslp::session_id _sid)
+Session::setAnlspSession(string _sid)
 {
 	sid = _sid;
 }

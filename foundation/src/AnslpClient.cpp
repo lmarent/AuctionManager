@@ -154,6 +154,8 @@ AnslpClient::tg_create( const string sessionId,
 #ifdef DEBUG
     log->dlog(ch,"Starting tg_create");
 #endif
+	
+	anslp_ipap_message mess(message); 
 		
     // Build the vector of objects to be configured.
     vector<msg::anslp_mspec_object *> mspec_objects;
@@ -168,7 +170,7 @@ AnslpClient::tg_create( const string sessionId,
    				       dest_port, protocol, mspec_objects, 
 				       session_lifetime, 
 				       selection_auctioning_entities::sme_any, 
-					   anslpd->installQueue);
+					   anslpd->getInstallQueue());
 
     anslp_event_msg *msg = new anslp_event_msg(session_id(), e);
         
@@ -178,12 +180,7 @@ AnslpClient::tg_create( const string sessionId,
     o << " session id:" << msg->get_session_id().to_string(); 
     log->log(ch,"%s", o.str().c_str());
 //#endif
-
-	struct timespec ts;
-	ts.tv_sec = 0;
-    ts.tv_nsec = 300000000;
 	
-    int retry = 0;
     bool queued = false;
 
 #ifdef DEBUG
@@ -219,6 +216,38 @@ AnslpClient::tg_teardown(anslp::session_id *sid)
 #ifdef DEBUG
     log->dlog(ch,"Ending tg_teardown ");
 #endif        
+
+}
+
+
+void 
+AnslpClient::tg_install(string sessionId, 
+						vector<msg::anslp_mspec_object *> mspec_objects)
+{
+
+
+//#ifdef DEBUG
+    log->log(ch,"Starting tg_install sessionId:%s", sessionId.c_str());
+//#endif        
+	
+	anslp::session_id *sid = new anslp::session_id(sessionId);
+	
+    // Create a new event for launching the configure event.
+    anslp::event *e = new anslp::api_install_event(sid, mspec_objects, NULL);
+
+    anslp_event_msg *msg = new anslp_event_msg(*sid, e);
+
+//#ifdef DEBUG
+    log->log(ch,"Message id: %lld sessionid:%s", msg->get_id(), 
+							msg->get_session_id().to_string().c_str());
+//#endif	
+	
+    anslpd->get_fqueue()->enqueue(msg);
+	
+        
+//#ifdef DEBUG
+    log->log(ch,"Ending tg_install ");
+//#endif  
 
 }
 
@@ -262,6 +291,55 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
     log->dlog(ch,"Ending tg_bidding ");
 #endif  
 
+}
+
+anslp_event_msg *
+AnslpClient::delayed_tg_bidding(anslp::session_id *sid, 
+								const protlib::hostaddress &source_addr, 
+								string destination_addr,
+								uint16_t source_port, uint16_t dest_port, 
+								uint8_t protocol, ipap_message &message)
+{
+
+#ifdef DEBUG
+    log->dlog(ch,"Starting delayed_tg_bidding ");
+#endif        
+
+	protlib::hostaddress dest_addr;
+	dest_addr.set_ip(destination_addr);
+
+    // Build an ipap_message for a create session, which only has 
+    // auction template options.
+	// Build the request message 
+
+	anslp_ipap_message mess(message);    
+            	    
+    // Build the vector of objects to be configured.
+    vector<msg::anslp_mspec_object *> mspec_objects;
+    mspec_objects.push_back(mess.copy());
+
+    // Create a new event for launching the configure event.
+    event *e = new api_bidding_event(sid, source_addr, dest_addr, source_port, 
+   				       dest_port, protocol, mspec_objects, NULL);
+
+    anslp_event_msg *msg = new anslp_event_msg(*sid, e);
+	        
+#ifdef DEBUG
+    log->dlog(ch,"Ending delayed_tg_bidding - Message id: %lld", msg->get_id());
+#endif  
+
+	return msg;
+}
+
+void 
+AnslpClient::tg_bidding(std::vector<anslp::anslp_event_msg *> *events)
+{
+	std::vector<anslp::anslp_event_msg *>::iterator it;
+	
+	for (it = events->begin(); it != events->end(); it++)
+	{
+		anslpd->get_fqueue()->enqueue(*it);
+	}
 }
 
 void 
