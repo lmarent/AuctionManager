@@ -125,9 +125,7 @@ void Auctioner_Test::test()
 			// Process the push execution event.
 			auctionerPtr->handleEvent(evt, NULL);
 			
-			
-			// Test the arrival of a new session.
-			
+			// Test the arrival of a new session.			
 			anslp::session_id *session1 = new anslp::session_id();
 			string sessionId = session1->to_string();
 			saveDelete(session1);
@@ -171,10 +169,8 @@ void Auctioner_Test::test()
 			CreateCheckSessionEvent *ccse = dynamic_cast<CreateCheckSessionEvent *>(evt);
 			CPPUNIT_ASSERT( ccse != NULL );
 			
-			auctionerPtr->handle_event_immediate_respond(evt, NULL);
-			
-			CPPUNIT_ASSERT( queueCheck.size() == 1 );
-			
+			auctionerPtr->handleEvent(evt, NULL);
+						
 			// once check the message, we proceed to create the session,
 			CreateSessionEvent *cse1 = new CreateSessionEvent(sessionId, &queueCheck);
 			cse1->setObject( key, ipapMesChec);
@@ -184,11 +180,8 @@ void Auctioner_Test::test()
 			CreateSessionEvent *cse = dynamic_cast<CreateSessionEvent *>(evt);
 			CPPUNIT_ASSERT( cse != NULL );
 							
-			auctionerPtr->handle_event_immediate_respond(evt, NULL);
-			
-			// Verify that it creates a new event in the queue.
-			CPPUNIT_ASSERT( queueCheck.size() == 2 );
-			
+			auctionerPtr->handleEvent(evt, NULL);
+						
 			saveDelete(objectsCheck);
 			
 			// TODO AM: what to do if there is no auction satisfying the given parameters.
@@ -298,21 +291,9 @@ void Auctioner_Test::test()
 			
 			CPPUNIT_ASSERT( numAllocs == 1);
 			auctionerPtr->handleEvent(evt, NULL);
-			
-			// Verify that it creates a new bidding object.
-			// Verify that a new bidding object was created.
-			CPPUNIT_ASSERT( auctionerPtr->bidm->getNumBiddingObjects() == 2 );
-
-			evt = auctionerPtr->evnt.get()->getNextEvent();
-			
-			// Verify that a new activate bidding object was generated.
-			aboe = dynamic_cast<ActivateBiddingObjectsEvent *>(evt);
-			CPPUNIT_ASSERT( aboe != NULL );
-			
-			auctionerPtr->handleEvent(evt, NULL);
 		
 			evt = auctionerPtr->evnt.get()->getNextEvent();
-			
+
 			// Verify that a transmit bidding object was generated.
 			TransmitBiddingObjectsEvent *tboe = dynamic_cast<TransmitBiddingObjectsEvent *>(evt);
 			CPPUNIT_ASSERT( tboe != NULL );
@@ -327,7 +308,16 @@ void Auctioner_Test::test()
 
 			// Handle the Transmit-Bidding-Objects event.
 			auctionerPtr->handleEvent(evt, NULL);
-						
+
+			evt = auctionerPtr->evnt.get()->getNextEvent();
+			
+			// Verify that a new activate bidding object was generated.
+			aboe = dynamic_cast<ActivateBiddingObjectsEvent *>(evt);
+			CPPUNIT_ASSERT( aboe != NULL );
+			
+			// Handle the Activate-Bidding-Objects event.
+			auctionerPtr->handleEvent(evt, NULL);
+					
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 			while ( evt != NULL ){
 				cout << eventNames[evt->getType()].c_str() << "time:" << Timeval::toString(evt->getTime()) << endl;
@@ -350,10 +340,7 @@ void Auctioner_Test::test()
 				RemoveSessionEvent *rse = dynamic_cast<RemoveSessionEvent *>(evt);
 				CPPUNIT_ASSERT( rse != NULL );
 								
-				auctionerPtr->handle_event_immediate_respond(evt, NULL);
-
-				// Verify that it creates a new event in the queue.
-				CPPUNIT_ASSERT( queueCheck.size() == 3 );
+				auctionerPtr->handleEvent(evt, NULL);
 				
 				break;
 			}

@@ -221,6 +221,37 @@ AnslpClient::tg_teardown(anslp::session_id *sid)
 
 
 void 
+AnslpClient::tg_check(string sessionId, vector<msg::anslp_mspec_object *> mspec_objects)
+{
+
+
+//#ifdef DEBUG
+    log->log(ch,"Starting tg_check sessionId:%s", sessionId.c_str());
+//#endif        
+	
+	anslp::session_id *sid = new anslp::session_id(sessionId);
+	
+    // Create a new event for launching the configure event.
+    anslp::event *e = new anslp::api_check_event(sid, mspec_objects, NULL);
+
+    anslp_event_msg *msg = new anslp_event_msg(*sid, e);
+
+//#ifdef DEBUG
+    log->log(ch,"Message id: %lld sessionid:%s", msg->get_id(), 
+							msg->get_session_id().to_string().c_str());
+//#endif	
+	
+    anslpd->get_fqueue()->enqueue(msg);
+	
+        
+//#ifdef DEBUG
+    log->log(ch,"Ending tg_check ");
+//#endif  
+
+}
+
+
+void 
 AnslpClient::tg_install(string sessionId, 
 						vector<msg::anslp_mspec_object *> mspec_objects)
 {
@@ -356,6 +387,37 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
    tg_bidding(sid, source_addr, dest_addr, source_port, dest_port, protocol, message);
 
 }						
+
+
+void 
+AnslpClient::tg_remove(string sessionId, vector<msg::anslp_mspec_object *> mspec_objects)
+{
+
+
+//#ifdef DEBUG
+    log->log(ch,"Starting tg_remove sessionId:%s", sessionId.c_str());
+//#endif        
+	
+	anslp::session_id *sid = new anslp::session_id(sessionId);
+	
+    // Create a new event for launching the configure event.
+    anslp::event *e = new anslp::api_remove_event(sid, mspec_objects, NULL);
+
+    anslp_event_msg *msg = new anslp_event_msg(*sid, e);
+
+//#ifdef DEBUG
+    log->log(ch,"Message id: %lld sessionid:%s", msg->get_id(), 
+							msg->get_session_id().to_string().c_str());
+//#endif	
+	
+    anslpd->get_fqueue()->enqueue(msg);
+	
+        
+//#ifdef DEBUG
+    log->log(ch,"Ending tg_install ");
+//#endif  
+
+}
 
 
 

@@ -974,7 +974,8 @@ void Auctioner::handlePushExecution(Event *e, fd_sets_t *fds)
 
 void 
 Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
-			anslp::anslp_ipap_message *ipap_mes, anslp::ResponseCheckSessionEvent *resCheck )
+			anslp::anslp_ipap_message *ipap_mes, 
+			std::vector<anslp::msg::anslp_mspec_object *> *mspec_objects )
 {
 
 //#ifdef DEBUG
@@ -1060,8 +1061,8 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 			message_return = aucm->get_ipap_message(auctions, iter->second, useIPV6, 
 										sAddressIPV4, sAddressIPV6, port);
 
-			anslp::anslp_ipap_message ipap_mes_return(*message_return);
-			resCheck->setObject(key, ipap_mes_return.copy());
+			anslp::anslp_ipap_message ipap_mes_return(*message_return);	
+			mspec_objects->push_back(ipap_mes_return.copy());		
 
 #ifdef DEBUG
 			anslp::msg::anslp_ipap_xml_message xmlMesdebug;
@@ -1078,7 +1079,7 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 		saveDelete(auctions);
 			
 #ifdef DEBUG
-		log->dlog(ch,"Ending handling single check session" );
+		log->log(ch,"Ending handling single check session" );
 #endif
 
 	}  catch (Error &err) {
@@ -1104,7 +1105,7 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 {
 
 //#ifdef DEBUG
-    
+    log->dlog(ch,"starting event create check session" );
 //#endif
 
 	anslp::objectList_t *objList = NULL;
@@ -1126,9 +1127,9 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 		// We assumming that the sender will send the message again.
 		throw Error(e.what());
     }
-    
-    resCheck = new anslp::ResponseCheckSessionEvent();
-    
+
+	std::vector<anslp::msg::anslp_mspec_object *> mspec_objects;
+        
     if (objList != NULL){
 		
 		anslp::objectListIter_t it;
@@ -1137,7 +1138,7 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 			anslp::mspec_rule_key key = it->first;
 			anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
 			if (ipap_mes != NULL)
-				handleSingleCheckSession(sessionId, key, ipap_mes, resCheck);
+				handleSingleCheckSession(sessionId, key, ipap_mes, &mspec_objects);
 					
 		}
 		
@@ -1145,10 +1146,8 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 		log->elog(ch, "The event does not have a valid list of objects");
 	}
 
-	// Send the response for every request.
-	if (retQueue != NULL){
-		retQueue->enqueue(resCheck);
-	}	
+	// Confirm for the anslp application installed objects.
+	anslpc->tg_check( sessionId, mspec_objects);
 
 #ifdef DEBUG
     log->dlog(ch,"ending event create check session" );
@@ -1158,7 +1157,7 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 
 void 
 Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key, 
-			anslp::anslp_ipap_message *ipap_mes, anslp::ResponseAddSessionEvent *resCreate)
+			anslp::anslp_ipap_message *ipap_mes, std::vector<anslp::msg::anslp_mspec_object *> *mspec_objects)
 {
 
 	ipap_message *message_return = NULL;
@@ -1296,8 +1295,7 @@ Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key
 
 			saveDelete(auctions);
 
-			resCreate->setObject(key, ipap_mes_return.copy());			
-
+			mspec_objects->push_back(ipap_mes_return.copy());
 
 #ifdef DEBUG
 			anslp::msg::anslp_ipap_message messagedebug(ipap_mes_return);
@@ -1363,7 +1361,7 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 		throw Error(e.what());
 	}
 	
-    resCreate = new anslp::ResponseAddSessionEvent();
+	std::vector<anslp::msg::anslp_mspec_object *> mspec_objects;
 	
     if (objList != NULL){
 		
@@ -1373,7 +1371,7 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 			anslp::mspec_rule_key key = it->first;
 			anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
 			if (ipap_mes != NULL)
-				handleSingleCreateSession(sessionId, key, ipap_mes, resCreate);
+				handleSingleCreateSession(sessionId, key, ipap_mes, &mspec_objects);
 					
 		}
 	} else {
@@ -1381,13 +1379,10 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 		log->log(ch,"ending with null event create session %s ", sessionId.c_str() );
 	}
 
-	// Send the response for every request.
-	if (retQueue != NULL){
-		retQueue->enqueue(resCreate);
-		log->log(ch,"ending with value event create session %s ", sessionId.c_str() );
-	} else {
-		log->log(ch,"ending with null event create session %s ", sessionId.c_str() );
-	}	
+
+	// Confirm for the anslp application installed objects.
+	anslpc->tg_install( sessionId, mspec_objects);
+
 
 //#ifdef DEBUG
     log->log(ch,"Ending event create session" );
@@ -1423,8 +1418,8 @@ void Auctioner::handleRemoveSession(Event *e, fd_sets_t *fds)
 		throw Error(e.what());
 	}
 	
-    resRemove = new anslp::ResponseRemoveSessionEvent();
-
+	std::vector<anslp::msg::anslp_mspec_object *> mspec_objects;
+		
 	// Remove the session from the container.
 	sesm->delSession(sessionId, evnt.get());
 
@@ -1436,17 +1431,15 @@ void Auctioner::handleRemoveSession(Event *e, fd_sets_t *fds)
 			anslp::mspec_rule_key key = it->first;
 			anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
 			if (ipap_mes != NULL)
-				resRemove->setObject(key, ipap_mes->copy());			
-					
+				mspec_objects.push_back(ipap_mes->copy());	
 		}
 	} else {
 		log->elog(ch, "The event does not have a valid list of objects");
 	}
 
-	// Send the response for every request.
-	if (retQueue != NULL){
-		retQueue->enqueue(resRemove);
-	}	
+	// Confirm for the anslp application installed objects.
+	anslpc->tg_remove( sessionId, mspec_objects);
+
 }
 
 
@@ -1798,6 +1791,18 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 	case AUCTION_INTERACTION:
 		handleAuctioningInteraction(e,fds);
 		break;
+
+    case CREATE_SESSION:
+		handleCreateSession(e,fds);
+		break;
+
+    case CREATE_CHECK_SESSION:
+		handleCreateCheckSession(e,fds);
+		break;
+
+    case REMOVE_SESSION:
+		handleRemoveSession(e,fds);
+		break;
 		
     default:
 
@@ -1808,42 +1813,6 @@ void Auctioner::handleEvent(Event *e, fd_sets_t *fds)
 		}
 		break;
     }
-}
-
-bool Auctioner::handle_event_immediate_respond(Event *e, fd_sets_t *fds)
-{
-
-#ifdef DEBUG
-        log->dlog(ch,"Start handle event immediate respond" );
-#endif   
-   
-    bool pendingExec = true; // By default the event will remain pending.
-   
-    switch (e->getType()) {
-    
-    case CREATE_SESSION:
-		handleCreateSession(e,fds);
-		delete e;
-		pendingExec = false;
-		break;
-
-    case CREATE_CHECK_SESSION:
-		handleCreateCheckSession(e,fds);
-		delete e;
-		pendingExec = false;
-		break;
-
-    case REMOVE_SESSION:
-		handleRemoveSession(e,fds);
-		delete e;
-		pendingExec = false;
-		break;
-
-    default:
-		break;
-    }
-    
-    return pendingExec;
 }
 
 
@@ -1981,22 +1950,13 @@ void Auctioner::run()
 #ifdef DEBUG			
 			log->dlog(ch,"after anslp proc handleFDEvent");
 #endif
-
-			
-			bool pendingExec = true;
 			
             // schedule events
             if (retEvents.size() > 0) {
                 for (eventVecIter_t iter = retEvents.begin();
                      iter != retEvents.end(); iter++) {
-
-					// Execute events that require immediate response.
-					pendingExec = handle_event_immediate_respond(*iter, &fds);
-					
-                    if (pendingExec){
-						evnt->addEvent(*iter);
-					} 
-					
+					evnt->addEvent(*iter);
+				
                 }
                 retEvents.clear(); 
             }
