@@ -975,7 +975,7 @@ void Auctioner::handlePushExecution(Event *e, fd_sets_t *fds)
 void 
 Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 			anslp::anslp_ipap_message *ipap_mes, 
-			std::vector<anslp::msg::anslp_mspec_object *> *mspec_objects )
+			anslp::objectList_t *objectList )
 {
 
 //#ifdef DEBUG
@@ -1062,7 +1062,8 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 										sAddressIPV4, sAddressIPV6, port);
 
 			anslp::anslp_ipap_message ipap_mes_return(*message_return);	
-			mspec_objects->push_back(ipap_mes_return.copy());		
+			objectList->insert(std::pair<anslp::mspec_rule_key, 
+										 anslp::msg::anslp_mspec_object *>(key,ipap_mes_return.copy()));
 
 #ifdef DEBUG
 			anslp::msg::anslp_ipap_xml_message xmlMesdebug;
@@ -1128,7 +1129,7 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 		throw Error(e.what());
     }
 
-	std::vector<anslp::msg::anslp_mspec_object *> mspec_objects;
+	anslp::objectList_t objListRet;
         
     if (objList != NULL){
 		
@@ -1138,7 +1139,7 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 			anslp::mspec_rule_key key = it->first;
 			anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
 			if (ipap_mes != NULL)
-				handleSingleCheckSession(sessionId, key, ipap_mes, &mspec_objects);
+				handleSingleCheckSession(sessionId, key, ipap_mes, &objListRet);
 					
 		}
 		
@@ -1147,7 +1148,7 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 	}
 
 	// Confirm for the anslp application installed objects.
-	anslpc->tg_check( sessionId, mspec_objects);
+	anslpc->tg_check( sessionId, objListRet);
 
 #ifdef DEBUG
     log->dlog(ch,"ending event create check session" );
@@ -1157,7 +1158,8 @@ void Auctioner::handleCreateCheckSession(Event *e, fd_sets_t *fds)
 
 void 
 Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key, 
-			anslp::anslp_ipap_message *ipap_mes, std::vector<anslp::msg::anslp_mspec_object *> *mspec_objects)
+			anslp::anslp_ipap_message *ipap_mes, 
+			anslp::objectList_t *objectList)
 {
 
 	ipap_message *message_return = NULL;
@@ -1294,9 +1296,10 @@ Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key
 			sesm->addSession(s); 
 
 			saveDelete(auctions);
-
-			mspec_objects->push_back(ipap_mes_return.copy());
-
+			
+			objectList->insert(std::pair<anslp::mspec_rule_key, 
+										 anslp::msg::anslp_mspec_object *>(key,ipap_mes_return.copy()));
+			
 #ifdef DEBUG
 			anslp::msg::anslp_ipap_message messagedebug(ipap_mes_return);
 			anslp::msg::anslp_ipap_xml_message xmlMesdebug;
@@ -1361,7 +1364,7 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 		throw Error(e.what());
 	}
 	
-	std::vector<anslp::msg::anslp_mspec_object *> mspec_objects;
+	anslp::objectList_t objListRet;
 	
     if (objList != NULL){
 		
@@ -1371,7 +1374,7 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 			anslp::mspec_rule_key key = it->first;
 			anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
 			if (ipap_mes != NULL)
-				handleSingleCreateSession(sessionId, key, ipap_mes, &mspec_objects);
+				handleSingleCreateSession(sessionId, key, ipap_mes, &objListRet);
 					
 		}
 	} else {
@@ -1381,7 +1384,7 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 
 
 	// Confirm for the anslp application installed objects.
-	anslpc->tg_install( sessionId, mspec_objects);
+	anslpc->tg_install( sessionId, objListRet );
 
 
 //#ifdef DEBUG
@@ -1418,7 +1421,7 @@ void Auctioner::handleRemoveSession(Event *e, fd_sets_t *fds)
 		throw Error(e.what());
 	}
 	
-	std::vector<anslp::msg::anslp_mspec_object *> mspec_objects;
+	anslp::objectList_t objListRet;
 		
 	// Remove the session from the container.
 	sesm->delSession(sessionId, evnt.get());
@@ -1430,15 +1433,17 @@ void Auctioner::handleRemoveSession(Event *e, fd_sets_t *fds)
 				
 			anslp::mspec_rule_key key = it->first;
 			anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
-			if (ipap_mes != NULL)
-				mspec_objects.push_back(ipap_mes->copy());	
+			if (ipap_mes != NULL){
+				objListRet.insert(std::pair<anslp::mspec_rule_key, 
+										 anslp::msg::anslp_mspec_object *>(key,ipap_mes->copy()));
+			}							 
 		}
 	} else {
 		log->elog(ch, "The event does not have a valid list of objects");
 	}
 
 	// Confirm for the anslp application installed objects.
-	anslpc->tg_remove( sessionId, mspec_objects);
+	anslpc->tg_remove( sessionId, objListRet);
 
 }
 
