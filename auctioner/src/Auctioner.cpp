@@ -990,6 +990,13 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 
 		ipap_message message = ipap_mes->ip_message;
 
+//#ifdef DEBUG
+		anslp::msg::anslp_ipap_message messagedebug1(message);
+		anslp::msg::anslp_ipap_xml_message xmlMesdebug1;
+		string xmlMessagedebug1 = xmlMesdebug1.get_message(messagedebug1);
+		log->log(ch,xmlMessagedebug1.c_str() );
+//#endif
+
 		ostringstream os;
 		auctions = proc->getApplicableAuctions(&message);
 			
@@ -1069,8 +1076,7 @@ Auctioner::handleSingleCheckSession(string sessionId, anslp::mspec_rule_key key,
 			string xmlMessagedebug = xmlMesdebug.get_message(ipap_mes_return);
 			log->dlog(ch,xmlMessagedebug.c_str() );
 #endif
-
-			
+		
 			saveDelete(message_return);
 			
 		} 
@@ -1164,19 +1170,28 @@ Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key
 	auctionDB_t *auctions = NULL;
 	auction::Session *s = NULL;
 
-#ifdef DEBUG
-	log->dlog(ch,"starting handleSingleCreateSession" );
-#endif		
+//#ifdef DEBUG
+	log->log(ch,"starting handleSingleCreateSession" );
+//#endif		
 
 	try{
     
 		ipap_message message = ipap_mes->ip_message;
 
+//#ifdef DEBUG
+		anslp::msg::anslp_ipap_message messagedebug1(message);
+		anslp::msg::anslp_ipap_xml_message xmlMesdebug1;
+		string xmlMessagedebug1 = xmlMesdebug1.get_message(messagedebug1);
+		log->log(ch,xmlMessagedebug1.c_str() );
+//#endif		
+
+
 		auctions = proc->getApplicableAuctions(&message);
 
-#ifdef DEBUG
-		log->dlog(ch,"# returned auctions: %d", auctions->size() );
-#endif		
+//#ifdef DEBUG
+		log->log(ch,"# returned auctions: %d", auctions->size() );
+//#endif		
+
 
 		// Read Local Address and port to send 
 		string sAddress, sPort;
@@ -1312,9 +1327,9 @@ Auctioner::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key
 			
 		}
 		
-#ifdef DEBUG
-		log->dlog(ch,"Ending event create session" );
-#endif
+//#ifdef DEBUG
+		log->log(ch,"Ending event create session" );
+//#endif
 
     } catch (Error &err) {
 		log->elog( ch, err.getError().c_str() );	
@@ -1378,7 +1393,9 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 		log->elog(ch, "The event does not have a valid list of objects");
 		log->log(ch,"ending with null event create session %s ", sessionId.c_str() );
 	}
-
+	
+	
+	log->log(ch,"Nbr objects installed %d ", mspec_objects.size() );
 
 	// Confirm for the anslp application installed objects.
 	anslpc->tg_install( sessionId, mspec_objects);
