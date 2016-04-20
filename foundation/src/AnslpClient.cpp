@@ -158,20 +158,21 @@ AnslpClient::tg_create( const string sessionId,
 	anslp_ipap_message mess(message); 
 		
     // Build the vector of objects to be configured.
-    vector<msg::anslp_mspec_object *> mspec_objects;
-    mspec_objects.push_back(mess.copy());
 
 #ifdef DEBUG
     log->dlog(ch,"message pushed");
 #endif
 
     // Create a new event for launching the configure event.
-    event *e = new api_create_event(sessionId, source_addr, destination_addr, source_port, 
-   				       dest_port, protocol, mspec_objects, 
+    api_create_event *e = new api_create_event(sessionId, source_addr, destination_addr, source_port, 
+   				       dest_port, protocol,  
 				       session_lifetime, 
 				       selection_auctioning_entities::sme_any, 
 					   anslpd->getInstallQueue());
-
+	
+	// Assign the object to install
+	mspec_rule_key key;
+	e->setObject(key, mess.copy());
     anslp_event_msg *msg = new anslp_event_msg(session_id(), e);
         
 //#ifdef DEBUG
@@ -221,7 +222,7 @@ AnslpClient::tg_teardown(anslp::session_id *sid)
 
 
 void 
-AnslpClient::tg_check(string sessionId, vector<msg::anslp_mspec_object *> mspec_objects)
+AnslpClient::tg_check(string sessionId, objectList_t &mspec_objects)
 {
 
 
@@ -232,8 +233,13 @@ AnslpClient::tg_check(string sessionId, vector<msg::anslp_mspec_object *> mspec_
 	anslp::session_id *sid = new anslp::session_id(sessionId);
 	
     // Create a new event for launching the configure event.
-    anslp::event *e = new anslp::api_check_event(sid, mspec_objects, NULL);
-
+    anslp::api_check_event *e = new anslp::api_check_event(sid, NULL);
+    
+    objectListIter_t it;
+	for (it = mspec_objects.begin(); it != mspec_objects.end(); it++){
+		e->setObject(it->first, it->second->copy());
+	}
+	
     anslp_event_msg *msg = new anslp_event_msg(*sid, e);
 
 //#ifdef DEBUG
@@ -253,7 +259,7 @@ AnslpClient::tg_check(string sessionId, vector<msg::anslp_mspec_object *> mspec_
 
 void 
 AnslpClient::tg_install(string sessionId, 
-						vector<msg::anslp_mspec_object *> mspec_objects)
+						objectList_t &mspec_objects)
 {
 
 
@@ -264,8 +270,14 @@ AnslpClient::tg_install(string sessionId,
 	anslp::session_id *sid = new anslp::session_id(sessionId);
 	
     // Create a new event for launching the configure event.
-    anslp::event *e = new anslp::api_install_event(sid, mspec_objects, NULL);
-
+    anslp::api_install_event *e = new anslp::api_install_event(sid, NULL);
+	
+	objectListIter_t it;
+	for (it = mspec_objects.begin(); it != mspec_objects.end(); it++){
+		e->setObject(anslp::mspec_rule_key(it->first), it->second->copy());
+	}
+	
+	
     anslp_event_msg *msg = new anslp_event_msg(*sid, e);
 
 //#ifdef DEBUG
@@ -300,14 +312,15 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
 	// Build the request message 
 
 	anslp_ipap_message mess(message);    
-            	    
-    // Build the vector of objects to be configured.
-    vector<msg::anslp_mspec_object *> mspec_objects;
-    mspec_objects.push_back(mess.copy());
+            	        
 
     // Create a new event for launching the configure event.
-    event *e = new api_bidding_event(sid, source_addr, destination_addr, source_port, 
-   				       dest_port, protocol, mspec_objects, NULL);
+    api_bidding_event *e = new api_bidding_event(sid, source_addr, destination_addr, source_port, 
+   				       dest_port, protocol, NULL);
+
+	// Assign the object to install
+	mspec_rule_key key;
+	e->setObject(key, mess.copy());
 
     anslp_event_msg *msg = new anslp_event_msg(*sid, e);
 
@@ -345,13 +358,13 @@ AnslpClient::delayed_tg_bidding(anslp::session_id *sid,
 
 	anslp_ipap_message mess(message);    
             	    
-    // Build the vector of objects to be configured.
-    vector<msg::anslp_mspec_object *> mspec_objects;
-    mspec_objects.push_back(mess.copy());
-
     // Create a new event for launching the configure event.
-    event *e = new api_bidding_event(sid, source_addr, dest_addr, source_port, 
-   				       dest_port, protocol, mspec_objects, NULL);
+    api_bidding_event *e = new api_bidding_event(sid, source_addr, dest_addr, source_port, 
+   				       dest_port, protocol, NULL);
+
+	// Assign the object to install
+	mspec_rule_key key;
+	e->setObject(key, mess.copy());
 
     anslp_event_msg *msg = new anslp_event_msg(*sid, e);
 	        
@@ -390,7 +403,7 @@ AnslpClient::tg_bidding(anslp::session_id *sid,
 
 
 void 
-AnslpClient::tg_remove(string sessionId, vector<msg::anslp_mspec_object *> mspec_objects)
+AnslpClient::tg_remove(string sessionId, anslp::objectList_t &mspec_objects)
 {
 
 
@@ -401,7 +414,12 @@ AnslpClient::tg_remove(string sessionId, vector<msg::anslp_mspec_object *> mspec
 	anslp::session_id *sid = new anslp::session_id(sessionId);
 	
     // Create a new event for launching the configure event.
-    anslp::event *e = new anslp::api_remove_event(sid, mspec_objects, NULL);
+    anslp::api_remove_event *e = new anslp::api_remove_event(sid, NULL);
+
+	objectListIter_t it;
+	for (it = mspec_objects.begin(); it != mspec_objects.end(); it++){
+		e->setObject(anslp::mspec_rule_key(it->first), it->second->copy());
+	}
 
     anslp_event_msg *msg = new anslp_event_msg(*sid, e);
 

@@ -88,10 +88,10 @@ class AnslpClient
 		void tg_teardown(anslp::session_id *sid);
 
 		void tg_check(string sessionId, 
-						vector<anslp::msg::anslp_mspec_object *> mspec_objects);
+					  anslp::objectList_t &mspec_objects);
 
 		void tg_install(string sessionId, 
-						vector<anslp::msg::anslp_mspec_object *> mspec_objects);
+						anslp::objectList_t &mspec_objects);
 
 		void tg_bidding(anslp::session_id *sid, 
 						const protlib::hostaddress &source_addr, 
@@ -116,7 +116,7 @@ class AnslpClient
 						uint8_t protocol, ipap_message &message);
 
 		void tg_remove(string sessionId, 
-						vector<anslp::msg::anslp_mspec_object *> mspec_objects);
+						anslp::objectList_t &mspec_objects);
 
 
 };

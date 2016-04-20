@@ -387,9 +387,6 @@ void AUMProcessor::delBiddingObjectAuctionProcess( int index, BiddingObject *b )
 {
  
     AUTOLOCK(threaded, &maccess);
-
-    int biddingObjectId = b->getUId();
-
     
 	bool deleted=false;
 		
@@ -397,6 +394,8 @@ void AUMProcessor::delBiddingObjectAuctionProcess( int index, BiddingObject *b )
 	if (iter != auctions.end()){
 
 #ifdef DEBUG
+		int biddingObjectId = b->getUId();
+
 		log->dlog(ch, "deleting Bidding Object #%d to auction- Set:%s name:%s", biddingObjectId,
 					(iter->second).getAuction()->getSetName().c_str(), 
 						(iter->second).getAuction()->getAuctionName().c_str());

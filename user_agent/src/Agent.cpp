@@ -871,9 +871,9 @@ void Agent::handleActivateSession(Event *e, fd_sets_t *fds)
 		log->elog( ch, err.getError().c_str() );
 	}
 
-#ifdef DEBUG
-	log->dlog(ch,"Ending event activate session" );
-#endif
+//#ifdef DEBUG
+	log->log(ch,"Ending event activate session" );
+//#endif
 
 }
 
@@ -1221,9 +1221,9 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 
 void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 {
-#ifdef DEBUG
-	log->dlog(ch,"Starting event handleResponseCreateSession" );
-#endif
+//#ifdef DEBUG
+	log->log(ch,"Starting event handleResponseCreateSession" );
+//#endif
 
 
 
@@ -1539,9 +1539,9 @@ void Agent::handleAddAuctions(Event *e, fd_sets_t *fds)
 
 void Agent::handleActivateAuctions(Event *e)
 {
-#ifdef DEBUG
-	log->dlog(ch,"Starting event activate auctions" );
-#endif
+//#ifdef DEBUG
+	log->log(ch,"Starting event activate auctions" );
+//#endif
 
 	try{
 
