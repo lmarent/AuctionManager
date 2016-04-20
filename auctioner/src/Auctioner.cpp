@@ -1398,7 +1398,7 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 	}
 	
 	
-	log->log(ch,"Nbr objects installed %d ", mspec_objects.size() );
+	log->log(ch,"Nbr objects installed %d ", objListRet.size() );
 
 	// Confirm for the anslp application installed objects.
 	anslpc->tg_install( sessionId, objListRet );

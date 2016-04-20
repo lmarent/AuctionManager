@@ -120,19 +120,13 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 		return;
 	}
 
-	if ( is_response_addsession_event(evt) ) {
-		anslp::ResponseAddSessionEvent *ras =
-			dynamic_cast<anslp::ResponseAddSessionEvent *>(evt);
-		
+	if ( is_response_addsession_event(evt) ) {		
 		// This message type must not be comming, log the error.
 		log->elog(ch,"Received message response add session which is not expected");
 		return;
 	}	
 
-	if ( is_response_checksession_event(evt) ) {
-		anslp::ResponseCheckSessionEvent *rcs =
-			dynamic_cast<anslp::ResponseCheckSessionEvent *>(evt);
-			
+	if ( is_response_checksession_event(evt) ) {			
 		// This message type must not be comming, log the error.
 		log->elog(ch,"Received message response check session which is not expected");									
 		return;

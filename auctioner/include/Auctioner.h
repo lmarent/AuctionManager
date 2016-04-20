@@ -166,13 +166,13 @@ class Auctioner
 
 	void handleSingleCheckSession(string sessionId, 
 			anslp::mspec_rule_key key, anslp::anslp_ipap_message *ipap_mes, 
-			std::vector<anslp::msg::anslp_mspec_object *> *mspec_objects);
+			anslp::objectList_t *objectList);
 
 	void handleCreateCheckSession(Event *e, fd_sets_t *fds);
 	
 	void handleSingleCreateSession(string sessionId,
 				anslp::mspec_rule_key key, anslp::anslp_ipap_message *ipap_mes, 
-				std::vector<anslp::msg::anslp_mspec_object *> *mspec_objects);
+				anslp::objectList_t *objectList);
 	
 	void handleCreateSession(Event *e, fd_sets_t *fds);
 

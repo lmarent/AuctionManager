@@ -879,7 +879,7 @@ void Agent::handleActivateSession(Event *e, fd_sets_t *fds)
 
 void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key, 
 					anslp::anslp_ipap_message *ipap_mes, 
-					std::vector<anslp::msg::anslp_mspec_object *> *mspec_objects,
+					anslp::objectList_t *objectList,
 					std::vector<anslp::anslp_event_msg *> *events)
 {
 
@@ -1200,7 +1200,11 @@ void Agent::handleSingleCreateSession(string sessionId, anslp::mspec_rule_key ke
 									resp ));
 
 		anslp::anslp_ipap_message ipap_mes_return(resp);		
-		mspec_objects->push_back(ipap_mes_return.copy());
+		
+		objectList->insert(std::pair<anslp::mspec_rule_key, 
+							 anslp::msg::anslp_mspec_object *>(key,ipap_mes_return.copy()));
+
+		
 
 	} catch (Error &err){
 		
@@ -1249,7 +1253,7 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 	log->log(ch,"Starting event handleResponseCreateSession %s", sessionId.c_str() );
 //#endif
 	
-	std::vector<anslp::msg::anslp_mspec_object *> mspec_objects;
+	anslp::objectList_t objListRet;
 	std::vector<anslp::anslp_event_msg *> events;
 	
 	try {
@@ -1261,15 +1265,17 @@ void Agent::handleResponseCreateSession(Event *e, fd_sets_t *fds)
 				anslp::mspec_rule_key key = it->first;
 				anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
 				if (ipap_mes != NULL){
-					handleSingleCreateSession(sessionId, key, ipap_mes, &mspec_objects, &events);
+					handleSingleCreateSession(sessionId, key, ipap_mes, &objListRet, &events);
 				}		
 			}
 		} else {
 			log->elog(ch, "The event does not have a valid list of objects");
 		}
 	
+		log->log(ch,"Nbr objects installed %d ", objListRet.size() );
+		
 		// Confirm for the anslp application installed objects.
-		anslpc->tg_install( sessionId, mspec_objects);
+		anslpc->tg_install( sessionId, objListRet);
 		
 		// Send confirmation to every auction server involved.
 		anslpc->tg_bidding(&events);

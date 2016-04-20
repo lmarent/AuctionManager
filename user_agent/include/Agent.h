@@ -169,7 +169,7 @@ class Agent
 
 	void handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key, 
 					anslp::anslp_ipap_message *ipap_mes, 
-					std::vector<anslp::msg::anslp_mspec_object *> *mspec_objects,
+					anslp::objectList_t *objectList,
 					std::vector<anslp::anslp_event_msg *> *events);
 
 	//! handle the response for a session creation previously sent.
