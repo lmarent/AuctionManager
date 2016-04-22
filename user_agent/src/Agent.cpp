@@ -2026,6 +2026,10 @@ void Agent::handleEvent(Event *e, fd_sets_t *fds)
 	case CONFIGURE_SESSION:
 		handleActivateSession(e,fds);
 	  break;
+
+    case REMOVE_SESSION:
+		handleRemoveSession(e,fds);
+		break;
 	  
     default:
 #ifdef DEBUG
