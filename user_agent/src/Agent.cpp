@@ -357,7 +357,7 @@ Agent::Agent( int argc, char *argv[])
 }
 
 
-void Auctioner::handleRemoveSession(Event *e, fd_sets_t *fds)
+void Agent::handleRemoveSession(Event *e, fd_sets_t *fds)
 {
 
 //#ifdef DEBUG
@@ -388,7 +388,7 @@ void Auctioner::handleRemoveSession(Event *e, fd_sets_t *fds)
 		
 	try{
 		// Remove the session from the container.
-		sesm->delSession(sessionId, evnt.get());
+		asmp->delSession(sessionId, evnt.get());
 
 	} catch(Error &e) {
 		log->dlog(ch, e.getError().c_str() );

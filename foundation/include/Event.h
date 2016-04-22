@@ -37,6 +37,8 @@
 #include "auction_rule.h"
 #include "Auction.h"
 #include "BiddingObject.h"
+#include "aqueue.h"
+
 
 namespace auction
 {
@@ -776,6 +778,59 @@ class AuctionInteractionEvent : public Event
 	string getSessionId()
 	{
 		return sessionId;
+	}
+};
+
+
+class RemoveSessionEvent : public Event
+{
+  private:
+	string sessionId;
+	anslp::objectList_t objects;
+	anslp::FastQueue *ret;
+    
+  public:
+
+    RemoveSessionEvent(string _sessionId, anslp::FastQueue *_ret, unsigned long ival=0, int align=0) 
+      : Event(REMOVE_SESSION, ival, align), sessionId(_sessionId), ret(_ret) {  }
+
+    ~RemoveSessionEvent() 
+    {
+		anslp::objectListIter_t it;
+		for ( it = objects.begin(); it != objects.end(); it++)
+		{
+			if (it->second != NULL)
+				delete(it->second);
+		}
+	}
+
+	void setObject(anslp::mspec_rule_key key, anslp::msg::anslp_mspec_object *obj)
+	{
+		if ( obj == NULL )
+		return;
+
+		anslp::msg::anslp_mspec_object *old = objects[key];
+
+		if ( old )
+			delete old;
+
+		objects[key] = obj;
+
+	}
+
+	anslp::objectList_t *  getObjects()
+	{
+		return &objects;
+	}
+	
+	string getSessionId()
+	{
+		return sessionId;
+	}
+	
+	anslp::FastQueue * getQueue()
+	{
+		return ret;
 	}
 };
 
