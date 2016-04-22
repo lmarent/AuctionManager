@@ -432,7 +432,7 @@ AnslpClient::tg_remove(string sessionId, anslp::objectList_t &mspec_objects)
 	
         
 //#ifdef DEBUG
-    log->log(ch,"Ending tg_install ");
+    log->log(ch,"Ending tg_remove ");
 //#endif  
 
 }

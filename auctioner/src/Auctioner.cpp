@@ -1414,9 +1414,9 @@ void Auctioner::handleCreateSession(Event *e, fd_sets_t *fds)
 void Auctioner::handleRemoveSession(Event *e, fd_sets_t *fds)
 {
 
-#ifdef DEBUG
-    log->dlog(ch,"processing event remove session" );
-#endif
+//#ifdef DEBUG
+    log->log(ch,"processing event remove session" );
+//#endif
 
 	anslp::objectList_t *objList = NULL;
 	anslp::FastQueue *retQueue = NULL;
@@ -1440,8 +1440,12 @@ void Auctioner::handleRemoveSession(Event *e, fd_sets_t *fds)
 	
 	anslp::objectList_t objListRet;
 		
-	// Remove the session from the container.
-	sesm->delSession(sessionId, evnt.get());
+	try{
+		// Remove the session from the container.
+		sesm->delSession(sessionId, evnt.get());
+	} catch(Error &e) {
+		log->dlog(ch, e.getError().c_str() );
+	}
 
     if (objList != NULL){
 		
