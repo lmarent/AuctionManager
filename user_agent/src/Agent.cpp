@@ -357,6 +357,66 @@ Agent::Agent( int argc, char *argv[])
 }
 
 
+void Auctioner::handleRemoveSession(Event *e, fd_sets_t *fds)
+{
+
+//#ifdef DEBUG
+    log->log(ch,"processing event remove session" );
+//#endif
+
+	anslp::objectList_t *objList = NULL;
+	anslp::FastQueue *retQueue = NULL;
+	
+	string sessionId;
+
+	anslp::ResponseRemoveSessionEvent *resRemove = NULL;
+	
+	try {
+		anslp::objectListIter_t it;
+		
+		sessionId = ((RemoveSessionEvent *)e)->getSessionId();
+		objList = ((RemoveSessionEvent *)e)->getObjects();
+		retQueue = ((RemoveSessionEvent *)e)->getQueue();
+				
+	} catch(anslp::msg::anslp_ipap_bad_argument &e) {
+		// The message was not parse, we dont have to do anything. 
+		// We assumming that the sender will send the message again.
+		throw Error(e.what());
+	}
+	
+	anslp::objectList_t objListRet;
+		
+	try{
+		// Remove the session from the container.
+		sesm->delSession(sessionId, evnt.get());
+
+	} catch(Error &e) {
+		log->dlog(ch, e.getError().c_str() );
+	}
+
+    if (objList != NULL){
+		
+		anslp::objectListIter_t it;
+		for (it = objList->begin(); it != objList->end(); ++it){
+				
+			anslp::mspec_rule_key key = it->first;
+			anslp::anslp_ipap_message *ipap_mes = dynamic_cast<anslp::anslp_ipap_message *>(it->second);
+			if (ipap_mes != NULL){
+				objListRet.insert(std::pair<anslp::mspec_rule_key, 
+										 anslp::msg::anslp_mspec_object *>(key,ipap_mes->copy()));
+			}							 
+		}
+	} else {
+		log->elog(ch, "The event does not have a valid list of objects");
+	}
+
+	// Confirm for the anslp application installed objects.
+	anslpc->tg_remove( sessionId, objListRet);
+
+}
+
+
+
 /* ---------------------------- ~Agent ---------------------------- */
 
 Agent::~Agent()

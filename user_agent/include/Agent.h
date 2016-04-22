@@ -213,6 +213,9 @@ class Agent
     
     //! handle the interaction arrived from a auctioneer system.
     void handleAuctioningInteraction(Event *e, fd_sets_t *fds);
+
+	//! handle the removal of a session triggered by the anslp application.
+	void handleRemoveSession(Event *e, fd_sets_t *fds);
     		    
   public:
 

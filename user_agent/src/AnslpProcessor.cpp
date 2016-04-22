@@ -134,10 +134,22 @@ void AnslpProcessor::process(eventVec_t *e, AnslpEvent *evt)
 	}
 
 	if ( is_removesession_event(evt) ) {
+
+
+		anslp::RemoveSessionEvent *rse =
+			dynamic_cast<anslp::RemoveSessionEvent *>(evt);
 			
-		// This message type must not be comming, log the error.
-		log->elog(ch,"Received message remove session, which is not expected");	
-		return;
+		string sessionId = rse->getSession();
+		RemoveSessionEvent *retEvent = new auction::RemoveSessionEvent(sessionId, rse->getQueue());
+		
+		anslp::objectList_t *objects = rse->getObjects();
+		anslp::objectListIter_t it;
+		for (it = objects->begin(); it != objects->end(); ++it){
+			retEvent->setObject(it->first,it->second->copy());
+		}
+		
+		e->push_back(retEvent);	
+			
 	}
 
 	if ( is_response_removesession_event(evt) ) {			
