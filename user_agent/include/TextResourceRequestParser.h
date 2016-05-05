@@ -73,8 +73,7 @@ class TextResourceRequestParser
 
     //! parse given resource requests and add those parsed to requests
     virtual void parse(fieldDefList_t *filters, 
-					   resourceRequestDB_t *requests,
-					   ResourceRequestIdSource *idSource );
+					   auctioningObjectDB_t *requests );
 
 };
 

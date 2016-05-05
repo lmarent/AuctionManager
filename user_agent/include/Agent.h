@@ -48,8 +48,10 @@
 #include "EventSchedulerAgent.h"
 #include "AgentSessionManager.h"
 #include "AnslpProcessor.h"
-
-
+#include "anslp_ipap_xml_message.h"
+#include "anslp_ipap_message.h"
+#include "anslp_ipap_exception.h" 
+#include "ProcModuleInterface.h"
 
 
 namespace auction
@@ -68,6 +70,12 @@ typedef map<int, ipap_template_container* >::const_iterator    	agentTemplateLis
 
 class Agent
 {
+  private:
+    
+    //! Split theString using theDelimiter and let results in theStringVector
+	void split( vector<string> & theStringVector, 
+					const  string  & theString, const  string  & theDelimiter);
+
   public:
 
 	
@@ -167,6 +175,32 @@ class Agent
 	//! handle the session activation after the anslpd process sends the event.
 	void handleActivateSession(Event *e, fd_sets_t *fds);
 
+	//! Read the auctions included in the ipap_message
+	auctioningObjectDB_t * readAuctionList(ipap_message &message);
+
+	//! Create auctions within the auction manager.
+	unsigned long createAuctions(auctioningObjectDB_t *auctions, 
+									resourceReqIntervalListIter_t &interval);
+
+	//! Create the process request for every auction included in auctions.
+	void createProcessRequests( AgentSession *session,
+								auctioningObjectDB_t *auctions, 
+								ResourceRequest *request,
+							    resourceReqIntervalListIter_t &interval, 
+							    unsigned long maxInterval );
+
+	//! Increments the reference counter for the session.
+	void increaseSessionReferences(AgentSession *session, 
+										auctioningObjectDB_t *auctions );
+
+	//! Send the reply for a create message response.
+	void replySessionCreationMessages(ipap_message &message,
+									  AgentSession *session, 
+									  anslp::mspec_rule_key key, 
+									  auctioningObjectDB_t *auctions, 
+									  anslp::objectList_t *objectList,
+									  std::vector<anslp::anslp_event_msg *> *events );
+
 	void handleSingleCreateSession(string sessionId, anslp::mspec_rule_key key, 
 					anslp::anslp_ipap_message *ipap_mes, 
 					anslp::objectList_t *objectList,
@@ -216,7 +250,11 @@ class Agent
 
 	//! handle the removal of a session triggered by the anslp application.
 	void handleRemoveSession(Event *e, fd_sets_t *fds);
-    		    
+
+
+	void intersectInterval( time_t startDttmAuc, time_t stopDttmAuc, 
+							time_t startDttmReq, time_t stopDttmReq,
+							  time_t &start, time_t &stop);
   public:
 
     /*! \short   construct and initialize a Agent Manager object

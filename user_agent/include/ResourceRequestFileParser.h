@@ -43,10 +43,6 @@
 namespace auction
 {
 
-//! Allocation list
-typedef vector<ResourceRequest*>            resourceRequestDB_t;
-typedef vector<ResourceRequest*>::iterator  resourceRequestDBIter_t;
-
 class ResourceRequestFileParser : public XMLParser
 {
   private:
@@ -80,8 +76,7 @@ class ResourceRequestFileParser : public XMLParser
 
     //! parse resource request and add parsed resource requests.
     virtual void parse(fieldDefList_t *fields, 
-					   resourceRequestDB_t *requests,
-					   ResourceRequestIdSource *idSource );
+					   auctioningObjectDB_t *requests );
 };
 
 }; // namespace auction

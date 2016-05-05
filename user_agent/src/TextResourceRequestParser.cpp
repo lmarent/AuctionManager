@@ -212,8 +212,7 @@ void TextResourceRequestParser::calculateInterval(time_t now, miscList_t *miscLi
 
 
 void TextResourceRequestParser::parse(fieldDefList_t *fieldDefs, 
-									  resourceRequestDB_t *requests,
-									  ResourceRequestIdSource *idSource )
+									  auctioningObjectDB_t *requests )
 {
     string rset, rname;
 

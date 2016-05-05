@@ -91,7 +91,9 @@ AgentProcessor::~AgentProcessor()
 }
 
 /* ------------------------ addRequest -------------------------*/
-int AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, Auction *auction, time_t start, time_t stop )
+int 
+AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, 
+							  Auction *auction, time_t start, time_t stop )
 {
 
 #ifdef DEBUG
@@ -189,7 +191,8 @@ int AgentProcessor::addRequest( string sessionId, fieldList_t *parameters, Aucti
 }
 
 /* ------------------------- delRequest ------------------------- */
-void AgentProcessor::releaseRequest( int index )
+void 
+AgentProcessor::releaseRequest( int index )
 {
 
 #ifdef DEBUG
@@ -219,9 +222,9 @@ void AgentProcessor::releaseRequest( int index )
 }
 
 
-
 /* ------------------------- delRequest ------------------------- */
-void AgentProcessor::delRequest( int index )
+void 
+AgentProcessor::delRequest( int index )
 {
 
 #ifdef DEBUG
@@ -271,8 +274,8 @@ AgentProcessor::executeRequest( int index, EventScheduler *e )
 	ret = requests.find(index);	
 	if (ret != requests.end()){
 		
-		biddingObjectDB_t bids;
-		biddingObjectDB_t *ptr = &bids;
+		auctioningObjectDB_t bids;
+		auctioningObjectDB_t *ptr = &bids;
 		
 		try{ 
 
@@ -309,12 +312,12 @@ AgentProcessor::executeRequest( int index, EventScheduler *e )
 		}
 
 #ifdef DEBUG
-		biddingObjectDBIter_t        iter;
+		auctioningObjectDBIter_t iter;
 		for (iter = bids.begin(); iter != bids.end();++iter) {
-			BiddingObject *b = (*iter);
+			BiddingObject *b = dynamic_cast<BiddingObject *>(*iter);
 			if (b != NULL){
-				log->dlog(ch, "New BiddingObject After Push Execution: %s.%s", b->getBiddingObjectSet().c_str(), 
-					b->getBiddingObjectName().c_str());
+				log->dlog(ch, "New BiddingObject After Push Execution: %s.%s", 
+							b->getSet().c_str(), b->getName().c_str());
 			}	
 		}	
 #endif
@@ -346,29 +349,30 @@ AgentProcessor::addAuctionRequest( int index, Auction *a )
 	}
 
 #ifdef DEBUG
-    log->dlog(ch,"Start addAuction  set:%s, name:%s to request: %d", 
-				a->getSetName().c_str(), a->getAuctionName().c_str(), index);
+    log->dlog(ch,"Start addAuction  set:%s.%s to request: %d", 
+				a->getSet().c_str(), a->getName().c_str(), index);
 #endif
 
     AUTOLOCK(threaded, &maccess);  
 
-	// first search for the index in the requests,  if not found throw an exception.
+	// first, search for the index in the requests,  if not found throw an exception.
 	requestProcessListIter_t reqIter = requests.find(index);	
 	if (reqIter == requests.end())
 	{
 		throw Error("Request with index %d not found", index);
 	} 
 	
-	// Second look the auction in the list of auction already inserted, if it exists generates an error
+	// Second, look for the auction in the list of auction already inserted, if it exists generates an error
 	reqIter = requests.find(index);	
-	auctionDBIter_t iterAuct;
-	for (iterAuct = ((reqIter->second).auctions).begin(); iterAuct != ((reqIter->second).auctions).end(); ++iterAuct)
+	auctioningObjectDBIter_t iterAuct;
+	for (iterAuct = ((reqIter->second).auctions).begin(); 
+			iterAuct != ((reqIter->second).auctions).end(); ++iterAuct)
 	{
-		Auction *aTmp = *iterAuct;
-		if ( (aTmp->getSetName() == a->getSetName()) &&
-			  (aTmp->getAuctionName() == a->getAuctionName()) ) {
+		Auction *aTmp = dynamic_cast<Auction *>(*iterAuct);
+		if ( (aTmp->getSet() == a->getSet()) &&
+			  (aTmp->getName() == a->getName()) ) {
 			throw Error("Auction %s.%s is inserted in the request process with index %d not found", 
-							a->getSetName().c_str(), a->getAuctionName().c_str(),  index);  
+							a->getSet().c_str(), a->getName().c_str(),  index);  
 		} 
 	}
 			
@@ -436,35 +440,39 @@ AgentProcessor::delAuctionRequest( int index, Auction *a )
 	ret = requests.find(index);	
 	if (ret != requests.end()) {
 
-		auctionDBIter_t aucIter;
-		for (aucIter = ((ret->second).getAuctions())->begin(); aucIter != ((ret->second).getAuctions())->end(); ++aucIter)
+		auctioningObjectDBIter_t aucIter;
+		for (aucIter = ((ret->second).getAuctions())->begin(); 
+				aucIter != ((ret->second).getAuctions())->end(); ++aucIter)
 		{
-			if ( ((*aucIter)->getSetName() == a->getSetName()) &&
-				 ((*aucIter)->getAuctionName()== a->getAuctionName()) ) {
+			Auction *act = dynamic_cast<Auction *>(*aucIter);
+			
+			if ( (act->getSet() == a->getSet()) && (act->getName()== a->getName()) ) {
 				((ret->second).getAuctions())->erase(aucIter);
 				break; 
 			}
 		}
 	} else {
 		throw Error("Auction %s.%s not found in request %d", 
-						a->getSetName().c_str(), a->getAuctionName().c_str(), index );
+						a->getSet().c_str(), a->getName().c_str(), index );
 	}
 }
 
 
 /* ------------------------- delAuctions ------------------------- */
 void 
-AgentProcessor::delAuctionsRequest(int index,  auctionDB_t *aucts)
+AgentProcessor::delAuctionsRequest(int index,  auctioningObjectDB_t *aucts)
 {
 	
-    auctionDBIter_t iter;
-    for (iter = aucts->begin(); iter != aucts->end(); iter++) {
-        delAuctionRequest(index, *iter);
+    auctioningObjectDBIter_t iter;
+    for (iter = aucts->begin(); iter != aucts->end(); iter++) 
+    {
+        Auction *act = dynamic_cast<Auction *>(*iter);
+        delAuctionRequest(index, act);
     }
 }
 
 void 
-AgentProcessor::delAuctions(auctionDB_t *aucts)
+AgentProcessor::delAuctions(auctioningObjectDB_t *aucts)
 {
 	AUTOLOCK(threaded, &maccess);
 	

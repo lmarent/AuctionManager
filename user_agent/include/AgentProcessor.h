@@ -60,7 +60,7 @@ class requestProcess : public AuctionProcessObject
 		fieldList_t *parameters; 	 		
 		
 		//! Auctions to execute 
-		auctionDB_t auctions;  		 	
+		auctioningObjectDB_t auctions;  		 	
     
 		requestProcess(fieldList_t * _parameters=NULL): 
 			AuctionProcessObject(), moduleName(), parameters(_parameters){}
@@ -87,7 +87,7 @@ class requestProcess : public AuctionProcessObject
 		
 		void setParameters(fieldList_t *_parameters){ parameters = _parameters; }
 		
-		auctionDB_t * getAuctions(){ return &auctions; }
+		auctioningObjectDB_t * getAuctions(){ return &auctions; }
 		
 		void insertAuction(Auction *auction){ auctions.push_back(auction); }
 		
@@ -168,13 +168,13 @@ class AgentProcessor : public AuctionManagerComponent, public FieldDefManager
     /*! \short delete auctions from a request
      *  \arg \c index 		  Id for the request.
 	 */
-    void delAuctionsRequest( int index,  auctionDB_t *auctions );	
+    void delAuctionsRequest( int index,  auctioningObjectDB_t *auctions );	
 	
     /*! \short delete the set of auctions from all request
      *  \arg \c aucts 		  auction set to delete.
      *  If a request process becomes free of auctions, then it is deleted too.
 	 */
-	void delAuctions(auctionDB_t *aucts);
+	void delAuctions(auctioningObjectDB_t *aucts);
 
 	//! get the sessionId generating a request process
 	string getSession(int index);

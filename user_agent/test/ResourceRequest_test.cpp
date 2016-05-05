@@ -71,7 +71,7 @@ void ResourceRequest_Test::testResourceRequets()
 {
 
 	time_t              now = time(NULL);
-	
+			
 	auction::fieldList_t fields;
 	resourceReqIntervalList_t intervals;
 	
@@ -90,7 +90,7 @@ void ResourceRequest_Test::testResourceRequets()
 	} else {
 		throw Error("field quantity sot found");
 	}
-
+		
 	iter = fieldDefs.find("maxvalue");
 	if (iter != fieldDefs.end()){
 		field2.name = iter->second.name;
@@ -101,7 +101,7 @@ void ResourceRequest_Test::testResourceRequets()
 	} else {
 		throw Error("field unitprice sot found");
 	}
-	
+		
 	iter = fieldDefs.find("unitbudget");
 	if (iter != fieldDefs.end()){
 		field3.name = iter->second.name;
@@ -214,8 +214,8 @@ void ResourceRequest_Test::testResourceRequets()
 	
 	ptrresourceRequest2 = new ResourceRequest(set, name, fields1, intervals1);
 	
-	CPPUNIT_ASSERT( ptrresourceRequest1->getResourceRequestSet().compare(ptrresourceRequest2->getResourceRequestSet())  == 0  ); 
-	CPPUNIT_ASSERT( ptrresourceRequest1->getResourceRequestName().compare(ptrresourceRequest2->getResourceRequestName())  == 0  ); 
+	CPPUNIT_ASSERT( ptrresourceRequest1->getSet().compare(ptrresourceRequest2->getSet())  == 0  ); 
+	CPPUNIT_ASSERT( ptrresourceRequest1->getName().compare(ptrresourceRequest2->getName())  == 0  ); 
 	
 	CPPUNIT_ASSERT( ptrresourceRequest1->getState() == ptrresourceRequest2->getState()  ); 
 	

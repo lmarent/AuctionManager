@@ -33,16 +33,16 @@
 #include "EventAgent.h"
 #include "TextResourceRequestParser.h"
 #include "MAPIResourceRequestParser.h"
+#include "AuctioningObjectManager.h"
 
 using namespace auction;
 
 /* ------------------------- ResourceRequestManager ------------------------- */
 
 ResourceRequestManager::ResourceRequestManager( int domain, string fdname, string fvname) 
-    : FieldDefManager(fdname, fvname), resourceRequests(0), domain(domain), idSource(1)
+    : AuctioningObjectManager(domain, fdname, fvname, "ResourceRequestManager")     
 {
-    log = Logger::getInstance();
-    ch = log->createChannel("ResourceRequestManager");
+
 #ifdef DEBUG
     log->dlog(ch,"Starting");
 #endif
@@ -54,23 +54,11 @@ ResourceRequestManager::ResourceRequestManager( int domain, string fdname, strin
 
 ResourceRequestManager::~ResourceRequestManager()
 {
-    resourceRequestDBIter_t iter;
 
 #ifdef DEBUG
     log->dlog(ch,"Shutdown");
 #endif
 
-    for (iter = resourceRequestDB.begin(); iter != resourceRequestDB.end(); iter++) {
-        if (*iter != NULL) {
-            // delete resource request
-            saveDelete(*iter);
-        } 
-    }
-
-    for (resourceRequestDoneIter_t i = resourceRequestDone.begin(); 
-				i != resourceRequestDone.end(); i++) {
-        saveDelete(*i);
-    }
 }
 
 
@@ -78,11 +66,13 @@ ResourceRequestManager::~ResourceRequestManager()
 
 ResourceRequest *ResourceRequestManager::getResourceRequest(int uid)
 {
-    if ((uid >= 0) && ((unsigned int)uid <= resourceRequestDB.size())) {
-        return resourceRequestDB[uid];
-    } else {
-        return NULL;
-    }
+    AuctioningObject *ao = getAuctioningObject(uid);
+    
+    if (ao != NULL)
+		return dynamic_cast<ResourceRequest *>(ao);
+	else
+		return NULL;
+		
 }
 
 
@@ -92,79 +82,33 @@ ResourceRequest *ResourceRequestManager::getResourceRequest(int uid)
 ResourceRequest *
 ResourceRequestManager::getResourceRequest(string sname, string rname)
 {
-    resourceRequestSetIndexIter_t iter;
-    resourceRequestIndexIter_t iter2;
 
-    iter = resourceRequestSetIndex.find(sname);
-    if (iter != resourceRequestSetIndex.end()) {		
-        iter2 = iter->second.find(rname);
-        if (iter2 != iter->second.end()) {
-            return getResourceRequest(iter2->second);
-        }
-        else
-        {
-#ifdef DEBUG
-    log->dlog(ch,"Resource Request Id not found %s.%s",sname.c_str(), rname.c_str());
-#endif		
-			
-		}
-    }
-    else
-    {
-#ifdef DEBUG
-    log->dlog(ch,"Resource Request set not found");
-#endif		
-	}
+    AuctioningObject *ao = getAuctioningObject(sname, rname);
+    
+    if (ao != NULL)
+		return dynamic_cast<ResourceRequest *>(ao);
+	else
+		return NULL;
 
-    return NULL;
 }
 
-
-/* -------------------- getBids -------------------- */
-
-resourceRequestIndex_t *
-ResourceRequestManager::getResourceRequests(string sname)
-{
-    resourceRequestSetIndexIter_t iter;
-
-    iter = resourceRequestSetIndex.find(sname);
-    if (iter != resourceRequestSetIndex.end()) {
-        return &(iter->second);
-    }
-
-    return NULL;
-}
-
-resourceRequestDB_t ResourceRequestManager::getResourceRequests()
-{
-    resourceRequestDB_t ret;
-
-    for (resourceRequestSetIndexIter_t r = resourceRequestSetIndex.begin(); 
-			r != resourceRequestSetIndex.end(); r++) {
-        for (resourceRequestIndexIter_t i = r->second.begin(); 
-				i != r->second.end(); i++) {
-            ret.push_back(getResourceRequest(i->second));
-        }
-    }
-
-    return ret;
-}
 
 /* --------------------- parseResourceRequests ----------------------- */
 
-resourceRequestDB_t *ResourceRequestManager::parseResourceRequests(string fname)
+auctioningObjectDB_t *
+ResourceRequestManager::parseResourceRequests(string fname)
 {
 
 #ifdef DEBUG
     log->dlog(ch,"ParseResourceRequests");
 #endif
 
-    resourceRequestDB_t *new_requests = new resourceRequestDB_t();
+    auctioningObjectDB_t *new_requests = new auctioningObjectDB_t();
 
     try {	
 		
         ResourceRequestFileParser rfp = ResourceRequestFileParser(fname);
-        rfp.parse(FieldDefManager::getFieldDefs(), new_requests, &idSource);
+        rfp.parse(FieldDefManager::getFieldDefs(), new_requests);
 
 #ifdef DEBUG
     log->dlog(ch, "resource requests parsed");
@@ -174,7 +118,7 @@ resourceRequestDB_t *ResourceRequestManager::parseResourceRequests(string fname)
 
     } catch (Error &e) {
 
-        for(resourceRequestDBIter_t i=new_requests->begin(); i != new_requests->end(); i++) {
+        for(auctioningObjectDBIter_t i=new_requests->begin(); i != new_requests->end(); i++) {
            saveDelete(*i);
         }
         saveDelete(new_requests);
@@ -185,25 +129,26 @@ resourceRequestDB_t *ResourceRequestManager::parseResourceRequests(string fname)
 
 /* -------------------- parseResourceRequestsBuffer -------------------- */
 
-resourceRequestDB_t *ResourceRequestManager::parseResourceRequestsBuffer(char *buf, int len, int mapi)
+auctioningObjectDB_t *
+ResourceRequestManager::parseResourceRequestsBuffer(char *buf, int len, int mapi)
 {
-    resourceRequestDB_t *new_requests = new resourceRequestDB_t();
+    auctioningObjectDB_t *new_requests = new auctioningObjectDB_t();
 
     try {
 				
         if (mapi) {
              TextResourceRequestParser rfp = TextResourceRequestParser(buf, len);
-             rfp.parse(FieldDefManager::getFieldDefs(), new_requests, &idSource);
+             rfp.parse(FieldDefManager::getFieldDefs(), new_requests);
         } else {
             ResourceRequestFileParser rfp = ResourceRequestFileParser(buf, len);
-            rfp.parse(FieldDefManager::getFieldDefs(),  new_requests, &idSource);
+            rfp.parse(FieldDefManager::getFieldDefs(),  new_requests);
         }
 
         return new_requests;
 	
     } catch (Error &e) {
 
-        for(resourceRequestDBIter_t i=new_requests->begin(); i != new_requests->end(); i++) {
+        for(auctioningObjectDBIter_t i=new_requests->begin(); i != new_requests->end(); i++) {
             saveDelete(*i);
         }
         saveDelete(new_requests);
@@ -214,9 +159,9 @@ resourceRequestDB_t *ResourceRequestManager::parseResourceRequestsBuffer(char *b
 
 /* ------------------------ addResourceRequests -------------------------- */
 
-void ResourceRequestManager::addResourceRequests(resourceRequestDB_t * requests, EventScheduler *e)
+void ResourceRequestManager::addAuctioningObjects(auctioningObjectDB_t * requests, EventScheduler *e)
 {
-    resourceRequestDBIter_t        iter;
+    auctioningObjectDBIter_t       iter;
     resourceRequestTimeIndex_t     start;
     resourceRequestTimeIndex_t     stop;
     resourceRequestTimeIndexIter_t iter2;
@@ -229,12 +174,12 @@ void ResourceRequestManager::addResourceRequests(resourceRequestDB_t * requests,
  
         
     // add bids
-    for (iter = requests->begin(); iter != requests->end(); iter++) {
-        ResourceRequest *r = (*iter);
-        
+    for (iter = requests->begin(); iter != requests->end(); iter++) 
+    {    
+        ResourceRequest *r = dynamic_cast<ResourceRequest *>(*iter);
         try {
 
-            addResourceRequest(r);
+            addAuctioningObject(r);
 			
 			// Loop though intervals to include the resource request 
 			// in the start and stop iterators
@@ -269,9 +214,10 @@ void ResourceRequestManager::addResourceRequests(resourceRequestDB_t * requests,
     time_t usec = 1;
     for (iter2 = start.begin(); iter2 != start.end(); iter2++) 
     {
-		resourceRequestDBIter_t reqDBIter;
+		auctioningObjectDBIter_t reqDBIter;
 		for (reqDBIter = (iter2->second).begin(); reqDBIter != (iter2->second).end(); ++reqDBIter ){
-			e->addEvent(new ActivateResourceRequestIntervalEvent(iter2->first-now, usec, *reqDBIter, iter2->first));
+			ResourceRequest *req = dynamic_cast<ResourceRequest *>(*reqDBIter);
+			e->addEvent(new ActivateResourceRequestIntervalEvent(iter2->first-now, usec, req, iter2->first));
 			usec = usec + 1;
 		}
     }
@@ -279,9 +225,11 @@ void ResourceRequestManager::addResourceRequests(resourceRequestDB_t * requests,
     // group resource request with same stop time
     usec = 1;
     for (iter2 = stop.begin(); iter2 != stop.end(); iter2++) {
-		resourceRequestDBIter_t reqDBIter;
-		for (reqDBIter = (iter2->second).begin(); reqDBIter != (iter2->second).end(); ++reqDBIter ){
-			e->addEvent(new RemoveResourceRequestIntervalEvent(iter2->first-now, usec, *reqDBIter, iter2->first));
+		auctioningObjectDBIter_t reqDBIter;
+		for (reqDBIter = (iter2->second).begin(); reqDBIter != (iter2->second).end(); ++reqDBIter )
+		{
+			ResourceRequest *req = dynamic_cast<ResourceRequest *>(*reqDBIter);
+			e->addEvent(new RemoveResourceRequestIntervalEvent(iter2->first-now, usec, req, iter2->first));
 			usec = usec + 1;
 		}
     }
@@ -293,188 +241,29 @@ void ResourceRequestManager::addResourceRequests(resourceRequestDB_t * requests,
 }
 
 
-/* -------------------- addBid -------------------- */
-
-void ResourceRequestManager::addResourceRequest(ResourceRequest *request)
-{
-  
-#ifdef DEBUG    
-    log->dlog(ch, "adding new resource request with name = '%s'",
-              request->getResourceRequestName().c_str());
-#endif  
-				  
-			  
-    // test for presence of Set/Name combination
-    // in RequestDatabase in particular set
-    if (getResourceRequest(request->getResourceRequestSet(), request->getResourceRequestName())) {
-        log->elog(ch, "Resource Request %s.%s already installed",
-                  request->getResourceRequestSet().c_str(), request->getResourceRequestName().c_str());
-        throw Error(408, "Resource Request with this name is already installed");
-    }
-
-    try {
-
-		// Assigns the new Id.
-		request->setUId(idSource.newId());
-
-        // could do some more checks here
-        request->setState(AO_VALID);
-
-#ifdef DEBUG    
-		log->dlog(ch, "Resource Request Id = '%d'", request->getUId());
-#endif 
-
-        // resize vector if necessary
-        if ((unsigned int)request->getUId() >= resourceRequestDB.size()) {
-            resourceRequestDB.reserve(request->getUId() * 2 + 1);
-            resourceRequestDB.resize(request->getUId() + 1);
-        }
-
-        // insert Resource Request
-        resourceRequestDB[request->getUId()] = request; 	
-
-        // add new entry in index
-        resourceRequestSetIndex[request->getResourceRequestSet()][request->getResourceRequestName()] = request->getUId();
-	
-        resourceRequests++;
-
-#ifdef DEBUG    
-    log->dlog(ch, "finish adding new Resource Request with name = '%s'",
-              request->getResourceRequestName().c_str());
-#endif  
-
-    } catch (Error &e) { 
-
-        // adding new Resource request failed in some component
-        // something failed -> remove Resource Request from database
-        delResourceRequest(request->getResourceRequestSet(), 
-							request->getResourceRequestName(), NULL);
-	
-        throw e;
-    }
-}
-
-void ResourceRequestManager::activateResourceRequests(resourceRequestDB_t *requests, EventScheduler *e)
-{
-    resourceRequestDBIter_t             iter;
-
-    for (iter = requests->begin(); iter != requests->end(); iter++) {
-        ResourceRequest *r = (*iter);
-        log->dlog(ch, "activate resource request with name = '%s'", r->getResourceRequestName().c_str());
-        r->setState(AO_ACTIVE);
-		// TODO AM: Finish this code.
-    }
-}
-
-
-/* ------------------------- getInfo ------------------------- */
-
-string ResourceRequestManager::getInfo(ResourceRequest *r)
-{
-    ostringstream s;
-
-#ifdef DEBUG
-    log->dlog(ch, "looking up Bid with uid = %d", r->getUId());
-#endif
-
-    s << r->getInfo() << endl;
-    
-    return s.str();
-}
-
-
-/* ------------------------- getInfo ------------------------- */
-
-string ResourceRequestManager::getInfo(string sname, string rname)
-{
-    ostringstream s;
-    string info;
-    ResourceRequest *r;
-  
-    r = getResourceRequest(sname, rname);
-
-    if (r == NULL) {
-        // check done tasks
-        for (resourceRequestDoneIter_t i = resourceRequestDone.begin(); i != resourceRequestDone.end(); i++) {
-            if (((*i)->getResourceRequestName() == rname) 
-						&& ((*i)->getResourceRequestSet() == sname)) {
-                info = (*i)->getInfo();
-            }
-        }
-        
-        if (info.empty()) {
-            throw Error("no Resource Request with name '%s.%s'", sname.c_str(), rname.c_str());
-        }
-    } else {
-        // Resource Request with given identification is in database
-        info = r->getInfo();
-    }
-    
-    s << info;
-
-    return s.str();
-}
-
-
-/* ------------------------- getInfo ------------------------- */
-
-string ResourceRequestManager::getInfo(string sname)
-{
-    ostringstream s;
-    resourceRequestSetIndexIter_t b;
-
-    b = resourceRequestSetIndex.find(sname);
-
-    if (b != resourceRequestSetIndex.end()) {
-        for (resourceRequestIndexIter_t i = b->second.begin(); i != b->second.end(); i++) {
-            s << getInfo(sname, i->first);
-        }
-    } else {
-        s << "No such set" << endl;
-    }
-    
-    return s.str();
-}
-
-
-/* ------------------------- getInfo ------------------------- */
-
-string ResourceRequestManager::getInfo()
-{
-    ostringstream s;
-    resourceRequestSetIndexIter_t iter;
-
-    for (iter = resourceRequestSetIndex.begin(); iter != resourceRequestSetIndex.end(); iter++) {
-        s << getInfo(iter->first);
-    }
-    
-    return s.str();
-}
-
-
 /* ------------------------- delBid ------------------------- */
 
-void ResourceRequestManager::delResourceRequest(string sname, string rname, EventScheduler *e)
+void ResourceRequestManager::delResourceRequest(ResourceRequest *r, EventScheduler *e)
 {
-    ResourceRequest *r;
-
+	
 #ifdef DEBUG    
-    log->dlog(ch, "Deleting Resource Request set= %s name = '%s'",
-              sname.c_str(), rname.c_str());
-#endif  
+    log->dlog(ch, "removing resource request with name = %s.%s", 
+					r->getSet().c_str(), r->getName().c_str());
+#endif
 
+	if( EventSchedulerAgent * eagent = dynamic_cast<EventSchedulerAgent*>(e) )
+	{
+		
+		AuctioningObjectManager::delAuctioningObject(r);
 
-    if (sname.empty() && rname.empty()) {
-        throw Error("incomplete Resource Request set or name specified");
-    }
+		if (eagent != NULL) {
+			eagent->delResourceRequestEvents(r->getUId());
+		}
 
-    r = getResourceRequest(sname, rname);
-
-    if (r != NULL) {
-        delResourceRequest(r, e);
-    } else {
-        throw Error("Resouce Request %s.%s does not exist", sname.c_str(),rname.c_str());
-    }
+	}
+	else {
+		throw Error("Event scheduler given is not of type agent");
+	}
 }
 
 
@@ -484,7 +273,7 @@ void ResourceRequestManager::delResourceRequest(int uid, EventScheduler *e)
 {
     ResourceRequest *r;
 
-    r = getResourceRequest(uid);
+    r = dynamic_cast<ResourceRequest *>(getAuctioningObject(uid)); 
 
     if (r != NULL) {
         delResourceRequest(r, e);
@@ -494,84 +283,149 @@ void ResourceRequestManager::delResourceRequest(int uid, EventScheduler *e)
 }
 
 
+/* ----------------------- delResourceRequest ---------------------- */
+
+void ResourceRequestManager::delResourceRequest(string sname, string rname, EventScheduler *e)
+{
+    ResourceRequest *r;
+
+#ifdef DEBUG    
+    log->dlog(ch, "Deleting Resource Request %s.%s", sname.c_str(), rname.c_str());
+#endif  
+
+
+    if (sname.empty() && rname.empty()) {
+        throw Error("incomplete Resource Request set or name specified");
+    }
+
+    r =  dynamic_cast<ResourceRequest *>(getAuctioningObject(sname, rname)); 
+
+    if (r != NULL) {
+        delResourceRequest(r, e);
+    } else {
+        throw Error("Resouce Request %s.%s does not exist", sname.c_str(),rname.c_str());
+    }
+}
+
+
+
 /* ---------------------- delResourceRequests ----------------------- */
 
 void ResourceRequestManager::delResourceRequests(string sname, EventScheduler *e)
 {
     
-    if (resourceRequestSetIndex.find(sname) != resourceRequestSetIndex.end()) 
-    {
-		resourceRequestSetIndexIter_t iter = resourceRequestSetIndex.find(sname);
-		resourceRequestIndex_t resourceRequestIndex = iter->second;
-        for (resourceRequestIndexIter_t i = resourceRequestIndex.begin(); 
-				i != resourceRequestIndex.end(); i++) 
-        {
-            delResourceRequest(getResourceRequest(sname, i->first),e);
-        }
+	auctioningObjectIndex_t *objects = getAuctioningObjects(sname);
+	auctioningObjectIndexIter_t iter;
+	
+    for (auctioningObjectIndexIter_t i = objects->begin(); i != objects->end(); i++) 
+    {						
+        ResourceRequest *r = dynamic_cast<ResourceRequest *>(getAuctioningObject(sname, i->first));
+        delResourceRequest(r,e);
     }
+    
 }
 
-
-/* ------------------------- delBid ------------------------- */
-
-void ResourceRequestManager::delResourceRequest(ResourceRequest *r, EventScheduler *e)
-{
-#ifdef DEBUG    
-    log->dlog(ch, "removing resource request with name = '%s'", r->getResourceRequestName().c_str());
-#endif
-
-	if( EventSchedulerAgent * eagent = dynamic_cast<EventSchedulerAgent*>(e) )
-	{
-		// remove bid from database and from index
-		storeResourceRequestAsDone(r);
-		resourceRequestDB[r->getUId()] = NULL;
-		resourceRequestSetIndex[r->getResourceRequestSet()].erase(r->getResourceRequestName());
-
-		// delete bid set if empty
-		if (resourceRequestSetIndex[r->getResourceRequestSet()].empty()) {
-			resourceRequestSetIndex.erase(r->getResourceRequestName());
-		}
-		
-		if (eagent != NULL) {
-			eagent->delResourceRequestEvents(r->getUId());
-		}
-
-		resourceRequests--;
-	}
-	else {
-		throw Error("Event scheduler given is not of type agent");
-	}
-}
 
 
 /* ----------------------- delResourceRequests ----------------------- */
 
-void ResourceRequestManager::delResourceRequests(resourceRequestDB_t *requests, EventScheduler *e)
-{
-    resourceRequestDBIter_t iter;
-
-    for (iter = requests->begin(); iter != requests->end(); iter++) {
-        delResourceRequest(*iter, e);
-    }
-}
-
-
-/* -------------------- storeResourceRequestAsDone -------------------- */
-
-void ResourceRequestManager::storeResourceRequestAsDone(ResourceRequest *r)
+void ResourceRequestManager::delAuctioningObjects(auctioningObjectDB_t *requests, EventScheduler *e)
 {
     
-    r->setState(AO_DONE);
-    resourceRequestDone.push_back(r);
+    auctioningObjectDBIter_t iter;
 
-    if (resourceRequestDone.size() > DONE_LIST_SIZE) {
-        // release id
-        idSource.freeId(resourceRequestDone.front()->getUId());
-        // remove Resource Request
-        saveDelete(resourceRequestDone.front());
-        resourceRequestDone.pop_front();
+    for (iter = requests->begin(); iter != requests->end(); iter++) {
+        AuctioningObject * ao = *iter;
+        ResourceRequest *r = dynamic_cast<ResourceRequest *>(ao); 
+        delResourceRequest(r, e);
     }
 }
+
+/* ------------------------- getInfo ------------------------- */
+
+string AuctionManager::getInfo(int uid)
+{ 
+	AuctioningObject *ao = getAuctioningObject(uid); 
+	
+	ResourceRequest *r = dynamic_cast<ResourceRequest *>(ao);
+	
+	if (r != NULL)
+		return r->getInfo();
+	else
+		return string();
+}
+
+
+/* ------------------------- getInfo ------------------------- */
+
+string ResourceRequestManager::getInfo(string sname, string rname)
+{
+
+    string info;
+    AuctioningObject *ao;
+  
+    ao = getAuctioningObject(sname, rname);
+    ResourceRequest *r = dynamic_cast<ResourceRequest *>(ao);
+
+    if (r == NULL) 
+    {
+        // check done tasks
+        AuctioningObject *ao = getAuctioningObjectDone(sname, rname);
+        r = dynamic_cast<ResourceRequest *>(ao);
+        if (r != NULL){
+			info = r->getInfo();
+        } else {
+            throw Error("no auctioning object with name '%s.%s'", sname.c_str(), rname.c_str());
+        }
+    } else {
+        // auction object with given identification is in database
+        info = r->getInfo();
+    }
+    
+    return info;
+
+
+
+}
+
+
+/* ------------------------- getInfo ------------------------- */
+
+string ResourceRequestManager::getInfo(string sname)
+{
+
+    ostringstream s;
+
+	auctioningObjectIndex_t *objects = getAuctioningObjects(sname);
+	auctioningObjectIndexIter_t iter;
+
+    for (auctioningObjectIndexIter_t i = objects->begin(); i != objects->end(); i++) {						
+        ResourceRequest *r = dynamic_cast<ResourceRequest *>(getAuctioningObject(sname, i->first));
+        s << r->getInfo();
+    }
+    
+    return s.str();
+
+
+}
+
+
+/* ------------------------- getInfo ------------------------- */
+
+string ResourceRequestManager::getInfo()
+{
+    ostringstream s;
+    auctioningObjectDBIter_t iter;
+
+    for (iter = getAuctioningObjects().begin(); iter != getAuctioningObjects().end(); iter++) 
+    {
+        ResourceRequest *request = dynamic_cast<ResourceRequest *>(*iter);
+        s << request->getInfo();
+    }
+    
+    return s.str();
+}
+
 
 ipap_message * 
 ResourceRequestManager::get_ipap_message(ResourceRequest *request, time_t start,

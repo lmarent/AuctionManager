@@ -176,7 +176,7 @@ createBid( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVal
 	uint32_t lid = getId();
 	string bidName = uint32ToString(lid);
 
-    bid = new auction::BiddingObject(auct->getSetName(), auct->getAuctionName(), 
+    bid = new auction::BiddingObject(auct->getSet(), auct->getName(), 
 							bidSet, bidName, IPAP_BID, elements, options);
     
 	return bid;
@@ -185,15 +185,15 @@ createBid( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVal
 
 void auction::execute (auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,  
 					   auction::configParam_t *params, string aset, string aname, 
-					   time_t start, time_t stop, auction::biddingObjectDB_t *bids, 
-					   auction::biddingObjectDB_t **allocationdata )
+					   time_t start, time_t stop, auction::auctioningObjectDB_t *bids, 
+					   auction::auctioningObjectDB_t **allocationdata )
 {
 	// NOTHING TO DO.
 }
 
 void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
-							auction::fieldList_t *requestparams, auction::auctionDB_t *auctions, 
-							time_t start, time_t stop, auction::biddingObjectDB_t **biddata )
+							auction::fieldList_t *requestparams, auction::auctioningObjectDB_t *auctions, 
+							time_t start, time_t stop, auction::auctioningObjectDB_t **biddata )
 {
 
 #ifdef DEBUG
@@ -221,17 +221,19 @@ void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldVa
 	
 	   // start and stop time come from the auction, because they are replaced by the
 	   // interval definition.
-	   auctionDBIter_t firstAuct = auctions->begin();
+	   auctioningObjectDBIter_t firstAuct = auctions->begin();
 		
 	   budgetByAuction = budget / (int) auctions->size();
 	   valuationByAuction = valuation / (int) auctions->size();
 		
-	   auctionDBIter_t auctIter;
+	   auctioningObjectDBIter_t auctIter;
 	   for (auctIter = auctions->begin(); auctIter != auctions->end(); ++auctIter)
 	   {
-			auction::BiddingObject * bid = createBid( fieldDefs, fieldVals, *auctIter, quantity, 
-											budgetByAuction, valuationByAuction, 
-												start, stop );
+			Auction *auction = dynamic_cast<Auction *>(*auctIter);
+			
+			auction::BiddingObject * bid = createBid( fieldDefs, fieldVals, auction, quantity, 
+													  budgetByAuction, valuationByAuction, 
+													  start, stop );
 			(*biddata)->push_back(bid);
 	   }
 

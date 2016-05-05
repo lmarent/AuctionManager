@@ -293,7 +293,7 @@ void incrementQuantityAllocation(auction::fieldValList_t *fieldVals,
 	
 }
 
-int calculateRequestedQuantities(auction::biddingObjectDB_t *bids)
+int calculateRequestedQuantities(auction::auctioningObjectDB_t *bids)
 {
 
 #ifdef DEBUG
@@ -302,9 +302,12 @@ int calculateRequestedQuantities(auction::biddingObjectDB_t *bids)
 	
 	int sumQuantity = 0;
 	
-	auction::biddingObjectDBIter_t bid_iter; 
-	for (bid_iter = bids->begin(); bid_iter != bids->end(); ++bid_iter){
-		auction::BiddingObject * bid = *bid_iter;
+	auction::auctioningObjectDBIter_t bid_iter; 
+	for (bid_iter = bids->begin(); bid_iter != bids->end(); ++bid_iter)
+	{
+		auction::BiddingObject *bid = 
+					dynamic_cast<auction::BiddingObject *>(*bid_iter);
+					
 		auction::elementList_t *elems = bid->getElements();
 		auction::elementListIter_t elem_iter;
 		
@@ -340,17 +343,21 @@ double getBidPrice(auction::BiddingObject *bid)
 }
 
 
-void separateBids(auction::biddingObjectDB_t *bids,double bl, double bh, 
-					auction::biddingObjectDB_t *bids_low, auction::biddingObjectDB_t *bids_high)
+void separateBids(auction::auctioningObjectDB_t *bids,double bl, double bh, 
+				   auction::auctioningObjectDB_t *bids_low, 
+					auction::auctioningObjectDB_t *bids_high)
 {
 
 #ifdef DEBUG
 	cout << "Starting separateBids" << endl;
 #endif
 
-	auction::biddingObjectDB_t::iterator iter;
-	for (iter = bids->begin();iter != bids->end(); ++iter){
-		auction::BiddingObject *bid = *iter;
+	auction::auctioningObjectDB_t::iterator iter;
+	for (iter = bids->begin();iter != bids->end(); ++iter)
+	{
+		auction::BiddingObject *bid = 
+					dynamic_cast<auction::BiddingObject *>(*iter);
+					
 		double price = getBidPrice(bid);
 		
 		if (price >= 0){
@@ -372,8 +379,8 @@ void separateBids(auction::biddingObjectDB_t *bids,double bl, double bh,
 
 void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,  
 					   auction::configParam_t *params, string aset, string aname, time_t start, 
-					   time_t stop, auction::biddingObjectDB_t *bids, 
-					   auction::biddingObjectDB_t **allocationdata )
+					   time_t stop, auction::auctioningObjectDB_t *bids, 
+					   auction::auctioningObjectDB_t **allocationdata )
 {
 
 #ifdef DEBUG
@@ -384,8 +391,8 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 	bandwidth_to_sell = getResourceAvailability(params);
 	reserve_price = getReservePrice( params );	
 
-	auction::biddingObjectDB_t *bids_low_rct = new auction::biddingObjectDB_t();
-	auction::biddingObjectDB_t *bids_high_rct = new auction::biddingObjectDB_t();
+	auction::auctioningObjectDB_t *bids_low_rct = new auction::auctioningObjectDB_t();
+	auction::auctioningObjectDB_t *bids_high_rct = new auction::auctioningObjectDB_t();
 		
 	// Order bids classifying them by whether they compete on the low and high auction.
 	separateBids(bids,0.5, 1, bids_low_rct, bids_high_rct);
@@ -396,10 +403,11 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 
 	std::multimap<double, alloc_proc_t>  orderedBids;
 	// Order Bids by elements.
-	auction::biddingObjectDBIter_t bid_iter; 
+	auction::auctioningObjectDBIter_t bid_iter; 
 	
 	for (bid_iter = bids->begin(); bid_iter != bids->end(); ++bid_iter){
-		auction::BiddingObject * bid = *bid_iter;
+		auction::BiddingObject *bid = 
+					dynamic_cast<auction::BiddingObject *>(*bid_iter);
 				
 		auction::elementList_t *elems = bid->getElements();
 				
@@ -411,8 +419,8 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 			
 			alloc_proc_t alloc;
 		
-			alloc.bidSet = bid->getBiddingObjectSet();
-			alloc.bidName = bid->getBiddingObjectName();
+			alloc.bidSet = bid->getSet();
+			alloc.bidName = bid->getName();
 			alloc.elementName = elem_iter->first;
 			alloc.sessionId = bid->getSession();
 			alloc.quantity = quantity;
@@ -516,8 +524,8 @@ void auction::execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList
 }
 
 void auction::execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
-							auction::fieldList_t *requestparams, auction::auctionDB_t *auctions, 
-							time_t start, time_t stop, auction::biddingObjectDB_t **biddata )
+							auction::fieldList_t *requestparams, auction::auctioningObjectDB_t *auctions, 
+							time_t start, time_t stop, auction::auctioningObjectDB_t **biddata )
 {
 #ifdef DEBUG
 	fprintf( stdout, "bas module: start execute_user \n");

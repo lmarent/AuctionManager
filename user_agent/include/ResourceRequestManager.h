@@ -33,79 +33,33 @@
 #include "stdincpp.h"
 #include "Logger.h"
 #include "Error.h"
-#include "FieldDefManager.h"
-#include "EventSchedulerAgent.h"
 #include "ResourceRequestFileParser.h"
+#include "AuctioningObjectManager.h"
+#include "EventSchedulerAgent.h"
 
 namespace auction
 {
 
-// index by set id and name
-typedef map<string, int>            					resourceRequestIndex_t;
-typedef map<string, int>::iterator  					resourceRequestIndexIter_t;
-typedef map<string, resourceRequestIndex_t>             resourceRequestSetIndex_t;
-typedef map<string, resourceRequestIndex_t>::iterator   resourceRequestSetIndexIter_t;
-
-//! list of done resource request
-typedef list<ResourceRequest*>            resourceRequestDone_t;
-typedef list<ResourceRequest*>::iterator  resourceRequestDoneIter_t;
 
 //! index bids by time
-typedef map<time_t, resourceRequestDB_t>            resourceRequestTimeIndex_t;
-typedef map<time_t, resourceRequestDB_t>::iterator  resourceRequestTimeIndexIter_t;
+typedef map<time_t, auctioningObjectDB_t>            resourceRequestTimeIndex_t;
+typedef map<time_t, auctioningObjectDB_t>::iterator  resourceRequestTimeIndexIter_t;
 
 
 /*! \short   manage adding/deleting of complete resource Request descriptions
   
-  the BidManager class allows to add and remove bids in the Auction
+  the ResourceRequestManager class allows to add and remove resource requests in the Auction
   core system. Resource Request data are a set of ascii strings that are parsed
-  and syntax checked by the BidManager and then their respective
+  and syntax checked by the Resource Request Manager and then their respective
   settings are used to configure the other AuctionCore components. 
-  The resourceRequest will then be stored in the bidDatabase inside the BidManager
+  The resourceRequest will then be stored in the requestDatabase.
 */
 
-class ResourceRequestManager : public FieldDefManager
+class ResourceRequestManager : public AuctioningObjectManager
 {
-  private:
-
-    Logger *log;
-    int ch; //!< logging channel number used by objects of this class
-
-    //!< number of resource requests in the database
-    int resourceRequests;
-
-	//! This field identifies uniquely the agent.
-	int domain; 
-
-    //! index to bids via setID and name
-    resourceRequestSetIndex_t resourceRequestSetIndex;
-
-    //! stores all resource requests indexed by setID, resource requestID
-    resourceRequestDB_t  resourceRequestDB;
-
-    //! list with resource requests done
-    resourceRequestDone_t resourceRequestDone;
-
-    //! pool of unique resourceRequest ids
-    ResourceRequestIdSource idSource;
-
-    /*! \short add the resourceRequest name to the list of finished resourceRequests
-
-       \arg \c resourceRequestname - name of the finished resourceRequest (source.name)
-    */
-    void storeResourceRequestAsDone(ResourceRequest *r);
 
   public:
 
-    int getNumResourceRequests() 
-    { 
-        return resourceRequests; 
-    }
-
-    string getInfo(int uid)
-    {
-        return getInfo(getResourceRequest(uid)); 
-    }
 
     /*! \short   construct and initialize a ResourceRequestManager object
         \arg \c fdname  field definition file name
@@ -130,17 +84,11 @@ class ResourceRequestManager : public FieldDefManager
     //! get ResourceRequest rname from ResourceRequest set and name 
     ResourceRequest *getResourceRequest(string sname, string rname); //Ok
 
-    //! get all ResourceRequests in the ResourceRequest set with name sname 
-    resourceRequestIndex_t *getResourceRequests(string sname);
-
-    //! get all rules
-    resourceRequestDB_t getResourceRequests();
-
-    //! parse XML rules from file 
-    resourceRequestDB_t *parseResourceRequests(string fname); // Ok
+	//! parse XML rules from file 
+    auctioningObjectDB_t *parseResourceRequests(string fname); // Ok
 
     //! parse XML or Auction API ResourceRequests from buffer
-    resourceRequestDB_t *parseResourceRequestsBuffer(char *buf, int len, int mapi);
+    auctioningObjectDB_t *parseResourceRequestsBuffer(char *buf, int len, int mapi);
    
     /*! \short   add a filter rule description 
 
@@ -153,13 +101,8 @@ class ResourceRequestManager : public FieldDefManager
         or if a ResourceRequest with the given identification is already 
         present in the ResourceRequestDatabase
     */
-    void addResourceRequests(resourceRequestDB_t *requests, EventScheduler *e);  
+    void addAuctioningObjects(auctioningObjectDB_t *requests, EventScheduler *e);  
 
-    //! add a single ResourceRequest
-    void addResourceRequest(ResourceRequest *b); //ok
-
-    //! activate/execute ResourceRequests
-    void activateResourceRequests(resourceRequestDB_t *requests, EventScheduler *e);
 
     /*! \short   delete a ResourceRequest description 
 
@@ -173,11 +116,11 @@ class ResourceRequestManager : public FieldDefManager
         if a ResourceRequest with the given identification is currently not present 
         in the ResourceRequestDatabase
     */
+    void delResourceRequest(ResourceRequest *r, EventScheduler *e);
     void delResourceRequest(int uid, EventScheduler *e); //ok
     void delResourceRequest(string rname, string sname, EventScheduler *e); // ok
     void delResourceRequests(string sname, EventScheduler *e);
-    void delResourceRequest(ResourceRequest *r, EventScheduler *e);
-    void delResourceRequests(resourceRequestDB_t *requests, EventScheduler *e); //Ok
+    void delAuctioningObjects(auctioningObjectDB_t *requests, EventScheduler *e); //Ok
    
     /*! \short   get information from the ResourceRequest manager
 
@@ -185,12 +128,10 @@ class ResourceRequestManager : public FieldDefManager
         or a set of ResourceRequests or all ResourceRequests
     */
     string getInfo(void);
-    string getInfo(ResourceRequest *r);
+    string getInfo(int uid);
     string getInfo(string sname, string rname);
     string getInfo(string sname);
 
-	//! Return the domain
-	inline int getDomain(){ return domain; }
 
     /*! \short   get the ipap_message that contains the request 
 		\arg     request - request to put in the message.
