@@ -247,6 +247,139 @@ class GetModInfoEvent : public CtrlCommEvent
     }
 };
 
+class AddResourceEvent : public Event
+{
+  private:
+    string fileName;
+
+  public:
+
+    AddResourceEvent(string fname, int mapi=0) 
+      : Event(ADD_RESOURCE), fileName(fname) 
+    {
+        
+    }
+
+    string getFileName()
+    {
+        return fileName;
+    }
+};
+
+class AddResourceCtrlCommEvent : public CtrlCommEvent
+{
+  private:
+    string xml;
+
+  public:
+
+    AddResourceCtrlCommEvent(string xml) 
+      : CtrlCommEvent(ADD_RESOURCE_CTRLCOMM), xml(xml) 
+    {
+        
+    }
+
+    string getMessage()
+    {
+        return xml;
+    }
+};
+
+
+class ActivateResourceEvent : public Event
+{
+  private:
+    auctioningObjectDB_t resources;
+    time_t startTime;
+
+  public:
+
+    ActivateResourceEvent(struct timeval time, auctioningObjectDB_t resources, time_t _startTime) 
+      : Event(ACTIVATE_RESOURCE, time), resources(resources), startTime(_startTime) {  }
+
+    ActivateResourceEvent(time_t offs_sec, time_t offs_usec, auctioningObjectDB_t resources, time_t _startTime) 
+      : Event(ACTIVATE_RESOURCE, offs_sec, offs_usec), resources(resources), startTime(_startTime) {}
+
+    ActivateResourceEvent(auctioningObjectDB_t resources,  time_t _startTime) 
+      : Event(ACTIVATE_RESOURCE), resources(resources), startTime(_startTime) {}
+
+     auctioningObjectDB_t *getResource()
+     {
+         return &resources;
+     }
+     
+     time_t getStartTime()
+     {
+		return startTime;
+	 }
+     
+    int deleteResource(int uid)
+    {
+        int ret = 0;
+        auctioningObjectDBIter_t iter;
+        
+        for (iter=resources.begin(); iter != resources.end(); iter++) {
+            if ((*iter)->getUId() == uid) {
+                resources.erase(iter);
+                ret++;
+                break;
+            }   
+        }
+          
+        if (resources.empty()) {
+            return ++ret;
+        }
+          
+        return ret;
+    }
+
+};
+
+
+class RemoveResourceEvent : public Event
+{
+  private:
+    auctioningObjectDB_t resources;
+
+  public:
+
+    RemoveResourceEvent(struct timeval time, auctioningObjectDB_t &r) 
+      : Event(REMOVE_RESOURCE, time), resources(r) {}
+
+    RemoveResourceEvent(time_t offs_sec, auctioningObjectDB_t &r) 
+      : Event(REMOVE_RESOURCE, offs_sec), resources(r) {}
+    
+    RemoveResourceEvent(auctioningObjectDB_t &r) 
+      : Event(REMOVE_RESOURCE), resources(r) {}
+
+    auctioningObjectDB_t *getResources()
+    {
+        return &resources;
+    }
+    
+    int deleteResource(int uid)
+    {
+        int ret = 0;
+        auctioningObjectDBIter_t iter;
+        
+        for (iter=resources.begin(); iter != resources.end(); iter++) {
+            if ((*iter)->getUId() == uid) {
+                resources.erase(iter);
+                ret++;
+                break;
+            }   
+        }
+          
+        if (resources.empty()) {
+            return ++ret;
+        }
+          
+        return ret;
+    }
+};
+
+
+
 }; // namespace auction
 
 #endif // _EVENT_AUCTIONER_H_

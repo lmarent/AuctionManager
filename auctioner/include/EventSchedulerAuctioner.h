@@ -42,6 +42,15 @@ public:
 	
     //! return the time of the next event due
     struct timeval getNextEventTime();
+
+
+    /*! \short   delete all events for a given process index
+
+        delete all Events related to the specified process index from the list of events
+
+        \arg \c uid  - the unique identification number of the process index
+    */
+    void delProcessExecutionEvents(int uid);
 		
 };
 
