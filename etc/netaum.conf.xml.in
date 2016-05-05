@@ -18,6 +18,8 @@
     <PREF NAME="FilterConstFile">@DEF_SYSCONFDIR@/fieldval.xml</PREF>     
     <!-- auction file to load at start -->
     <PREF NAME="AuctionFile">@DEF_SYSCONFDIR@/example_auctions2.xml</PREF>    
+    <!-- Resource file to load at start -->
+    <PREF NAME="ResourceFile">@DEF_SYSCONFDIR@/resourcefiledef.xml</PREF>    
 	<!-- Information for database store -->
     <PREF NAME="DataBaseIpAddress" TYPE="IPAddr">127.0.0.1</PREF>
     <PREF NAME="DBname" TYPE="String">auctionDB</PREF>
