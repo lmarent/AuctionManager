@@ -35,6 +35,7 @@
 #include "Error.h"
 #include "IdSource.h"
 #include "ProcModuleInterface.h"
+#include "AuctioningObjectManager.h"
 #include "BiddingObject.h"
 #include "BiddingObjectFileParser.h"
 #include "MAPIBiddingObjectParser.h"
@@ -48,21 +49,9 @@ namespace auction
 const time_t FLOW_IDLE_TIMEOUT = 30;
 
 
-// RuleDB definition is currently in RuleFileParser.h
-
-// index by set id and name
-typedef map<string, int>            				  biddingObjectIndex_t;
-typedef map<string, int>::iterator  				  biddingObjectIndexIter_t;
-typedef map<string, biddingObjectIndex_t>             biddingObjectSetIndex_t;
-typedef map<string, biddingObjectIndex_t>::iterator   biddingObjectSetIndexIter_t;
-
-//! list of done biddingObjects
-typedef list<BiddingObject*>            biddingObjectDone_t;
-typedef list<BiddingObject*>::iterator  biddingObjectDoneIter_t;
-
 //! index biddingObjects by time
-typedef map<time_t, biddingObjectDB_t>            	biddingObjectTimeIndex_t;
-typedef map<time_t, biddingObjectDB_t>::iterator  	biddingObjectTimeIndexIter_t;
+typedef map<time_t, auctioningObjectDB_t>            	biddingObjectTimeIndex_t;
+typedef map<time_t, auctioningObjectDB_t>::iterator  	biddingObjectTimeIndexIter_t;
 
 typedef map<string, vector<int> >					auctionBidIndex_t;
 typedef map<string, vector<int> >::iterator			auctionBidIndexIter_t;
@@ -78,43 +67,22 @@ typedef map<string, auctionBidIndex_t>::iterator	auctionSetBidIndexIter_t;
   The biddingObject  will then be stored in the bidDatabase inside the BiddingObjectManager
 */
 
-class BiddingObjectManager : public FieldDefManager
+class BiddingObjectManager : public AuctioningObjectManager
 {
   private:
 
-    Logger *log;
-    int ch; //!< logging channel number used by objects of this class
-
-    //!< number of bidding objects in the database
-    int biddingObjects;
-
-    //! index to biddingObjects via setID and name
-    biddingObjectSetIndex_t biddingObjectSetIndex;
 
 	//! index biddingObjects via AuctionSetId and Auction name.
 	auctionSetBidIndex_t bidAuctionSetIndex;
-
-    //! stores all biddingObjects indexed by setID, bidID
-    biddingObjectDB_t  biddingObjectDB;
-
-    //! list with biddingObjects done
-    biddingObjectDone_t biddingObjectDone;
-
-    //! pool of unique biddingObject  ids
-    IdSource idSource;
-
-	//! This field identifies uniquely the agent.
-	int domain; 
 	
-    /*! \short add the biddingObject  name to the list of finished biddingObjects
-
-       \arg \c bidname - name of the finished biddingObject  (source.name)
-    */
-    void storeBiddingObjectAsDone(BiddingObject  *r);
-
     //! connection string to the database.
     string connectionDBStr;
     
+	/*! \short add the biddingObject  name to the list of finished biddingObjects
+       \arg \c b - object to store biddingObject  (source.name).
+    */
+    void storeBiddingObjectAsDone(BiddingObject  *b);
+  
   public:
 
     /*! \short   construct and initialize a BiddingObjectManager object
@@ -127,37 +95,17 @@ class BiddingObjectManager : public FieldDefManager
     //! destroy a BiddingObjectManager object
     ~BiddingObjectManager(); // Ok
 
-     /*! \short   lookup the biddingObject  info data for a given BidId or name
-
-        lookup the database of biddingObjects for a specific biddingObject 
-        and return a link (pointer) to the biddingObject  data associated with it
-        do not store this pointer, its contents will be destroyed upon biddingObject  deletion. 
-        do not free this pointer as it is a link to the biddingObject  and not a copy.
-    
-        \arg \c bidId - unique biddingObject  id
-    */
-    BiddingObject  *getBiddingObject(int uid);
-
-    //! get biddingObject  rname from bidset sname 
-    BiddingObject  *getBiddingObject(string sname, string rname); //Ok
-
-    //! get all biddingObjects in bidset with name sname 
-    biddingObjectIndex_t *getBiddingObjects(string sname);
-
 	//! get biddingObjects by auction set and auction name
 	vector<int> getBiddingObjects(string aset, string aname);
 
-    //! get all biddingObjects
-    biddingObjectDB_t getBiddingObjects();
-
     //! parse XML biddingObjects from file 
-    biddingObjectDB_t *parseBiddingObjects(string fname); // Ok
+    auctioningObjectDB_t *parseBiddingObjects(string fname); // Ok
 
     //! parse XML or Auction API biddingObjects from buffer
-    biddingObjectDB_t *parseBiddingObjectsBuffer(char *buf, int len);
+    auctioningObjectDB_t *parseBiddingObjectsBuffer(char *buf, int len);
 
     //! parse biddingObjects from ipap_message 
-    biddingObjectDB_t *parseMessage(ipap_message *messageIn, ipap_template_container *templates);
+    auctioningObjectDB_t *parseMessage(ipap_message *messageIn, ipap_template_container *templates);
 
    
     /*! \short   add a biddingObject  list
@@ -170,51 +118,21 @@ class BiddingObjectManager : public FieldDefManager
         syntactically correct or does not contain the mandatory fields
         or if a biddingObject  with the given identification is already present in the bidDatabase
     */
-    void addBiddingObjects(biddingObjectDB_t *biddingObjects, EventScheduler *e);  
+    void addAuctioningObjects(auctioningObjectDB_t *biddingObjects, EventScheduler *e);  
 
-    //! add a single biddingObject 
-    void addBiddingObject(BiddingObject  *b); //ok
+	//! add a single biddingObject
+	void addBiddingObject(BiddingObject *b);
 
-    //! activate/execute biddingObjects
-    void activateBiddingObjects(biddingObjectDB_t *biddingObjects);
+	void delBiddingObject(BiddingObject *r, EventScheduler *e);
 
-    /*! \short   delete a biddingObject  description 
-
-        deletion of a biddingObject  will parse and syntax check the
-        identification string, test the presence of the given biddingObject 
-        in the bidDatabase, remove the biddingObject  from the bidDatabase
-
-        \throws an Error exception if the given biddingObject  identification is not
-        syntactically correct or does not contain the mandatory fields  or 
-        if a biddingObject  with the given identification is currently not present 
-        in the bidDatabase
-    */
-    void delBiddingObject(int uid, EventScheduler *e); //ok
-    void delBiddingObject(string rname, string sname, EventScheduler *e); // ok
-    void delBiddingObjects(string sname, EventScheduler *e);
-    void delBiddingObject(BiddingObject  *r, EventScheduler *e);
-    void delBiddingObjects(biddingObjectDB_t *biddingObjects, EventScheduler *e); //Ok
-   
-    /*! \short   get information from the biddingObject  manager
-
-        these functions can be used to get information for a single biddingObject ,
-        or a set of biddingObjects or all biddingObjects
-    */
-    string getInfo(void);
-    
-    inline string getInfo(int uid){ return getBiddingObject(uid)->getInfo(); }
-    
-    string getInfo(string sname, string rname);
-    string getInfo(string sname);
-
-    //! dump a BiddingObjectManager object
-    void dump( ostream &os );
-
-    //! Return the number of biddingObjects in the container.
-    inline int getNumBiddingObjects(){ return biddingObjects; }
-
-	//! Return the domain
-	inline int getDomain(){ return domain; }
+	void delBiddingObject(int uid, EventScheduler *e);
+	
+	void delBiddingObjects(string sname, EventScheduler *e); 
+	
+	void delBiddingObject(string sname, string rname, EventScheduler *e);
+	
+	void delAuctioningObjects(auctioningObjectDB_t *biddingObjects, EventScheduler *e);
+	
 
 	/*! \short   get the ipap_message that contains all the bidding objects within
      * 			  the container. 
@@ -224,6 +142,19 @@ class BiddingObjectManager : public FieldDefManager
 	ipap_message * get_ipap_message(BiddingObject *biddingObject,
 									Auction *auction, 
 									ipap_template_container *templates);
+
+    /*! \short   get information from the auction manager
+
+        these functions can be used to get information for a single auction object,
+        or a set of auction objects
+    */
+    string getInfo(int uid);
+    string getInfo(string sname, string rname);
+    string getInfo(string sname);
+    string getInfo();
+
+    //! dump a AuctionManager object
+    void dump( ostream &os );
 	
 };
 

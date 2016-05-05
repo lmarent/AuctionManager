@@ -92,16 +92,18 @@ void BiddingObject_Test::tearDown()
 void BiddingObject_Test::testBiddingObjects() 
 {
 	try{
-		biddingObjectDB_t *new_bids = new biddingObjectDB_t();
+		auctioningObjectDB_t *new_bids = new auctioningObjectDB_t();
 
 		ptrBidFileParser->parse(&fieldDefs, &fieldVals, new_bids );
 			
-		BiddingObject *copy = (*new_bids)[0];
+		
+		AuctioningObject *ao = (*new_bids)[0];
+		BiddingObject *copy = dynamic_cast<BiddingObject*>(ao);
 				
 		ptrBid1 = new BiddingObject(*copy);
-		ptrBid2 = new BiddingObject(*((*new_bids)[0]));
+		ptrBid2 = new BiddingObject(*copy);
 				
-		CPPUNIT_ASSERT( (ptrBid1->getInfo()).compare(((*new_bids)[0])->getInfo()) == 0 );
+		CPPUNIT_ASSERT( (ptrBid1->getInfo()).compare(copy->getInfo()) == 0 );
 		
 		CPPUNIT_ASSERT(	*ptrBid1 == *ptrBid2);
 				

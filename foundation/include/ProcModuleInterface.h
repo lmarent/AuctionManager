@@ -38,6 +38,7 @@
 namespace auction
 {
 
+class AuctioningObject;
 class Auction;
 class BiddingObject;
 
@@ -104,6 +105,10 @@ static const int offset_refer[] = {
     ( 0 )
 };
 
+//! auctioning object list
+typedef vector<AuctioningObject*>            auctioningObjectDB_t;
+typedef vector<AuctioningObject*>::iterator  auctioningObjectDBIter_t;
+
 //! auction list
 typedef vector<Auction*>            auctionDB_t;
 typedef vector<Auction*>::iterator  auctionDBIter_t;
@@ -137,8 +142,8 @@ void destroyModule( configParam_t *params );
     freed by caller. 
 */
 void execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
-			  configParam_t *params, string aset, string aname, time_t start, time_t stop, biddingObjectDB_t *bids, 
-			  biddingObjectDB_t **allocationdata );
+			  configParam_t *params, string aset, string aname, time_t start, time_t stop, auctioningObjectDB_t *bids, 
+			  auctioningObjectDB_t **allocationdata );
 
 /*! \short   execute the bidding process for the list of auctions given 
  * 			 that are required to support a resource request interval.
@@ -153,8 +158,8 @@ void execute( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *field
 
 */
 void execute_user( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
-				   fieldList_t *requestparams, auctionDB_t *auctions, time_t start, 
-				   time_t stop, biddingObjectDB_t **biddata );
+				   fieldList_t *requestparams, auctioningObjectDB_t *auctions, time_t start, 
+				   time_t stop, auctioningObjectDB_t **biddata );
 
 
 /*! \short   dismantle the module
@@ -229,11 +234,11 @@ typedef struct {
 
     void (*execute)( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals, 
 					 configParam_t *params, string aset, string aname, time_t start, 
-					 time_t stop, biddingObjectDB_t *bids, biddingObjectDB_t **allocationdata );
+					 time_t stop, auctioningObjectDB_t *bids, auctioningObjectDB_t **allocationdata );
 
 	void (*execute_user)( auction::fieldDefList_t *fieldDefs, auction::fieldValList_t *fieldVals,
-						  fieldList_t *requestparams, auctionDB_t *auctions, time_t start, 
-						  time_t stop, biddingObjectDB_t **biddata );	
+						  fieldList_t *requestparams, auctioningObjectDB_t *auctions, time_t start, 
+						  time_t stop, auctioningObjectDB_t **biddata );	
 					 
     void (*destroy)( configParam_t *params );
 

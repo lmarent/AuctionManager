@@ -83,7 +83,7 @@ class MAPIBiddingObjectParser : public IpApMessageParser, public anslp::msg::ans
 
 	void parseAuctionKey( fieldDefList_t *fields, fieldValList_t *fieldVals,
 						  const anslp::msg::xml_object_key &key,
-						  biddingObjectDB_t *biddingObjects, 
+						  auctioningObjectDB_t *biddingObjects, 
 						  ipap_template_container *templates );
 	
   public:
@@ -94,7 +94,7 @@ class MAPIBiddingObjectParser : public IpApMessageParser, public anslp::msg::ans
 
     //! parse given biddingObjects and add parsed biddingObjects to biddingObjects
     void parse( fieldDefList_t *fieldDefs, fieldValList_t *fieldVals,
-			    ipap_message *message, biddingObjectDB_t *biddingObjects, 
+			    ipap_message *message, auctioningObjectDB_t *biddingObjects, 
 			    ipap_template_container *templates );
 
 

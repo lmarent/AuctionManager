@@ -86,12 +86,11 @@ configItem_t BiddingObjectFileParser::parsePref(xmlNodePtr cur)
 }
 
 
-void BiddingObjectFileParser::parse(fieldDefList_t *fieldDefs, fieldValList_t *fieldVals, biddingObjectDB_t *bidingObjects )
+void BiddingObjectFileParser::parse(fieldDefList_t *fieldDefs, fieldValList_t *fieldVals, auctioningObjectDB_t *bidingObjects )
 {
     xmlNodePtr cur, cur2, cur3;
     string sname, aset, aname, bset, bname, stype;
     cur = xmlDocGetRootElement(XMLDoc);
-    time_t now = time(NULL);
     ipap_object_type_t type;
 
 #ifdef DEBUG
@@ -142,7 +141,7 @@ void BiddingObjectFileParser::parse(fieldDefList_t *fieldDefs, fieldValList_t *f
 
 			if (bset.empty()){
 				try{
-					int iset = ParserFcts::parseInt(sname);
+					ParserFcts::parseInt(sname);
 				} catch (Error &e) {
 					sname= ""; // the number given is not an integer.
 				}

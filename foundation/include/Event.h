@@ -76,7 +76,11 @@ typedef enum
       REMOVE_SESSION,
       AUCTION_INTERACTION,
       ADD_RESOURCEREQUESTS_CTRLCOMM,
-      CONFIGURE_SESSION
+      CONFIGURE_SESSION,
+      ADD_RESOURCE,
+      ADD_RESOURCE_CTRLCOMM,
+      ACTIVATE_RESOURCE,
+      REMOVE_RESOURCE
 } event_t;
 
 //! event names for dump method
@@ -112,6 +116,11 @@ const string eventNames[] =
       "Remove-Session",
       "Auction-Interaction",
       "Add-ResourceRequests-ctrlcomm",
+      "Configure-Session",
+      "Add-Resource",
+      "Add-Resource-ctrlcomm",
+      "Activate-Resource",
+      "Remove-Resource"
 };
 
 /* ------------------------- Event class ------------------------- */
@@ -311,17 +320,17 @@ class AddGeneratedBiddingObjectsEvent : public Event
 {
   private:
     int index;
-    biddingObjectDB_t biddingObjects;
+    auctioningObjectDB_t biddingObjects;
 
   public:
 
-    AddGeneratedBiddingObjectsEvent( int _index, biddingObjectDB_t &biddingObjects ): 
+    AddGeneratedBiddingObjectsEvent( int _index, auctioningObjectDB_t &biddingObjects ): 
     Event(ADD_GENERATED_BIDDING_OBJECTS), index(_index), biddingObjects(biddingObjects) 
     {
         
     }
 
-    biddingObjectDB_t *getBiddingObjects()
+    auctioningObjectDB_t *getBiddingObjects()
     {
         return &biddingObjects;
     }
@@ -331,7 +340,7 @@ class AddGeneratedBiddingObjectsEvent : public Event
     int deleteBiddingObject(int uid)
     {
         int ret = 0;
-        biddingObjectDBIter_t iter;
+        auctioningObjectDBIter_t iter;
         
         for (iter=biddingObjects.begin(); iter != biddingObjects.end(); iter++) {
             if ((*iter)->getUId() == uid) {
@@ -353,20 +362,20 @@ class AddGeneratedBiddingObjectsEvent : public Event
 class RemoveBiddingObjectsEvent : public Event
 {
   private:
-    biddingObjectDB_t biddingObjects;
+    auctioningObjectDB_t biddingObjects;
 
   public:
 
-    RemoveBiddingObjectsEvent(struct timeval time, biddingObjectDB_t &b) 
+    RemoveBiddingObjectsEvent(struct timeval time, auctioningObjectDB_t &b) 
       : Event(REMOVE_BIDDING_OBJECTS, time), biddingObjects(b) {}
 
-    RemoveBiddingObjectsEvent(time_t offs_sec, biddingObjectDB_t &b) 
+    RemoveBiddingObjectsEvent(time_t offs_sec, auctioningObjectDB_t &b) 
       : Event(REMOVE_BIDDING_OBJECTS, offs_sec), biddingObjects(b) {}
     
-    RemoveBiddingObjectsEvent(biddingObjectDB_t &b) 
+    RemoveBiddingObjectsEvent(auctioningObjectDB_t &b) 
       : Event(REMOVE_BIDDING_OBJECTS), biddingObjects(b) {}
 
-    biddingObjectDB_t *getBiddingObjects()
+    auctioningObjectDB_t *getBiddingObjects()
     {
         return &biddingObjects;
     }
@@ -374,7 +383,7 @@ class RemoveBiddingObjectsEvent : public Event
     int deleteBiddingObject(int uid)
     {
         int ret = 0;
-        biddingObjectDBIter_t iter;
+        auctioningObjectDBIter_t iter;
         
         for (iter=biddingObjects.begin(); iter != biddingObjects.end(); iter++) {
             if ((*iter)->getUId() == uid) {
@@ -395,20 +404,20 @@ class RemoveBiddingObjectsEvent : public Event
 class ActivateBiddingObjectsEvent : public Event
 {
   private:
-    biddingObjectDB_t biddingObjects;
+    auctioningObjectDB_t biddingObjects;
 
   public:
 
-    ActivateBiddingObjectsEvent(struct timeval time, biddingObjectDB_t &b) 
+    ActivateBiddingObjectsEvent(struct timeval time, auctioningObjectDB_t &b) 
       : Event(ACTIVATE_BIDDING_OBJECTS, time), biddingObjects(b) {}
 
-    ActivateBiddingObjectsEvent(time_t offs_sec, biddingObjectDB_t &b) 
+    ActivateBiddingObjectsEvent(time_t offs_sec, auctioningObjectDB_t &b) 
       : Event(ACTIVATE_BIDDING_OBJECTS, offs_sec), biddingObjects(b) {}
     
-    ActivateBiddingObjectsEvent(biddingObjectDB_t &b) 
+    ActivateBiddingObjectsEvent(auctioningObjectDB_t &b) 
       : Event(ACTIVATE_BIDDING_OBJECTS), biddingObjects(b) {}
 
-    biddingObjectDB_t *getBiddingObjects()
+    auctioningObjectDB_t *getBiddingObjects()
     {
         return &biddingObjects;
     }
@@ -416,7 +425,7 @@ class ActivateBiddingObjectsEvent : public Event
     int deleteBiddingObject(int uid)
     {
         int ret = 0;
-        biddingObjectDBIter_t iter;
+        auctioningObjectDBIter_t iter;
         
         for (iter=biddingObjects.begin(); iter != biddingObjects.end(); iter++) {
             if ((*iter)->getUId() == uid) {
@@ -439,14 +448,14 @@ class TransmitBiddingObjectsEvent : public Event
 {
   private:
     int index;
-    biddingObjectDB_t biddingObjects;
+    auctioningObjectDB_t biddingObjects;
 
   public:
     
-    TransmitBiddingObjectsEvent(int _index, biddingObjectDB_t &b) 
+    TransmitBiddingObjectsEvent(int _index, auctioningObjectDB_t &b) 
       : Event(TRANSMIT_BIDDING_OBJECTS), index(_index), biddingObjects(b) {}
 
-    biddingObjectDB_t *getBiddingObjects()
+    auctioningObjectDB_t *getBiddingObjects()
     {
         return &biddingObjects;
     }
@@ -456,7 +465,7 @@ class TransmitBiddingObjectsEvent : public Event
     int deleteBiddingObject(int uid)
     {
         int ret = 0;
-        biddingObjectDBIter_t iter;
+        auctioningObjectDBIter_t iter;
         
         for (iter=biddingObjects.begin(); iter != biddingObjects.end(); iter++) {
             if ((*iter)->getUId() == uid) {
@@ -498,20 +507,20 @@ class AddAuctionsEvent : public Event
 class ActivateAuctionsEvent : public Event
 {
   private:
-    auctionDB_t auctions;
+    auctioningObjectDB_t auctions;
 
   public:
 
-    ActivateAuctionsEvent(struct timeval time, auctionDB_t &a) 
+    ActivateAuctionsEvent(struct timeval time, auctioningObjectDB_t &a) 
       : Event(ACTIVATE_AUCTIONS, time), auctions(a) {}
 
-     ActivateAuctionsEvent(time_t offs_sec, auctionDB_t &a) 
+     ActivateAuctionsEvent(time_t offs_sec, auctioningObjectDB_t &a) 
       : Event(ACTIVATE_AUCTIONS, offs_sec), auctions(a) {}
 
-     ActivateAuctionsEvent(auctionDB_t &a) 
+     ActivateAuctionsEvent(auctioningObjectDB_t &a) 
       : Event(ACTIVATE_AUCTIONS), auctions(a) {}
 
-     auctionDB_t *getAuctions()
+     auctioningObjectDB_t *getAuctions()
      {
          return &auctions;
      }
@@ -519,7 +528,7 @@ class ActivateAuctionsEvent : public Event
      int deleteAuction(int uid)
      {
          int ret = 0;
-         auctionDBIter_t iter;
+         auctioningObjectDBIter_t iter;
            
          for (iter=auctions.begin(); iter != auctions.end(); iter++) {
              if ((*iter)->getUId() == uid) {
@@ -537,24 +546,23 @@ class ActivateAuctionsEvent : public Event
      }
 };
 
-
 class RemoveAuctionsEvent : public Event
 {
   private:
-    auctionDB_t auctions;
+    auctioningObjectDB_t auctions;
 
   public:
 
-    RemoveAuctionsEvent(struct timeval time, auctionDB_t &a) 
+    RemoveAuctionsEvent(struct timeval time, auctioningObjectDB_t &a) 
       : Event(REMOVE_AUCTIONS, time), auctions(a) {}
 
-    RemoveAuctionsEvent(time_t offs_sec, auctionDB_t &a) 
+    RemoveAuctionsEvent(time_t offs_sec, auctioningObjectDB_t &a) 
       : Event(REMOVE_AUCTIONS, offs_sec), auctions(a) {}
     
-    RemoveAuctionsEvent(auctionDB_t &a) 
+    RemoveAuctionsEvent(auctioningObjectDB_t &a) 
       : Event(REMOVE_AUCTIONS), auctions(a) {}
 
-    auctionDB_t *getAuctions()
+    auctioningObjectDB_t *getAuctions()
     {
         return &auctions;
     }
@@ -562,7 +570,7 @@ class RemoveAuctionsEvent : public Event
     int isIncluded(int uid)
     {
 		int ret = 0;
-        auctionDBIter_t iter;
+        auctioningObjectDBIter_t iter;
         
         for (iter=auctions.begin(); iter != auctions.end(); iter++) {
             if ((*iter)->getUId() == uid) {
@@ -577,7 +585,7 @@ class RemoveAuctionsEvent : public Event
     int deleteAuction(int uid)
     {
         int ret = 0;
-        auctionDBIter_t iter;
+        auctioningObjectDBIter_t iter;
         
         for (iter=auctions.begin(); iter != auctions.end(); iter++) {
             if ((*iter)->getUId() == uid) {
@@ -598,22 +606,22 @@ class RemoveAuctionsEvent : public Event
 class InsertBiddingObjectsAuctionEvent : public Event
 {
   private:
-	biddingObjectDB_t biddingObjects;
+	auctioningObjectDB_t biddingObjects;
 	
   public:
 
     InsertBiddingObjectsAuctionEvent(struct timeval time, 
-									 biddingObjectDB_t &_biddingObjects ): 
+									 auctioningObjectDB_t &_biddingObjects ): 
 		Event(ADD_BIDDING_OBJECTS_AUCTION, time), biddingObjects(_biddingObjects){}
 
      InsertBiddingObjectsAuctionEvent(time_t offs_sec, 
-									  biddingObjectDB_t &_biddingObjects ) : 
+									  auctioningObjectDB_t &_biddingObjects ) : 
 		Event(ADD_BIDDING_OBJECTS_AUCTION, offs_sec), biddingObjects(_biddingObjects){}
 
-     InsertBiddingObjectsAuctionEvent(biddingObjectDB_t &_biddingObjects  ) : 
+     InsertBiddingObjectsAuctionEvent(auctioningObjectDB_t &_biddingObjects  ) : 
 		Event(ADD_BIDDING_OBJECTS_AUCTION), biddingObjects(_biddingObjects) {}
 
-	 biddingObjectDB_t * getBiddingObjects()
+	 auctioningObjectDB_t * getBiddingObjects()
 	 {
 	     return &biddingObjects;
 	 }
@@ -626,26 +634,26 @@ class RemoveBiddingObjectsAuctionEvent : public Event
   private:
   
 	int index;
-	biddingObjectDB_t  biddingObjects;
+	auctioningObjectDB_t  biddingObjects;
 	
   public:
 
      RemoveBiddingObjectsAuctionEvent(struct timeval time, 
 									 int _index,
-									 biddingObjectDB_t &_biddingObjects ) : 
+									 auctioningObjectDB_t &_biddingObjects ) : 
 		Event(REMOVE_BIDDING_OBJECTS_AUCTION, time), index(_index), 
 		biddingObjects(_biddingObjects){}
 
      RemoveBiddingObjectsAuctionEvent(time_t offs_sec, 
 									  int _index, 
-									  biddingObjectDB_t &_biddingObjects ) : 
+									  auctioningObjectDB_t &_biddingObjects ) : 
 		Event(REMOVE_BIDDING_OBJECTS_AUCTION, offs_sec), index(_index), biddingObjects(_biddingObjects) {}
 
      RemoveBiddingObjectsAuctionEvent(int _index,
-									  biddingObjectDB_t &_biddingObjects  ) :
+									  auctioningObjectDB_t &_biddingObjects  ) :
 		Event(REMOVE_BIDDING_OBJECTS_AUCTION), index(_index), biddingObjects(_biddingObjects)  {}
 
-	 biddingObjectDB_t * getBiddingObjects()
+	 auctioningObjectDB_t * getBiddingObjects()
 	 {
 		 return &biddingObjects;
 	 }

@@ -82,14 +82,6 @@ public:
 
 	~BiddingObject();
 
-    void setBiddingObjectSet(string _BiddingObjectset);
-
-    string getBiddingObjectSet();
-
-	void setBiddingObjectName(string _BiddingObjectName);
-
-    string getBiddingObjectName();
-
     void setAuctionSet(string _auctionset);	
 
     string getAuctionSet();
@@ -179,12 +171,6 @@ protected:
     
     //! name of the auction that this BiddingObject belongs to 
     string auctionName;
-
-    //! name of the set that this BiddingObject belongs to
-    string BiddingObjectSet;
-
-    //! name of the rule for the external system calling the Auction Manager
-    string BiddingObjectName;
    
     //! for the auctioneer this field has a reference to the session 
     //! that is the origin of the bidding object.

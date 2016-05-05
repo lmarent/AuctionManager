@@ -6,12 +6,15 @@ INC_DIR 	= $(top_srcdir)/foundation/include
 
 pkginclude_HEADERS = $(INC_DIR)/Auction.h \
 					 $(INC_DIR)/AuctioningObject.h \
+					 $(INC_DIR)/AuctioningObjectManager.h \
 					 $(INC_DIR)/AuctionManagerInfo.h \
 					 $(INC_DIR)/AuctionManager.h \
 					 $(INC_DIR)/MAPIAuctionParser.h \
 					 $(INC_DIR)/AuctionFileParser.h \
 					 $(INC_DIR)/IdSource.h \
 					 $(INC_DIR)/BiddingObject.h \
+					 $(INC_DIR)/Resource.h \
+					 $(INC_DIR)/ResourceManager.h \
 					 $(INC_DIR)/MAPIBiddingObjectParser.h \
 					 $(INC_DIR)/BiddingObjectFileParser.h \
 					 $(INC_DIR)/BiddingObjectManager.h \
@@ -73,7 +76,10 @@ libauctionfdtion_la_SOURCES = AuctionTimer.cpp \
 						   FieldDefManager.cpp \
 						   IpApMessageParser.cpp \
 						   AuctioningObject.cpp \
+						   AuctioningObjectManager.cpp \
 						   TemplateIdSource.cpp \
+						   Resource.cpp \
+						   ResourceManager.cpp \
 						   BiddingObject.cpp \
 						   BiddingObjectFileParser.cpp \
 						   MAPIBiddingObjectParser.cpp \

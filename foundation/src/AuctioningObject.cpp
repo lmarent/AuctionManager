@@ -32,13 +32,19 @@ using namespace auction;
 
 const char *auction::AuctionObjectStateNames[] = { "new", "valid", "scheduled", "active", "done", "error"};
 
-AuctioningObject::AuctioningObject(string name): 
-uid(0), state(AO_NEW)
+AuctioningObject::AuctioningObject(string channelName, string set, string name): 
+uid(0), state(AO_NEW), _set(set), _name(name), _setParent(""), _nameParent("")
 {
     log  = Logger::getInstance();
-    ch   = log->createChannel( name );
+    ch   = log->createChannel( channelName );
 }
 
+AuctioningObject::AuctioningObject(string channelName, string set, string name, string setParent, string nameParent): 
+uid(0), state(AO_NEW), _set(set), _name(name), _setParent(setParent), _nameParent(nameParent)
+{
+    log  = Logger::getInstance();
+    ch   = log->createChannel( channelName );
+}
 
 AuctioningObject::~AuctioningObject()
 {
@@ -46,12 +52,34 @@ AuctioningObject::~AuctioningObject()
 }
 
 AuctioningObject::AuctioningObject(const AuctioningObject &rhs):
-uid(rhs.uid), state(rhs.state)
+uid(rhs.uid), state(rhs.state), _set(rhs._set), _name(rhs._name), 
+_setParent(rhs._setParent), _nameParent(rhs._nameParent)
 {
 
     log  = Logger::getInstance();
     ch   = rhs.ch;
 	
+}
+
+bool 
+AuctioningObject::equals(const AuctioningObject &rhs)
+{
+	if (_set.compare(rhs._set) != 0 )
+		return false;
+
+	if (_name.compare(rhs._name) != 0 )
+		return false;
+
+	if (_setParent.compare(rhs._setParent) != 0 )
+		return false;
+
+	if (_nameParent.compare(rhs._nameParent) != 0 )
+		return false;
+
+	if (state != rhs.state)
+		return false;
+
+	return true;
 }
 
 string AuctioningObject::getInfo(void)

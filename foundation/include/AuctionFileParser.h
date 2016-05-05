@@ -71,7 +71,7 @@ class AuctionFileParser : public XMLParser, IpApMessageParser
     //! parse an auction from the data contained in a xml file. 
     //! put new templates in message.
     virtual void parse( fieldDefList_t *fieldDefs, 
-						auctionDB_t *bids,
+						auctioningObjectDB_t *bids,
 					    ipap_template_container *templates );
 };
 

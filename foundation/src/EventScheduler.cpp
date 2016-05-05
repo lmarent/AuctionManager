@@ -90,20 +90,20 @@ void EventScheduler::addEvent(Event *ev)
     
     events.insert(make_pair(ev->getTime(),ev));
 
-/*    
-#ifdef DEBUG
-    log->dlog(ch,"nbr of events active after inserting:", events.size());
-    eventListIter_t iter;
+    
+//#ifdef DEBUG
+//    log->dlog(ch,"nbr of events active after inserting:", events.size());
+//    eventListIter_t iter;
             
     // output all scheduled Events to ostream
-    for (iter = events.begin(); iter != events.end(); iter++) {
-        struct timeval rv = iter->first;
-        log->dlog(ch,"Time:%s event:%s", (Timeval::toString(rv)).c_str(), 
-					eventNames[iter->second->getType()].c_str());        
-    }
+//    for (iter = events.begin(); iter != events.end(); iter++) {
+//        struct timeval rv = iter->first;
+//        log->log(ch,"Time:%s event:%s", (Timeval::toString(rv)).c_str(), 
+//					eventNames[iter->second->getType()].c_str());        
+//    }
     
-#endif
-*/
+//#endif
+
     
 }
 
@@ -330,7 +330,7 @@ void EventScheduler::dump(ostream &os)
 
 /* ------------------------- operator<< ------------------------- */
 
-ostream& operator<< (ostream &os, EventScheduler &dc)
+ostream& auction::operator<< (ostream &os, EventScheduler &dc)
 {
     dc.dump(os);
     return os;

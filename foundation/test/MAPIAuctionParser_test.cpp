@@ -79,9 +79,9 @@ void MAPIAuctionParser_Test::tearDown()
 
 void MAPIAuctionParser_Test::testParser() 
 {
-	auctionDB_t *new_auctions = new auctionDB_t();
+	auctioningObjectDB_t *new_auctions = new auctioningObjectDB_t();
 	
-	auctionDB_t *new_auctions2 = new auctionDB_t();
+	auctioningObjectDB_t *new_auctions2 = new auctioningObjectDB_t();
 		
 	try
 	{
@@ -97,30 +97,25 @@ void MAPIAuctionParser_Test::testParser()
 		
 		// Change the status of auctions in order to see that it send the correct 
 		// information in the xml message.
-		auctionDBIter_t iter;
+		auctioningObjectDBIter_t iter;
 		for (iter = new_auctions->begin(); iter != new_auctions->end(); ++iter)
 		{
 			(*iter)->setState(AO_ACTIVE);
 		}
-		
-		cout << "estamos aqui" << endl;
-						
+								
 		// Build the message from auctions in the vector
 				
 		ipap_message * messages2 = ptrMAPIAuctionParser->
 						get_ipap_message(&fieldDefs, new_auctions, 
 										  templates, useIPV6, 
-										  sAddressIPV4, sAddressIPV6, port );
-				
+										  sAddressIPV4, sAddressIPV6, port );				
+		
 		anslp::msg::anslp_ipap_message msgb (*messages2);	
 		
 		anslp::msg::anslp_ipap_xml_message xmlMes;
 				
 		string sxmlMes = xmlMes.get_message(msgb);
 		
-		// Please activate to print the message. 
-		cout << "Message:" << sxmlMes << endl;
-
 		saveDelete(messages2);
 
 		CPPUNIT_ASSERT( new_auctions->size() == 1 );
@@ -132,7 +127,7 @@ void MAPIAuctionParser_Test::testParser()
 		templates->delete_all_templates();
 		
 		// Parse a XML with an auction
-		
+				
 		const string resourceRequestFilename = "../../etc/ResponseRequestMessage.xml";
 		
 		std::ifstream in(resourceRequestFilename.c_str());
@@ -142,14 +137,14 @@ void MAPIAuctionParser_Test::testParser()
 		
 		anslp::msg::anslp_ipap_xml_message mess;
 		anslp::msg::anslp_ipap_message *ipap_mes = mess.from_message(test);
-						
+								
 		ptrMAPIAuctionParser->parse( &fieldDefs,
 									 &(ipap_mes->ip_message),
 									 new_auctions2,
 									 templates );
 				
 		CPPUNIT_ASSERT( new_auctions2->size() == 1 );
-		
+				
 		saveDelete(new_auctions2);
 				
 	}

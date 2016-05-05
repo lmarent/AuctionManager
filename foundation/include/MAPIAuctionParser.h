@@ -93,7 +93,7 @@ class MAPIAuctionParser : public IpApMessageParser, public anslp::msg::anslp_ipa
 								 uint16_t templId);
 	
 	void parseAuctionKey( fieldDefList_t *fieldDefs, const anslp::msg::xml_object_key &key, 
-						  auctionDB_t *auctions, ipap_template_container *templatesOut );
+						  auctioningObjectDB_t *auctions, ipap_template_container *templatesOut );
 	
   public:
 
@@ -108,12 +108,12 @@ class MAPIAuctionParser : public IpApMessageParser, public anslp::msg::anslp_ipa
     //! parse given bids and add parsed auction to auctions
     virtual void parse( fieldDefList_t *fieldDefs,
 						ipap_message *message,
-						auctionDB_t *auctions,
+						auctioningObjectDB_t *auctions,
 					    ipap_template_container *templatesOut );
 
 	//! get the ipap_message that represents the set of auctions.
 	ipap_message * get_ipap_message(fieldDefList_t *fieldDefs, 
-									auctionDB_t *auctions, 
+									auctioningObjectDB_t *auctions, 
 									ipap_template_container *templates,
 									bool useIPV6, string sAddressIPV4, 
 									string sAddressIPV6, uint16_t port );

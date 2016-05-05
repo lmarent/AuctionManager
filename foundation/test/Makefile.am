@@ -20,6 +20,7 @@ test_runner_SOURCES = 	@top_srcdir@/foundation/src/Constants.cpp \
 						@top_srcdir@/foundation/src/IdSource.cpp \
 						@top_srcdir@/foundation/src/MessageIdSource.cpp \
 						@top_srcdir@/foundation/src/AuctioningObject.cpp \
+						@top_srcdir@/foundation/src/AuctioningObjectManager.cpp \
 						@top_srcdir@/foundation/src/Auction.cpp \
 						@top_srcdir@/foundation/src/AuctionFileParser.cpp \
 						@top_srcdir@/foundation/src/MAPIAuctionParser.cpp \
@@ -35,6 +36,8 @@ test_runner_SOURCES = 	@top_srcdir@/foundation/src/Constants.cpp \
 						@top_srcdir@/foundation/src/CommandLineArgs.cpp \
 						@top_srcdir@/foundation/src/ConfigManager.cpp \
 						@top_srcdir@/foundation/src/ConfigParser.cpp \
+						@top_srcdir@/foundation/src/Resource.cpp \
+						@top_srcdir@/foundation/src/ResourceManager.cpp \
 						@top_srcdir@/foundation/test/Timeval_test.cpp \
 						@top_srcdir@/foundation/test/FieldValue_test.cpp \
 						@top_srcdir@/foundation/test/FieldDefParser_test.cpp \
@@ -49,6 +52,7 @@ test_runner_SOURCES = 	@top_srcdir@/foundation/src/Constants.cpp \
 						@top_srcdir@/foundation/test/MAPIBiddingObjectParser_test.cpp \
 						@top_srcdir@/foundation/test/BiddingObjectManager_test.cpp \
 						@top_srcdir@/foundation/test/AuctionManager_test.cpp \
+						@top_srcdir@/foundation/test/ResourceManager_test.cpp \
 						@top_srcdir@/foundation/test/test_runner.cpp
 
 
