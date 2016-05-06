@@ -325,9 +325,9 @@ void AUMProcessor::executeAuction(int index, time_t start, time_t stop, EventSch
 												actProcess.getBids(), 
 												&ptr );
 
-#ifdef DEBUG	
-				log->dlog(ch,"Number of allocations generated %d", allocations.size() ); 
-#endif	
+//#ifdef DEBUG	
+				log->log(ch,"Number of allocations generated %d", allocations.size() ); 
+//#endif	
 
 			} catch (ProcError &e){
 				log->elog(ch,e.getError().c_str());
@@ -363,6 +363,9 @@ AUMProcessor::addBiddingObjectAuctionProcess( int index, BiddingObject *b )
 	if (iter != auctions.end() ){  
 		if (b->getType() == IPAP_BID){
 			(iter->second).insertBid(b);
+			
+			log->log(ch, "Num Bids in the process auction index%d, : %d", 
+							index, (iter->second).getBids()->size());
 		}	
     } else {	
 		throw Error("process Auction not found: %d", index);
@@ -535,6 +538,7 @@ AUMProcessor::getApplicableAuctions(ipap_message *message)
 #ifdef DEBUG
     log->dlog(ch, "ending getApplicableAuctions Nbr:%d", auctions_anw->size());
 #endif
+	
 	
 	return auctions_anw;
 }

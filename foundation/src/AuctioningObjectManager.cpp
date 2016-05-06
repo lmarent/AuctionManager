@@ -368,7 +368,8 @@ void AuctioningObjectManager::storeAuctioningObjectAsDone(AuctioningObject *a)
         idSource.freeId(auctioningObjectDone.front()->getUId());
         
         // remove auctioning object
-        saveDelete(auctioningObjectDone.front());
+        AuctioningObject *ao = auctioningObjectDone.front();
+        delete ao;
         auctioningObjectDone.pop_front();
     }
 }

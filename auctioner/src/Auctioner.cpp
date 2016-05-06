@@ -814,6 +814,8 @@ void Auctioner::handleActivateAuction(Event *e, fd_sets_t *fds)
 			time_t stop = auction->getStop();
 			interval_t interval = auction->getInterval();
 
+			log->log(ch,"creating PushExecution in %d and stops in %d", start-now, stop );
+			
 			// The interval must be in microseconds.
 			evnt.get()->addEvent(new PushExecutionEvent(start-now, index, stop, (interval.interval)*1000, interval.align));	
 		}
@@ -890,9 +892,9 @@ void Auctioner ::handleActivateBiddingObjects(Event *e, fd_sets_t *fds)
 void Auctioner::handleRemoveBiddingObjects(Event *e, fd_sets_t *fds)
 {
 
-#ifdef DEBUG
-	log->dlog(ch,"processing event remove bidding Objects" );
-#endif
+//#ifdef DEBUG
+	log->log(ch,"processing event remove bidding Objects" );
+//#endif
 
 	auctioningObjectDB_t *bids = NULL;
 
@@ -910,8 +912,11 @@ void Auctioner::handleRemoveBiddingObjects(Event *e, fd_sets_t *fds)
 			string aName = bidTmp->getAuctionName();
 			try
 			{
+				// The Auction can be deleted by now.
 				Auction * a = aucm->getAuction(aSet, aName);
-				proc->delBiddingObjectAuctionProcess(a->getUId(), bidTmp);
+				
+				if (a != NULL)
+					proc->delBiddingObjectAuctionProcess(a->getUId(), bidTmp);
 			} catch (Error &e) {
 				//Nothing to do
 			}
@@ -995,6 +1000,11 @@ void Auctioner::handlePushExecution(Event *e, fd_sets_t *fds)
         
         int index = ((PushExecutionEvent *)e)->getIndex();
         time_t stop = ((PushExecutionEvent *)e)->getStop();
+
+//#ifdef DEBUG
+    log->log(ch,"processing event push execution %d", index );
+//#endif
+
         
         unsigned long interval = e->getIval();
         struct timeval t = ((PushExecutionEvent *)e)->getTime();
@@ -1625,6 +1635,10 @@ Auctioner::handleSingleObjectAuctioningInteraction( string sessionId, anslp::ans
 void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
 {
 
+#ifdef DEBUG
+	log->dlog(ch,"Starting handle Auction Interaction" );
+#endif	
+
 	anslp::objectList_t *objList = NULL;
 	string sessionId;
 	
@@ -1643,6 +1657,9 @@ void Auctioner::handleAuctioningInteraction(Event *e, fd_sets_t *fds)
     
     try{
 
+#ifdef DEBUG
+		log->dlog(ch,"Starting handle Auction Interaction Nbr_objects: %d", objList->size()  );
+#endif	
 		if (objList != NULL){
 			
 			anslp::objectListIter_t it;
@@ -2243,6 +2260,7 @@ void Auctioner::handleRemoveAuctions(Event *e, fd_sets_t *fds)
 		// We remove the auction from all process requests.
 		proc->delAuctions(auctions, evnt.get());
 				
+		/* This code is not necessary as bid are removed when their due date arrive.
 		// In the server application, we delete bids associated with all auctions.
 		auctioningObjectDBIter_t  iter;
 		for (iter = auctions->begin(); iter != auctions->end(); iter++) 
@@ -2263,6 +2281,7 @@ void Auctioner::handleRemoveAuctions(Event *e, fd_sets_t *fds)
 			
 			evnt->addEvent(new RemoveBiddingObjectsEvent(bids));
 		}
+		*/
 						
 		// Remove the auction from the manager
 		aucm->delAuctioningObjects(auctions, evnt.get());

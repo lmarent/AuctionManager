@@ -95,13 +95,15 @@ void EventSchedulerAuctioner::delProcessExecutionEvents(int uid)
         PushExecutionEvent *e = dynamic_cast<PushExecutionEvent *>(tmp->second);
 
         if (e != NULL) {
-            // ret=2 means the event is now empty and therefore can be deleted
+			
+			if (e->getIndex() == uid){ 
 //#ifdef DEBUG
-            log->log(ch,"remove event %s", eventNames[tmp->second->getType()].c_str());
+				log->log(ch,"remove event  here I am %s", eventNames[tmp->second->getType()].c_str());
 //#endif
            
-            saveDelete(tmp->second);
-            events.erase(tmp);
+				saveDelete(tmp->second);
+				events.erase(tmp);
+			}
         } 
     }
 }

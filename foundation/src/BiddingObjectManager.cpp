@@ -343,6 +343,8 @@ void BiddingObjectManager::delBiddingObject(BiddingObject *r, EventScheduler *e)
         e->delBiddingObjectEvents(r->getUId());
     }
 
+	storeBiddingObjectAsDone(r);
+
 }
 
 
@@ -399,12 +401,7 @@ void BiddingObjectManager::storeBiddingObjectAsDone(BiddingObject *r)
 #endif
     
     
-    if (connectionDBStr.empty())
-    {
-		AuctioningObjectManager::storeAuctioningObjectAsDone(r);
-	} 
-	else 
-	{
+    if ( !connectionDBStr.empty()){
 
 #ifdef DEBUG    
 		log->dlog(ch, "connection Str = '%s'", connectionDBStr.c_str());
@@ -432,7 +429,7 @@ void BiddingObjectManager::storeBiddingObjectAsDone(BiddingObject *r)
 			idSource.freeId(r->getUId());
 
 			// remove rule
-			saveDelete(r);
+			//saveDelete(r);
 		} catch(const std::exception &e){
 			throw Error("Error connecting to the database %s", e.what());
 		}

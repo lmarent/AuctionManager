@@ -126,8 +126,6 @@ void Auctioner_Test::test()
 			// Verifies the number of auctions
 			CPPUNIT_ASSERT( auctionerPtr->aucm->getNumAuctioningObjects() == 2);
 
-			cout << "Events:" << *(auctionerPtr->evnt.get()) << endl;
-
 			
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 

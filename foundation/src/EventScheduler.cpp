@@ -120,6 +120,11 @@ void EventScheduler::delBiddingObjectEvents(int uid)
         iter++;
         
         ret = tmp->second->deleteBiddingObject(uid);
+        
+        if (( ret == 2 ) && ( tmp->second->getType() == PUSH_EXECUTION)){
+			log->log(ch,"remove event 2 %s", eventNames[tmp->second->getType()].c_str());
+        }
+        
         if (ret == 1) {
             // ret = 1 means bidding object was present in event but other bidding objects are still in
             // the event

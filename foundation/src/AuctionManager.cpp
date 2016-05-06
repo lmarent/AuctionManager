@@ -254,13 +254,13 @@ void AuctionManager::delAuction(Auction *a, EventScheduler *e)
     log->dlog(ch, "removing auction with name = %s.%s", 
 						a->getSet().c_str(), a->getName().c_str());
 #endif
-	
-	AuctioningObjectManager::delAuctioningObject(a);
-	
+
     if (e != NULL) {
         e->delAuctionEvents(a->getUId());
     }
-
+	
+	AuctioningObjectManager::delAuctioningObject(a);
+	
 }
 
 void AuctionManager::delAuction(int uid, EventScheduler *e)
