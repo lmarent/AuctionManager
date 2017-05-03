@@ -108,6 +108,15 @@ void Auctioner_Test::test()
 			Event * evt = auctionerPtr->evnt.get()->getNextEvent();
 			
 			// Verifies that a new add auctions event was generated			
+			AddResourceEvent *are = dynamic_cast<AddResourceEvent *>(evt);
+			CPPUNIT_ASSERT( are != NULL );
+			
+			// Process the add auction event.
+			auctionerPtr->handleEvent(evt, NULL);
+			
+			evt = auctionerPtr->evnt.get()->getNextEvent();
+			
+			// Verifies that a new add auctions event was generated			
 			AddAuctionsEvent *aae = dynamic_cast<AddAuctionsEvent *>(evt);
 			CPPUNIT_ASSERT( aae != NULL );
 			
@@ -115,7 +124,17 @@ void Auctioner_Test::test()
 			auctionerPtr->handleEvent(evt, NULL);
 			
 			// Verifies the number of auctions
-			CPPUNIT_ASSERT( auctionerPtr->aucm->getNumAuctions() == 1);
+			CPPUNIT_ASSERT( auctionerPtr->aucm->getNumAuctioningObjects() == 2);
+
+			
+			evt = auctionerPtr->evnt.get()->getNextEvent();
+
+           
+			ActivateAuctionsEvent *aue = dynamic_cast<ActivateAuctionsEvent *>(evt);
+			CPPUNIT_ASSERT( aue != NULL );
+
+			// Process the Add Process Auction event.
+			auctionerPtr->handleEvent(evt, NULL);
 			
 			// Verifies that a new PushExecutionEvent was created
 			evt = auctionerPtr->evnt.get()->getNextEvent();
@@ -247,7 +266,7 @@ void Auctioner_Test::test()
 			saveDelete(objectsAuctInter);
 			
 			// Verify that a new bidding object was created.
-			CPPUNIT_ASSERT( auctionerPtr->bidm->getNumBiddingObjects() == 1 );
+			CPPUNIT_ASSERT( auctionerPtr->bidm->getNumAuctioningObjects() == 1 );
 			
 			evt = auctionerPtr->evnt.get()->getNextEvent();
 			
@@ -281,10 +300,10 @@ void Auctioner_Test::test()
 			AddGeneratedBiddingObjectsEvent *agboe = dynamic_cast<AddGeneratedBiddingObjectsEvent *>(evt);
 			CPPUNIT_ASSERT( agboe != NULL );
 			
-			biddingObjectDB_t *new_bids = ((AddGeneratedBiddingObjectsEvent *)evt)->getBiddingObjects();
+			auctioningObjectDB_t *new_bids = ((AddGeneratedBiddingObjectsEvent *)evt)->getBiddingObjects();
 			
 			int numAllocs = 0;
-			biddingObjectDBIter_t bidIter;
+			auctioningObjectDBIter_t bidIter;
 			for (bidIter = new_bids->begin(); bidIter != new_bids->end(); ++bidIter){
 				numAllocs++;
 			} 

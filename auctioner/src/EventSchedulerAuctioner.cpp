@@ -29,6 +29,7 @@
 #include "ParserFcts.h"
 #include "EventSchedulerAuctioner.h"
 #include "Auctioner.h"
+#include "EventAuctioner.h"
 
 using namespace auction;
 
@@ -78,5 +79,32 @@ struct timeval EventSchedulerAuctioner::getNextEventTime()
         }
     } 
     return rv;
+}
+
+void EventSchedulerAuctioner::delProcessExecutionEvents(int uid)
+{
+    int ret = 0;
+    eventListIter_t iter, tmp;
+
+    // search linearly through list for bid with given ID and delete entries
+    iter = events.begin();
+    while (iter != events.end()) {
+        tmp = iter;
+        iter++;
+        
+        PushExecutionEvent *e = dynamic_cast<PushExecutionEvent *>(tmp->second);
+
+        if (e != NULL) {
+			
+			if (e->getIndex() == uid){ 
+//#ifdef DEBUG
+				log->log(ch,"remove event  here I am %s", eventNames[tmp->second->getType()].c_str());
+//#endif
+           
+				saveDelete(tmp->second);
+				events.erase(tmp);
+			}
+        } 
+    }
 }
 

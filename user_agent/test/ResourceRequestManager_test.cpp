@@ -242,9 +242,9 @@ void ResourceRequestManager_Test::testResourceManagerManager()
 	{
 		
 		string filename = DEF_SYSCONFDIR "/example_resource_request1.xml";
-		resourceRequestDB_t *new_requests = manager->parseResourceRequests(filename);
-		manager->addResourceRequests(new_requests, evnt.get()); 
-		CPPUNIT_ASSERT( manager->getNumResourceRequests() == 1 );
+		auctioningObjectDB_t *new_requests = manager->parseResourceRequests(filename);
+		manager->addAuctioningObjects(new_requests, evnt.get()); 
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 1 );
 
 		// Release all resource request.
 		saveDelete(manager);
@@ -257,11 +257,14 @@ void ResourceRequestManager_Test::testResourceManagerManager()
 
 		createResourceRequest();
 		
-		// Add both Resource Allocations in the manager
-		manager->addResourceRequest(ptrResourceRequest1);
-		manager->addResourceRequest(ptrResourceRequest2);
+		auctioningObjectDB_t *new_request2 = new auctioningObjectDB_t();
+		new_request2->push_back(ptrResourceRequest1);
+		new_request2->push_back(ptrResourceRequest2);
 		
-		CPPUNIT_ASSERT( manager->getNumResourceRequests() == 2 );
+		// Add both Resource Allocations in the manager
+		manager->addAuctioningObjects(new_request2, evnt.get()); 
+		
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 2 );
 					
 		CPPUNIT_ASSERT( ptrResourceRequest1->getInfo() == manager->getInfo("set1", "1") );
 		
@@ -269,33 +272,41 @@ void ResourceRequestManager_Test::testResourceManagerManager()
 		
 		manager->delResourceRequest(1, evnt.get() );
 
-		CPPUNIT_ASSERT( manager->getNumResourceRequests() == 1 );
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 1 );
 		
 		manager->delResourceRequest("set1", "1", evnt.get() );
 
-		CPPUNIT_ASSERT( manager->getNumResourceRequests() == 0 );
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 0 );
 				
 		// Release all resource request.
 		saveDelete(manager);
+		saveDelete(new_request2);
 								
 		manager = new ResourceRequestManager(domain, fieldname, fieldval);
 		
 		createResourceRequest();
 
-		manager->addResourceRequest(ptrResourceRequest1);
-		manager->addResourceRequest(ptrResourceRequest2);
+		auctioningObjectDB_t *new_request3 = new auctioningObjectDB_t();
+		new_request3->push_back(ptrResourceRequest1);
+		new_request3->push_back(ptrResourceRequest2);
+
+		manager->addAuctioningObjects(new_request3, evnt.get()); 
 				
-		CPPUNIT_ASSERT( manager->getNumResourceRequests() == 2 );
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 2 );
 				
 		// Release all allocations.
 		saveDelete(manager);
+		saveDelete(new_request3);
 				
 		manager = new ResourceRequestManager(domain, fieldname, fieldval);
 		
 		createResourceRequest();
 
-		manager->addResourceRequest(ptrResourceRequest1);
-		manager->addResourceRequest(ptrResourceRequest2);
+		auctioningObjectDB_t *new_request4 = new auctioningObjectDB_t();
+		new_request4->push_back(ptrResourceRequest1);
+		new_request4->push_back(ptrResourceRequest2);
+
+		manager->addAuctioningObjects(new_request4, evnt.get()); 
 		
 		ResourceRequest *tmpResourceRequest2 = manager->getResourceRequest("set1", "1");
 				
@@ -303,24 +314,25 @@ void ResourceRequestManager_Test::testResourceManagerManager()
 
 		// Release all ResourceRequest.
 		saveDelete(manager);
+		saveDelete(new_request4);
 				
 		manager = new ResourceRequestManager(domain,fieldname, fieldval);
 		
 		createResourceRequest();
 		
-		resourceRequestDB_t requests;
+		auctioningObjectDB_t requests5;
 		
-		requests.push_back(ptrResourceRequest1);
-		requests.push_back(ptrResourceRequest2);
-		manager->addResourceRequests(&requests, evnt.get());
+		requests5.push_back(ptrResourceRequest1);
+		requests5.push_back(ptrResourceRequest2);
+		manager->addAuctioningObjects(&requests5, evnt.get());
 		
-		CPPUNIT_ASSERT( manager->getNumResourceRequests() == 2 );
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 2 );
 		
-		manager->activateResourceRequests(&requests, evnt.get());
+		manager->activateAuctioningObjects(&requests5);
 
-		manager->delResourceRequests(&requests, evnt.get());
+		manager->delAuctioningObjects(&requests5, evnt.get());
 
-		CPPUNIT_ASSERT( manager->getNumResourceRequests() == 0 );		
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 0 );		
 			
 	} catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;

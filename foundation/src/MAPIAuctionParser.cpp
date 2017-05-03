@@ -277,13 +277,14 @@ MAPIAuctionParser::findTemplate(ipap_template *templData, ipap_template *templOp
 
 void MAPIAuctionParser::parseAuctionKey( fieldDefList_t *fieldDefs, 
 										 const anslp::msg::xml_object_key &key, 
-									     auctionDB_t *auctions,
+									     auctioningObjectDB_t *auctions,
 									     ipap_template_container *templatesOut )
 {
 
 	time_t now = time(NULL);
 	string resourceId;
 	string sname, aname;
+	string resourceSet, resourceName;
 	string actionName, auctionName;
 	string status;
 	string templateList; 
@@ -351,6 +352,7 @@ void MAPIAuctionParser::parseAuctionKey( fieldDefList_t *fieldDefs,
 							miscs = readAuctionData( templData, fieldDefs, *dataRecordIter, 
 													  auctionName, resourceId, status, templateList);
 							parseName(auctionName, sname, aname);
+							parseName(resourceId, resourceSet, resourceName);
 							++NbrDataRead;
 						}
 					}
@@ -389,7 +391,7 @@ void MAPIAuctionParser::parseAuctionKey( fieldDefList_t *fieldDefs,
 			}
 		}
 				
-		a = new Auction(now, sname, aname, resourceId, action, miscs, 
+		a = new Auction(now, sname, aname, resourceSet, resourceName, action, miscs, 
 							AS_COPY_TEMPLATE, templFields, templatesOut );
 
 		int istatus = ParserFcts::parseInt(status, 0, 16);
@@ -429,7 +431,7 @@ void MAPIAuctionParser::parseAuctionKey( fieldDefList_t *fieldDefs,
 
 void MAPIAuctionParser::parse( fieldDefList_t *fieldDefs,
 							   ipap_message *messsage,
-							   auctionDB_t *auctions,
+							   auctioningObjectDB_t *auctions,
 							   ipap_template_container *templatesOut )
 {
 
@@ -668,7 +670,7 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 
 	// Add the resource Id. 
 	ipap_field resourceIdF = mes->get_field_definition( 0, IPAP_FT_IDRESOURCE );
-	ipap_value_field fvalueresourceId = resourceIdF.parseString(  auctionPtr->getAuctionResource() );
+	ipap_value_field fvalueresourceId = resourceIdF.parseString(  auctionPtr->getIpResourceId(getDomain()).c_str() );
 	data.insert_field(0, IPAP_FT_IDRESOURCE, fvalueresourceId);
 	
 	// Add the start time.
@@ -762,7 +764,7 @@ void MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 
 ipap_message *
 MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs, 
-									auctionDB_t *auctions, 
+									auctioningObjectDB_t *auctions, 
 									ipap_template_container *templates,
 									bool useIPV6, string sAddressIPV4, 
 									string sAddressIPV6, uint16_t port)
@@ -774,10 +776,11 @@ MAPIAuctionParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	
 	ipap_message *mes = new ipap_message(getDomain(), IPAP_VERSION, true);
 	
-	auctionDBIter_t auctionIter;
+	auctioningObjectDBIter_t auctionIter;
 	for (auctionIter=auctions->begin(); auctionIter!=auctions->end(); ++auctionIter)
 	{
-		Auction *a = *auctionIter;
+		AuctioningObject *ao  = *auctionIter;
+		Auction *a = dynamic_cast<Auction *>(ao);
 		get_ipap_message(fieldDefs, a, templates,  
 						getDomain(), useIPV6, sAddressIPV4, sAddressIPV6, port, mes);
 	}

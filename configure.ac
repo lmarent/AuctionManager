@@ -396,13 +396,7 @@ AC_DEFINE_UNQUOTED(DEF_LIBDIR, "$DEF_LIBDIR", "lib dir")
 DEF_BINDIR=`eval echo ${bindir}`
 AC_DEFINE_UNQUOTED(DEF_BINDIR, "$DEF_BINDIR", "bin dir")
 
-# Additional arguments (and substitutions)
-# Allow the pkg-config directory to be set
-AC_ARG_WITH(pkgconfigdir,
-	AC_HELP_STRING([--with-pkgconfigdir],
-	[Use the specified pkgconfig dir (default is pkgconfig)]),
-	[pkgconfigdir=${withval}],
-	[pkgconfigdir='${exec_prefix}/lib/pkgconfig'])
+pkgconfigdir='${exec_prefix}/lib/pkgconfig'
 	
 	
 

@@ -20,6 +20,7 @@ class AuctionFileParser_Test : public CppUnit::TestFixture {
 	CPPUNIT_TEST_SUITE( AuctionFileParser_Test );
 
 	CPPUNIT_TEST( testParser );
+	CPPUNIT_TEST( testMultipleAuctions );
 	CPPUNIT_TEST_SUITE_END();
 
   public:
@@ -28,6 +29,7 @@ class AuctionFileParser_Test : public CppUnit::TestFixture {
 	void loadFieldDefs(fieldDefList_t *fieldList);
 
 	void testParser();
+	void testMultipleAuctions();
 
   private:
     
@@ -78,7 +80,7 @@ void AuctionFileParser_Test::tearDown()
 
 void AuctionFileParser_Test::testParser() 
 {
-	auctionDB_t *new_auctions = new auctionDB_t();
+	auctioningObjectDB_t *new_auctions = new auctioningObjectDB_t();
 		
 	try
 	{
@@ -108,4 +110,68 @@ void AuctionFileParser_Test::loadFieldDefs(fieldDefList_t *fieldList)
 		throw e;
 	}
 
+}
+
+void AuctionFileParser_Test::testMultipleAuctions() 
+{
+	auctioningObjectDB_t new_auctions;
+		
+	try
+	{
+
+		int domain = 0;
+		
+		string filename2 = DEF_SYSCONFDIR "/example_auctions4.xml";
+		
+		AuctionFileParser *ptrAuctionFileParser2 = new AuctionFileParser(domain, filename2);
+						
+		ipap_template_container *templates2 = new ipap_template_container();
+
+		ptrAuctionFileParser2->parse( &fieldDefs, &new_auctions, templates );
+		
+		// Verify the number of auctions loaded
+		CPPUNIT_ASSERT( new_auctions.size() == 3 );
+		
+		// Verify the interval for the first auction. start and end time
+		Auction *first = dynamic_cast<Auction*>(new_auctions[0]);
+		Auction *second = dynamic_cast<Auction*>(new_auctions[1]);
+		Auction *third = dynamic_cast<Auction*>(new_auctions[2]);
+		
+		time_t start1 = first->getStart();
+		time_t stop1 = first->getStop();
+		string aucName = first->getName();
+
+		time_t now = time(NULL);
+				
+		CPPUNIT_ASSERT( (start1 >= now + 9) && (start1 <= now + 20) );
+		CPPUNIT_ASSERT( stop1 == start1 + 10 );
+		CPPUNIT_ASSERT( aucName.compare("10") == 0 );
+		
+		start1 = second->getStart();
+		stop1 = second->getStop();
+		aucName = second->getName();
+
+		CPPUNIT_ASSERT( (start1 >= now + 19) && (start1 <= now + 30) );
+		CPPUNIT_ASSERT( start1 + 10 );
+		CPPUNIT_ASSERT( aucName.compare("11") == 0 );
+
+		start1 = third->getStart();
+		stop1 = third->getStop();
+		aucName = third->getName();
+				
+		CPPUNIT_ASSERT( start1 > now - 10 );
+		CPPUNIT_ASSERT( stop1 == start1 + 10 );
+		CPPUNIT_ASSERT( aucName == "12" );
+
+		
+		// Verify the interval for the second auction. start and end time
+		
+		delete(ptrAuctionFileParser2);
+		delete(templates2);
+		
+	}
+	catch (Error &e){
+		std::cout << "Error:" << e.getError() << std::endl << std::flush;
+		throw e;
+	}
 }

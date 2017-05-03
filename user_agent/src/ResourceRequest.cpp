@@ -35,7 +35,7 @@ using namespace auction;
 
 ResourceRequest::ResourceRequest( string rset, string rname, fieldList_t &f, 
 								resourceReqIntervalList_t &resReqInter )
-	: AuctioningObject("RESOURCE_REQUEST"), set(rset), name(rname), fields(f), intervals(resReqInter) 
+	: AuctioningObject("RESOURCE_REQUEST", rset, rname), fields(f), intervals(resReqInter) 
 { 
 
 }
@@ -49,12 +49,12 @@ string
 ResourceRequest::getIpApId(int domain)
 {
 	string idResourceRequestS;
-	if ((getResourceRequestSet()).empty()){
+	if ((getSet()).empty()){
 		ostringstream ssA;
 		ssA << domain;
-		idResourceRequestS =  ssA.str() + "." + getResourceRequestName();
+		idResourceRequestS =  ssA.str() + "." + getName();
 	} else {
-		idResourceRequestS = getResourceRequestSet() + "." + getResourceRequestName();
+		idResourceRequestS = getSet() + "." + getName();
 	}
 	
 	return idResourceRequestS;
@@ -68,8 +68,8 @@ string ResourceRequest::getInfo()
 	
 	output << AuctioningObject::getInfo();
 	
-	output << " Set:" << getResourceRequestSet() 
-		   << " Name:" << getResourceRequestName() << endl;
+	output << " Set:" << getSet() 
+		   << " Name:" << getName() << endl;
 	
 	resourceReqIntervalListIter_t inter_iter;
 	int counter = 1;

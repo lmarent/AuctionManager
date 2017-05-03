@@ -164,7 +164,7 @@ auctionTemplateField_t AuctionFileParser::parseField(xmlNodePtr cur,
 
 
 void AuctionFileParser::parse( fieldDefList_t *fieldDefs, 
-							   auctionDB_t *auctions,
+							   auctioningObjectDB_t *auctions,
 							   ipap_template_container *templates )
 {
 
@@ -262,7 +262,7 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
         }
 	
         if ((!xmlStrcmp(cur->name, (const xmlChar *)"AUCTION")) && (cur->ns == ns)) {
-            string sid, sname, rname, resourceId;
+            string sid, sname, rname, resourceSet, resourceId;
             actionList_t actions = globalActionList;
             miscList_t miscs = globalMiscList;
 			auctionTemplateFieldList_t templFields;
@@ -286,7 +286,9 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
 				}
 			}
 			            
+            resourceSet = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"RESOURCE_SET"));
             resourceId = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"RESOURCE_ID"));
+            transform(resourceSet.begin(), resourceSet.end(), resourceSet.begin(), ToLower());
             transform(resourceId.begin(), resourceId.end(), resourceId.begin(), ToLower());
 
             cur2 = cur->xmlChildrenNode;
@@ -299,7 +301,6 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
                     configItem_t item = parsePref(cur2); 	
                     // add
                     miscs[item.name] = item;
-
                 }
 
                 // get FIELD
@@ -375,7 +376,7 @@ void AuctionFileParser::parse( fieldDefList_t *fieldDefs,
 					}
 				}
 				
-                Auction *a = new Auction(now, sname, rname, resourceId, action, 
+                Auction *a = new Auction(now, sname, rname, resourceSet, resourceId, action, 
 										 miscs, AS_BUILD_TEMPLATE, 
 										 templFields, templates );
                 auctions->push_back(a);

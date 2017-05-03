@@ -279,14 +279,12 @@ ResourceRequestFileParser::calculateInterval(time_t start,  miscList_t *miscList
 
 void 
 ResourceRequestFileParser::parse(fieldDefList_t *fieldDefs, 
-									  resourceRequestDB_t *requests,
-									  ResourceRequestIdSource *idSource )
+							     auctioningObjectDB_t *requests )
 {
     xmlNodePtr cur, cur2, cur3;
     string rset;
     cur = xmlDocGetRootElement(XMLDoc);
-    time_t start = time(NULL);
-
+    
     rset = xmlCharToString(xmlGetProp(cur, (const xmlChar *)"ID"));
 	// use lower case internally - set id.
 	transform(rset.begin(), rset.end(), rset.begin(), ToLower());

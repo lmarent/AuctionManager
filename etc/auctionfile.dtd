@@ -8,21 +8,22 @@
 <!ELEMENT GLOBAL (ACTION|PREF)*>
 <!-- global configuration is overruled by per auction configuration -->
           
-<!ELEMENT AUCTION (ACTION, FIELD*)>
+<!ELEMENT AUCTION (ACTION, FIELD*,PREF*)>
 <!ATTLIST AUCTION
         ID CDATA #REQUIRED
+        RESOURCE_SET CDATA #REQUIRED
         RESOURCE_ID CDATA #REQUIRED >
+
+<!ELEMENT PREF (#PCDATA)>
+<!ATTLIST PREF
+        NAME CDATA #REQUIRED
+        TYPE (UInt8|SInt8|UInt16|SInt16|UInt32|SInt32|UInt64|SInt64|Bool|Binary|String|Float32|Float64) "String">
 
 <!ELEMENT ACTION (PREF*)>
 <!ATTLIST ACTION
         NAME CDATA #REQUIRED
         DEFAULT CDATA #REQUIRED >
-        
-<!ELEMENT PREF (#PCDATA)>
-<!ATTLIST PREF
-        NAME CDATA #REQUIRED
-        TYPE (UInt8|SInt8|UInt16|SInt16|UInt32|SInt32|UInt64|SInt64|Bool|Binary|String|Float32|Float64) "String">
-                
+                        
 <!ELEMENT FIELD (TEMPLATE_FIELD*)>
 <!ATTLIST FIELD
         NAME CDATA #REQUIRED >

@@ -39,9 +39,8 @@ using namespace auction;
 
 BiddingObject::BiddingObject( string _auctionSet, string _auctionName, string _BiddingObjectSet, string _BiddingObjectName, 
 		  ipap_object_type_t _type, elementList_t &elements, optionList_t &options)
-  : AuctioningObject("BiddingObject"), auctionSet(_auctionSet), auctionName(_auctionName), 
-	BiddingObjectSet(_BiddingObjectSet), BiddingObjectName(_BiddingObjectName), biddingObjectType(_type),
-	elementList(elements), optionList(options)
+  : AuctioningObject("BiddingObject", _BiddingObjectSet, _BiddingObjectName), auctionSet(_auctionSet), auctionName(_auctionName), 
+	biddingObjectType(_type), elementList(elements), optionList(options)
 {
 
 	if ((_type < IPAP_BID) || (_type > IPAP_ALLOCATION)){
@@ -61,8 +60,6 @@ BiddingObject::BiddingObject( const BiddingObject &rhs )
 	uid = rhs.uid;
 	auctionSet = rhs.auctionSet;
 	auctionName = rhs.auctionName;
-	BiddingObjectSet = rhs.BiddingObjectSet;
-	BiddingObjectName = rhs.BiddingObjectName;
 	biddingObjectType = rhs.biddingObjectType;
 	
 	// Copy elements part of the BiddingObject.
@@ -99,12 +96,11 @@ BiddingObject::~BiddingObject()
 {
 
 #ifdef DEBUG
-    log->dlog(ch, "BiddingObject destructor %s", getBiddingObjectName().c_str());
+    log->dlog(ch, "BiddingObject destructor %s.%s", getSet().c_str(), getName().c_str());
 #endif 
 	
 	while (!optionList.empty())
 	{
-		cout << (optionList.back()).first << endl;
 		optionList.pop_back();
 	}
   
@@ -119,8 +115,8 @@ string BiddingObject::getInfo()
 	output << "auctionSet:" << getAuctionSet() 
 		   << " auctionName:" << getAuctionName();
 
-	output << "BiddingObjectSet:" << getBiddingObjectSet() 
-		   << " BiddingObjectName:" << getBiddingObjectName();
+	output << "BiddingObjectSet:" << getSet() 
+		   << " BiddingObjectName:" << getName();
 
 	output << "type:" << getType();
 	
@@ -176,12 +172,12 @@ string BiddingObject::getIpApId(int domain)
 
 	// Set BiddingObject Id.
 	string idBiddingObjectS;
-	if (getBiddingObjectSet().empty()){
+	if (getSet().empty()){
 		ostringstream ssA;
 		ssA << domain;
-		idBiddingObjectS =  ssA.str() + "." + getBiddingObjectName();
+		idBiddingObjectS =  ssA.str() + "." + getName();
 	} else {
-		idBiddingObjectS = getBiddingObjectSet() + "." + getBiddingObjectName();
+		idBiddingObjectS = getSet() + "." + getName();
 	}
 	
 	return idBiddingObjectS;
@@ -203,16 +199,13 @@ bool BiddingObject::operator==(const BiddingObject &rhs)
     log->dlog(ch, "Starting operator == ");
 #endif  
 
+	if (AuctioningObject::equals(rhs) == false )
+		return false;
+
 	if (auctionSet.compare(rhs.auctionSet) != 0 )
 		return false;
 		
 	if (auctionName.compare(rhs.auctionName) != 0 )
-		return false;
-
-	if (BiddingObjectSet.compare(rhs.BiddingObjectSet) != 0 )
-		return false;
-
-	if (BiddingObjectName.compare(rhs.BiddingObjectName) != 0 )
 		return false;
 
 
@@ -380,8 +373,8 @@ string BiddingObject::execute_insert_biddingObjectHdr( void )
 	sentence = sentence + " BiddingObjectName, sessionId, biddingObjectType, biddingobjectstatus) VALUES (";
 	sentence = sentence + "'" + auctionSet + "',";
 	sentence = sentence + "'" + auctionName + "',";
-	sentence = sentence + "'" + BiddingObjectSet + "',";
-	sentence = sentence + "'" + BiddingObjectName + "',";
+	sentence = sentence + "'" + getSet() + "',";
+	sentence = sentence + "'" + getName() + "',";
 	sentence = sentence + "'" + sessionId + "',";
 	sentence = sentence + "'" + biddingObjectTypeStr + "',";
 	sentence = sentence + "'" + biddingtypeStateStr + "'";
@@ -402,8 +395,8 @@ string BiddingObject::execute_insert_biddingObjectElement( string elementName )
 	sentence = sentence + " BiddingObjectName, elementName) VALUES (";
 	sentence = sentence + "'" + auctionSet + "',";
 	sentence = sentence + "'" + auctionName + "',";
-	sentence = sentence + "'" + BiddingObjectSet + "',";
-	sentence = sentence + "'" + BiddingObjectName + "',";
+	sentence = sentence + "'" + getSet() + "',";
+	sentence = sentence + "'" + getName() + "',";
 	sentence = sentence + "'" + elementName + "'";
 	sentence = sentence + ")";
 	
@@ -422,8 +415,8 @@ string BiddingObject::execute_insert_biddingObjectElementField( string elementNa
 	sentence = sentence + " fieldName, fieldType, len, value) VALUES (";
 	sentence = sentence + "'" + auctionSet + "',";
 	sentence = sentence + "'" + auctionName + "',";
-	sentence = sentence + "'" + BiddingObjectSet + "',";
-	sentence = sentence + "'" + BiddingObjectName + "',";
+	sentence = sentence + "'" + getSet() + "',";
+	sentence = sentence + "'" + getName() + "',";
 	sentence = sentence + "'" + elementName + "',";
 	sentence = sentence + "'" + field.name + "',";
 	sentence = sentence + "'" + field.type + "',";
@@ -448,8 +441,8 @@ string BiddingObject::execute_insert_biddingObjectOption( string optionName)
 	sentence = sentence + " BiddingObjectName, optionName) VALUES (";
 	sentence = sentence + "'" + auctionSet + "',";
 	sentence = sentence + "'" + auctionName + "',";
-	sentence = sentence + "'" + BiddingObjectSet + "',";
-	sentence = sentence + "'" + BiddingObjectName + "',";
+	sentence = sentence + "'" + getSet() + "',";
+	sentence = sentence + "'" + getName() + "',";
 	sentence = sentence + "'" + optionName + "'";
 	sentence = sentence + ")";
 
@@ -469,8 +462,8 @@ string BiddingObject::execute_insert_biddingObjectOptionField( string optionName
 	sentence = sentence + " fieldType, len, value) VALUES (";
 	sentence = sentence + "'" + auctionSet + "',";
 	sentence = sentence + "'" + auctionName + "',";
-	sentence = sentence + "'" + BiddingObjectSet + "',";
-	sentence = sentence + "'" + BiddingObjectName + "',";
+	sentence = sentence + "'" + getSet() + "',";
+	sentence = sentence + "'" + getName() + "',";
 	sentence = sentence + "'" + optionName + "',";
 	sentence = sentence + "'" + field.name + "',";
 	sentence = sentence + "'" + field.type + "',";
@@ -511,14 +504,14 @@ BiddingObject::calculateIntervals(time_t now, biddingObjectIntervalList_t *list)
 		field_t fduration = getOptionVal(iter->first, "BiddingDuration");				
 
 #ifdef DEBUG
-    log->dlog(ch, "BiddingObject: %s.%s - fstart %s", getBiddingObjectSet().c_str(), 
-					getBiddingObjectName().c_str(), (fstart.getInfo()).c_str());
+    log->dlog(ch, "BiddingObject: %s.%s - fstart %s", getSet().c_str(), 
+					getName().c_str(), (fstart.getInfo()).c_str());
 
-    log->dlog(ch, "BiddingObject: %s.%s - fstop %s", getBiddingObjectSet().c_str(), 
-					getBiddingObjectName().c_str(), (fstop.getInfo()).c_str());
+    log->dlog(ch, "BiddingObject: %s.%s - fstop %s", getSet().c_str(), 
+					getName().c_str(), (fstop.getInfo()).c_str());
 
-    log->dlog(ch, "BiddingObject: %s.%s - fduration %s", getBiddingObjectSet().c_str(), 
-					getBiddingObjectName().c_str(), (fduration.getInfo()).c_str());
+    log->dlog(ch, "BiddingObject: %s.%s - fduration %s", getSet().c_str(), 
+					getName().c_str(), (fduration.getInfo()).c_str());
 					
 #endif
 
@@ -566,8 +559,8 @@ BiddingObject::calculateIntervals(time_t now, biddingObjectIntervalList_t *list)
 		}
 
 #ifdef DEBUG
-    log->dlog(ch, "BiddingObject: %s.%s - now:%s stop %s", getBiddingObjectSet().c_str(), 
-					getBiddingObjectName().c_str(), Timeval::toString(now).c_str(),
+    log->dlog(ch, "BiddingObject: %s.%s - now:%s stop %s", getSet().c_str(), 
+					getName().c_str(), Timeval::toString(now).c_str(),
 					Timeval::toString(biddingObjectInterval.stop).c_str());					
 #endif
 
@@ -596,8 +589,8 @@ void BiddingObject::save_ver4(pqxx::connection_base &c)
 {
 
 #ifdef DEBUG
-    log->dlog(ch, "Start Save BiddingObject: %s.%s", getBiddingObjectSet().c_str(), 
-										getBiddingObjectName().c_str());
+    log->dlog(ch, "Start Save BiddingObject: %s.%s", getSet().c_str(), 
+										getName().c_str());
 #endif
 
 	
@@ -619,7 +612,7 @@ void BiddingObject::save_ver4(pqxx::connection_base &c)
 		std::string biddingObjectTypeStr = ipap_object_type_names[getType()];
 		std::string biddingtypeStateStr = AuctionObjectStateNames[getState()];
 
-		pqxx::result r = w.prepared("insertBO_HDR")(auctionSet)(auctionName)(BiddingObjectSet)(BiddingObjectName)(sessionId)(biddingObjectTypeStr)(biddingtypeStateStr).exec();
+		pqxx::result r = w.prepared("insertBO_HDR")(auctionSet)(auctionName)(getSet())(getName())(sessionId)(biddingObjectTypeStr)(biddingtypeStateStr).exec();
 		
 #ifdef DEBUG
 		log->dlog(ch, "after header" );
@@ -628,12 +621,12 @@ void BiddingObject::save_ver4(pqxx::connection_base &c)
 		elementListIter_t iter;
 		for (iter = elementList.begin(); iter != elementList.end(); ++iter ){
 
-			r = w.prepared("insertBO_ELEMENT")(auctionSet)(auctionName)(BiddingObjectSet)(BiddingObjectName)(iter->first).exec();
+			r = w.prepared("insertBO_ELEMENT")(auctionSet)(auctionName)(getSet())(getName())(iter->first).exec();
 			fieldListIter_t fieldIter;
 			
 			for (fieldIter = (iter->second).begin(); fieldIter != iter->second.end(); ++fieldIter)
 			{
-				r = w.prepared("insertBO_ELEMENTFIELD")(auctionSet)(auctionName)(BiddingObjectSet)(BiddingObjectName)(iter->first)(fieldIter->name)(fieldIter->type)(fieldIter->len)(((fieldIter->value)[0]).getValue()).exec();
+				r = w.prepared("insertBO_ELEMENTFIELD")(auctionSet)(auctionName)(getSet())(getName())(iter->first)(fieldIter->name)(fieldIter->type)(fieldIter->len)(((fieldIter->value)[0]).getValue()).exec();
 			}
 
 		}
@@ -645,13 +638,13 @@ void BiddingObject::save_ver4(pqxx::connection_base &c)
 		optionListIter_t iterOpt;
 		for (iterOpt = optionList.begin(); iterOpt != optionList.end(); ++iterOpt ){
 
-			r = w.prepared("insertBO_OPTION")(auctionSet)(auctionName)(BiddingObjectSet)(BiddingObjectName)(iterOpt->first).exec();
+			r = w.prepared("insertBO_OPTION")(auctionSet)(auctionName)(getSet())(getName())(iterOpt->first).exec();
 
 			fieldListIter_t fieldIter;
 		
 			for (fieldIter = (iterOpt->second).begin(); fieldIter != iterOpt->second.end(); ++fieldIter)
 			{
-				r = w.prepared("insertBO_OPTIONFIELD")(auctionSet)(auctionName)(BiddingObjectSet)(BiddingObjectName)(iterOpt->first)(fieldIter->name)(fieldIter->type)(fieldIter->len)(((fieldIter->value)[0]).getValue()).exec();
+				r = w.prepared("insertBO_OPTIONFIELD")(auctionSet)(auctionName)(getSet())(getName())(iterOpt->first)(fieldIter->name)(fieldIter->type)(fieldIter->len)(((fieldIter->value)[0]).getValue()).exec();
 			}
 
 		}
@@ -669,8 +662,8 @@ void BiddingObject::save_ver3(pqxx::connection_base &c)
 {
 
 #ifdef DEBUG
-    log->dlog(ch, "Start Save BiddingObject in version3: %s.%s - now:%s stop %s", getBiddingObjectSet().c_str(), 
-										getBiddingObjectName().c_str());
+    log->dlog(ch, "Start Save BiddingObject in version3: %s.%s - now:%s stop %s", getSet().c_str(), 
+										getName().c_str());
 #endif
 
 	
@@ -735,29 +728,6 @@ void BiddingObject::save_ver3(pqxx::connection_base &c)
 
 }
 
-void 
-BiddingObject::setBiddingObjectSet(string _BiddingObjectset)
-{
-	 BiddingObjectSet = _BiddingObjectset; 
-}	
-
-string 
-BiddingObject::getBiddingObjectSet() 
-{ 
-	return BiddingObjectSet; 
-}
-
-string 
-BiddingObject::getBiddingObjectName()
-{ 
-	return BiddingObjectName; 
-}
-
-void 
-BiddingObject::setBiddingObjectName(string _BiddingObjectName)
-{ 
-	BiddingObjectName = _BiddingObjectName; 
-}
 
 void 
 BiddingObject::setAuctionSet(string _auctionset)

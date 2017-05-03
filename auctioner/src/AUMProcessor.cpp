@@ -206,7 +206,7 @@ AUMProcessor::addAuctionProcess( Auction *a, EventScheduler *evs )
 
 #ifdef DEBUG
     log->dlog(ch, "Adding auction #%d - set:%s, name:%s", 
-				 auctionId, a->getSetName().c_str(), a->getAuctionName().c_str());
+				 auctionId, a->getSet().c_str(), a->getName().c_str());
 #endif  
 
     AUTOLOCK(threaded, &maccess);  
@@ -309,9 +309,9 @@ void AUMProcessor::executeAuction(int index, time_t start, time_t stop, EventSch
 
 		auctionProcess actProcess = auctions[index];
 		
-		biddingObjectDB_t allocations;
+		auctioningObjectDB_t allocations;
 			
-		biddingObjectDB_t *ptr = &allocations;
+		auctioningObjectDB_t *ptr = &allocations;
 		
 		if ( actProcess.getBids()->size() > 0 ){
 		
@@ -319,15 +319,15 @@ void AUMProcessor::executeAuction(int index, time_t start, time_t stop, EventSch
 				actProcess.getMAPI()->execute( FieldDefManager::getFieldDefs(),
 												FieldDefManager::getFieldVals(),
 												actProcess.getParams(), 
-												actProcess.getAuction()->getSetName(),
-												actProcess.getAuction()->getAuctionName(),
+												actProcess.getAuction()->getSet(),
+												actProcess.getAuction()->getName(),
 												start, stop, 
 												actProcess.getBids(), 
 												&ptr );
 
-#ifdef DEBUG	
-				log->dlog(ch,"Number of allocations generated %d", allocations.size() ); 
-#endif	
+//#ifdef DEBUG	
+				log->log(ch,"Number of allocations generated %d", allocations.size() ); 
+//#endif	
 
 			} catch (ProcError &e){
 				log->elog(ch,e.getError().c_str());
@@ -363,6 +363,9 @@ AUMProcessor::addBiddingObjectAuctionProcess( int index, BiddingObject *b )
 	if (iter != auctions.end() ){  
 		if (b->getType() == IPAP_BID){
 			(iter->second).insertBid(b);
+			
+			log->log(ch, "Num Bids in the process auction index%d, : %d", 
+							index, (iter->second).getBids()->size());
 		}	
     } else {	
 		throw Error("process Auction not found: %d", index);
@@ -370,12 +373,13 @@ AUMProcessor::addBiddingObjectAuctionProcess( int index, BiddingObject *b )
 }
 
 void 
-AUMProcessor::addBiddingObjectsAuctionProcess( int index, biddingObjectDB_t *bids )
+AUMProcessor::addBiddingObjectsAuctionProcess( int index, auctioningObjectDB_t *bids )
 {
 
-	biddingObjectDBIter_t iter;
-	for (iter = bids->begin(); iter != bids->end(); ++iter){
-		addBiddingObjectAuctionProcess( index, *iter );
+	auctioningObjectDBIter_t iter;
+	for (iter = bids->begin(); iter != bids->end(); ++iter)
+	{
+		addBiddingObjectAuctionProcess( index, dynamic_cast<BiddingObject *>(*iter) );
 	}
 
 }
@@ -397,13 +401,13 @@ void AUMProcessor::delBiddingObjectAuctionProcess( int index, BiddingObject *b )
 		int biddingObjectId = b->getUId();
 
 		log->dlog(ch, "deleting Bidding Object #%d to auction- Set:%s name:%s", biddingObjectId,
-					(iter->second).getAuction()->getSetName().c_str(), 
-						(iter->second).getAuction()->getAuctionName().c_str());
+					(iter->second).getAuction()->getSet().c_str(), 
+						(iter->second).getAuction()->getName().c_str());
 #endif
 
 				
-		biddingObjectDB_t * bidObjects;
-		biddingObjectDBIter_t bid_iter;
+		auctioningObjectDB_t * bidObjects;
+		auctioningObjectDBIter_t bid_iter;
 		
 		bidObjects = (iter->second).getBids();
 
@@ -412,8 +416,8 @@ void AUMProcessor::delBiddingObjectAuctionProcess( int index, BiddingObject *b )
 #endif		
 		for ( bid_iter = bidObjects->begin();  bid_iter != bidObjects->end(); ++bid_iter ){
 			
-			if ((b->getBiddingObjectSet().compare((*bid_iter)->getBiddingObjectSet()) == 0) &&
-				(b->getBiddingObjectName().compare((*bid_iter)->getBiddingObjectName()) == 0)){
+			if ((b->getSet().compare((*bid_iter)->getSet()) == 0) &&
+				(b->getName().compare((*bid_iter)->getName()) == 0)){
 				((iter->second).bids).erase(bid_iter);
 				deleted=true;
 				break;
@@ -425,19 +429,19 @@ void AUMProcessor::delBiddingObjectAuctionProcess( int index, BiddingObject *b )
 	}
 		
 	if (deleted==false){
-		throw Error("Bid not found: set:%s: name:%s", 
-						b->getBiddingObjectSet().c_str(), 
-						b->getBiddingObjectName().c_str());
+		throw Error("Bid not found: set:%s: name:%s", b->getSet().c_str(), 
+								b->getName().c_str());
 	}
 	
 }
 
 
-void AUMProcessor::delBiddingObjectsAuctionProcess(int index, biddingObjectDB_t *bids)
+void AUMProcessor::delBiddingObjectsAuctionProcess(int index, auctioningObjectDB_t *bids)
 {
-	biddingObjectDBIter_t bid_iter;   
-	for (bid_iter = bids->begin(); bid_iter!= bids->end(); ++bid_iter ){
-		BiddingObject *bid = *bid_iter;
+	auctioningObjectDBIter_t bid_iter;   
+	for (bid_iter = bids->begin(); bid_iter!= bids->end(); ++bid_iter )
+	{
+		BiddingObject *bid = dynamic_cast<BiddingObject *>(*bid_iter);
 		try {
 			 delBiddingObjectAuctionProcess(index, bid );
 		} catch(Error &err){
@@ -450,13 +454,13 @@ void AUMProcessor::delBiddingObjectsAuctionProcess(int index, biddingObjectDB_t 
 
 /* ------------------------- delAuctionProcess ------------------------- */
 
-void AUMProcessor::delAuctionProcess( int index )
+void AUMProcessor::delAuctionProcess( int index, EventSchedulerAuctioner *e )
 {
     auctionProcess entry;
     
-#ifdef DEBUG
-    log->dlog(ch, "deleting Auction Process #%d", index);
-#endif
+//#ifdef DEBUG
+    log->log(ch, "Starting del Auction Process #%d", index);
+//#endif
 
     AUTOLOCK(threaded, &maccess);
         
@@ -466,11 +470,16 @@ void AUMProcessor::delAuctionProcess( int index )
     loader->releaseModule(entry.getModule());
      
     auctions.erase(index); 
-       
+
+	e->delProcessExecutionEvents(index);
+
+//#ifdef DEBUG
+    log->log(ch, "ending del Auction Process #%d", index);
+//#endif       
 }
 
 /* -----------------  getApplicableAuctions --------------------- */
-auctionDB_t * 
+auctioningObjectDB_t * 
 AUMProcessor::getApplicableAuctions(ipap_message *message)
 {
 
@@ -480,7 +489,7 @@ AUMProcessor::getApplicableAuctions(ipap_message *message)
 
 	AUTOLOCK(threaded, &maccess);
 	
-	auctionDB_t *auctions_anw = new auctionDB_t();
+	auctioningObjectDB_t *auctions_anw = new auctioningObjectDB_t();
 	
 	// Read the option data auction template.
 	ipap_template *templOptAuct = readTemplate(message, IPAP_OPTNS_AUCTION_TEMPLATE);
@@ -529,6 +538,7 @@ AUMProcessor::getApplicableAuctions(ipap_message *message)
 #ifdef DEBUG
     log->dlog(ch, "ending getApplicableAuctions Nbr:%d", auctions_anw->size());
 #endif
+	
 	
 	return auctions_anw;
 }
@@ -580,6 +590,47 @@ AUMProcessor::getSessionInformation(ipap_message *message)
 	}
 	
 	return sessionInfo;
+}
+
+
+void 
+AUMProcessor::delAuctions(auctioningObjectDB_t *aucts,  EventSchedulerAuctioner *e)
+{
+
+	log->log(ch, "Starting delete auctions nbr: %d", aucts->size() );
+
+	AUTOLOCK(threaded, &maccess);
+	
+    auctionProcessListRevIter_t iter = auctions.rbegin();
+    for (; iter != auctions.rend();){
+				
+		// delete the actions from the request process.
+ 		Auction *auction = (iter->second).getAuction();
+ 		int index = iter->first;
+
+		log->log(ch, "auction explore: %s.%s", auction->getSet().c_str(), 
+						auction->getName().c_str() );
+ 		
+ 		auctioningObjectDBIter_t iter2;
+ 		for (iter2 = aucts->begin(); iter2 != aucts->end(); iter2++)
+ 		{ 
+			Auction *auction2 = dynamic_cast<Auction *>(*iter2);
+			if ((auction->getSet().compare(auction2->getSet()) == 0 ) &&
+				(auction->getName().compare(auction2->getName()) == 0 )){
+				delAuctionProcess(index, e);
+				iter = auctions.rbegin();
+				break;
+			}
+		}
+		
+		if (iter != auctions.rend())
+		{
+			++iter;
+		}
+	}
+	
+	log->log(ch, "Ending delete auctions nbr: %d", aucts->size() );
+		
 }
 
 

@@ -38,6 +38,7 @@
 #include "ConfigManager.h"
 #include "BiddingObjectManager.h"
 #include "AuctionManager.h"
+#include "ResourceManager.h"
 #include "SessionManager.h"
 #include "CtrlComm.h"
 #include "EventSchedulerAuctioner.h"
@@ -88,6 +89,7 @@ class Auctioner
     auto_ptr<BiddingObjectManager>     	bidm;
     auto_ptr<AuctionManager>   			aucm;
     auto_ptr<SessionManager>			sesm;
+    auto_ptr<ResourceManager>			resm;
     auto_ptr<EventSchedulerAuctioner>  	evnt;
     auto_ptr<AnslpClient>				anslpc;
     
@@ -137,12 +139,13 @@ class Auctioner
     string getAuctionManagerInfo(infoList_t *i);
     
     //! activate/execute auctions
-    void activateAuctions(auctionDB_t *auctions, EventScheduler *e);    
-
+    void activateAuctions(auctioningObjectDB_t *auctions, EventScheduler *e);    
 
 	void handleGetInfo(Event *e, fd_sets_t *fds);
     
 	void handleGetModInfo(Event *e, fd_sets_t *fds);
+
+	void handleAddResource(Event *e, fd_sets_t *fds);
     
 	void handleAddBiddingObjects(Event *e, fd_sets_t *fds);      
 
@@ -155,6 +158,8 @@ class Auctioner
 	void handleActivateBiddingObjects(Event *e, fd_sets_t *fds);
 	
 	void handleActivateAuction(Event *e, fd_sets_t *fds);
+
+	void handleRemoveAuctions(Event *e, fd_sets_t *fds);
 
     void handleRemoveBiddingObjects(Event *e, fd_sets_t *fds);
     

@@ -81,7 +81,7 @@ void BiddingObjectFileParser_Test::tearDown()
 
 void BiddingObjectFileParser_Test::testParser() 
 {
-	biddingObjectDB_t *newBiddingObjects = new biddingObjectDB_t();
+	auctioningObjectDB_t *newBiddingObjects = new auctioningObjectDB_t();
 		
 	try
 	{

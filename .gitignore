@@ -51,7 +51,6 @@
 
 # Configuration Files #
 ###################
-*.xml
 *.Po
 *.Plo
 

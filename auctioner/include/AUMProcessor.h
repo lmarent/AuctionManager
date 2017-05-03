@@ -40,6 +40,7 @@
 #include "IpApMessageParser.h"
 #include "FieldDefManager.h"
 #include "AuctionProcessObject.h"
+#include "EventSchedulerAuctioner.h"
 
 namespace auction
 {
@@ -61,7 +62,7 @@ class auctionProcess : public AuctionProcessObject
 		Auction *auction; 
 		
 		//! Bids competing in the auction.
-		biddingObjectDB_t bids;  
+		auctioningObjectDB_t bids;  
 		
 		auctionProcess():AuctionProcessObject(), params(NULL), auction(NULL){ }
 		
@@ -77,16 +78,18 @@ class auctionProcess : public AuctionProcessObject
 		
 		void insertBid(BiddingObject * bid){ bids.push_back(bid); }
 		
-		biddingObjectDB_t * getBids() { return &bids; }
+		auctioningObjectDB_t * getBids() { return &bids; }
     
 };
 
 //! action list for each auction
 typedef map<int, auctionProcess>            auctionProcessList_t;
 typedef map<int, auctionProcess>::iterator  auctionProcessListIter_t;
+typedef  map<int, auctionProcess>::reverse_iterator  auctionProcessListRevIter_t;
 
 typedef map< agentFieldSet_t, set<ipap_field_key> >  		  setFieldsList_t;
 typedef map< agentFieldSet_t, set<ipap_field_key> >::iterator  setFieldsListIter_t;
+
 
 
 /*! \short   manage and execute algoirthms for a set of auctions.
@@ -161,23 +164,23 @@ class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser, p
         \arg \c index   index to add the element.
         \arg \c bids 	Pointer to bidding object list to insert
     */
-    void addBiddingObjectsAuctionProcess(int index, biddingObjectDB_t *bids );
+    void addBiddingObjectsAuctionProcess(int index, auctioningObjectDB_t *bids );
 
 
     //! delete biddingObjects
-    void delBiddingObjectsAuctionProcess( int index, biddingObjectDB_t *bids );
+    void delBiddingObjectsAuctionProcess( int index, auctioningObjectDB_t *bids );
 
 
     /*! \short   delete an Auction from the auction process list
         \arg \c index  index to erase.
     */
-    void delAuctionProcess( int index );
+    void delAuctionProcess( int index, EventSchedulerAuctioner *e );
 		
     /*! \short   get the auctions applicable given the options within the message.
         \arg \message a  pointer to a message with the options to filter.
         \returns 0 - list of application auctions.
     */
-	auctionDB_t * getApplicableAuctions(ipap_message *message);
+	auctioningObjectDB_t * getApplicableAuctions(ipap_message *message);
 
 
 	//! gives an iterator over the first auction process registered.
@@ -193,6 +196,13 @@ class AUMProcessor : public AuctionManagerComponent, public IpApMessageParser, p
 
     //! handle file descriptor event
     virtual int handleFDEvent(eventVec_t *e, fd_set *rset, fd_set *wset, fd_sets_t *fds);
+
+    /*! \short delete the set of auctions from all request
+     *  \arg \c aucts 		  auction set to delete.
+     *  If a request process becomes free of auctions, then it is deleted too.
+	 */
+	void delAuctions(auctioningObjectDB_t *aucts, EventSchedulerAuctioner *e);
+
 
     //! thread main function
     void main();

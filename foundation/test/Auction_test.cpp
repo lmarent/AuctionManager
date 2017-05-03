@@ -95,18 +95,18 @@ void Auction_Test::tearDown()
 void Auction_Test::testAuctions() 
 {
 	try{
-		auctionDB_t *new_acts = new auctionDB_t();
+		auctioningObjectDB_t *new_acts = new auctioningObjectDB_t();
 
 		ptrActFileParser->parse(&fieldDefs, new_acts, templates );
 			
-		Auction *copy = (*new_acts)[0];
+		Auction *copy = dynamic_cast<Auction *>((*new_acts)[0]);
 				
 		ptrAuction1 = new Auction(*copy);
-		ptrAuction2 = new Auction(*((*new_acts)[0]));
+		ptrAuction2 = new Auction(*copy);
 				
-		CPPUNIT_ASSERT( (ptrAuction1->getInfo()).compare(((*new_acts)[0])->getInfo()) == 0 );
+		CPPUNIT_ASSERT( (ptrAuction1->getInfo()).compare(copy->getInfo()) == 0 );
 						
-		for (int i = 0; i < new_acts->size() ; i++)
+		for (size_t i = 0; i < new_acts->size() ; i++)
 		{
 			delete(((*new_acts)[i]));
 		}

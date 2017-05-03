@@ -29,15 +29,13 @@
 #ifndef _AUCTION_H_
 #define _AUCTION_H_
 
-#include "stdincpp.h"
+#include "AuctioningObject.h"
 #include "Constants.h"
-#include "Logger.h"
 #include "AuctionTimer.h"
 #include "ConfigParser.h"
 #include "IpAp_template_container.h"
 #include "IpAp_message.h"
 #include "Field.h"
-#include "AuctioningObject.h"
 
 namespace auction
 {
@@ -98,16 +96,7 @@ class Auction : public AuctioningObject
 
 	//! define the execution intervals.
 	interval_t	mainInterval;
-
-    //! name of the auction by convention this must be either: <name> or <resource>.<id>
-    string auctionName;
-
-    //! parts of auction name for efficiency
-    string resource;
     
-    //! name of the auction set this auction belongs to
-    string setName;
-
 	//! template references
 	uint16_t dataAuctionTemplate;
 	uint16_t optionAuctionTemplate;
@@ -134,7 +123,7 @@ class Auction : public AuctioningObject
 									ipap_field_container g_ipap_fields);
 	
 	//! Calculate the number of fields to be included in the template type.
-	set<ipap_field_key>  calculateTemplateFields( ipap_object_type_t objectType,
+	std::set<ipap_field_key>  calculateTemplateFields( ipap_object_type_t objectType,
 												  ipap_templ_type_t templType, 
 												  auctionTemplateFieldList_t &templFields);
 	
@@ -158,15 +147,7 @@ class Auction : public AuctioningObject
 	
   public:    
   
-    inline string getSetName(){ return setName; }
-	
-	inline void setSetName(string sname){ setName = sname; }
-	
-	inline void setAuctionName(string aname){ auctionName = aname; }
-	
-    inline string getAuctionName(){ return auctionName; }
-        
-    inline string getAuctionResource(){ return resource; }
+    inline string getAuctionResource(){ return getSetParent() + "." + getNameParent(); }
     
     inline void setStart(time_t _start){ start = _start; }
     
@@ -179,6 +160,8 @@ class Auction : public AuctioningObject
     inline interval_t getInterval(){ return mainInterval; }
     
     string getIpApId(int domain);
+
+    string getIpResourceId(int domain);
     
 	/*! 
 	 * \short Get the data auction template associated with the auction
@@ -229,7 +212,7 @@ class Auction : public AuctioningObject
         \arg \c message  	message where we include the new templates. 
         
     */
-    Auction(time_t now, string sname, string aname, string resource, action_t &a, miscList_t &m, 
+    Auction(time_t now, string sname, string aname, string resourceSet, string resource, action_t &a, miscList_t &m, 
 		    AuctionTemplateMode_t mode, auctionTemplateFieldList_t &templFields,
 		    ipap_template_container *templates );
 
@@ -273,6 +256,10 @@ class Auction : public AuctioningObject
 	
 	//! get the Module name for the default action.
 	string getModuleName();
+
+	void getConnectionString(string &sipv4Address, string &sipv6Address, 
+						     int &iport, int &ipversion, string &destinAddr);
+
 };
 
 //! overload for <<, so that a Auction object can be thrown into an iostream

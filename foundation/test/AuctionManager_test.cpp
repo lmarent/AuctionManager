@@ -76,24 +76,21 @@ void AuctionManager_Test::test()
 		ipap_template_container *templates;
 		
 		const string filename = "../../etc/example_auctions1.xml";
-		
 		templates = new ipap_template_container();
-		
-		auctionDB_t * auctions = auctionManagerPtr->parseAuctions(filename, templates);
-		
+		auctioningObjectDB_t * auctions = auctionManagerPtr->parseAuctions(filename, templates);
+		CPPUNIT_ASSERT( auctions->size() == 1 );
 		saveDelete(templates);
 				
-		auctionManagerPtr->addAuctions(auctions, evnt.get());
-				
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
+		auctionManagerPtr->addAuctioningObjects(auctions, evnt.get());				
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 1 );
 		
-		auctionDB_t auctions2 = auctionManagerPtr->getAuctions();		
+		auctioningObjectDB_t auctions2 = auctionManagerPtr->getAuctioningObjects();		
 
-		Auction *auctionPtr = auctions2[0];
-		
+		Auction *auctionPtr = dynamic_cast<Auction *>(auctions2[0]);
+						
 		Auction *auction2 = new Auction(*auctionPtr);
 		
-		auction2->setAuctionName("2");
+		auction2->setName("2");
 		
 		// test the increment and decrement functions for auctions.
 		
@@ -107,15 +104,19 @@ void AuctionManager_Test::test()
 		
 		CPPUNIT_ASSERT( auction2->getSessionReferences() == 2 );
 						
-		auctionManagerPtr->addAuction(auction2);
+		auctionManagerPtr->addAuctioningObject(auction2);
 				
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 2 );
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 2 );
 				
 		string info = auctionPtr->getInfo();
+
+		cout << "Info 1:" << info << endl;
+		cout << "id:" << auctionPtr->getUId() << endl;
+		cout << "Info 2:" << auctionManagerPtr->getInfo(auctionPtr->getUId()) << endl;
 						
 		CPPUNIT_ASSERT( info.compare(auctionManagerPtr->getInfo(auctionPtr->getUId())) == 0 );
 		
-		auctionDB_t auctions3 = auctionManagerPtr->getAuctions();	
+		auctioningObjectDB_t auctions3 = auctionManagerPtr->getAuctioningObjects();	
 		
 		CPPUNIT_ASSERT( auctions3.size() == 2 );
 				
@@ -123,12 +124,12 @@ void AuctionManager_Test::test()
 				
 		auctionManagerPtr->delAuction(auctionPtr->getUId(),evnt.get());
 		
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 1 );
 		
-		auctionManagerPtr->delAuction(auction2->getSetName(), 
-										auction2->getAuctionName(), evnt.get());
+		auctionManagerPtr->delAuction(auction2->getSet(), 
+										auction2->getName(), evnt.get());
 	
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 0 );
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 0 );
 		
 		// Reinsert auctions - Delete by set name( Bidder )
 
@@ -138,25 +139,25 @@ void AuctionManager_Test::test()
 		
 		saveDelete(templates);
 				
-		auctionManagerPtr->addAuctions(auctions, evnt.get());
+		auctionManagerPtr->addAuctioningObjects(auctions, evnt.get());
 				
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 1 );
 		
-		auctions2 = auctionManagerPtr->getAuctions();		
+		auctions2 = auctionManagerPtr->getAuctioningObjects();		
 
-		auctionPtr = auctions2[0];
+		auctionPtr = dynamic_cast<Auction *>(auctions2[0]);
 		
 		auction2 = new Auction(*auctionPtr);
 		
-		auction2->setAuctionName("2");
+		auction2->setName("2");
 		
-		auctionManagerPtr->addAuction(auction2);
+		auctionManagerPtr->addAuctioningObject(auction2);
 		
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 2 );
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 2 );
 				
-		auctionManagerPtr->delAuctions(auction2->getSetName(), evnt.get());
+		auctionManagerPtr->delAuctions(auction2->getSet(), evnt.get());
 		
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 0 );
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 0 );
 				
 		// Reinsert auction - Delete by pointer
 		
@@ -166,17 +167,17 @@ void AuctionManager_Test::test()
 		
 		saveDelete(templates);
 		
-		auctionManagerPtr->addAuctions(auctions, evnt.get());
+		auctionManagerPtr->addAuctioningObjects(auctions, evnt.get());
 				
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 1 );
 		
-		auctions2 = auctionManagerPtr->getAuctions();		
+		auctions2 = auctionManagerPtr->getAuctioningObjects();		
 
-		auctionPtr = auctions2[0];
+		auctionPtr = dynamic_cast<Auction *>(auctions2[0]);
 		
 		auctionManagerPtr->delAuction(auctionPtr, evnt.get());
 		
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 0 );
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 0 );
 		
 		// Reinsert auctions - Delete by set.
 		
@@ -186,24 +187,25 @@ void AuctionManager_Test::test()
 		
 		saveDelete(templates);
 		
-		auctionManagerPtr->addAuctions(auctions, evnt.get());
+		auctionManagerPtr->addAuctioningObjects(auctions, evnt.get());
 				
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 1 );
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 1 );
 				
-		auctionPtr = auctionManagerPtr->getAuction("general1","1");
+		auctionPtr = dynamic_cast<Auction *>(
+						auctionManagerPtr->getAuctioningObject("general1","1"));
 				
 		if (auctionPtr != NULL){
 			auction2 = new Auction(*auctionPtr);
-			auction2->setAuctionName("2");	
-			auctionManagerPtr->addAuction(auction2);		
-			CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 2 );
+			auction2->setName("2");	
+			auctionManagerPtr->addAuctioningObject(auction2);		
+			CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 2 );
 		}
 						
-		auctions3 = auctionManagerPtr->getAuctions();	
+		auctions3 = auctionManagerPtr->getAuctioningObjects();	
 		
-		auctionManagerPtr->delAuctions(&auctions3, evnt.get());
+		auctionManagerPtr->delAuctioningObjects(&auctions3, evnt.get());
 		
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 0 );
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 0 );
 		
 		
 	} catch(Error &e){

@@ -11,7 +11,7 @@
     <!-- How often they should be run - value in seconds -->
     <PREF NAME="Interval">10</PREF>
   </GLOBAL>
-  <AUCTION ID="1" RESOURCE_ID="router2">
+  <AUCTION ID="1" RESOURCE_SET="1" RESOURCE_ID="router2">
     <ACTION NAME="libbas" DEFAULT="true">
     <PREF NAME="Bandwidth" TYPE="Float32">8</PREF>
     <PREF NAME="ReservePrice" TYPE="Float64">0.012</PREF>

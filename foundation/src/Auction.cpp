@@ -28,6 +28,7 @@
 
 #include <sstream>
 #include <assert.h>
+#include <set>
 
 #include "ParserFcts.h"
 #include "Auction.h"
@@ -42,11 +43,11 @@ using namespace auction;
 
 /* ------------------------- Auction ------------------------- */
 
-Auction::Auction(time_t now, string sname, string aname, string resource, action_t &a, 
-				 miscList_t &m, AuctionTemplateMode_t mode, 
+Auction::Auction(time_t now, string sname, string aname, string resourceSet, 
+				 string resource, action_t &a, miscList_t &m, AuctionTemplateMode_t mode, 
 				 auctionTemplateFieldList_t &templFields,
 				 ipap_template_container *templates )
-   : AuctioningObject("AUCTION"), auctionName(aname), resource(resource), setName(sname), 
+   : AuctioningObject("AUCTION", sname, aname, resourceSet,resource),  
    	 action(a), miscList(m)
 {
 
@@ -179,8 +180,7 @@ Auction::Auction(time_t now, string sname, string aname, string resource, action
 }
 
 Auction::Auction(const Auction &rhs): 
-	AuctioningObject(rhs), auctionName(rhs.auctionName), setName(rhs.setName), 
-	 resource(rhs.resource)
+	AuctioningObject(rhs)
 {
 	
 	start = rhs.start;
@@ -232,16 +232,34 @@ string
 Auction::getIpApId(int domain)
 {
 	string idAuctionS;
-	if ((getSetName()).empty()){
+	if ((getSet()).empty()){
 		ostringstream ssA;
 		ssA << domain;
-		idAuctionS =  ssA.str() + "." + getAuctionName();
+		idAuctionS =  ssA.str() + "." + getName();
 	} else {
-		idAuctionS = getSetName() + "." + getAuctionName();
+		idAuctionS = getSet() + "." + getName();
 	}
 	
 	return idAuctionS;
 }
+
+
+string 
+Auction::getIpResourceId(int domain)
+{
+	string idResourceS;
+	
+	if ((getSetParent()).empty()){
+		ostringstream ssA;
+		ssA << domain;
+		idResourceS =  ssA.str() + "." + getNameParent();
+	} else {
+		idResourceS = getSetParent() + "." + getNameParent();
+	}
+	
+	return idResourceS;
+}
+
 
 /* ------------------------- ~Auction ------------------------- */
 
@@ -508,7 +526,7 @@ string Auction::getInfo(void)
 
 	s << AuctioningObject::getInfo();
 
-    s << getSetName() << "." << getAuctionName() << " ";
+    s << getSet() << "." << getName() << " ";
 
 	s << getStart() << " & " << getStop() << " ";
 
@@ -592,4 +610,29 @@ string Auction::getModuleName()
 {
 	 string moduleName(action.name.c_str());
 	 return moduleName;
+}
+
+
+/*------- We obtain from the auction the connection settings 
+ * 			    for auctioning ( Ip address, port, Ip_version )  ------*/
+void Auction::getConnectionString(string &sipv4Address, string &sipv6Address, 
+									int &iport, int &ipVersion, string &destinAddr)
+{
+	string sport, sipversion;
+	
+	sipv4Address = IpApMessageParser::getMiscVal(getMisc(), "dstip");
+	sipv6Address = IpApMessageParser::getMiscVal(getMisc(), "dstip6");
+	sport = IpApMessageParser::getMiscVal(getMisc(), "dstauctionport");
+	sipversion = IpApMessageParser::getMiscVal(getMisc(), "ipversion");
+						
+	ipVersion = ParserFcts:: parseInt(sipversion);
+		
+	if (ipVersion == 4) {
+		destinAddr = sipv4Address;
+	} else {
+		destinAddr = sipv6Address;
+	}
+			
+	iport = ParserFcts::parseInt(sport);
+
 }

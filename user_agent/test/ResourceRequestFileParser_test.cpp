@@ -72,7 +72,7 @@ void ResourceRequestFileParser_Test::tearDown()
 
 void ResourceRequestFileParser_Test::testParser() 
 {
-	resourceRequestDB_t *new_requests = new resourceRequestDB_t();
+	auctioningObjectDB_t *new_requests = new auctioningObjectDB_t();
 		
 	try
 	{
@@ -174,12 +174,11 @@ void ResourceRequestFileParser_Test::testParser()
 		
 		
 		ptrResourceRequestFileParser->parse(&fieldDefs, 
-											new_requests,
-											idSource );
+											new_requests );
 		
 		CPPUNIT_ASSERT( new_requests->size() == 1 );
 		
-		string info1 = (*new_requests)[0]->getInfo();
+		string info1 = dynamic_cast<ResourceRequest *>((*new_requests)[0])->getInfo();
 		string info2 = ptrresourceRequest1->getInfo();
 				
 		CPPUNIT_ASSERT( info1.compare(info2) == 0);

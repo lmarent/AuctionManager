@@ -41,15 +41,6 @@
 namespace auction
 {
 
-//! resource request's states during lifecycle
-typedef enum
-{
-    RR_NEW = 0,
-    RR_VALID,
-    RR_ACTIVE,
-    RR_DONE,
-    RR_ERROR
-} resourceRequestState_t;
 
 //! execution interval definition
 typedef struct 
@@ -93,27 +84,6 @@ public:
 	ResourceRequest( string rset, string rname, fieldList_t &f, resourceReqIntervalList_t &resReqInter );
 
 	~ResourceRequest();
-
-    string getResourceRequestSet()
-    {
-        return set;
-    }
-
-    void setResourceRequestSet(string rset)
-	{
-		set = rset;
-	}	
-
-   
-    string getResourceRequestName()
-    {
-        return name;
-    }
-
-    void setResourceRequestName(string _name)
-	{
-		name = _name;
-	}	
 	
 	string getIpApId(int domain);
 	
@@ -147,19 +117,8 @@ public:
 	string getSession(time_t start);
 			
 protected:
-	
-    //! unique bidID of this Rule instance (has to be provided)
-    int uid;
-   
-	//! state of this rule
-    resourceRequestState_t state;
 
-	//! resource request set associated
-	string set;  
-
-	//! resource request name associated
-	string name; 
-
+	   
 	//! Resource request fields, two typical fields are quantity and price.
 	fieldList_t fields; 
 

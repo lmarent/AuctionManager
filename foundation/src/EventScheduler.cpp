@@ -90,20 +90,20 @@ void EventScheduler::addEvent(Event *ev)
     
     events.insert(make_pair(ev->getTime(),ev));
 
-/*    
-#ifdef DEBUG
-    log->dlog(ch,"nbr of events active after inserting:", events.size());
-    eventListIter_t iter;
+    
+//#ifdef DEBUG
+//    log->dlog(ch,"nbr of events active after inserting:", events.size());
+//    eventListIter_t iter;
             
     // output all scheduled Events to ostream
-    for (iter = events.begin(); iter != events.end(); iter++) {
-        struct timeval rv = iter->first;
-        log->dlog(ch,"Time:%s event:%s", (Timeval::toString(rv)).c_str(), 
-					eventNames[iter->second->getType()].c_str());        
-    }
+//    for (iter = events.begin(); iter != events.end(); iter++) {
+//        struct timeval rv = iter->first;
+//        log->log(ch,"Time:%s event:%s", (Timeval::toString(rv)).c_str(), 
+//					eventNames[iter->second->getType()].c_str());        
+//    }
     
-#endif
-*/
+//#endif
+
     
 }
 
@@ -120,6 +120,11 @@ void EventScheduler::delBiddingObjectEvents(int uid)
         iter++;
         
         ret = tmp->second->deleteBiddingObject(uid);
+        
+        if (( ret == 2 ) && ( tmp->second->getType() == PUSH_EXECUTION)){
+			log->log(ch,"remove event 2 %s", eventNames[tmp->second->getType()].c_str());
+        }
+        
         if (ret == 1) {
             // ret = 1 means bidding object was present in event but other bidding objects are still in
             // the event
@@ -330,7 +335,7 @@ void EventScheduler::dump(ostream &os)
 
 /* ------------------------- operator<< ------------------------- */
 
-ostream& operator<< (ostream &os, EventScheduler &dc)
+ostream& auction::operator<< (ostream &os, EventScheduler &dc)
 {
     dc.dump(os);
     return os;

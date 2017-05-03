@@ -62,14 +62,45 @@ class AuctioningObject
     //! state of this auction
     AuctioningObjectState_t state;
 
+    //! set this auctioning object belongs to
+    string _set;
+
+    //! name of the auctioning object by convention this must be either: <name> or <set>.name
+    string _name;
+
+	//! Parents' set 
+	string _setParent;
+	
+	//! Parents' name
+	string _nameParent;
+
   public:
     
-    AuctioningObject(string name);
+    AuctioningObject(string channelName, string _set, string _name);
+    
+    AuctioningObject(string channelName, string _set, string _name, 
+						string setParent, string nameParent);
     
     AuctioningObject(const AuctioningObject &rhs);
     
-    ~AuctioningObject();
+    virtual ~AuctioningObject();
+
+    inline string getSet(){ return _set; }
+	
+	inline void setSet(string sname){ _set = sname; }
+	
+	inline void setName(string aname){ _name = aname; }
+	
+    inline string getName(){ return _name; }
+
+    inline string getSetParent(){ return _setParent; }
     
+    inline void setSetParent(string sParent){ _setParent = sParent; }
+    
+    inline string getNameParent(){ return _nameParent; }
+    
+    inline void setNameParent(string nameParent){ _nameParent = nameParent; }
+
     inline void setState(AuctioningObjectState_t s) { state = s; }
 
     inline AuctioningObjectState_t getState(){ return state; }
@@ -77,6 +108,8 @@ class AuctioningObject
     inline int getUId(){ return uid; }
     
     inline void setUId(int nuid){ uid = nuid; }
+
+	bool equals(const AuctioningObject &rhs);
 
 	string getInfo(void);
 };

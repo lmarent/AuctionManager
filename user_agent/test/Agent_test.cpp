@@ -104,9 +104,48 @@ void Agent_Test::test()
 
 	try
 	{
-			
+		
         // going into main loop
         if (agentPtr != NULL){
+	
+			// test the interval intersect function
+			time_t time1, time2, time3, time4, time5, time6;
+			time_t start, stop;
+			
+			time1 = time(NULL);
+			time2 = time1 + 300;
+			
+			time3 = time1 - 300;
+			time4 = time1 - 200;
+			
+			agentPtr->intersectInterval(time1, time2, time3, time4, start, stop);
+			CPPUNIT_ASSERT( start == time3 );
+			CPPUNIT_ASSERT( stop == time4 );
+
+			time3 = time1 - 300;
+			time4 = time1 + 100;
+			agentPtr->intersectInterval(time1, time2, time3, time4, start, stop);
+			CPPUNIT_ASSERT( start == time1 );
+			CPPUNIT_ASSERT( stop == time4 );
+
+			time3 = time1 + 100;
+			time4 = time1 + 200;
+			agentPtr->intersectInterval(time1, time2, time3, time4, start, stop);
+			CPPUNIT_ASSERT( start == time3 );
+			CPPUNIT_ASSERT( stop == time4 );
+
+			time3 = time1 + 200;
+			time4 = time1 + 400;
+			agentPtr->intersectInterval(time1, time2, time3, time4, start, stop);
+			CPPUNIT_ASSERT( start == time3 );
+			CPPUNIT_ASSERT( stop == time2 );
+
+			time3 = time1 + 350;
+			time4 = time1 + 400;
+			agentPtr->intersectInterval(time1, time2, time3, time4, start, stop);
+			CPPUNIT_ASSERT( start == time3 );
+			CPPUNIT_ASSERT( stop == time4 );
+			
 			
 			Event * evt = agentPtr->evnt.get()->getNextEvent();
 			
@@ -160,7 +199,7 @@ void Agent_Test::test()
 			CPPUNIT_ASSERT( nbrMessages == 1);
 			
 			// Confirm manually the message reading a constant response and changing the message number.
-			std::ifstream t("../../etc/ResponseRequestMessage.xml");
+			std::ifstream t("../../etc/ResponseRequestMessage2.xml");
 			std::string xmlMessage;
 			
 			t.seekg(0, std::ios::end);   
@@ -235,14 +274,18 @@ void Agent_Test::test()
 		
 			CPPUNIT_ASSERT( tmplIter != agentPtr->agentTemplates.end() );
 						
-			CPPUNIT_ASSERT( (tmplIter->second)->get_num_templates() == 8 );
+			CPPUNIT_ASSERT( (tmplIter->second)->get_num_templates() == 16 );
 			
 			Session * ses2 = agentPtr->asmp->getSession(sessionId);
 			CPPUNIT_ASSERT( ses2->beginMessages() == ses2->endMessages() );
 			
 			// Verify that a new auction was created.
-			CPPUNIT_ASSERT( agentPtr->aucm->getNumAuctions() == 1);
+			CPPUNIT_ASSERT( agentPtr->aucm->getNumAuctioningObjects() == 2);
+
+			// Print both auctions.
 			
+			cout << *(agentPtr->aucm) << endl;
+						
 			// Verify that a new request process was created
 			requestProcessListIter_t reqIter;
 			int nbrRequest = 0;
@@ -259,6 +302,12 @@ void Agent_Test::test()
 			
 			// Handle the activate auctions event.
 			agentPtr->handleEvent(evt, NULL);
+
+			for (reqIter = agentPtr->proc->begin(); reqIter != agentPtr->proc->end(); ++reqIter){
+				nbrRequest++;
+			}
+
+			CPPUNIT_ASSERT( nbrRequest == 2 );
 			
 			// Verify message confirmation.
 			sessions = agentPtr->asmp->getSessions();
@@ -273,8 +322,6 @@ void Agent_Test::test()
 			for ( mesIter = asession->beginMessages(); mesIter != asession->endMessages(); ++mesIter){
 				++nbrMessages;
 			}
-			
-			cout << "Here I am 4" << endl;
 			
 			CPPUNIT_ASSERT( nbrMessages == 0);
 						
@@ -291,57 +338,50 @@ void Agent_Test::test()
 			AddGeneratedBiddingObjectsEvent *agboe = dynamic_cast<AddGeneratedBiddingObjectsEvent *>(evt);
 			CPPUNIT_ASSERT( agboe != NULL );
 			
-			biddingObjectDB_t *new_bids = ((AddGeneratedBiddingObjectsEvent *)evt)->getBiddingObjects();
+			auctioningObjectDB_t *new_bids = ((AddGeneratedBiddingObjectsEvent *)evt)->getBiddingObjects();
 			
 			int numBids = 0;
-			biddingObjectDBIter_t bidIter;
+			auctioningObjectDBIter_t bidIter;
 			for (bidIter = new_bids->begin(); bidIter != new_bids->end(); ++bidIter){
 				numBids++;
 			} 
-			
-			CPPUNIT_ASSERT( numBids == 1);
+						
+			CPPUNIT_ASSERT( numBids == 2);
 			
 			// Handle the Add-Generated-Bidding-Objects event.
 			agentPtr->handleEvent(evt, NULL);
 						
-			CPPUNIT_ASSERT( agentPtr->bidm->getNumBiddingObjects() == 1);
+			CPPUNIT_ASSERT( agentPtr->bidm->getNumAuctioningObjects() == 2);
 						
 			// Verify that a new activate bidding Object event was created.
 			evt = agentPtr->evnt.get()->getNextEvent();
+			
+			cout << *(agentPtr->evnt.get()) << endl;
 			
 			int numEvents = 0;
 			while (numEvents <=1){
 				
 				// Depending on execution time, it can create first the activate event or the trasmit event
 				if (evt->getType() == TRANSMIT_BIDDING_OBJECTS) {
-					
-					cout << "Here I am 4c" << endl;
-					
+										
 					// Verify that a new transmit bidding Object event was created.
 					TransmitBiddingObjectsEvent *tboe = dynamic_cast<TransmitBiddingObjectsEvent *>(evt);
 					CPPUNIT_ASSERT( tboe != NULL );
-					
-					cout << "Here I am 4c2" << endl;
-						
+											
 					numBids = 0;
 					new_bids = ((TransmitBiddingObjectsEvent *)evt)->getBiddingObjects();
 					for (bidIter = new_bids->begin(); bidIter != new_bids->end(); ++bidIter){
 						numBids++;
 					} 
-					
-					cout << "Here I am 4c3" << endl;
-						
-					CPPUNIT_ASSERT( numBids == 1);
+											
+					CPPUNIT_ASSERT( numBids == 2);
 
 					// Handle the Transmit-Bidding-Objects event.
 					agentPtr->handleEvent(evt, NULL);
 					
-					cout << "Here I am 4c4" << endl;
 				}	   
 				else if (evt->getType() == ACTIVATE_BIDDING_OBJECTS) {
-					
-					cout << "Here I am 4d" << endl;
-					
+										
 					ActivateBiddingObjectsEvent *aboe = dynamic_cast<ActivateBiddingObjectsEvent *>(evt);
 					CPPUNIT_ASSERT( aboe != NULL );
 						
@@ -351,7 +391,7 @@ void Agent_Test::test()
 						numBids++;
 					} 
 						
-					CPPUNIT_ASSERT( numBids == 1);
+					CPPUNIT_ASSERT( numBids == 2);
 						
 					// Handle the Activate-Bidding-Objects event.
 					agentPtr->handleEvent(evt, NULL);
@@ -363,33 +403,23 @@ void Agent_Test::test()
 				numEvents++;
 				evt = agentPtr->evnt.get()->getNextEvent();
 			}
-			
-			cout << "Here I am 5" << endl;
-			
+						
 			numEvents = 0;
 			while (numEvents <=2){
 							
 				if (evt->getType() == REMOVE_RESOURCE_REQUEST_INTERVAL) {
-					cout << "Here I am 6" << endl;
 					checkRemoveRequestEvent(evt);
-					cout << "Here I am 6a" << endl;
 				}		
 				else if (evt->getType() == REMOVE_AUCTIONS) {
-					cout << "Here I am 7" << endl;
 					checkRemoveAuctionEvent(evt);
-					cout << "Here I am 7a" << endl;
 				}	
 				else if (evt->getType() == REMOVE_BIDDING_OBJECTS) {
-					cout << "Here I am 8" << endl;
 					checkRemoveBiddingObjectEvent(evt);
-					cout << "Here I am 8a" << endl;
 				}	
 				numEvents++;
 				evt = agentPtr->evnt.get()->getNextEvent();
 			}
-			
-			cout << "Here I am 6" << endl;
-			
+						
 		}	
 		
 		
@@ -397,8 +427,6 @@ void Agent_Test::test()
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
 		throw e;
 	}
-
-
 }
 
 void Agent_Test::checkRemoveAuctionEvent(Event *evt)
@@ -425,20 +453,20 @@ void Agent_Test::checkRemoveAuctionEvent(Event *evt)
 	rae = dynamic_cast<RemoveAuctionsEvent *>(evt);
 	CPPUNIT_ASSERT( rae != NULL );
 						
-	auctionDB_t *auctions = rae->getAuctions();
-	auctionDBIter_t aucIter;
+	auctioningObjectDB_t *auctions = rae->getAuctions();
+	auctioningObjectDBIter_t aucIter;
 	int numAuct = 0;
 	for (aucIter = auctions->begin(); aucIter != auctions->end(); ++aucIter){
 		numAuct++;
 	} 
 			
-	CPPUNIT_ASSERT( numAuct == 1 );
+	CPPUNIT_ASSERT( numAuct == 2 );
 		
 	// Handle the Remove-Auctions event.
 	agentPtr->handleEvent(evt, NULL);
 			
 	// Verify the auction depletion.
-	CPPUNIT_ASSERT( agentPtr->aucm->getNumAuctions() == 0);
+	CPPUNIT_ASSERT( agentPtr->aucm->getNumAuctioningObjects() == 0);
 
 }
 
@@ -469,9 +497,19 @@ void Agent_Test::checkRemoveBiddingObjectEvent(Event *evt)
 {
 	RemoveBiddingObjectsEvent *rboe = dynamic_cast<RemoveBiddingObjectsEvent *>(evt);
 	CPPUNIT_ASSERT( rboe != NULL );
+
+	auctioningObjectDB_t *auctions = rboe->getBiddingObjects();
+	auctioningObjectDBIter_t bidIter;
+	int numBids = 0;
+	for (bidIter = auctions->begin(); bidIter != auctions->end(); ++bidIter){
+		numBids++;
+	} 
+				
+	CPPUNIT_ASSERT( numBids == 1 );
+
 			
 	// Handle the Remove-Bidding Objects event.
 	agentPtr->handleEvent(evt, NULL);
 			
-	CPPUNIT_ASSERT( agentPtr->bidm->getNumBiddingObjects() == 0);
+	CPPUNIT_ASSERT( agentPtr->bidm->getNumAuctioningObjects() == 1);
 }

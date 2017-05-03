@@ -35,6 +35,7 @@
 #include "Error.h"
 #include "IdSource.h"
 #include "Auction.h"
+#include "AuctioningObjectManager.h"
 #include "AuctionFileParser.h"
 #include "EventScheduler.h"
 #include "MAPIAuctionParser.h"
@@ -56,8 +57,8 @@ typedef list<Auction*>            auctionDone_t;
 typedef list<Auction*>::iterator  auctionDoneIter_t;
 
 //! index auctions by time
-typedef map<time_t, auctionDB_t>            auctionTimeIndex_t;
-typedef map<time_t, auctionDB_t>::iterator  auctionTimeIndexIter_t;
+typedef map<time_t, auctioningObjectDB_t>            auctionTimeIndex_t;
+typedef map<time_t, auctioningObjectDB_t>::iterator  auctionTimeIndexIter_t;
 
 //! compare two export definition structs
 struct lttexp
@@ -91,82 +92,36 @@ typedef set<int>::iterator  auctionSetIter_t;
   The Auction will then be stored in the AuctionDatabase inside the AuctionManager
 */
 
-class AuctionManager : public FieldDefManager
+class AuctionManager : public AuctioningObjectManager
 {
+
   private:
-
-    Logger *log;
-    int ch; //!< logging channel number used by objects of this class
-
-    //!< number of bids in the database
-    int auctions;
-
-    //! index to auctions via setID and name
-    auctionSetIndex_t auctionSetIndex;
-
-    //! stores all auctions indexed by setID, bidID
-    auctionDB_t  auctionDB;
-
-    //! list with auctions done
-    auctionDone_t auctionDone;
-		
-    //! pool of unique auction ids
-    IdSource idSource;
-
-	//! This field identifies uniquely the agent.
-	int domain; 
-
-    /*! \short add the auction name to the list of finished bids
-
-       \arg \c auctionname - name of the finished auction (source.name)
-    */
-    void storeAuctionAsDone(Auction *a);
-
+    
+    //! If true the process request is created in the auction creation time, 
+    //! otherwise it is created when during the auction activation.
+    bool immediateStart; 
 
   public:
 
     /*! \short   construct and initialize a AuctionManager object
      */
-    AuctionManager( int domain, string fdname, string fvname);
+    AuctionManager( int domain, string fdname, string fvname, bool immediateStart);
 
     //! destroy a AuctionManager object
     ~AuctionManager(); 
-
-     /*! \short   lookup the auction info data for a given auctionId or name
-
-        lookup the database of auctions for a specific auction
-        and return a link (pointer) to the auction data associated with it
-        do not store this pointer, its contents will be destroyed upon auction deletion. 
-        do not free this pointer as it is a link to the auction and not a copy.
-    
-        \arg \c uId - unique auction id
-    */
-    Auction *getAuction(int uid);
-
-    //! get auction rname from auctionset sname 
-    Auction *getAuction(string sname, string rname); 
-
-	//! get auction with name rname and auctionset snamefrom the stored mark as done.
-	Auction *getAuctionDone(string sname, string rname);
-
-	//! get auction with id uid from the stored mark as done.
-	Auction *getAuctionDone(int uid);
-
-    //! get all auctions in auctionset with name sname 
-    auctionIndex_t *getAuctions(string sname);
-
-    //! get all bids, creates a nuew vector with the same pointers to auctions,
-	//! so it does not require to free memory. 
-    auctionDB_t getAuctions();
-
+	
+	bool getImmediateStart();
+	
+	Auction * getAuction(string sname, string rname);
+	
     //! parse XML auctions from file 
-    auctionDB_t *parseAuctions(string fname, ipap_template_container *templates); 
+    auctioningObjectDB_t *parseAuctions(string fname, ipap_template_container *templates); 
 
     //! parse XML or Auction API bids from buffer
-    auctionDB_t *parseAuctionsBuffer(char *buf, int len, ipap_template_container *templates);
+    auctioningObjectDB_t *parseAuctionsBuffer(char *buf, int len, ipap_template_container *templates);
    
     //! parse auctions from ipap_message 
-    auctionDB_t *parseMessage(ipap_message *messageIn, ipap_template_container *templates);
+    auctioningObjectDB_t *parseMessage(ipap_message *messageIn, ipap_template_container *templates);
    
     /*! \short   add a auction description 
 
@@ -179,50 +134,18 @@ class AuctionManager : public FieldDefManager
         syntactically correct or does not contain the mandatory fields
         or if a auction with the given identification is already present in the AuctionDatabase
     */
-    void addAuctions(auctionDB_t *auctions, EventScheduler *e); 
+    void addAuctioningObjects(auctioningObjectDB_t *auctions, EventScheduler *e); 
 
-    //! add a single auction, the methods assigns the UID for the auction.
-    void addAuction(Auction *b); 
-
-    //! activate/execute bids
-    void activateAuctions(auctionDB_t *auctions, EventScheduler *e);
-
-
-    /*! \short   delete a Auction description 
-
-        deletion of a auction will parse and syntax check the
-        identification string, test the presence of the given auction
-        in the auctionDatabase, remove the auction from the auctionDatabase
-
-        \throws an Error exception if the given auction identification is not
-        syntactically correct or does not contain the mandatory fields  or 
-        if a auction with the given identification is currently not present 
-        in the auctionDatabase
-    */
-    void delAuction(int uid, EventScheduler *e); 
-    void delAuction(string sname, string rname, EventScheduler *e); 
-    void delAuctions(string sname, EventScheduler *e); 
     void delAuction(Auction *a, EventScheduler *e); 
-    void delAuctions(auctionDB_t *auctions, EventScheduler *e); 
+
+	void delAuction(int uid, EventScheduler *e);
+
+	void delAuction(string sname, string rname, EventScheduler *e);
+
+	void delAuctions(string sname, EventScheduler *e); 
+		
+	void delAuctioningObjects(auctioningObjectDB_t *auctions, EventScheduler *e);
    
-    /*! \short   get information from the auction manager
-
-        these functions can be used to get information for a single auction,
-        or a set of auctions or all auctions
-    */
-    string getInfo(void);
-
-    inline string getInfo(int uid){ return getInfo(getAuction(uid)); }
-
-    string getInfo(Auction *a);
-    string getInfo(string sname, string rname);
-    string getInfo(string sname);
-
-    //! Return the number of auctions in the container.
-    inline int getNumAuctions() { return auctions; }
-
-	//! Return the domain
-	inline int getDomain(){ return domain; }
 
     /*! \short   get the ipap_message that contains all the auctions within
      * 			  the container. 
@@ -230,17 +153,14 @@ class AuctionManager : public FieldDefManager
 		
         \throws an Error exception if some field required is missing.
     */	
-	ipap_message * get_ipap_message(auctionDB_t *auctions, 
+	ipap_message * get_ipap_message(auctioningObjectDB_t *auctions, 
 									ipap_template_container *templates,
 									bool useIPV6, string sAddressIPV4, 
 									string sAddressIPV6, uint16_t port);
-
-    //! dump a AuctionManager object
-    void dump( ostream &os );
     
     /*! \short This function return the ids resgistered for a ser of auctions
      */
-	void getIds(auctionDB_t *_auctions, auctionSet_t &setParam);
+	void getIds(auctioningObjectDB_t *_auctions, auctionSet_t &setParam);
 	
     /*! \short This function increment the session's reference number
      */	
@@ -250,6 +170,19 @@ class AuctionManager : public FieldDefManager
      */	
 	void decrementReferences(auctionSet_t & setParam, string sessionId);
 	
+
+    /*! \short   get information from the auction manager
+
+        these functions can be used to get information for a single auction object,
+        or a set of auction objects
+    */
+    string getInfo(int uid);
+    string getInfo(string sname, string rname);
+    string getInfo(string sname);
+    string getInfo();
+
+    //! dump a AuctionManager object
+    void dump( ostream &os );
 	
 };
 

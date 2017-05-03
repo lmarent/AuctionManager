@@ -213,20 +213,20 @@ class RemoveResourceRequestIntervalEvent : public Event
 class RemoveResourceRequestsEvent : public Event
 {
   private:
-    resourceRequestDB_t requests;
+    auctioningObjectDB_t requests;
 
   public:
 
-    RemoveResourceRequestsEvent(struct timeval time, resourceRequestDB_t &r) 
+    RemoveResourceRequestsEvent(struct timeval time, auctioningObjectDB_t &r) 
       : Event(REMOVE_RESOURCEREQUESTS, time), requests(r) {}
 
-    RemoveResourceRequestsEvent(time_t offs_sec, resourceRequestDB_t &r) 
+    RemoveResourceRequestsEvent(time_t offs_sec, auctioningObjectDB_t &r) 
       : Event(REMOVE_RESOURCEREQUESTS, offs_sec), requests(r) {}
     
-    RemoveResourceRequestsEvent(resourceRequestDB_t &r) 
+    RemoveResourceRequestsEvent(auctioningObjectDB_t &r) 
       : Event(REMOVE_RESOURCEREQUESTS), requests(r) {}
 
-    resourceRequestDB_t *getResourceRequests()
+    auctioningObjectDB_t *getResourceRequests()
     {
         return &requests;
     }
@@ -234,7 +234,7 @@ class RemoveResourceRequestsEvent : public Event
     int deleteResourceRequest(int uid)
     {
         int ret = 0;
-        resourceRequestDBIter_t iter;
+        auctioningObjectDBIter_t iter;
         
         for (iter=requests.begin(); iter != requests.end(); iter++) {
             if ((*iter)->getUId() == uid) {

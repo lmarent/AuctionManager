@@ -89,7 +89,7 @@ class EventScheduler
     */
     void addEvent(Event *ev);
 
-
+	
     /*! \short   delete all events for a given bidding object
 
         delete all Events related to the specified bid from the list of events
@@ -122,7 +122,10 @@ class EventScheduler
 
 	//! delete the session from all events 
 	virtual void delSessionEvents(int uid);
-
+	
+	//! get the number of events in the scheduller
+	
+	inline size_t getNbrEvents(){ return events.size(); }
 
 };
 

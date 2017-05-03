@@ -77,11 +77,12 @@ void BiddingObjectManager_Test::setUp()
 		manager = new BiddingObjectManager(domain, fieldname, fieldValuename, "");
 
 		// Parse the bidding objects in file example_bids1.xml, it allocates the memory.
-		biddingObjectDB_t *new_bids = manager->parseBiddingObjects(filename);
+		auctioningObjectDB_t *new_bids = manager->parseBiddingObjects(filename);
 		
 		CPPUNIT_ASSERT( new_bids->size() == 1 );
 		
-		ptrBid1 = new BiddingObject(*((*new_bids)[0]));
+		BiddingObject *copy = dynamic_cast<BiddingObject *>((*new_bids)[0]);
+		ptrBid1 = new BiddingObject(*copy);
 
 		auto_ptr<EventScheduler> _evnt(new EventScheduler());
         evnt = _evnt;
@@ -117,37 +118,38 @@ void BiddingObjectManager_Test::testBiddingManagerManager()
 
 		manager->addBiddingObject(ptrBid1);
 		
-		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 1 );
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 1 );
 
-		ptrBid2->setBiddingObjectSet("2");
+		ptrBid2->setSet("2");
 		manager->addBiddingObject(ptrBid2);
-		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 2 );
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 2 );
 		
-		manager->delBiddingObject(ptrBid1->getBiddingObjectSet(), 
-								  ptrBid1->getBiddingObjectName(), 
+		manager->delBiddingObject(ptrBid1->getSet(), 
+								  ptrBid1->getName(), 
 								  evnt.get());
 		
 		BiddingObject * bid2 = 
-				manager->getBiddingObject(ptrBid2->getBiddingObjectSet(), 
-				    					  ptrBid2->getBiddingObjectName());
+				dynamic_cast<BiddingObject *>(manager->getAuctioningObject(ptrBid2->getSet(), 
+				    					  ptrBid2->getName()));
 		
 		manager->delBiddingObject(bid2->getUId(), evnt.get());
-		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 0 );
-		ptrBid3->setBiddingObjectSet("3");
-		ptrBid4->setBiddingObjectSet("4");		
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 0 );
+		ptrBid3->setSet("3");
+		ptrBid4->setSet("4");		
 		manager->addBiddingObject(ptrBid3);
 		manager->addBiddingObject(ptrBid4);
-		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 2 );
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 2 );
 		
-		biddingObjectDB_t in_bids = manager->getBiddingObjects();
-		manager->delBiddingObjects(&in_bids, evnt.get());
-		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 0 );
+		auctioningObjectDB_t in_bids = manager->getAuctioningObjects();
+		manager->delAuctioningObjects(&in_bids, evnt.get());
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 0 );
 	
-		ptrBid5->setBiddingObjectSet("5");
+		ptrBid5->setSet("5");
 		manager->addBiddingObject(ptrBid5);
-		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 1 );
+		
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 1 );
 		manager->delBiddingObjects("5", evnt.get());
-		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 0 );
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 0 );
 			
 	} catch(Error &e){
 		std::cout << "Error:" << e.getError() << std::endl << std::flush;
@@ -166,33 +168,44 @@ void BiddingObjectManager_Test::testBiddingObjectManager2()
 	try
 	{
 	
+		AuctioningObject *tmp;
+		BiddingObject *tmpBO;
+		
 		//1.Bid2
 		const string filename2 = "../../etc/example_bids2.xml";
-		biddingObjectDB_t *new_bids2 = manager->parseBiddingObjects(filename2);
+		auctioningObjectDB_t *new_bids2 = manager->parseBiddingObjects(filename2);
 		CPPUNIT_ASSERT( new_bids2->size() == 1 );
-		ptrBid2 = new BiddingObject(*((*new_bids2)[0]));
+		tmp = (*new_bids2)[0];
+		tmpBO = dynamic_cast<BiddingObject *>(tmp);
+		ptrBid2 = new BiddingObject(*tmpBO);
 		saveDelete(new_bids2);
 		
 		//2.Bid1
 		const string filename3 = "../../etc/example_bids3.xml";
-		biddingObjectDB_t *new_bids3 = manager->parseBiddingObjects(filename3);
+		auctioningObjectDB_t *new_bids3 = manager->parseBiddingObjects(filename3);
 		CPPUNIT_ASSERT( new_bids3->size() == 1 );
-		ptrBid3 = new BiddingObject(*((*new_bids3)[0]));
+		tmp = (*new_bids3)[0];
+		tmpBO = dynamic_cast<BiddingObject *>(tmp);
+		ptrBid3 = new BiddingObject(*tmpBO);
 		saveDelete(new_bids3);
 
 		//3.Bid1
 		const string filename4 = "../../etc/example_bids4.xml";
-		biddingObjectDB_t *new_bids4 = manager->parseBiddingObjects(filename4);
+		auctioningObjectDB_t *new_bids4 = manager->parseBiddingObjects(filename4);
 		CPPUNIT_ASSERT( new_bids4->size() == 1 );
-		ptrBid4 = new BiddingObject(*((*new_bids4)[0]));
+		tmp = (*new_bids4)[0];
+		tmpBO = dynamic_cast<BiddingObject *>(tmp);
+		ptrBid4 = new BiddingObject(*tmpBO);
 		saveDelete(new_bids4);
 
 		
 		//4.Bid1
 		const string filename5 = "../../etc/example_bids5.xml";
-		biddingObjectDB_t *new_bids5 = manager->parseBiddingObjects(filename5);
+		auctioningObjectDB_t *new_bids5 = manager->parseBiddingObjects(filename5);
 		CPPUNIT_ASSERT( new_bids5->size() == 1 );
-		ptrBid5 = new BiddingObject(*((*new_bids5)[0]));
+		tmp = (*new_bids5)[0];
+		tmpBO = dynamic_cast<BiddingObject *>(tmp);
+		ptrBid5 = new BiddingObject(*tmpBO);
 		saveDelete(new_bids5);
 
 		
@@ -202,10 +215,9 @@ void BiddingObjectManager_Test::testBiddingObjectManager2()
 		manager->addBiddingObject(ptrBid4);
 		manager->addBiddingObject(ptrBid5);
 		
-		
 		CPPUNIT_ASSERT( manager->getBiddingObjects("1","1").size() == 3);
 		CPPUNIT_ASSERT( manager->getBiddingObjects("2","1").size() == 2);
-		CPPUNIT_ASSERT( manager->getNumBiddingObjects() == 5 );
+		CPPUNIT_ASSERT( manager->getNumAuctioningObjects() == 5 );
 				
 		// Delete a BiddingObject 1, it should delete from the auction index containing 
 		// bid 1.Bid1

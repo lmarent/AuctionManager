@@ -54,16 +54,14 @@ CPPUNIT_TEST_SUITE_REGISTRATION( AgentProcessor_Test );
 
 void AgentProcessor_Test::setUp() 
 {
-	
-	time_t              now = time(NULL);
-	
+		
 	try
 	{
 			
 		const string configDTD = DEF_SYSCONFDIR "/netagnt.conf.dtd";
 		const string configFileName = AGNT_DEFAULT_CONFIG_FILE;
 		configManagerPtr = new ConfigManager(configDTD, configFileName, "./netagent");
-		auctionDB_t * auctions = NULL;
+		auctioningObjectDB_t * auctions = NULL;
 
 		auto_ptr<EventScheduler> _evnt(new EventScheduler());
         evnt = _evnt;		
@@ -75,15 +73,16 @@ void AgentProcessor_Test::setUp()
 		
 		auctionManagerPtr = new AuctionManager(domainAuct, 
 								configManagerPtr->getValue("FieldDefFile", "MAIN") , 
-								configManagerPtr->getValue("FilterConstFile", "MAIN") );
+								configManagerPtr->getValue("FilterConstFile", "MAIN"),
+								false );
 
 		string filenameAuctions = "../../etc/example_auctions2.xml";
 		
 		auctions = auctionManagerPtr->parseAuctions(filenameAuctions, templContainer);
 				
-		ptrAct1 = (*auctions)[0];
+		ptrAct1 = dynamic_cast<Auction *>((*auctions)[0]);
 
-		auctionManagerPtr->addAuctions(auctions, evnt.get());
+		auctionManagerPtr->addAuctioningObjects(auctions, evnt.get());
 		
 		saveDelete(auctions);
 
@@ -91,13 +90,13 @@ void AgentProcessor_Test::setUp()
 		
 		auctions = auctionManagerPtr->parseAuctions(filenameAuctions, templContainer);
 
-		auctionManagerPtr->addAuctions(auctions, evnt.get());
+		auctionManagerPtr->addAuctioningObjects(auctions, evnt.get());
 				
-		ptrAct2 = (*auctions)[0];
+		ptrAct2 = dynamic_cast<Auction *>((*auctions)[0]);
 		
 		saveDelete(auctions);
 		
-		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctions() == 2 );
+		CPPUNIT_ASSERT( auctionManagerPtr->getNumAuctioningObjects() == 3 );
 		
 		agntProcessorPtr = new AgentProcessor(ownDomain,
 											  configManagerPtr, 
@@ -262,11 +261,11 @@ void AgentProcessor_Test::testBasicExecution()
 			int index2 = etmp->getIndex();		
 			CPPUNIT_ASSERT( index == index2 );
 		
-			biddingObjectDB_t *new_bids = etmp->getBiddingObjects();
+			auctioningObjectDB_t *new_bids = etmp->getBiddingObjects();
 			CPPUNIT_ASSERT( new_bids->size() == 1 );
 			
 			// Delete the bidding object created. 
-			 biddingObjectDBIter_t iter;
+			 auctioningObjectDBIter_t iter;
 		    for (iter = new_bids->begin(); iter != new_bids->end(); iter++) {
 				if (*iter != NULL) {
 					// delete rule

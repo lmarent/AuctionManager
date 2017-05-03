@@ -386,7 +386,7 @@ void
 MAPIBiddingObjectParser::parseAuctionKey(fieldDefList_t *fields, 
 										 fieldValList_t *fieldVals,
 										 const anslp::msg::xml_object_key &key,
-										 biddingObjectDB_t *bids,
+										 auctioningObjectDB_t *bids,
 										 ipap_template_container *templates )
 {
 
@@ -507,7 +507,7 @@ void
 MAPIBiddingObjectParser::parse(fieldDefList_t *fieldDefs, 
 							   fieldValList_t *fieldVals,
 							   ipap_message *message, 
-							   biddingObjectDB_t *bids,
+							   auctioningObjectDB_t *bids,
 							   ipap_template_container *templates )
 {
 	try
@@ -556,8 +556,8 @@ MAPIBiddingObjectParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	ipap_templ_type_t tempType;
 
 	// Verifies that the BiddingObject is for the auction given.
-	assert((biddingObjectPtr->getAuctionSet() == auctionPtr->getSetName()) && 
-			(biddingObjectPtr->getAuctionName() == auctionPtr->getAuctionName() ));
+	assert((biddingObjectPtr->getAuctionSet() == auctionPtr->getSet()) && 
+			(biddingObjectPtr->getAuctionName() == auctionPtr->getName() ));
 
 	uint16_t dataTemplateId, optionTemplateId;
 		
@@ -627,8 +627,8 @@ MAPIBiddingObjectParser::get_ipap_message(fieldDefList_t *fieldDefs,
 	
 	ipap_message *mes = new ipap_message(getDomain(), IPAP_VERSION, true);
 			
-	if ( (biddingObject->getAuctionSet() == auction->getSetName()) && 
-		   (biddingObject->getAuctionName() == auction->getAuctionName()) ){
+	if ( (biddingObject->getAuctionSet() == auction->getSet()) && 
+		   (biddingObject->getAuctionName() == auction->getName()) ){
 		get_ipap_message(fieldDefs, biddingObject, auction, templates, mes);
 		mes->output();
 	} else {
